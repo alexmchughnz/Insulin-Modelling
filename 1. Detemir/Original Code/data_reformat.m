@@ -21,7 +21,10 @@ ts = strrep(raw_datetime,'a.m.','AM');
 ts = strrep(ts,'p.m.','PM');
 for ii = 1:length(ts)
     try
-    temp = datenum(ts(ii),'dd/mm/yyyy HH:MM:SS AM');
+    % (ADM 19/02/20)
+    % Removed 'AM specifier, not present in my data. Catch statement was
+    % stripping time data.
+    temp = datenum(ts(ii),'dd/mm/yyyy HH:MM:SS'); 
     catch
         temp = datenum(ts(ii),'dd/mm/yyyy');
     end

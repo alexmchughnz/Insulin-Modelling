@@ -16,14 +16,14 @@ sys = struct('GI',[],'SC',[],'GC',[],'Data',[]);
 
 %SBIT Trial Patient Data Analysis
 %Patient Number
-sys.Data.PtNo = 4; %Define Patient Number
+sys.Data.PtNo = 1; %Define Patient Number
 
 %initialising ptient data
 sys = PtDataRead(sys);
 
 %initialising all variables
 sys = init_vars(sys);
-
+save(sprintf('patient%d.mat', sys.Data.PtNo))
 %fitting insulin sensitivity values for the trial
 sys = fit_SI(sys);
 

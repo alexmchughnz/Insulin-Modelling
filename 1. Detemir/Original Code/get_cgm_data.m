@@ -6,7 +6,7 @@ function [datetime_a, data_cgm_a, datetime_b, data_cgm_b] = get_cgm_data(pt_num)
 filename_a = pt_num + "a_cgm.xlsx";
 filename_b = pt_num + "b_cgm.xlsx";
 
-addpath '\\file\UsersJ$\jkl59\Home\My Documents\408 FYP\patient data';
+addpath 'C:\Users\adm181\OneDrive\PhD\Insulin Modelling\1. Detemir\Original Code'
 
 [num_a, txt_a, ~] = xlsread(filename_a);
 [num_b, txt_b, ~] = xlsread(filename_b);

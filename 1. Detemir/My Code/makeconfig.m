@@ -1,8 +1,12 @@
-DATAPATH = 'C:\Users\adm181\OneDrive\PhD\Insulin Modelling\1. Detemir\My Code\Data';
+USERNAME = 'alexm';
+DATAPATH = fullfile('C:\Users', USERNAME, 'OneDrive\PhD\Insulin Modelling\1. Detemir\My Code\Data');
+FUNCPATH = fullfile('C:\Users', USERNAME, '\OneDrive\PhD\Insulin Modelling\1. Detemir\My Code\Functions');
+
 addpath(DATAPATH);
+addpath(FUNCPATH);
 
 
 PATIENTFILE = 'patient_master.xlsx';
 
-
-save config
+save config DATAPATH FUNCPATH
+clear

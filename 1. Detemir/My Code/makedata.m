@@ -16,6 +16,9 @@ for ii = 1:length(patientNums)
     P.patientNum = data.PtNo;
     P.mass = data.pt_mass;           % Patient mass [kg]
     
+    P.trialTime   = [sys.trial_start_t, sys.trial_end_t];
+    P.trialLength = sys.trial_max_t;
+    
     P.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
     P.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
     
@@ -29,10 +32,10 @@ for ii = 1:length(patientNums)
     P.I.value = data.PlasmaI;        % Plasma insulin [?]
     P.I.time  = data.PlasmaI_time;
     
-    P.meal.duration = data.meal_durations;  %[min]
-    P.meal.startTime = data.meal_start;     %[datetime]
-    P.meal.carbs = data.carbs;              %[g]
-    P.meal.sugar = data.sugar;              %[g]
+    P.meal.durations = data.meal_durations;  %[min]
+    P.meal.startTimes = data.meal_start;     %[datetime]
+    P.meal.carbs = data.carbs;               %[g]
+    P.meal.sugar = data.sugar;               %[g]
     
     P.GFast{1} = sys.GC.fasting_bg1;
     P.GFast{2} = sys.GC.fasting_bg2;    

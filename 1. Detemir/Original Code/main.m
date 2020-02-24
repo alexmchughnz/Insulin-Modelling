@@ -6,7 +6,7 @@
 clear all, clc
 
 global USERNAME
-USERNAME = 'alexm';
+USERNAME = 'adm181';
 
 %Index
 %   GI = GastroIntestinal

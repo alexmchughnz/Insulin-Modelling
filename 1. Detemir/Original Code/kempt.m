@@ -6,7 +6,8 @@ function [kempt] = kempt(current_time,y1,y2,sys)
 %   glucose ingested (D)
 
 number_of_meals = length(sys.Data.meal_start); %works out how many meals there are
-meal_end = sys.Data.meal_start + duration; %end of the meal
+meal_end = sys.Data.meal_start + sys.Data.meal_durations; %end of the meal
+%(ADM 24/02/20) Changed 'duration' to 'sys.Data.meal_durations'.
 
 sys.GI.D = 1e-3; %set to a small number by default, then it is overridden by the loop below if reqd
 

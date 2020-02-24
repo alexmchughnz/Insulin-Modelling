@@ -24,9 +24,8 @@ loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
 P = {loadpatient(1), loadpatient(3), loadpatient(4)};
 
 
-%% Estimate
+%% Calculate Patient/Time Dependent Parameters
 for ii = 1:length(P)
-    [P{ii}.Uen.value, P{ii}.Uen.time] = EstimateInsulinSecretion(P{ii}, GC);
+    P{ii} = EstimateInsulinSecretion(P{ii}, GC);
+    P{ii} = FitInsulinSensitivity(P{ii});
 end
-
-disp('Done')

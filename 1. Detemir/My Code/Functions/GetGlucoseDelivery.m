@@ -12,9 +12,10 @@ mealStarts = M.startTimes;              % [min]
 mealEnds = M.startTimes + M.durations;  % [min]
 
 % Add contribution from all meals occuring during this time.
-MAGIC_SCALE_FACTOR = 1000/180.156;                               % From eating.m.
-currentMeals = (mealStarts < t) & (t < mealEnds);                % Which meals contribute at time=t? [logical]
-D = dot(currentMeals, M.carbs./M.durations*MAGIC_SCALE_FACTOR);  % Glucose delivery rate [g/min?]
+currentMeals = (mealStarts < t) & (t < mealEnds);       % Which meals contribute at time=t? [logical]
+mealRates = M.carbs ./ M.durations;                     % Glucose rates of all meals [g/min?]
+MAGIC_SCALE_FACTOR = 1000/180.156;                      % From eating.m.
+D = MAGIC_SCALE_FACTOR * dot(currentMeals, mealRates);  % Glucose delivery rate [g/min?]
 
 end
 

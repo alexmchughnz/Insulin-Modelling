@@ -9,7 +9,7 @@ GI.kMax = 0.054;    %maximum value of kempt (min^-1)
 GI.kMin = 0.006;    %minimum value of kempt (min^-1)
 GI.f = 0.8;         %sclaing factor for incomplete absorption in first pass hepatic clearance
 
-GI.D = 0.001;       %default amount of glucose in stomach - cannot be zero
+GI.DTot = 0.001;       %default amount of glucose in stomach - cannot be zero
 
 %% Insulin Detemir (ID) Parameters
 ID.k1 = 0.96;       %Detemir Unbind fraction

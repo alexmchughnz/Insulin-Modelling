@@ -47,5 +47,5 @@ SC.k3 = 0.0106;     %rate constant of insulin absorbed into plasma(min^-1)
 
 
 save('parameters.mat', 'GI', 'ID', 'GC', 'SC')
-disp('Saved system parameters.')
+disp('Parameters updated.')
 clear

@@ -97,7 +97,7 @@ function P = EstimateInsulinSecretion(P, GC)
     % xlabel('time, min')
     % ylabel('Endogenous insulin, U')
 
-    disp('Fit Uen from C-peptide data')    
+    fprintf('P%d: Estimated Uen.\n', P.patientNum);    
 %\STUB
 
 % Write value to patient struct.

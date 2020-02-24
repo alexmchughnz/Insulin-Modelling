@@ -1,6 +1,5 @@
 %% main.m (Detemir)
 
-
 % Author : Alex McHugh
 % Created: 19/02/2020
 set(groot, 'defaultTextInterpreter','latex');

@@ -14,7 +14,7 @@ ts = strrep(times,'a.m.','AM');
 ts = strrep(ts,'p.m.','PM');
 for ii = 1:length(ts)
     try
-    temp = datenum(ts(ii),'dd/mm/yyyy HH:MM:SS AM');
+    temp = datenum(ts(ii),'dd/mm/yyyy HH:MM:SS');
     catch
         temp = datenum(ts(ii),'dd/mm/yyyy');
     end

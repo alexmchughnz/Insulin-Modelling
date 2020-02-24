@@ -6,7 +6,12 @@ function [datetime_a, data_cgm_a, datetime_b, data_cgm_b] = get_cgm_data(pt_num)
 filename_a = pt_num + "a_cgm.xlsx";
 filename_b = pt_num + "b_cgm.xlsx";
 
-addpath 'C:\Users\adm181\OneDrive\PhD\Insulin Modelling\1. Detemir\Original Code'
+
+global USERNAME
+% (ADM 18/02/20)
+% Changed for my directory.
+fullpath = fullfile('C:\Users', USERNAME, 'OneDrive\PhD\Insulin Modelling\1. Detemir\Original Code');
+addpath(fullpath);
 
 [num_a, txt_a, ~] = xlsread(filename_a);
 [num_b, txt_b, ~] = xlsread(filename_b);

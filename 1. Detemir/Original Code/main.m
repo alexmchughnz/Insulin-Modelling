@@ -5,6 +5,9 @@
 
 clear all, clc
 
+global USERNAME
+USERNAME = 'alexm';
+
 %Index
 %   GI = GastroIntestinal
 %   SC = Subcutaneous
@@ -23,7 +26,8 @@ sys = PtDataRead(sys);
 
 %initialising all variables
 sys = init_vars(sys);
-save(sprintf('patient%d.mat', sys.Data.PtNo))
+save(sprintf('sys%d.mat', sys.Data.PtNo))
+disp(['SAVED ' sprintf('sys%d.mat', sys.Data.PtNo)])
 %fitting insulin sensitivity values for the trial
 sys = fit_SI(sys);
 

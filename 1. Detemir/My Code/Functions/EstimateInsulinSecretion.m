@@ -1,11 +1,11 @@
-function P = EstimateInsulinSecretion(P, GC)
+function P = EstimateInsulinSecretion(GC, P)
 % Estimates pancreatic insulin secretion rate (Uen) using a patient's 
 % C-peptide data.
 % Model from Van Cauter et al. (1992).
 % Code based on van_cauter.m.
 % INPUTS:
-%   P   - patient struct
 %   GC  - glycaemic control parameter set
+%   P   - patient struct
 % OUTPUT:
 %   P   - modified patient struct with Uen
 

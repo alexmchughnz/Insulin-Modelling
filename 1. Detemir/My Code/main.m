@@ -25,6 +25,6 @@ P = {loadpatient(1), loadpatient(3), loadpatient(4)};
 
 %% Calculate Patient/Time Dependent Parameters
 for ii = 1:length(P)
-    P{ii} = EstimateInsulinSecretion(P{ii}, GC);
-    P{ii} = FitInsulinSensitivity(P{ii});
+    P{ii} = EstimateInsulinSecretion(GC, P{ii});
+    P{ii} = FitInsulinSensitivity(GI, GC, P{ii});
 end

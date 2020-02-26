@@ -42,7 +42,7 @@ for ii = 1:length(patientNums)
     
     filename = sprintf("patient%d.mat", patientNum);
     save(fullfile(DATAPATH, filename), '-struct', 'P');
-    fprintf('Saved data for Patient %d.\n', patientNum);
+    fprintf('P%d: Saved patient data.\n', patientNum);
 end
 %\STUB
 

@@ -12,8 +12,8 @@ GI.f = 0.8;         %sclaing factor for incomplete absorption in first pass hepa
 GI.DTot = 0.001;       %default amount of glucose in stomach - cannot be zero
 
 %% Insulin Detemir (ID) Parameters
-ID.k1 = 0.96;       %Detemir Unbind fraction
-ID.k2 = 0.04;       %detemir bind fraction
+ID.kd1 = 0.96;       %Detemir Unbind fraction
+ID.kd2 = 0.04;       %detemir bind fraction
 ID.nK = 0.06;       %renal clearance
 ID.nDL = 0.147;     %Detamir hepatic insulin clearance rate (min?1)
 ID.nDI = 0.06;      %the detemir trans-endothelial diffusion rate between the plasma and interstitial compartments (min-1)
@@ -25,7 +25,9 @@ GC.pg = 0.06;       % non insulin mediated uptake (min^-1)
 GC.EGP = 0.96;      % endogenous glucose production (mmol/min)
 GC.CNS = 0.3;       % glucose consumption attributed to central nervous system (mmol·min-1)
 GC.VG = @(P) 0.18*P.mass;     % volume distribution of glucose (L)GC.nL = 0.15;       % hepatic insulin clearance rate (min?1)
-GC.nK = 0.0644;     % NORMAL renal insulin clearance (min-1) - THIS GETS MODIFIED DURING THE FIRST DAY TO BE 1/2 OF THE VALUE, reverts to normal value after t_nk_change time has passed...
+GC.nKChangeTime = 600;  % the time nk goes from nk/3 -> nk, also k3/3 -> k3
+GC.nK = @(t) 0.0644 * (t < GC.nKChangeTime)*0.5;     % NORMAL renal insulin clearance (min-1) - THIS GETS MODIFIED DURING THE FIRST DAY TO BE 1/2 OF THE VALUE, reverts to normal value after t_nk_change time has passed...
+GC.nL = 0.15;       % hepatic insulin clearance rate (min?1)
 GC.alphaI = 0.0017; % hepatic clearance saturation constant (L·mU-1)
 GC.xL = 0.67;       % first pass constant as endogenous insulin is secreted into the portal vein 
 GC.nC = 0.032;      % insulin degredation rate (min?1)
@@ -35,12 +37,11 @@ GC.alphaG = 0.0154; % from lotz 2008, 0 for low dose injection, insulin binding 
 
 GC.uMin = 16.7;     % minimum endogenous insulin secretion (mU·min?1)
 GC.uMax = 267;      % maximum endogenous insulin secretion (mU·min?1)
-GC.nKChangeTime = 600;  % the time nk goes from nk/3 -> nk, also k3/3 -> k3
 % GC.Uen = van_cauter(sys);   % solves Uen according to the van cauter model
 
 
 %% Endogenous Insulin Secretion (SC) Parameters
-SC.kdi = 0.0624;    % (min^-1)
+SC.k1 = 0.0624;    % (min^-1)
 SC.k2 = 0.0104;     %rate constant of diffusion from SC to interstitium(min^-1) 
 SC.k3 = 0.0106;     %rate constant of insulin absorbed into plasma(min^-1)
 

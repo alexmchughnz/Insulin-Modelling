@@ -93,8 +93,8 @@ for ii = 1 : numIntervals
     Y0 = Y(end, :);
 end
 
-% Write results.
-P.SI = minuteSI;
+% Write estimated data into patient struct, overwriting defaults.
+P.SI(1:length(minuteSI)) = minuteSI;
 
 fprintf('P%d: SI fit successfully. SI(*1e+4) at %d min intervals = ', ...
         P.patientNum, intervalDuration)

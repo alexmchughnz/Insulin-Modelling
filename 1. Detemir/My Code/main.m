@@ -27,4 +27,5 @@ P = {loadpatient(1), loadpatient(3), loadpatient(4)};
 for ii = 1:length(P)
     P{ii} = EstimateInsulinSecretion(GC, P{ii});
     P{ii} = FitInsulinSensitivity(GI, GC, P{ii});
+    P{ii} = SolveSystem(GI, ID, GC, SC, P{ii});
 end

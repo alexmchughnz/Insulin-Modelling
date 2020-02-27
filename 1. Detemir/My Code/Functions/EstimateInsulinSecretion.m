@@ -42,9 +42,7 @@ function P = EstimateInsulinSecretion(GC, P)
     C = ppval(C, t);
 
     %making time dependant clearance rate
-    k3 = zeros(n, 1);
-    k3(1 : GC.nKChangeTime) = GC.nK/2;
-    k3(GC.nKChangeTime + 1 : end) = GC.nK/2;
+    k3 = GC.nK(1:n);
     k1 = k1 * ones(n,1);
 
     %initialising Y and S vectors

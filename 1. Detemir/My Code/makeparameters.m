@@ -34,7 +34,7 @@ GC.EGP = 0.96;      % endogenous glucose production (mmol/min)
 GC.CNS = 0.3;       % glucose consumption attributed to central nervous system (mmol·min-1)
 GC.VG = @(P) 0.18*P.mass;     % volume distribution of glucose (L)GC.nL = 0.15;       % hepatic insulin clearance rate (min?1)
 GC.nKChangeTime = 600;  % the time nk goes from nk/3 -> nk, also k3/3 -> k3
-GC.nK = @(t) 0.0644 * (t < GC.nKChangeTime)*0.5;     % NORMAL renal insulin clearance (min-1) - THIS GETS MODIFIED DURING THE FIRST DAY TO BE 1/2 OF THE VALUE, reverts to normal value after t_nk_change time has passed...
+GC.nK = @(t) 0.0644 * (1 - (t < GC.nKChangeTime)*0.5);  % NORMAL renal insulin clearance (min-1) - THIS GETS MODIFIED DURING THE FIRST DAY TO BE 1/2 OF THE VALUE, reverts to normal value after t_nk_change time has passed...
 GC.nL = 0.15;       % hepatic insulin clearance rate (min?1)
 GC.alphaI = 0.0017; % hepatic clearance saturation constant (L·mU-1)
 GC.xL = 0.67;       % first pass constant as endogenous insulin is secreted into the portal vein 

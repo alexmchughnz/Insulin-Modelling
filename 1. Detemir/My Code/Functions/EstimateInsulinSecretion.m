@@ -44,8 +44,8 @@ global C GC
     CPep = ppval(CPep, t);
 
     %making time dependant clearance rate
-    k3 = GC.nK(1:n)';
     k1 = k1 * ones(n,1);
+    k3 = GC.nK(1:n)';
 
     %initialising Y and S vectors
     Y = zeros(n,1);

@@ -1,4 +1,4 @@
-ofunction P = EstimateInsulinSecretion(P)
+function P = EstimateInsulinSecretion(P)
 % Estimates pancreatic insulin secretion rate (Uen) using a patient's 
 % C-peptide data.
 % Model from Van Cauter et al. (1992).
@@ -8,7 +8,8 @@ ofunction P = EstimateInsulinSecretion(P)
 % OUTPUT:
 %   P   - modified patient struct with Uen
 
-load('parameters.mat', 'GC')
+
+global C GC
 
 % STUB: Use previous Van Cauter function
 
@@ -20,7 +21,7 @@ load('parameters.mat', 'GC')
     %here we go...
 
     t = minutes(P.CPep.time - P.CPep.time(1));
-    C = P.CPep.value;
+    CPep = P.CPep.value;
 
     %hard coded pt 1 data
     % t = [0, 115, 160, 235, 290, 315, 370, 580, 640, 670, 730, 970, 1425, 1495, 1525, 1590, 1690, 1725, 1760, 1810, 2005, 2080, 2110, 2180];
@@ -33,14 +34,14 @@ load('parameters.mat', 'GC')
     %volume of distribution
     V = 5; %+/- 0.83
 
-    C = C * V; %converting units from pmol/L to pmol
-    C = interp1(t, C, 'linear', 'pp');
+    CPep = CPep * V; %converting units from pmol/L to pmol
+    CPep = interp1(t, CPep, 'linear', 'pp');
 
     %making vector of 1min spacing
     dt = 1;
     t = (0 : dt : t(end))';
     n = length(t);
-    C = ppval(C, t);
+    CPep = ppval(CPep, t);
 
     %making time dependant clearance rate
     k3 = GC.nK(1:n)';
@@ -50,15 +51,15 @@ load('parameters.mat', 'GC')
     Y = zeros(n,1);
 
     %getting first Y value - assumes dY/dt = 0
-    Y(1) = k1(1)/k2*C(1);
-    Y = exp(-k2*t).*(Y(1) + cumtrapz(t,exp(k2*t).*k1.*C));
+    Y(1) = k1(1)/k2*CPep(1);
+    Y = exp(-k2*t).*(Y(1) + cumtrapz(t,exp(k2*t).*k1.*CPep));
 
 
     %calculating endogenous secretion of insulin --- this is a rate
-    S = ( [diff(C); 0]/dt + (k1 + k3).*C - k2*Y);
+    S = ( [diff(CPep); 0]/dt + (k1 + k3).*CPep - k2*Y);
     % Uen2 = ([diff(C), 0]/dt + (k1 + k3)*C - k2*Y2) * V; % p. docherty's one
 
-    Uen = S * 1e-12 * 5808 / 33.7e-6 * 1000; %convert from pmol/min to mU/min
+    Uen = C.mol2IU * (S * 1e-12) * 1000; %convert from pmol/min to mU/min
 
     % C = C/V;
     % Y = Y/V;

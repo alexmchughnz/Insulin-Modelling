@@ -18,7 +18,9 @@ makeparameters
 load config
 
 %% Load Data
-load('parameters.mat')
+global C GI ID GC SC
+load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')   
+
 loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
 patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
 
@@ -82,3 +84,4 @@ for ii = 1:length(patients)
     fprintf("P%d: Plotted results.\n", P.patientNum)
     pause
 end
+

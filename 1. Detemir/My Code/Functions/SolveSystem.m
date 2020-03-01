@@ -1,14 +1,11 @@
 function P = SolveSystem(P)
 % Fits data to find SI over time for a patient.
 % INPUTS:
-%   GC  - glycaemic control parameter set
-%   GI  - gastrointestinal parameter set
 %   P   - patient struct
 % OUTPUT:
 %   P   - modified patient struct with SI
 
-global GI ID GC SC
-load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')
+global C GI ID GC SC
 
 G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
 G0 = P.G{3}.value(G0Indices);

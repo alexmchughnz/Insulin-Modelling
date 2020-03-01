@@ -6,7 +6,8 @@ function kEmpt = GetStomachEmptyingRate(t, qSto, P)
 % OUTPUT:
 %   kempt - stomach emptying rate at time t
 
-load('parameters.mat', 'GI')
+
+global GI
 
 % Extract meal times.
 M = P.meal;

@@ -1,10 +1,18 @@
 % Adapted from "init_vars.m".
 
-clear GI ID GC SC
+clear C GI ID GC SC
+
+%% Constants / Conversions (C)
+MIn = 5808; % Molar mass [g/mol]
+PIn = 33.7e-6; % Potency [g/IU]
+C.mol2IU = MIn / PIn;         % * amount of insulin [mol]
+C.IU2mol = 1 / C.mol2IU;        % * amount of insulin [IU]
 
 %% Gastrointestinal (GI) Parameters
 GI.k21 = 0.054;     %rate constant of grinding (min^-1)
 GI.kAbs = 0.071;    %rate glucose absorbed into bloodstream (min^-1)
+GI.b = 0.69;        % Stomach emptying parameters.
+GI.c = 0.17;        % ''
 GI.kMax = 0.054;    %maximum value of kempt (min^-1)
 GI.kMin = 0.006;    %minimum value of kempt (min^-1)
 GI.f = 0.8;         %sclaing factor for incomplete absorption in first pass hepatic clearance
@@ -47,6 +55,6 @@ SC.k3 = 0.0106;     %rate constant of insulin absorbed into plasma(min^-1)
 
 
 
-save('parameters.mat', 'GI', 'ID', 'GC', 'SC')
+save('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')
 disp('Parameters updated.')
 clear

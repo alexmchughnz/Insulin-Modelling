@@ -1,11 +1,12 @@
-function P = FitInsulinSensitivity(GI, GC, P)
+function P = FitInsulinSensitivity(P)
 % Fits data to find SI over time for a patient.
 % INPUTS:
-%   GC  - glycaemic control parameter set
-%   GI  - gastrointestinal parameter set
 %   P   - patient struct
 % OUTPUT:
 %   P   - modified patient struct with SI
+
+global GI GC
+load('parameters.mat', 'GI', 'GC')
 
 %% Setup
 % Define time range.
@@ -58,7 +59,7 @@ for ii = 1 : numIntervals
                          ta : ta+1, ...
                          Y0, ...
                          optionsShort, ...
-                         ppG, ppI, GI, GC, P);
+                         ppG, ppI, P);
     Y0 = Y1(end, :)';  % Update ICs, picking up where we left off.
     
     % Remaining minutes: coarser solving.
@@ -66,7 +67,7 @@ for ii = 1 : numIntervals
                         (ta+1 : ta+intervalDuration-1)', ...
                         Y0, ...
                         optionsLong, ...
-                        ppG, ppI, GI, GC, P);
+                        ppG, ppI, P);
                     
     % Assemble sections (in 1 min intervals).              
     t    = [t1(1); t2];
@@ -104,7 +105,9 @@ end
 
 
 % Adapted from fit_SI/FAERIES_integrals.
-function [dY] = GIModelODE(t, Y, ppG, ppI, GI, GC, P)
+function [dY] = GIModelODE(t, Y, ppG, ppI, P)
+
+global GI GC
 
 % HARDCODED VALUE from fit_SI, to "bypass the nasty shit"?
 EGP = 0.96;
@@ -116,7 +119,7 @@ qGut   = Y(3);
 Q      = Y(4);
 
 % Retrieve required derived values.
-kEmpt = GetStomachEmptyingRate(t, (qSto1+qSto2), GI, P);
+kEmpt = GetStomachEmptyingRate(t, (qSto1+qSto2), P);
 D = GetGlucoseDelivery(t, P); % Current glucose delivery rate [g/min]
 G = ppG(t);                   % Current blood glucose (interpolated) [mmol/L]
 I = ppI(t);                   % Current plasma insulin (interpolated) [mU/L]

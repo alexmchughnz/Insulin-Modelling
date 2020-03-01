@@ -1,4 +1,4 @@
-function P = SolveSystem(GI, ID, GC, SC, P)
+function P = SolveSystem(P)
 % Fits data to find SI over time for a patient.
 % INPUTS:
 %   GC  - glycaemic control parameter set
@@ -7,38 +7,54 @@ function P = SolveSystem(GI, ID, GC, SC, P)
 % OUTPUT:
 %   P   - modified patient struct with SI
 
-pmol2mu = @(pmol) pmol * 1e-12 * 5808 / 33.7e-6 * 1000;
+global GI ID GC SC
+load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')
 
-G0Indices = (P.G{3}.time == P.simTime(1)); % Start of G measurements [indices]
+G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
 G0 = P.G{3}.value(G0Indices);
-I0 = pmol2mu(P.I.value(1));
+I0 = C.mol2IU * (P.I.value(1) * 1e-12) * 1000; % Convert pmol/L to mIU/L.
 
 t = (0 : P.simDuration-1)';
-Y0 = [0.001;            % qSto1(t=0)
-      0;                % qSto2(t=0)
-      0;                % qGut(t=0)
-      0;                % ISC(t=0)
-      0;                % QDFLocal(t=0)
-      0;                % QDBLocal(t=0)
-      0;                % IDF(t=0)
-      0;                % IDB(t=0)
-      0;                % QDF(t=0)
-      0;                % QDB(t=0)
-      G0;               % G(t=0)
-      I0;               % I(t=0)
-      0];               % Q(t=0)
+Y0 = [0.001;  % qSto1(t=0)
+      0; 	  % qSto2(t=0)
+      0;      % qGut(t=0)
+      0;      % ISC(t=0)
+      0;      % QDFLocal(t=0)
+      0;      % QDBLocal(t=0)
+      0;      % IDF(t=0)
+      0;      % IDB(t=0)
+      0;      % QDF(t=0)
+      0;      % QDB(t=0)
+      G0;     % G(t=0)
+      I0;     % I(t=0)
+      0];     % Q(t=0)
 
-optionsLong = odeset('RelTol',1e-5, ...
-                     'AbsTol',1e-4);
-[t, Y] = ode45(@SystemODE, t, Y0, optionsLong, GI, ID, GC, SC, P);
+options = odeset('RelTol',1e-5, ...
+                 'AbsTol',1e-4);
+[t, Y] = ode45(@SystemODE, t, Y0, options, P);
 
-P.results = [t Y];
-
+% Write out results.
+P.results.time = P.simTime(1) + t/24/60;
+P.results.qSto1 = Y(:,1);
+P.results.qSto2 = Y(:,2);
+P.results.qGut = Y(:,3);
+P.results.IDH = Y(:,4);
+P.results.QDFLocal = Y(:,5);
+P.results.QDBLocal = Y(:,6);
+P.results.IDF = Y(:,7)*18;  % Why * 18??????????
+P.results.IDB = Y(:,8)*18;
+P.results.QDF = Y(:,9)*18;
+P.results.QDB = Y(:,10)*18;
+P.results.G = Y(:,11);
+P.results.I = Y(:,12);
+P.results.Q = Y(:,13);
 end
 
 
 % Adapted from eq_solve/odefun.
-function [dY] = SystemODE(t, Y, GI, ID, GC, SC, P)
+function [dY] = SystemODE(t, Y, P)
+
+global GI ID GC SC
 
 % Assign incoming variables.
 qSto1     = Y(1);  % GI model.
@@ -58,7 +74,7 @@ I         = Y(12);
 Q         = Y(13);
 
 % Retrieve required derived values.
-kEmpt = GetStomachEmptyingRate(t, (qSto1+qSto2), GI, P);
+kEmpt = GetStomachEmptyingRate(t, (qSto1+qSto2), P);
 D = GetGlucoseDelivery(t, P); % Current glucose delivery rate [g/min]
 Ra = GI.f * GI.kAbs * qGut;   % Rate of glucose appearance in plasma
 

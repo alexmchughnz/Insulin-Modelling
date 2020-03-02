@@ -15,7 +15,7 @@ mealStarts = M.startTimes;              % [min]
 mealEnds = M.startTimes + M.durations;  % [min]
 
 % Add contribution from all meals occuring during this time.
-DTot = GI.DTot;
+DTot = GI.DTot0;  % Begin at default rate.
 currentMeals = (mealStarts < t) & (t < mealEnds);     % Which meals contribute at time=t? [logical]
 MAGIC_SCALE_FACTOR = 1000/180.156;                    % From eating.m.
 if (any(currentMeals))

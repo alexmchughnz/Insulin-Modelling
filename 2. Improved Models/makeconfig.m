@@ -1,13 +1,13 @@
-USERNAME = 'adm181';
-DATAPATH = fullfile('C:\Users', USERNAME, 'OneDrive\PhD\Insulin Modelling\1. Detemir\My Code\Data');
-FUNCPATH = fullfile('C:\Users', USERNAME, '\OneDrive\PhD\Insulin Modelling\1. Detemir\My Code\Functions');
+DATAPATH  = fullfile(pwd, 'Data');
+FUNCPATH  = fullfile(pwd, 'Functions');
+MODELPATH = fullfile(pwd, 'Models');
 
 addpath(DATAPATH);
 addpath(FUNCPATH);
-
+addpath(MODELPATH);
 
 PATIENTFILE = 'patient_master.xlsx';
 
-save config DATAPATH FUNCPATH
+save config DATAPATH FUNCPATH MODELPATH
 disp('Config updated.')
 clear

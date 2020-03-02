@@ -30,7 +30,7 @@ QDF = P.results.QDF(index);
 % Solve derivatives.
 dG = -GC.pg*(G - GFast) - SI*G*(Q+QDF)/(1 + GC.alphaG*(Q+QDF)) ... % NOTE: Removed infusion term.
           + (Ra + GC.EGP - GC.CNS)/GC.VG(P);
-dI = -GC.nK(t)*I - GC.nL*I/(1 + GC.alphaI*I) - GC.nI*(I - Q) + Uen*(1 - GC.xL)/GC.VI(P);
+dI = -GC.nK*I - GC.nL*I/(1 + GC.alphaI*I) - GC.nI*(I - Q) + Uen*(1 - GC.xL)/GC.VI(P);
 dQ = GC.nI*(I - Q) - GC.nC * Q/(1+GC.alphaG*Q);
 
 % Pack up outgoing variables.

@@ -26,7 +26,6 @@ CPep = P.CPep.value * V;  % Amount of C-peptide [pmol]
 
 
 %% Interpolation
-
 ppCPep = griddedInterpolant(t, CPep);
 
 % Make 1-minute spaced time vector, and interpolate CPep values.
@@ -49,7 +48,7 @@ Y = exp(-k2*t).*(Y(1) + cumtrapz(t,exp(k2*t).*k1.*CPep));
 
 % Calculate endogenous secretion rate (Uen).
 Uen = [diff(CPep); 0]/dt + (k1 + k3).*CPep - k2*Y;  % [pmol/min]
-Uen = C.mol2IU * (Uen * 1e-12) * 1000;              % [mU/min]
+Uen = C.pmol2mIU(Uen);                              % [mU/min]
 
 % Write value to patient struct.
 P.Uen.value = Uen;

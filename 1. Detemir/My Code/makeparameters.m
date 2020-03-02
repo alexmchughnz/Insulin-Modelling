@@ -3,14 +3,9 @@
 clear C GI ID GC SC
 
 %% Constants / Conversions (C)
-MIn = 5808; % Molar mass [g/mol]
-PIn = 33.7e-6; % Potency [g/IU]
-C.mol2IU = MIn / PIn;         % * amount of insulin [mol]
-C.IU2mol = 1 / C.mol2IU;        % * amount of insulin [IU]
-
-C.uIU2pmol = 6.05e-3;  % From Lui's insulin conversion paper.
-C.pmol2uIU = 1 / C.uIU2pmol;
-
+% From J. L. Knopp's insulin conversion paper.
+C.mIU2pmol = @(uIU) uIU * 6.0;    % Insulin [mIU]  -> Insulin [pmol]
+C.pmol2mIU = @(pmol) pmol / 6.0;  % Insulin [pmol] -> Insulin [mIU]
 
 %% Gastrointestinal (GI) Parameters
 GI.k21 = 0.054;     %rate constant of grinding (min^-1)
@@ -49,7 +44,6 @@ GC.alphaG = 0.0154; % from lotz 2008, 0 for low dose injection, insulin binding 
 
 GC.uMin = 16.7;     % minimum endogenous insulin secretion (mU·min?1)
 GC.uMax = 267;      % maximum endogenous insulin secretion (mU·min?1)
-% GC.Uen = van_cauter(sys);   % solves Uen according to the van cauter model
 
 
 %% Endogenous Insulin Secretion (SC) Parameters

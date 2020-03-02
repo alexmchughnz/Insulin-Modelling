@@ -93,7 +93,7 @@ dQDBLocal = ID.C * (ID.kd1*QDFLocal - ID.kd2*QDBLocal);
 dIDF = SC.k3/GC.VI(P)*QDFLocal - IDF*(ID.nDL + ID.nK) ...
            - ID.nDI*(IDF - QDF) - (SC.k1*QDF - SC.k2*QDB);
 dIDB = ID.C * (ID.kd1*IDF - ID.kd2*IDB);
-dQDF = -ID.nDC*QDF + ID.nDI*(IDF - QDF) - ID.C * (ID.kd1*IDF - ID.kd2*QDB);
+dQDF = -ID.nDC*QDF + ID.nDI*(IDF - QDF) - ID.C * (ID.kd1*QDF - ID.kd2*QDB);
 dQDB = ID.C * (ID.kd1*QDF - ID.kd2*QDB);
 
 % Glycaemic control model DEs.

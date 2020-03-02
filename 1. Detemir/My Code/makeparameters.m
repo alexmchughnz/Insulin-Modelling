@@ -8,8 +8,8 @@ PIn = 33.7e-6; % Potency [g/IU]
 C.mol2IU = MIn / PIn;         % * amount of insulin [mol]
 C.IU2mol = 1 / C.mol2IU;        % * amount of insulin [IU]
 
-C.pmol2uIU = 6.05;  % From Lui's insulin conversion paper.
-C.uIU2pmol = 1 / C.pmol2uIU;
+C.uIU2pmol = 6.05e-3;  % From Lui's insulin conversion paper.
+C.pmol2uIU = 1 / C.uIU2pmol;
 
 
 %% Gastrointestinal (GI) Parameters
@@ -56,7 +56,6 @@ GC.uMax = 267;      % maximum endogenous insulin secretion (mU·min?1)
 SC.k1 = 0.0624;    % (min^-1)
 SC.k2 = 0.0104;     %rate constant of diffusion from SC to interstitium(min^-1) 
 SC.k3 = 0.0106;     %rate constant of insulin absorbed into plasma(min^-1)
-
 
 
 save('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')

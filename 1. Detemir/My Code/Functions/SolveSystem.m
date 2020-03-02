@@ -5,11 +5,11 @@ function P = SolveSystem(P)
 % OUTPUT:
 %   P   - modified patient struct with SI
 
-global C GI ID GC SC
+global C
 
 G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
 G0 = P.G{3}.value(G0Indices);
-I0 = C.mol2IU * (P.I.value(1) * 1e-12) * 1000; % Convert pmol/L to mIU/L.
+I0 = C.mol2IU * (P.I.value(1) * 1e-12) * 1000; % [pmol/L] -> [mIU/L]
 
 t = (0 : P.simDuration-1)';
 Y0 = [0.001;  % qSto1(t=0)

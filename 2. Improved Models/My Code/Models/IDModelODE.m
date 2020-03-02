@@ -1,4 +1,4 @@
-function [dY] = IDModelODE(~, Y, P)
+function [dY] = IDModelODE(t, Y, P)
 % ODE for ID model. Use with ode45.
 % INPUTS:
 %   t   - time at which to evaluate ODE
@@ -19,9 +19,16 @@ QDF       = Y(6);
 QDB       = Y(7);
 
 % Find derived values.
+TBolus = 5;              % Period of bolus action [min]
+tBolus = P.IBolus.time;  % Time of bolus delivery [min]
+if 0 % (tBolus < t)
+    IBolus = P.IBolus.value/TBolus;  % I amount (if in bolus period) [mU]
+else
+    IBolus = 0;
+end
 
 % Solve derivatives.
-dIDH = ID.ka*IDH; %+ UTOTAL - TODO
+dIDH = -ID.ka*IDH + IBolus;
 dQDFLocal = ID.ka*IDH - QDFLocal*(ID.kb + ID.kdi) ...
                 - ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);
 dQDBLocal = ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);

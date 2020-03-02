@@ -36,6 +36,9 @@ for ii = 1:length(patientNums)
     P.I.value = data.PlasmaI;        % Plasma insulin [?]
     P.I.time  = data.PlasmaI_time;
     
+    P.IBolus.value = sys.SC.Ibolus;  % Insulin bolus [mU]
+    P.IBolus.time  = sys.SC.T; 
+    
     P.meal.durations = data.meal_durations;  %[min]
     P.meal.startTimes = data.meal_start;     %[datetime]
     P.meal.carbs = data.carbs;               %[g]

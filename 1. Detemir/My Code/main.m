@@ -51,7 +51,7 @@ datetick('x')
 ylim([4 15])
 
 %Insulin fit
-ITotal = C.IU2mol*(P.results.I*1e-3)*1e+12 + P.results.IDF;
+ITotal = C.mIU2pmol*P.results.I + P.results.IDF;
 figure(2)
 hold on
 plot(P.I.time,P.I.value,'r*')

@@ -8,6 +8,10 @@ PIn = 33.7e-6; % Potency [g/IU]
 C.mol2IU = MIn / PIn;         % * amount of insulin [mol]
 C.IU2mol = 1 / C.mol2IU;        % * amount of insulin [IU]
 
+C.pmol2uIU = 6.05;  % From Lui's insulin conversion paper.
+C.uIU2pmol = 1 / C.pmol2uIU;
+
+
 %% Gastrointestinal (GI) Parameters
 GI.k21 = 0.054;     %rate constant of grinding (min^-1)
 GI.kAbs = 0.071;    %rate glucose absorbed into bloodstream (min^-1)

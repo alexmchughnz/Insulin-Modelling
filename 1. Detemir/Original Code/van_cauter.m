@@ -34,7 +34,7 @@ C = ppval(C, t);
 %making time dependant clearance rate
 k3 = zeros(1, n);
 k3(1 : sys.GC.t_nk_change) = sys.GC.nK/2;
-k3(sys.GC.t_nk_change + 1 : end) = sys.GC.nK/2;
+k3(sys.GC.t_nk_change + 1 : end) = sys.GC.nK/2; % Should this be not halved???
 k1 = k1 * ones(1, n);
 
 %initialising Y and S vectors

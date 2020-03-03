@@ -56,13 +56,16 @@ P.results.QDB      = YID(:,7);  % "
 G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
 G0 = P.G{3}.value(G0Indices);
 I0 = C.pmol2mIU(P.I.value(1)); % [pmol/L] -> [mIU/L]
+Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 
-YGC0 = [G0;  % G(t=0)
-        I0;  % I(t=0)
-        0];  % Q(t=0)
+YGC0 = [0;      % P1(t=0)
+        0;      % P2(t=0)    
+        G0;     % G(t=0)
+        I0;     % I(t=0)
+        Q0];  % Q(t=0)
 
 % Forward simulate.
-[~, YGC] = ode45(@GCModelODE, t, YGC0, options, P);
+[~, YGC] = ode45(@GCModelODE, t, YGC0, options, P, Q0);
 
 % Store results.
 P.results.G = YGC(:,1);

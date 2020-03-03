@@ -1,39 +1,48 @@
-function [dY] = GCModelODE(t, Y, P)
+function [dY] = GCModelODE(t, Y, P, Q0)
 % ODE for GC model. Use with ode45.
 % Requires qGut(t) and QDF(t) - must be run AFTER GI model.
 % INPUTS:
 %   t   - time at which to evaluate ODE
-%   Y   - states [G; I; Q] at time == t
+%   Y   - states [P1; P2; G; I; Q] at time == t
 %   P   - patient struct
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GI GC
+global GC SC NP
 
 % Assign incoming variables.
-G         = Y(1);
-I         = Y(2);
-Q         = Y(3);
+P1 = Y(1);
+P2 = Y(2);
+G  = Y(3);
+I  = Y(4);
+Q  = Y(5);
 
-% Find patient/time dependent values.
+% Find patient dependent values.
 index = (1 + floor(t));
-Ra = GI.f * GI.kAbs * P.results.qGut(index);  % Rate of glucose appearance in plasma
+
 if (t <= 1000)
-    GFast = P.GFast{1};  % Fasting glucose
+    GFast = P.GFast{1};  % Fasting glucose [mol?]
 else    
     GFast = P.GFast{2};
 end
+D = GetGlucoseDelivery(t, P);
 SI = P.SI(index);
 Uen = P.Uen.value(index);
 QDF = P.results.QDF(index);
+QT0  = Q0 + P.results.QDF(1);
+QLocal = P.results.QDFLocal(index);
 
 % Solve derivatives.
-dG = -GC.pg*(G - GFast) - SI*G*(Q+QDF)/(1 + GC.alphaG*(Q+QDF)) ... % NOTE: Removed infusion term.
-          + (Ra + GC.EGP - GC.CNS)/GC.VG(P);
-dI = -GC.nK*I - GC.nL*I/(1 + GC.alphaI*I) - GC.nI*(I - Q) + Uen*(1 - GC.xL)/GC.VI(P);
-dQ = GC.nI*(I - Q) - GC.nC * Q/(1+GC.alphaG*Q);
+dP1 = -NP.d1*P1 + D;
+dP2 = NP.d1*P1 - NP.d2*P2;
+dG  = -GC.pg*(G-GFast) ... % NOTE: Removed infusion term.
+          - SI*(G*(Q+QDF) - GFast*QT0)/(1 + GC.alphaG*(Q+QDF)) ...
+          + NP.d2/GC.VG(P)*P2;      
+dI  = -GC.nK*I - GC.nL/(1 + GC.alphaI*I)*I - GC.nI/GC.VI(P)*(I-Q) ...
+          + SC.k3*QLocal + Uen*(1-GC.xL)/GC.VI(P);
+dQ  = GC.nI/NP.VQ(P)*(I-Q) - GC.nC*Q;
 
 % Pack up outgoing variables.
-dY = [dG; dI; dQ];
+dY = [dP1; dP2; dG; dI; dQ];
 
 end

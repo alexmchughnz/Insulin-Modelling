@@ -18,8 +18,9 @@ makeparameters
 load config
 
 %% Load Data
-global C GI ID GC SC
-load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')   
+% Global parameter structs - do not mutate!
+global C GI ID GC SC NP
+load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC', 'NP')
 
 loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
 patients = {loadpatient(1), loadpatient(3), loadpatient(4)};

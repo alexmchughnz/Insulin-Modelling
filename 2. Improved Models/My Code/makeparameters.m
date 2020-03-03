@@ -24,7 +24,7 @@ ID.kd1  = 0.96;     % Detemir unbind fraction [1/min]
 ID.kd2  = 0.04;     % Detemir bind fraction [1/min]
 ID.kdi  = 0.0594;   % Detemir interstitial degradation [1/min]
 ID.kb   = 0.0181;   % Unbound I diffusion from local to blood [1/min]
-% NOTE: nK doesn't match paper (nK = 0).
+% NOTE: nK doesn't match Klenner paper (nK = 0).
 ID.nK   = 0.06;     % Detemir renal clearance [1/min]
 ID.nDL  = 0.147;    % Detamir hepatic insulin clearance rate [1/min]
 ID.nDI  = 0.06;     % Detemir trans-endothelial diffusion rate [1/min]
@@ -50,13 +50,26 @@ GC.alphaG = 0.0154;         % Saturation of insulin binding to cells [L/mU]
 GC.uMin = 16.7;             % Minimum endogenous insulin secretion [mU/min]
 GC.uMax = 267;              % Maximum endogenous insulin secretion [mU/min]
 
-
 %% Endogenous Insulin Secretion (SC) Parameters
 SC.k1 = 0.0478;  % C-peptide diffusion rates [1/min]
 SC.k2 = 0.0516;  % '' 
 SC.k3 = 0.0644;  % C-peptide clearance [1/min]
 
+%% NEW PARAMETERS - to be sorted
+P1HalfLife = 20; % Half-life of glucose in P1 compartment [min]
+NP.d1 = log(2)/P1HalfLife;
+NP.d2 = 0.1;  % NOTE: dummy value, needs parameter ID.
 
-save('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')
+% From PD's thesis - need to investigate.
+a = log(2)/4.95;
+b = log(2)/32.4;
+F = 0.76;
+ck2 = F*(b-a) + a;
+ck3 = (a*b)/ck2;
+ck1 = a+b-ck2-ck3;
+NP.VQ = @(P) GC.VI(P)*(ck1/ck2);
+
+
+save('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC', 'NP')
 disp('Parameters updated.')
 clear

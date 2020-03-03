@@ -32,8 +32,8 @@ Y(1) = SC.k1(1)/SC.k2*CPep(1);
 Y = exp(-SC.k2*t) .* (Y(1) + cumtrapz(t, exp(SC.k2*t).*SC.k1.*CPep));
 
 % Calculate endogenous secretion rate (Uen).
-Uen = [diff(CPep); 0]/dt + (SC.k1 + SC.k3).*CPep - SC.k2*Y;  % [pmol/min]
-Uen = C.pmol2mIU(Uen);                                    % [mU/min]
+S = [diff(CPep); 0]/dt + (SC.k1 + SC.k3).*CPep - SC.k2*Y;  % C-peptide secretion [pmol/min]
+Uen = C.pmol2mIU(S);                                       % Endogenous insulin secretion [mU/min]
 
 % Write value to patient struct.
 P.Uen.value = Uen;

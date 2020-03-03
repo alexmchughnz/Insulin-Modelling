@@ -17,20 +17,23 @@ G  = Y(3);
 I  = Y(4);
 Q  = Y(5);
 
-% Find patient dependent values.
-index = (1 + floor(t));
+% Retrieve patient dependent values.
+n = (1 + floor(t));  % Index of current timestep.
+SI = P.SI(n);
+Uen = P.Uen.value(n);
+QDF = P.results.QDF(n);
+QLocal = P.results.QDFLocal(n);
+
+D = GetGlucoseDelivery(t, P);
 
 if (t <= 1000)
     GFast = P.GFast{1};  % Fasting glucose [mol?]
 else    
     GFast = P.GFast{2};
 end
-D = GetGlucoseDelivery(t, P);
-SI = P.SI(index);
-Uen = P.Uen.value(index);
-QDF = P.results.QDF(index);
+
+% Compute derived values.
 QT0  = Q0 + P.results.QDF(1);
-QLocal = P.results.QDFLocal(index);
 
 % Solve derivatives.
 dP1 = -NP.d1*P1 + D;

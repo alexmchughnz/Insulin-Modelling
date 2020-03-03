@@ -58,7 +58,7 @@ SC.k3 = 0.0644;  % C-peptide clearance [1/min]
 %% NEW PARAMETERS - to be sorted
 P1HalfLife = 20; % Half-life of glucose in P1 compartment [min]
 NP.d1 = log(2)/P1HalfLife;
-NP.d2 = 0.1;  % NOTE: dummy value, needs parameter ID.
+NP.d2 = 0.01;  % NOTE: dummy value, needs parameter ID.
 
 % From PD's thesis - need to investigate.
 a = log(2)/4.95;

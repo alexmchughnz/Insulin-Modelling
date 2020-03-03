@@ -18,7 +18,7 @@ IDB       = Y(5);
 QDF       = Y(6);
 QDB       = Y(7);
 
-% Find derived values.
+% Compute derived values.
 TBolus = 5;              % Period of bolus action [min]
 tBolus = P.IBolus.time;  % Time of bolus delivery [min]
 if 0 % (tBolus < t)

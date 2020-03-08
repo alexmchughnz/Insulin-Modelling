@@ -10,20 +10,17 @@ function [dY] = GIModelODE(t, Y, P)
 global GI
 
 % Assign incoming variables.
-qSto1     = Y(1);
-qSto2     = Y(2);
-qGut      = Y(3);
+P1     = Y(1);
+P2     = Y(2);
 
 % Find derived values.
-kEmpt = GetStomachEmptyingRate(t, (qSto1+qSto2), P);
 D = GetGlucoseDelivery(t, P);
 
 % Solve derivatives.
-dqSto1 = D - GI.k21*qSto1;
-dqSto2 = GI.k21*qSto1 - kEmpt*qSto2;
-dqGut  = kEmpt*qSto2 - GI.kAbs*qGut;
+dP1 = -GI.d1*P1 + D;
+dP2 = GI.d1*P1 - GI.d2*P2;
 
 % Pack up outgoing variables.
-dY = [dqSto1; dqSto2; dqGut];
+dY = [dP1; dP2];
 
 end

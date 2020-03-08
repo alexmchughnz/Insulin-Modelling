@@ -19,8 +19,8 @@ load config
 
 %% Load Data
 % Global parameter structs - do not mutate!
-global C GI ID GC SC 
-load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')   
+global C GI ID GC SC
+load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')
 
 % Patient data structs.
 loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
@@ -38,4 +38,3 @@ plotnum = 1;
 P = patients{plotnum};
 PlotResults(P);
 fprintf("P%d: Plotted results.\n", P.patientNum)
-

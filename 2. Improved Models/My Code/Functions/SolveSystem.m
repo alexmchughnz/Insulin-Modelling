@@ -17,17 +17,15 @@ P.results.time = P.simTime(1) + t/24/60;  % Time of results [datetime]
 
 %% GI Model
 % Set up initial conditions.
-YGI0 = [0.001;  % qSto1(t=0)
-        0; 	    % qSto2(t=0)
-        0];     % qGut(t=0)
+YGI0 = [0.001;  % P1(t=0)
+        0]; 	% P2(t=0)
       
 % Forward simulate.
 [~, YGI] = ode45(@GIModelODE, t, YGI0, options, P);  
 
 % Store results.
-P.results.qSto1 = YGI(:,1);
-P.results.qSto2 = YGI(:,2);
-P.results.qGut  = YGI(:,3);
+P.results.P1 = YGI(:,1);
+P.results.P2 = YGI(:,2);
 
 %% ID Model
 % Set up initial conditions.
@@ -56,13 +54,14 @@ P.results.QDB      = YID(:,7);  % "
 G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
 G0 = P.G{3}.value(G0Indices);
 I0 = C.pmol2mIU(P.I.value(1)); % [pmol/L] -> [mIU/L]
+Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 
-YGC0 = [G0;  % G(t=0)
-        I0;  % I(t=0)
-        0];  % Q(t=0)
+YGC0 = [G0;   % G(t=0)
+        I0;   % I(t=0)
+        Q0];  % Q(t=0)
 
 % Forward simulate.
-[~, YGC] = ode45(@GCModelODE, t, YGC0, options, P);
+[~, YGC] = ode45(@GCModelODE, t, YGC0, options, P, Q0);
 
 % Store results.
 P.results.G = YGC(:,1);
@@ -70,4 +69,3 @@ P.results.I = YGC(:,2);
 P.results.Q = YGC(:,3);
 
 end
-

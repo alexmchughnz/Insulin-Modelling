@@ -6,16 +6,18 @@ function D = GetGlucoseDelivery(t, P)
 % OUTPUT:
 %   D   - glucose delivery rate at time t
 
+global C
+
 % Extract meal times.
 M = P.meal;
 mealStarts = M.startTimes;              % [min]
 mealEnds = M.startTimes + M.durations;  % [min]
 
 % Add contribution from all meals occuring during this time.
-currentMeals = (mealStarts < t) & (t < mealEnds);       % Which meals contribute at time=t? [logical]
-mealRates = M.carbs ./ M.durations;                     % Glucose rates of all meals [g/min?]
-MAGIC_SCALE_FACTOR = 1000/180.156;                      % From eating.m.
-D = MAGIC_SCALE_FACTOR * dot(currentMeals, mealRates);  % Glucose delivery rate [g/min?]
+currentMeals = (mealStarts < t) & (t < mealEnds); % Which meals contribute at time=t? [logical]
+mealRates = M.carbs ./ M.durations;               % Glucose rates of all meals [g/min?]
+
+D = dot(currentMeals, mealRates) / C.MGlucose ;  % Glucose delivery rate [mol/min]
 
 end
 

@@ -44,43 +44,60 @@ optionsShort = odeset('RelTol',1e-5, ...  % Options for first minute.
 optionsLong = odeset('RelTol',1e-5, ...   % Options for other minutes.
                      'AbsTol',1e-4, ...
                      'InitialStep',0.1);
-Y0 = [0.001;  % qSto1(t=0)
-      0;      % qSto2(t=0)      
-      0;      % qGut(t=0)
-      9;      % Q(t=0)
-      0;      % GA(t=0)
-      0];     % Gb(t=0)
+
+% Initial conditions.
+YGI0 = [0.001;  % P1(t=0)        GI Model
+        0]; 	% P2(t=0)  
+    
+YID0 = [0;   % ISC(t=0)          ID Model
+        0;   % QDFLocal(t=0)
+        0;   % QDBLocal(t=0)
+        0;   % IDF(t=0)
+        0;   % IDB(t=0)
+        0;   % QDF(t=0)
+        0];  % QDB(t=0)
+    
+YGC0 = [9;   % Q(t=0)            GC Model
+        0;   % GA(t=0)
+        0];  % Gb(t=0)
+    
+Y0 = [YGI0;
+      YID0;
+      YGC0];
 
 % For each interval, integrate the collection of ODEs,
 % then solve the dG equation for SI.
+ccGA = 11;  % Column index of GA in Y.
+ccGb = 12;  % Column index of Gb in Y.
 for ii = 1 : numIntervals
     % First minute: finer solving.
-    [t1, Y1] = ode45(@GIModelODE, ...
+    [t1, Y1] = ode45(@SIModelODE, ...
                          ta : ta+1, ...
                          Y0, ...
                          optionsShort, ...
-                         ppG, ppI, P);
+                         ppG, ppI, P, Y0);
     Y0 = Y1(end, :)';  % Update ICs, picking up where we left off.
     
     % Remaining minutes: coarser solving.
-    [t2, Y2] = ode45(@GIModelODE, ...
-                        (ta+1 : ta+intervalDuration-1)', ...
-                        Y0, ...
-                        optionsLong, ...
-                        ppG, ppI, P);
+    [t2, Y2] = ode45(@SIModelODE, ...
+                     (ta+1 : ta+intervalDuration-1)', ...
+                     Y0, ...
+                     optionsLong, ...
+                     ppG, ppI, P, Y0);
                     
     % Assemble sections (in 1 min intervals).              
     t    = [t1(1); t2];
     Y    = [Y1(1, :); Y2];
 
     % Solve linear system to find SI.
-    % dG = -dGA*SI + dGb, therefore SI = -dGA\(dGb-dG).
-    dGA = Y(:, 5);         % Coefficient of SI in equation.
-    dGb = Y(:, 6);         % Added terms in equation.
-    dG  = ppG(tb) - ppG(ta);  % Change in G over interval.  
+    % deltaG = -int{dGA}*SI + int{dGb}, therefore SI = -GA\(Gb-deltaG).
+    GA = Y(:, ccGA);         % Coefficient of SI in equation.
+    Gb = Y(:, ccGb);         % Added terms in equation.
     
-    A = -dGA;     
-    b = dGb-dG;          
+    deltaG  = ppG(tb) - ppG(ta);  % Change in G over interval.  
+    
+    A = -GA;     
+    b = Gb-deltaG;          
     intervalSI(ii) = A\b;
     
     % Set SI value over current interval to computed value.
@@ -105,45 +122,69 @@ end
 
 
 % Adapted from fit_SI/FAERIES_integrals.
-function [dY] = GIModelODE(t, Y, ppG, ppI, P)
+function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
 
 global GI GC
-
-% HARDCODED VALUE from fit_SI, to "bypass the nasty shit"?
-EGP = 0.96;
-
+% % Initial conditions.
+% YGI0 = [0.001;  % P1(t=0)        GI Model
+%         0]; 	% P2(t=0)  
+%     
+% YID0 = [0;   % ISC(t=0)          ID Model
+%         0;   % QDFLocal(t=0)
+%         0;   % QDBLocal(t=0)
+%         0;   % IDF(t=0)
+%         0;   % IDB(t=0)
+%         0;   % QDF(t=0)
+%         0];  % QDB(t=0)
+%     
+% YGC0 = [9;   % Q(t=0)            GC Model
+%         0;   % GA(t=0)
+%         0];  % Gb(t=0)
+%     
+% Y0 = [YGI0;
+%       YID0;
+%       YGC0];
+  
 % Assign incoming variables.
-qSto1  = Y(1);
-qSto2  = Y(2);
-qGut   = Y(3);
-Q      = Y(4);
+YGI = Y(1:2);
+YID = Y(3:9);
+YGC = Y(10:12);
 
-% Retrieve required derived values.
-kEmpt = GetStomachEmptyingRate(t, (qSto1+qSto2), P);
-D = GetGlucoseDelivery(t, P); % Current glucose delivery rate [g/min]
-G = ppG(t);                   % Current blood glucose (interpolated) [mmol/L]
-I = ppI(t);                   % Current plasma insulin (interpolated) [mU/L]
-Ra = GI.f * GI.kAbs * qGut;   % Rate of glucose appearance in plasma
+P2  = YGI(2);
+QDF = YID(6);
+Q   = YGC(1);
 
-% Gastrointestinal model DEs.
-dqSto1 = D - GI.k21*qSto1;
-dqSto2 = GI.k21*qSto1 - kEmpt*qSto2;
-dqGut  = kEmpt*qSto2 - GI.kAbs*qGut;
+G   = ppG(t);   % Current blood glucose (interpolated)  [mmol/L]
+I   = ppI(t);   % Current plasma insulin (interpolated) [mU/L]
 
-% Glycaemic control model DEs.
+% Retrieve patient dependent values.
+n = (1 + floor(t));         % Index of current timestep.
+GFast = P.GFast(t);         % Fasting glucose [mol?/L]
+GInfusion = P.GInfusion(n); % Glucose infusion rate [mol/min]
+
+VG  = GC.VG(P);
+VQ  = GC.VQ(P);
+
+% Compute derived values.
+Q0   = Y0(3);
+QDF0 = Y0(6);
+QTFast  = Q0 + QDF0;
+QT = Q + QDF;
+
+% GC model, reconstructed.
 % dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI*(I - Q) - GC.nC * Q/(1+GC.alphaG*Q);
-dGA    = G * Q/(1 + GC.alphaG*Q);
-% NOTE: Removed infusion term.
-%dGb    = (Ra + EGP + infusion(sys, t) - sys.GC.CNS)/sys.GC.VG - sys.GC.pg*G;
-dGb    = -GC.pg*G + (Ra + EGP - GC.CNS)/GC.VG(P);
+dQ     = GC.nI/VQ*(I-Q) - GC.nC*Q;
+dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
+dGb    = -GC.pg*(G-GFast) + GI.d2/VG*P2 + GInfusion/VG;
+
+% Forward simulate GI and ID models for values.
+dYGI = GIModelODE(t, YGI, P);
+dYID = IDModelODE(t, YID, P);
 
 % Pack up outgoing variables.
-dY = [dqSto1;
-      dqSto2;
-      dqGut;
+dY = [dYGI;
+      dYID;
       dQ;
       dGA;
       dGb];
-
 end

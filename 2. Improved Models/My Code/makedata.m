@@ -19,7 +19,6 @@ for ii = 1:length(patientNums)
     P.trialTime     = [sys.trial_start_t, sys.trial_end_t];
     P.trialDuration = sys.trial_max_t;
     
-    %NOTE: Unsure what "sim time" is, but it's used here...?
     P.simTime     =  [sys.sim_start_t, sys.sim_end_t];
     P.simDuration =  sys.sim_max_t;
     
@@ -44,8 +43,13 @@ for ii = 1:length(patientNums)
     P.meal.carbs = data.carbs;               %[g]
     P.meal.sugar = data.sugar;               %[g]
     
-    P.GFast{1} = sys.GC.fasting_bg1;
-    P.GFast{2} = sys.GC.fasting_bg2;    
+    day1 = sys.sim_start_t;    % Day 1 start, at sim start time [datetime]
+    [Y, M, D] = ymd(day1 + 1);
+    day2 = datetime(Y, M, D);  % Day 2 start, at midnight [datetime]
+    tFast = minutes(day2 - day1); % Time when reading 2 replaces reading 1 [min]
+    GFast1 = sys.GC.fasting_bg1;
+    GFast2 = sys.GC.fasting_bg2;
+    P.GFast = @(t) (t < tFast)*GFast1 + (t >= tFast)*GFast2;
     
     filename = sprintf("patient%d.mat", patientNum);
     save(fullfile(DATAPATH, filename), '-struct', 'P');

@@ -61,7 +61,7 @@ YGC0 = [G0;   % G(t=0)
         Q0];  % Q(t=0)
 
 % Forward simulate.
-[~, YGC] = ode45(@GCModelODE, t, YGC0, options, P, Q0);
+[~, YGC] = ode45(@GCModelODE, t, YGC0, options, P, YGC0);
 
 % Store results.
 P.results.G = YGC(:,1);

@@ -32,7 +32,7 @@ P.SI = ones(P.simDuration, 1) * defaultSI;             % SI value at each minute
 intervalSI = ones(numIntervals, 1) * defaultSI;        % SI value at each interval in sim.
 minuteSI = zeros(numIntervals * intervalDuration, 1);  % SI value at each minute in sim.
 
-ta = 1;                      % Start of current interval [min]
+ta = 0;                      % Start of current interval [min]
 tb = ta + intervalDuration;  % End of current interval [min]
 
 %% Compute
@@ -57,7 +57,7 @@ YID0 = [0;   % ISC(t=0)          ID Model
         0;   % QDF(t=0)
         0];  % QDB(t=0)
     
-YGC0 = [9;   % Q(t=0)            GC Model
+YGC0 = [0;   % Q(t=0)            GC Model
         0;   % GA(t=0)
         0];  % Gb(t=0)
     
@@ -125,27 +125,9 @@ end
 function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
 
 global GI GC
-% % Initial conditions.
-% YGI0 = [0.001;  % P1(t=0)        GI Model
-%         0]; 	% P2(t=0)  
-%     
-% YID0 = [0;   % ISC(t=0)          ID Model
-%         0;   % QDFLocal(t=0)
-%         0;   % QDBLocal(t=0)
-%         0;   % IDF(t=0)
-%         0;   % IDB(t=0)
-%         0;   % QDF(t=0)
-%         0];  % QDB(t=0)
-%     
-% YGC0 = [9;   % Q(t=0)            GC Model
-%         0;   % GA(t=0)
-%         0];  % Gb(t=0)
-%     
-% Y0 = [YGI0;
-%       YID0;
-%       YGC0];
-  
-% Assign incoming variables.
+
+%% Input
+% Split up states.
 YGI = Y(1:2);
 YID = Y(3:9);
 YGC = Y(10:12);
@@ -157,34 +139,45 @@ Q   = YGC(1);
 G   = ppG(t);   % Current blood glucose (interpolated)  [mmol/L]
 I   = ppI(t);   % Current plasma insulin (interpolated) [mU/L]
 
-% Retrieve patient dependent values.
+% Split up initial conditions.
+YID0 = Y0(3:9);
+YGC0 = Y0(10:12);
+
+QDF0 = YID0(6);
+Q0   = YGC0(1);
+
+%% Variables
+% Time dependent.
 n = (1 + floor(t));         % Index of current timestep.
 GFast = P.GFast(t);         % Fasting glucose [mol?/L]
 GInfusion = P.GInfusion(n); % Glucose infusion rate [mol/min]
 
+% Patient dependent.
 VG  = GC.VG(P);
 VQ  = GC.VQ(P);
 
-% Compute derived values.
-Q0   = Y0(3);
-QDF0 = Y0(6);
+% Derived values.
 QTFast  = Q0 + QDF0;
 QT = Q + QDF;
 
-% GC model, reconstructed.
+%% Computation
+% GC Model (reconstructed)
 % dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
 dQ     = GC.nI/VQ*(I-Q) - GC.nC*Q;
 dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
 dGb    = -GC.pg*(G-GFast) + GI.d2/VG*P2 + GInfusion/VG;
 
-% Forward simulate GI and ID models for values.
+% GI Model
 dYGI = GIModelODE(t, YGI, P);
+
+% ID Model
 dYID = IDModelODE(t, YID, P);
 
-% Pack up outgoing variables.
-dY = [dYGI;
-      dYID;
+%% Output
+dY = [dYGI; % [3x1]
+      dYID; % [3x1]
       dQ;
       dGA;
       dGb];
+  
 end

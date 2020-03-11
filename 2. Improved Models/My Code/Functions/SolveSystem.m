@@ -65,7 +65,7 @@ YGC0 = [G0;   % G(t=0)
 
 % Store results.
 P.results.G = YGC(:,1);
-P.results.I = YGC(:,2);
+P.results.I = C.mIU2pmol(YGC(:,2));  %[mIU] -> [pmol]
 P.results.Q = YGC(:,3);
 
 end

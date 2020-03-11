@@ -166,6 +166,7 @@ QT = Q + QDF;
 dQ     = GC.nI/VQ*(I-Q) - GC.nC*Q;
 dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
 dGb    = -GC.pg*(G-GFast) + GI.d2/VG*P2 + GInfusion/VG;
+dYGC   = [dQ; dGA; dGb];
 
 % GI Model
 dYGI = GIModelODE(t, YGI, P);
@@ -174,10 +175,8 @@ dYGI = GIModelODE(t, YGI, P);
 dYID = IDModelODE(t, YID, P);
 
 %% Output
-dY = [dYGI; % [3x1]
-      dYID; % [3x1]
-      dQ;
-      dGA;
-      dGb];
+dY = [dYGI;
+      dYID;
+      dYGC];
   
 end

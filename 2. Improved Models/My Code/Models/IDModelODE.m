@@ -7,7 +7,7 @@ function [dY] = IDModelODE(t, Y, P)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global ID GC SC
+global ID GC
 
 % Assign incoming variables.
 IDH       = Y(1);
@@ -19,13 +19,8 @@ QDF       = Y(6);
 QDB       = Y(7);
 
 % Compute derived values.
-TBolus = 5;              % Period of bolus action [min]
-tBolus = P.IBolus.time;  % Time of bolus delivery [min]
-if 0 % (tBolus < t)
-    IBolus = P.IBolus.value/TBolus;  % I amount (if in bolus period) [mU]
-else
-    IBolus = 0;
-end
+n = (1 + floor(t));
+IBolus = P.IBolus(n);
 
 % Solve derivatives.
 dIDH = -ID.ka*IDH + IBolus;

@@ -24,7 +24,7 @@ Y0 = [0.001;  % qSto1(t=0)
       0;      % QDB(t=0)
       G0;     % G(t=0)
       I0;     % I(t=0)
-      0];     % Q(t=0)
+      9];     % Q(t=0)
 
 options = odeset('RelTol',1e-5, ...
                  'AbsTol',1e-4);

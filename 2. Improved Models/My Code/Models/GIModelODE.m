@@ -9,18 +9,20 @@ function [dY] = GIModelODE(t, Y, P)
 
 global GI
 
-% Assign incoming variables.
+%% Input
 P1     = Y(1);
 P2     = Y(2);
 
-% Find derived values.
+%% Variables
+% Patient dependent.
 D = GetGlucoseDelivery(t, P);
 
-% Solve derivatives.
+%% Computation
 dP1 = -GI.d1*P1 + D;
 dP2 = GI.d1*P1 - GI.d2*P2;
 
-% Pack up outgoing variables.
-dY = [dP1; dP2];
+%% Output
+dY = [dP1;
+      dP2];
 
 end

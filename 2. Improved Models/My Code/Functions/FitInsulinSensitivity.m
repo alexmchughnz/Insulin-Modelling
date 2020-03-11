@@ -123,7 +123,16 @@ end
 
 % Adapted from fit_SI/FAERIES_integrals.
 function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
-
+% Collection of full system ODEs used to compute SI. Use with ode45.
+% INPUTS:
+%   t   - time at which to evaluate ODE
+%   Y   - states [P1; P2; G; I; Q] at time == t
+%   ppG - piecewise polynomial interpolant of G over time
+%   ppI - piecewise polynomial interpolant of I over time
+%   P   - patient struct
+%   Y0  - initial conditions of states
+% OUTPUT:
+%   dY  - derivatives of states at time == t
 global GI GC
 
 %% Input

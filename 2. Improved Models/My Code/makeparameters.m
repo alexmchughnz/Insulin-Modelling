@@ -36,9 +36,6 @@ ID.nDL  = 0.147;    % Detamir hepatic insulin clearance rate [1/min]
 ID.nDI  = 0.06;     % Detemir trans-endothelial diffusion rate [1/min]
 ID.nDC  = 0.032;    % Detemir insulin degredation rate [1/min]
 
-% NOTE: Same as kd1/kd2?? Is this accounted for twice?
-ID.C    = 0.95;     % Detemir bind/unbind rate [1/min?]
-
 %% Endogenous Insulin Secretion (SC) Parameters
 F = 0.76;
 CHalfLife1 = 4.95;       % Half-life of C-peptide in compartment 1 [min]

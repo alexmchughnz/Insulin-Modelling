@@ -30,13 +30,13 @@ end
 % Solve derivatives.
 dIDH = -ID.ka*IDH + IBolus;
 dQDFLocal = ID.ka*IDH - QDFLocal*(ID.kb + ID.kdi) ...
-                - ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);
-dQDBLocal = ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);
+                - (ID.kd1*QDFLocal - ID.kd2*QDBLocal);
+dQDBLocal = (ID.kd1*QDFLocal - ID.kd2*QDBLocal);
 dIDF = ID.kb/GC.VI(P)*QDFLocal - IDF*(ID.nDL + ID.nK) ...
-           - ID.nDI*(IDF - QDF) - ID.C*(ID.kd1*QDF - ID.kd2*QDB);
-dIDB = ID.C*(ID.kd1*IDF - ID.kd2*IDB);
-dQDF = -ID.nDC*QDF + ID.nDI*(IDF - QDF) - ID.C*(ID.kd1*QDF - ID.kd2*QDB);
-dQDB = ID.C*(ID.kd1*QDF - ID.kd2*QDB);
+           - ID.nDI*(IDF - QDF) - (ID.kd1*QDF - ID.kd2*QDB);
+dIDB = ID.kd1*IDF - ID.kd2*IDB;
+dQDF = -ID.nDC*QDF + ID.nDI*(IDF - QDF) - (ID.kd1*QDF - ID.kd2*QDB);
+dQDB = ID.kd1*QDF - ID.kd2*QDB;
 
 % Pack up outgoing variables.
 dY = [dIDH; dQDFLocal; dQDBLocal; dIDF; dIDB; dQDF; dQDB];

@@ -38,12 +38,12 @@ P.results.qGut = Y(:,3);
 P.results.IDH = Y(:,4);
 P.results.QDFLocal = Y(:,5);
 P.results.QDBLocal = Y(:,6);
-P.results.IDF = Y(:,7)*18;  % Why * 18??????????
+P.results.IDF = Y(:,7);  % Why * 18??????????
 P.results.IDB = Y(:,8)*18;
 P.results.QDF = Y(:,9)*18;
 P.results.QDB = Y(:,10)*18;
 P.results.G = Y(:,11);
-P.results.I = Y(:,12);
+P.results.I = C.mIU2pmol(Y(:,12)); % [pmol]
 P.results.Q = Y(:,13);
 end
 
@@ -86,15 +86,15 @@ dqSto2 = GI.k21*qSto1 - kEmpt*qSto2;
 dqGut  = kEmpt*qSto2 - GI.kAbs*qGut;
 
 % Insulin Detemir model DEs.
-dISC = SC.k2*IDH; %+ UTOTAL - TODO
-dQDFLocal = SC.k2*IDH - QDFLocal*(SC.k3 + SC.k1) ...
+dIDH = -ID.ka*IDH; %+ IBolus (TODO)
+dQDFLocal = ID.ka*IDH - QDFLocal*(ID.kb + ID.kdi) ...
                 - ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);
-dQDBLocal = ID.C * (ID.kd1*QDFLocal - ID.kd2*QDBLocal);
-dIDF = SC.k3/GC.VI(P)*QDFLocal - IDF*(ID.nDL + ID.nK) ...
-           - ID.nDI*(IDF - QDF) - (SC.k1*QDF - SC.k2*QDB);
-dIDB = ID.C * (ID.kd1*IDF - ID.kd2*IDB);
-dQDF = -ID.nDC*QDF + ID.nDI*(IDF - QDF) - ID.C * (ID.kd1*QDF - ID.kd2*QDB);
-dQDB = ID.C * (ID.kd1*QDF - ID.kd2*QDB);
+dQDBLocal = ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);
+dIDF = ID.kb/GC.VI(P)*QDFLocal - IDF*(ID.nDL + ID.nK) ...
+           - ID.nDI*(IDF - QDF) - ID.C*(ID.kd1*QDF - ID.kd2*QDB);
+dIDB = ID.C*(ID.kd1*IDF - ID.kd2*IDB);
+dQDF = -ID.nDC*QDF + ID.nDI*(IDF - QDF) - ID.C*(ID.kd1*QDF - ID.kd2*QDB);
+dQDB = ID.C*(ID.kd1*QDF - ID.kd2*QDB);
 
 % Glycaemic control model DEs.
 dG = -GC.pg*(G - GFast) - SI*G*(Q+QDF)/(1 + GC.alphaG*(Q+QDF)) ... % NOTE: Removed infusion term.
@@ -106,7 +106,7 @@ dQ = GC.nI*(I - Q) - GC.nC * Q/(1+GC.alphaG*Q);
 dY = [dqSto1;
       dqSto2;
       dqGut;
-      dISC;
+      dIDH;
       dQDFLocal;
       dQDBLocal;
       dIDF;

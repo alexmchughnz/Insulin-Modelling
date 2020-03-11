@@ -19,8 +19,11 @@ GI.f = 0.8;         %sclaing factor for incomplete absorption in first pass hepa
 GI.DTot = 0.001;       %default amount of glucose in stomach - cannot be zero
 
 %% Insulin Detemir (ID) Parameters
-ID.kd1 = 0.96;       %Detemir Unbind fraction
-ID.kd2 = 0.04;       %detemir bind fraction
+ID.ka   = 0.0078;   % Hexameric Detemir dissociation rate [1/min]
+ID.kd1  = 0.96;     % Detemir unbind fraction [1/min]
+ID.kd2  = 0.04;     % Detemir bind fraction [1/min]
+ID.kdi  = 0.0594;   % Detemir interstitial degradation [1/min]
+ID.kb   = 0.0181;   % Unbound I diffusion from local to blood [1/min]
 ID.nK = 0.06;       %renal clearance
 ID.nDL = 0.147;     %Detamir hepatic insulin clearance rate (min?1)
 ID.nDI = 0.06;      %the detemir trans-endothelial diffusion rate between the plasma and interstitial compartments (min-1)

@@ -28,7 +28,7 @@ datetick('x')
 ylim([4 15])
 
 %% Insulin
-ITotal = C.mIU2pmol(P.results.I) + P.results.IDF;  % [mIU/L] -> [pmol/L]
+ITotal = P.results.I + P.results.IDF;  %[pmol/L]
 
 figure(2)
 hold on

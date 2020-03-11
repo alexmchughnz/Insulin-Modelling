@@ -36,6 +36,13 @@ for ii = 1:length(patientNums)
     P.I.value = data.PlasmaI;        % Plasma insulin [?]
     P.I.time  = data.PlasmaI_time;
     
+    IBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
+    tBolus  = sys.SC.T;      % Time of bolus delivery [min]
+    TBolus = 5;              % Period of bolus action [min]
+    % Bolus as function of time, value spread over period.
+    % Active if time within period.   
+    P.IBolus = @(t) ((tBolus <= t) && (t < tBolus+TBolus)).*IBolus/TBolus;
+    
     P.meal.durations = data.meal_durations;  %[min]
     P.meal.startTimes = data.meal_start;     %[datetime]
     P.meal.carbs = data.carbs;               %[g]

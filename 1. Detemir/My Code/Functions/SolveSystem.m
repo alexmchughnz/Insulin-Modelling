@@ -38,7 +38,7 @@ P.results.qGut = Y(:,3);
 P.results.IDH = Y(:,4);
 P.results.QDFLocal = Y(:,5);
 P.results.QDBLocal = Y(:,6);
-P.results.IDF = Y(:,7);  % Why * 18??????????
+P.results.IDF = Y(:,7)*18;  % Why * 18??????????
 P.results.IDB = Y(:,8)*18;
 P.results.QDF = Y(:,9)*18;
 P.results.QDB = Y(:,10)*18;
@@ -79,6 +79,7 @@ Ra = GI.f * GI.kAbs * qGut;   % Rate of glucose appearance in plasma
 GFast = P.GFast{1+(t>1000)};            % HACKY, rewrite!!!
 SI = P.SI(1 + floor(t));
 Uen = P.Uen.value(1 + floor(t));
+IBolus = P.IBolus(1 + floor(t));
 
 % Gastrointestinal model DEs.
 dqSto1 = D - GI.k21*qSto1;
@@ -86,7 +87,7 @@ dqSto2 = GI.k21*qSto1 - kEmpt*qSto2;
 dqGut  = kEmpt*qSto2 - GI.kAbs*qGut;
 
 % Insulin Detemir model DEs.
-dIDH = -ID.ka*IDH; %+ IBolus (TODO)
+dIDH = -ID.ka*IDH + IBolus;
 dQDFLocal = ID.ka*IDH - QDFLocal*(ID.kb + ID.kdi) ...
                 - ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);
 dQDBLocal = ID.C*(ID.kd1*QDFLocal - ID.kd2*QDBLocal);

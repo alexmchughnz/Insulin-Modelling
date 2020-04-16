@@ -44,10 +44,10 @@ YID0 = [0;  % ISC(t=0)
 P.results.IDH      = YID(:,1);
 P.results.QDFLocal = YID(:,2);
 P.results.QDBLocal = YID(:,3);
-P.results.IDF      = YID(:,4);  % NOTE: Removed a factor of 18.
-P.results.IDB      = YID(:,5);  % "
-P.results.QDF      = YID(:,6);  % "
-P.results.QDB      = YID(:,7);  % "
+P.results.IDF      = YID(:,4) * C.IU18Factor; 
+P.results.IDB      = YID(:,5) * C.IU18Factor;
+P.results.QDF      = YID(:,6) * C.IU18Factor;
+P.results.QDB      = YID(:,7) * C.IU18Factor;
 
 %% GC Model
 % Set up initial conditions.

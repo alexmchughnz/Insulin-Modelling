@@ -8,11 +8,13 @@ C.mIU2pmol = @(uIU) uIU * 6.0;    % Insulin [mIU]  -> Insulin [pmol]
 C.pmol2mIU = @(pmol) pmol / 6.0;  % Insulin [pmol] -> Insulin [mIU]
 C.MGlucose = 180.156;  % Glucose molar mass [g/mol]
 
+C.IU18Factor = 18;  % TODO: Not sure what this yet! Something involving dL?
+
 %% Gastrointestinal (GI) Parameters
-PHalfLife1 = 20;    % Half-life of glucose in stomach (P1) [min]
-PHalfLife2 = 60;    % Half-life of glucose in gut (P2) [min]
-GI.d1 = log(2)/PHalfLife1;
-GI.d2 = log(2)/60;  % NOTE: dummy value, needs parameter ID.
+P1HalfLife = 20;    % Half-life of glucose in stomach (P1) [min]
+P2HalfLife = 60;    % Half-life of glucose in gut (P2) [min]
+GI.d1 = log(2)/P1HalfLife;
+GI.d2 = log(2)/P2HalfLife;  % NOTE: dummy value, needs parameter ID.
 
 GI.k21 = 0.054;     % Rate constant of stomach grinding [1/min]
 GI.kAbs = 0.071;    % rate glucose absorbed into bloodstream [1/min]

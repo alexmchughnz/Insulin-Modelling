@@ -47,7 +47,7 @@ end
 Qlocal(num)=icfinal(end,2);
 
 IInterp = ppI(tSpan);
-Uen = P.Uen.value(1:end-1);
+Uen = P.Uen.value;
 cn=cumtrapz(tSpan, IInterp./(1+(GC.alphaI .* IInterp)));
 cx=cumtrapz(tSpan, Uen/GC.VI(P));
 c = (ppI(0) - IInterp) - cumtrapz(tSpan, GC.nK*IInterp) ...

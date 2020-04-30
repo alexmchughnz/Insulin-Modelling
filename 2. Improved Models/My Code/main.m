@@ -29,7 +29,7 @@ patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
 %% Calculate Patient/Time Dependent parameters
 for ii = 1:length(patients)
     patients{ii} = GetGlucoseInfusion(patients{ii});
-    patients{ii} = EstimateInsulinSecretion(patients{ii});
+    patients{ii} = PDEstimateInsulinSecretion(patients{ii});
     patients{ii} = FitHepaticClearance(patients{ii});
     patients{ii} = FitInsulinSensitivity(patients{ii});
     patients{ii} = SolveSystem(patients{ii});

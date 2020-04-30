@@ -61,7 +61,6 @@ title([patientLabel 'Estimated Endogenous Insulin Secretion'])
 xlabel('Time')
 ylabel('$U_{en}$ [mU/min]')
 datetick('x')
-ylim([0 350])
 
 end
 

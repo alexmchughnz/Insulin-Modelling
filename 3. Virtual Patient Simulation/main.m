@@ -13,6 +13,7 @@ clc
 
 makeconfig
 makeparameters
+makevariants
 
 load config
 
@@ -20,8 +21,11 @@ load config
 % Global parameter structs - do not mutate!
 global C GI IN GC
 load('parameters.mat', 'C', 'GI', 'IN', 'GC')
+load('variants.mat', 'variants')
 
-results = SolveSystem();
+for ii = 1:length(variants)
+    variants{ii}.results = SolveSystem(variants{ii});
+end
 
 %% Plot Results
-PlotResults(results);
+PlotResults(variants);

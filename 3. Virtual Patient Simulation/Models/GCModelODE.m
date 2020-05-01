@@ -1,4 +1,4 @@
-function [dY] = GCModelODE(t, Y, tArray, qGut, QLocal)
+function [dY] = GCModelODE(t, Y, tArray, qGut, QLocal, V)
 % ODE for GC model. Use with ode45.
 % Requires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
@@ -28,9 +28,12 @@ uEx = IN.k3 * QLocal(ii);
 uEn = EstimateInsulinSecretion(G);
 P = GI.f * GI.kAbs * qGut(ii);
 
+% Variant dependent.
+SI = V.SI;
+
 %% Computation
 dG  = -GC.pg*(G-GC.GFast) ...
-          - GC.SI*G*Q/(1 + GC.alphaG*Q) ...
+          - SI*G*Q/(1 + GC.alphaG*Q) ...
           + (P + GC.EGP - GC.CNS)/GC.VG;      %TODO: missing P(t)?
 dI  = -GC.nK*I ...
           - GC.nL*I/(1 + GC.alphaI*I) ...

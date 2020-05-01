@@ -1,4 +1,4 @@
-function results = SolveSystem()
+function results = SolveSystem(V)
 % Fits data to find SI over time for a patient.
 % INPUTS:
 %   P   - patient struct
@@ -57,7 +57,8 @@ YGC0 = [G0;   % G(t=0)
 
 % Forward simulate.
 [~, YGC] = ode45(@GCModelODE, tArray, YGC0, options, ...
-                 results.tArray, results.qGut, results.QLocal);
+                 results.tArray, results.qGut, results.QLocal, ...
+                 V);
 
 % Store results.
 results.G = YGC(:,1);

@@ -31,7 +31,6 @@ IN.TBolus = 15; % [min]
 %% Glycaemic Control (GC) Parameters
 GC.pg   = 0.06;                       % Non insulin mediated uptake [1/min]
 GC.GFast = 4.8; %[mmol/L]
-GC.SI = 10.8e-4; %[L/(mU*min)]
 GC.alphaG = 0.0154; %[L/mU]
 GC.EGP = 0.612;                        % Endogenous glucose production [mmol/min]
 GC.CNS = 0.42;                         % Central nervous system glucose uptake [mmol/min]

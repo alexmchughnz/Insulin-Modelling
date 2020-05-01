@@ -9,9 +9,9 @@ function uEn = EstimateInsulinSecretion(G)
 global GC
 
 %% Solving
-if (G < GFast)
+if (G < GC.GFast)
     uEn = GC.uMin;
-elseif (G >= uMax)
+elseif (G >= GC.uMax)
     uEn = GC.uMax;
 else
     uEn = GC.kSec*G + GC.kOff;

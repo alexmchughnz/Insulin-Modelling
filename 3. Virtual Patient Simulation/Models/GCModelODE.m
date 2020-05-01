@@ -1,6 +1,6 @@
-function [dY] = GCModelODE(t, Y)
+function [dY] = GCModelODE(t, Y, tArray, qGut, QLocal)
 % ODE for GC model. Use with ode45.
-% Requires P1(t) and P2(t) - must be run AFTER GI model.
+% Requires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
 %   t   - time at which to evaluate ODE
 %   Y   - states [P1; P2; G; I; Q] at time == t
@@ -9,21 +9,33 @@ function [dY] = GCModelODE(t, Y)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GC
+global GI IN GC
 
 %% Input
 G  = Y(1);
 I  = Y(2);
 Q  = Y(3);
 
+
+%% Variables
+% Find time index.
+t0 = tArray(1);
+dt = tArray(2) - t0;
+ii = floor((t-t0)/dt) + 1;
+
+% Time dependent.
+uEx = IN.k3 * QLocal(ii);
+uEn = EstimateInsulinSecretion(G);
+P = GI.f * GI.kAbs * qGut(ii);
+
 %% Computation
 dG  = -GC.pg*(G-GC.GFast) ...
-          - SI*G*Q/(1 + GC.alphaG*Q) ...
-          + (GC.EGP - GC.CNS)/GC.VG;      %TODO: missing P(t)?
+          - GC.SI*G*Q/(1 + GC.alphaG*Q) ...
+          + (P + GC.EGP - GC.CNS)/GC.VG;      %TODO: missing P(t)?
 dI  = -GC.nK*I ...
-          - P.nL*I/(1 + GC.alphaI*I) ...
+          - GC.nL*I/(1 + GC.alphaI*I) ...
           - GC.nI*(I-Q) ...
-          + (uEx + uEn*(1 - P.xL))/VI;    %TODO: where does uEx come from?
+          + (uEx + uEn*(1 - GC.xL))/GC.VI;    %TODO: where does uEx come from?
 dQ  = GC.nI*(I-Q) ...
           - GC.nC*Q/(1 + GC.alphaG*Q);
 

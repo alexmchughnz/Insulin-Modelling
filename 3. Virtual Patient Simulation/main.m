@@ -2,10 +2,10 @@
 % Monte Carlo Simulation with fast-acting insulin.
 % Based on Bekisz, S., Holder-Pearson, L., Chase, J. G., & Desaive, T. (n.d.).,
 % In silico validation of a new model-based oral-subcutaneous insulin
-% sensitivity testing through monte carlo sensitivity analyses. 18.
+% sensitivity testing through monte carlo sensitivity analyses.
 
 % Author : Alex McHugh
-% Created: 30/04/2020
+% Created: 21/04/2020
 
 clear
 close all
@@ -21,16 +21,7 @@ load config
 global C GI IN GC
 load('parameters.mat', 'C', 'GI', 'IN', 'GC')
 
-
-%% Calculate Patient/Time Dependent parameters
-%     patients{ii} = GetGlucoseInfusion(patients{ii});
-%     patients{ii} = PDEstimateInsulinSecretion(patients{ii});
-%     patients{ii} = FitHepaticClearance(patients{ii});
-%     patients{ii} = FitInsulinSensitivity(patients{ii});
-%     patients{ii} = SolveSystem(patients{ii});
+results = SolveSystem();
 
 %% Plot Results
-% plotnum = 1;
-% P = patients{plotnum};
-% PlotResults(P);
-% fprintf("P%d: Plotted results.\n", P.patientNum)
+PlotResults(results);

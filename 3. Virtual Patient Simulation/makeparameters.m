@@ -20,24 +20,13 @@ GI.b = 0.85;        % Stomach emptying parameters [1]
 GI.c = 0.25;        % ''
 % GI.DTot0 = 0.001;   % Default amount of glucose in stomach [mmol]
 
-%% Insulin (IN) Parameters
+%% Insulin Subcutaneous Injection (IN) Parameters
 IN.k2 = 0.0104; % [1/min]
 IN.k3 = 0.0613; % [1/min]
 IN.kdi = 0.0029; % [1/min]
 IN.IBolus = 2000; % [mU]
-IN.T = 15; % [min]
+IN.TBolus = 15; % [min]
 
-
-%% Endogenous Insulin Secretion (SC) Parameters
-F = 0.76;
-CHalfLife1 = 4.95;       % Half-life of C-peptide in compartment 1 [min]
-CHalflife2 = 32.4;         % Half-life of C-peptide in compartment 2 [min]
-a = log(2)/CHalfLife1;
-b = log(2)/CHalflife2;
-% NOTE: Currently unused in EstimateInsulinSecretion!
-SC.k2 = F*(b-a) + a;     % Rate constants
-SC.k3 = a*b/(2*SC.k2); % NOTE: Original code had no factor of 1/2; PDD's thesis does.
-SC.k1 = a + b - SC.k2 - SC.k3;
 
 %% Glycaemic Control (GC) Parameters
 GC.pg   = 0.06;                       % Non insulin mediated uptake [1/min]

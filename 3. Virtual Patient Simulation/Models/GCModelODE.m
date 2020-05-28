@@ -2,10 +2,11 @@ function [dY] = GCModelODE(t, Y, tArray, qGut, QLocal, V)
 % ODE for GC model. Use with ode45.
 % Requires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
-%   t   - time at which to evaluate ODE
-%   Y   - states [P1; P2; G; I; Q] at time == t
-%   P   - patient struct
-%   Y0  - initial conditions of states
+%   t      - time at which to evaluate ODE
+%   Y      - states [G; I; Q] at time == t
+%   qGut   - patient struct
+%   QLocal - initial conditions of states
+%   V      - specific parameter variant
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
@@ -34,11 +35,11 @@ SI = V.SI;
 %% Computation
 dG  = -GC.pg*(G-GC.GFast) ...
           - SI*G*Q/(1 + GC.alphaG*Q) ...
-          + (P + GC.EGP - GC.CNS)/GC.VG;      %TODO: missing P(t)?
+          + (P + GC.EGP - GC.CNS)/GC.VG;
 dI  = -GC.nK*I ...
           - GC.nL*I/(1 + GC.alphaI*I) ...
           - GC.nI*(I-Q) ...
-          + (uEx + uEn*(1 - GC.xL))/GC.VI;    %TODO: where does uEx come from?
+          + (uEx + (1 - GC.xL)*uEn)/GC.VI;
 dQ  = GC.nI*(I-Q) ...
           - GC.nC*Q/(1 + GC.alphaG*Q);
 

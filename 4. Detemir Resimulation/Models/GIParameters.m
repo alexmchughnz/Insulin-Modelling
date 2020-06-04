@@ -1,7 +1,6 @@
 % Initial Values
-GI.q0Sto1     = 35; % Stomach glucose in solid compartment [g->mmol]
-GI.q0Sto2     = 0;  % Stomach glucose in liquid compartment [mmol]
-GI.q0Gut      = 0;  % Gut glucose [mmol]
+GI.P10     = 0.001; % Stomach glucose [mmol]
+GI.P20     = 0;  % Gut glucose [mmol]
 
 % Parameters
 P1HalfLife = 20;    % Half-life of glucose in stomach (P1) [min]
@@ -16,5 +15,3 @@ GI.c = 0.17;        % ''
 GI.kMax = 0.054;    % Maximum value of kEmpt [1/min]
 GI.kMin = 0.006;    % Minimum value of kEmpt [1/min]
 GI.f = 0.8;         % Scaling factor for incomplete absorption [1]
-
-GI.DTot0 = 0.001;   % Default amount of glucose in stomach [mmol]

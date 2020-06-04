@@ -1,35 +1,32 @@
-function [R] = GIModel(R, O, V)
+function [R] = GIModel(R, O)
 % Function for GI model forward simulation.
 % INPUTS:
 %   R  - results struct, must have tArray
 %   O  - ode45 options
-%   V  - parameter variants
 % OUTPUT:
 %   R  - results struct updated with model results 
 
 global GI
 
 % Set up initial conditions.
-Y0 = [GI.q0Sto1;
-      GI.q0Sto2;
-      GI.q0Gut];
+Y0 = [GI.P10;
+      GI.P20];
   
 % Forward simulate.
-[~, Y] = ode45(@GIModelODE, R.tArray, Y0, O);  
+[~, Y] = ode45(@GIModelODE, R.tArray, Y0, O, P);  
 
 % Store results.
-R.qSto1 = Y(:,1);
-R.qSto2 = Y(:,2);
-R.qGut  = Y(:,3);
+P.results.P1 = Y(:,1);
+P.results.P2 = Y(:,2);
 
 end
 
 
-function [dY] = GIModelODE(t, Y)
+function [dY] = GIModelODE(t, Y, P)
 % ODE for GI model. Use with ode45.
 % INPUTS:
 %   t   - time at which to evaluate ODE
-%   Y   - states [qSto1; qSto2; qGut] at time == t
+%   Y   - states [P1; P2] at time == t
 %   P   - patient struct
 % OUTPUT:
 %   dY  - derivatives of states at time == t
@@ -37,27 +34,19 @@ function [dY] = GIModelODE(t, Y)
 global GI
 
 %% Input
-qSto1     = Y(1);
-qSto2     = Y(2);
-qGut      = Y(3);
+P1     = Y(1);
+P2     = Y(2);
 
 %% Variables
 % Patient dependent.
-qSto = qSto1 + qSto2;
-kEmpt = GetStomachEmptyingRate(qSto);
-
-% Time dependent.
-isActive = (t >= 0) && (t < 1); % Glucose input over 1st minute.
-D = (isActive)*GI.D; 
+D = GetGlucoseDelivery(t, P);
 
 %% Computation
-dqSto1 = -GI.k21*qSto1 + D;
-dqSto2 = -kEmpt*qSto2 + GI.k21*qSto1;
-dqGut  = -GI.kAbs*qGut + kEmpt*qSto2;
+dP1 = -GI.d1*P1 + D;
+dP2 = GI.d1*P1 - GI.d2*P2;
 
 %% Output
-dY = [dqSto1;
-      dqSto2;
-      dqGut];
+dY = [dP1;
+      dP2];
 
 end

@@ -20,5 +20,5 @@ GC.uMax = 267;                        % Maximum endogenous insulin secretion [mU
 
 % Dependent Parameters
 GC.VG = @(P) 0.18*P.mass;             % Glucose volume of distribution [L]
-GC.VQ = @(P) (SC.k1/SC.k2)*GC.VI(P);  % Interstitial volume of distribution [L]
 GC.VI = @(P) 0.038*P.mass;            % Insulin volume of distribution [L]
+GC.VQ = @(P, SC) (SC.k1/SC.k2)*GC.VI(P);  % Interstitial volume of distribution [L]

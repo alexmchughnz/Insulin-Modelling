@@ -14,18 +14,17 @@ load config
 
 %% Load Data
 % Global parameter structs - do not mutate!
-global C GI ID GC SC
-load('parameters.mat', 'C', 'GI', 'ID', 'GC', 'SC')
+global C GC GI ID SC
+load('parameters.mat', 'C', 'GC', 'GI', 'ID', 'SC')
 
 % Patient data structs.
 loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
 patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
 
-%% Calculate Patient/Time Dependent parameters
+%% Calculate Patient/Time Dependent Parameters
 for ii = 1:length(patients)
     patients{ii} = GetGlucoseInfusion(patients{ii});
-    patients{ii} = PDEstimateInsulinSecretion(patients{ii});
-    patients{ii} = FitHepaticClearance(patients{ii});
+    patients{ii} = EstimateInsulinSecretion(patients{ii});
     patients{ii} = FitInsulinSensitivity(patients{ii});
     patients{ii} = SolveSystem(patients{ii});
 end

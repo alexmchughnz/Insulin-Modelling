@@ -3,7 +3,7 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % Requires P1(t) and P2(t) - must be run AFTER GI model.
 % INPUTS:
 %   t   - time at which to evaluate ODE
-%   Y   - states [P1; P2; G; I; Q] at time == t
+%   Y   - states [G; I; Q] at time == t
 %   P   - patient struct
 %   Y0  - initial conditions of states
 % OUTPUT:

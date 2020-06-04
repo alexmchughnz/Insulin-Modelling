@@ -1,4 +1,4 @@
-function [dY] = IDModelODE(t, Y)
+function [dY] = IDModelODE(t, Y, P)
 % ODE for ID model. Use with ode45.
 % INPUTS:
 %   t   - time at which to evaluate ODE

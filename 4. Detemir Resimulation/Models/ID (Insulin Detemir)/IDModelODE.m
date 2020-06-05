@@ -7,7 +7,7 @@ function [dY] = IDModelODE(t, Y, P)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global ID
+global ID GC
 
 %% Input
 IDH       = Y(1);

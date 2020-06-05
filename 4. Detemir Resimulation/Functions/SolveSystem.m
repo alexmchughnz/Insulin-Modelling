@@ -15,8 +15,8 @@ P.results.tArray = tArray;
 
 
 %% Models
-P.results = GIModel(P.results, options, variants);
-P.results = IDModel(P.results, options, variants);
-P.results = GCModel(P.results, options, variants);
+P = GIModel(P, options);
+P = IDModel(P, options);
+P = GCModel(P, options);
 
 end

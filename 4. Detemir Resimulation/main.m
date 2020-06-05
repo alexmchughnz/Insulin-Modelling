@@ -30,7 +30,7 @@ for ii = 1:length(patients)
 end
 
 %% Plot Results
-plotnum = 1;
-P = patients{plotnum};
-PlotResults(P);
-fprintf("P%d: Plotted results.\n", P.patientNum)
+for ii = 1:length(patients)
+    P = patients{ii};
+    PlotResults(P);
+end

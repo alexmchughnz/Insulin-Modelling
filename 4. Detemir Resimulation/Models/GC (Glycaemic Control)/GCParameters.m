@@ -1,8 +1,3 @@
-% Initial Values
-GC.G0 = 4.8;          % Blood glucose [mmol/L]
-GC.I0 = 13.4185;      % Plasma insulin [mU/L] 
-GC.Q0 = 7.4255;       % Interstitial insulin [mU/L]
-
 % Parameters
 GC.pg   = 0.06;                       % Non insulin mediated uptake [1/min]
 GC.EGP = 0.96;                        % Endogenous glucose production [mmol/min]

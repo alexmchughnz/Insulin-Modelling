@@ -7,16 +7,16 @@ function [dY] = IDModelODE(t, Y, P)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global ID GC
+global C ID GC
 
 %% Input
 IDH       = Y(1);
 QDFLocal  = Y(2);
 QDBLocal  = Y(3);
-IDF       = Y(4);
-IDB       = Y(5);
-QDF       = Y(6);
-QDB       = Y(7);
+IDF       = Y(4) * C.IU18Factor;
+IDB       = Y(5) * C.IU18Factor;
+QDF       = Y(6) * C.IU18Factor;
+QDB       = Y(7) * C.IU18Factor;
 
 %% Variables
 % Time dependent.

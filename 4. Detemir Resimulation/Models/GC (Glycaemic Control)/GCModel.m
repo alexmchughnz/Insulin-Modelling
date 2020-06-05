@@ -7,12 +7,17 @@ function [P] = GCModel(P, options)
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
-global GC
+global C
 
 % Set up initial conditions.
-Y0 = [GC.G0;   
-      GC.I0; 
-      GC.Q0];
+G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
+G0 = P.G{3}.value(G0Indices);
+I0 = C.pmol2mIU(P.I.value(1)); % [pmol/L] -> [mIU/L]
+Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
+
+Y0 = [G0;   
+      I0; 
+      Q0];
     
 % Forward simulate.
 [~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  

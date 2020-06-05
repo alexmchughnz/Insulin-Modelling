@@ -7,6 +7,8 @@ function [] = PlotResults(P)
 % INPUTS:
 %   P - patient struct
 
+global C
+
 patientLabel = sprintf("Patient %d: ", P.patientNum);
 time = P.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
 
@@ -39,7 +41,7 @@ datetick('x')
 ylim([4 15])
 
 %% Insulin
-ITotal = P.results.I + P.results.IDF;
+ITotal = C.mIU2pmol(P.results.I + P.results.IDF);
 
 subplot(4, 1, 2)
 hold on

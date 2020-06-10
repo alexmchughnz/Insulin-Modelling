@@ -3,13 +3,13 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % Requires P1(t) and P2(t) - must be run AFTER GI model.
 % INPUTS:
 %   t   - time at which to evaluate ODE
-%   Y   - states [P1; P2; G; I; Q] at time == t
+%   Y   - states [G; I; Q] at time == t
 %   P   - patient struct
 %   Y0  - initial conditions of states
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GI GC
+global GI GC SC
 
 %% Input
 G  = Y(1);
@@ -29,7 +29,7 @@ GFast     = P.GFast(t);       % Fasting glucose [mol?/L]
 % Patient dependent.
 VG  = GC.VG(P);
 VI  = GC.VI(P);
-VQ  = GC.VQ(P);
+VQ  = GC.VQ(P, SC);
  
 % Derived values.
 QTFast  = Q0 + P.results.QDF(1);
@@ -39,11 +39,13 @@ QT      = Q + P.results.QDF(n);
 dG  = -GC.pg*(G-GFast) ...
           - SI*(G*QT - GFast*QTFast)/(1 + GC.alphaG*QT) ...
           + GI.d2/VG*P2 + GInfusion/VG;      
-dI  = -GC.nK*I - P.nL/(1 + GC.alphaI*I)*I - GC.nI/VI*(I-Q) ...
-          + Uen*(1 - P.xL)/VI;
+dI  = -GC.nK*I - GC.nL/(1 + GC.alphaI*I)*I - GC.nI/VI*(I-Q) ...
+          + Uen*(1 - GC.xL)/VI;
 dQ  = GC.nI/VQ*(I-Q) - GC.nC*Q;
 
 %% Output
-dY = [dG; dI; dQ];
+dY = [dG;
+      dI;
+      dQ];
 
 end

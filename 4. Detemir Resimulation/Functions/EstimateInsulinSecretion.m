@@ -9,7 +9,7 @@ function P = EstimateInsulinSecretion(P)
 %   P   - modified patient struct with Uen
 
 
-global C GC
+global C GC SC
 %% Setup
 % Time and data arrays.
 t = minutes(P.CPep.time - P.CPep.time(1));  % Time or reading [min]
@@ -17,8 +17,8 @@ CPep = P.CPep.value * GC.VI(P);  % Amount of C-peptide [pmol]
 
 % Hard coded rate constants.
 % NOTE: why not the SC model parameter values?
-k1 = 0.0478;    %+/- 0.019
-k2 = 0.0516;    %+/- 0.013
+k1 = SC.k1;    %+/- 0.019
+k2 = SC.k2;    %+/- 0.013
 k3 = GC.nK;
 
 %% Interpolation

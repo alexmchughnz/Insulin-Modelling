@@ -10,8 +10,8 @@ function [P] = GCModel(P, options)
 global C
 
 % Set up initial conditions.
-G0Indices = (P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
-G0 = P.G{3}.value(G0Indices);
+G0Index = find(P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
+G0 = P.G{3}.value(G0Index);
 I0 = C.pmol2mIU(P.I.value(1)); % [pmol/L] -> [mIU/L]
 Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 

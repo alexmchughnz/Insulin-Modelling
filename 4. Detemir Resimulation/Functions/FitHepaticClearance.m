@@ -10,7 +10,7 @@ tI = minutes(P.I.time - P.I.time(1))';  % t of reading [min]
 ppI = griddedInterpolant(tI, P.I.value);
 
 %% Analytical Forward Simulation for Q
-QSolution = zeros(length(tArray),1); %analytical solution for Q
+Q = zeros(length(tArray),1); %analytical solution for Q
 
 % Consider form of dQ/dt = kQ*Q + kI*I.
 kQ = -GC.nC - GC.nI/GC.VQ(P, SC); % Constant term coefficent of Q - easier to use
@@ -18,7 +18,7 @@ kI = GC.nI/GC.VQ(P, SC);  % Constant term coefficent of Q - easier to use
 
 Q0 = P.I.value(1)/2; %ADM: same assumption as elsewhere
 t0 = tArray(1);
-QSolution(1) = Q0;
+Q(1) = Q0;
 
 for ii=2:length(tArray)
     t = tArray(ii);         % Current time value.
@@ -27,7 +27,7 @@ for ii=2:length(tArray)
     
     % Analytical solution for the Q equation at time==t.
     % Standard soln. for non-homogenous 1st order ODE (page 17).
-    QSolution(ii) = Q0*exp(kQ*(t-t0)) ...
+    Q(ii) = Q0*exp(kQ*(t-t0)) ...
                     + trapz(tSpan, kI*exp(kQ*(t - tSpan).*ISpan));
 end
 
@@ -54,59 +54,58 @@ end
 %     YFinal = [YFinal(1:end-1, :);
 %               Y];
 % end
+% 
+%  
+% num=length(tArray);
+% Qlocal=zeros(num,1); %obtain Qlocal values at each minute from ODE solver solution
+% for ii=1:num-1
+%     for j=1:length(tFinal)
+%         if tFinal(j)>=tArray(ii)
+%             Qlocal(ii)=YFinal(j,2);
+%             break
+%         end
+%     end
+% end
+% Qlocal(num)=YFinal(end,2);
 
+%% Parameter ID of I Equation to find nL/xL (pg. 16)
 
- %%
- 
-num=length(tArray);
-Qlocal=zeros(num,1); %obtain Qlocal values at each minute from ODE solver solution
-for ii=1:num-1
-    for j=1:length(tFinal)
-        if tFinal(j)>=tArray(ii)
-            Qlocal(ii)=YFinal(j,2);
-            break
-        end
-    end
-end
-Qlocal(num)=YFinal(end,2);
+I = ppI(tArray); % I values over all time.
+I0 = ppI(t0);
+Uen = P.Uen.value;       % Uen values over all time.
 
-IInterp = ppI(tArray);
-Uen = P.Uen.value;
-cn=cumtrapz(tArray, IInterp./(1+(GC.alphaI .* IInterp)));
-cx=cumtrapz(tArray, Uen/GC.VI(P));
-b = (ppI(0) - IInterp) - cumtrapz(tArray, GC.nK*IInterp) ...
-      - cumtrapz(tArray,(GC.nI./GC.VI(P)).*(IInterp-QSolution)) ...
-      + cumtrapz(tArray,(SC.k3./GC.VI(P)).*Qlocal) ...
-      + cumtrapz(tArray, Uen/GC.VI(P));
-% NOTE: SC.k3 almost definitely wrong here, need to figure out correct value
-% in conjunction with new SC model.
-  
-  A=[cn cx];
+% Set coefficients for MLR.
+% Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*xL + k
+kI = -GC.nK;
+kIQ = -GC.nI./GC.VQ(P, SC);
+k = Uen/GC.VI(P);
 
-x=A\b;
+% Therefore, integrating:
+% I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*xL + int{k}
+% Renaming cN = int{c1} and cX = int{c2}
+% cN*nL + cX*xL = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k}
+cN = cumtrapz(tArray, ...
+              -I./(1 + GC.alphaI*I));
+cX = cumtrapz(tArray, ...
+              -Uen/GC.VI(P));
+          
+% Assembling MLR system:
+% [cN(t), cX(t)] * (nL; xL) = [b(t)]
+A = [cN cX];
+b = I - I0 ...
+      - kI * cumtrapz(tArray, GC.nK*I) ...
+      - kIQ * cumtrapz(tArray, I-Q) ...
+      - cumtrapz(tArray, k); 
 
+% Solve and save.
+x = A\b;
 nL = x(1);
 xL = x(2);
 
-lb=1e-7; %"lower bound"
-nL=max(nL,lb);
-xL=max(xL,lb);
+lb = 1e-7; %"lower bound"
+nL = max(nL, lb);
+xL = max(xL, lb);
 
 P.nL = nL;
 P.xL = xL;
-end
-
-%% function that sets up differential equations to solve for Isc and Qlocal
-function dY = nLxLModelODE(t, Y, P)
-
-global SC 
-
-Isc=Y(1,1);
-Qlocal=Y(2,1);
-
-IB = P.IBolus(t);
-
-dY=zeros(2,1); %differential equations used to solve for GIQ
-dY(1)=(-SC.k2*Isc)+IB; %Isc
-dY(2)=(-SC.k3*Qlocal)+(SC.k2*Isc)-(SC.k3*Qlocal); %Qlocal
 end

@@ -76,6 +76,8 @@ ylabel('$U_{en}$ [mU/min]')
 datetick('x')
 
 %% 
+path = fullfile("Plots", "patient" + num2str(n));
+savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
 
 end

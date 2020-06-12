@@ -27,9 +27,6 @@ GInfusion = P.GInfusion(n);   % Glucose infusion rate [mol/min]
 GFast     = P.GFast(t);       % Fasting glucose [mol?/L]
 
 % Patient dependent.
-VG  = GC.VG(P);
-VI  = GC.VI(P);
-VQ  = GC.VQ(P, SC);
 xL = P.xL;
 nL = P.nL;
  
@@ -40,10 +37,10 @@ QT      = Q + P.results.QDF(n);
 %% Computation
 dG  = -GC.pg*(G-GFast) ...
           - SI*(G*QT - GFast*QTFast)/(1 + GC.alphaG*QT) ...
-          + GI.d2/VG*P2 + GInfusion/VG;      
-dI  = -GC.nK*I - nL/(1 + GC.alphaI*I)*I - GC.nI/VQ*(I-Q) ...
-          + Uen*(1 - xL)/VI;
-dQ  = GC.nI/VQ*(I-Q) - GC.nC*Q;
+          + GI.d2/GC.VG*P2 + GInfusion/GC.VG;      
+dI  = -GC.nK*I - nL/(1 + GC.alphaI*I)*I - GC.nI/GC.VQ*(I-Q) ...
+          + Uen*(1 - xL)/GC.VI;
+dQ  = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
 
 %% Output
 dY = [dG;

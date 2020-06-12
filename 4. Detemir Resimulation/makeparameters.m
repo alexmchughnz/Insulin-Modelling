@@ -1,4 +1,4 @@
-modelNames = {'GC', 'GI', 'ID', 'SC'};
+modelNames = {'GI', 'ID', 'SC', 'GC'};
 
 %% Constants / Conversions (C)
 C.MGlucose = 180.156;  % Glucose molar mass [g/mol]

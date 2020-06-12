@@ -13,13 +13,13 @@ global C GC SC
 %% Setup
 % Time and data arrays.
 t = minutes(P.CPep.time - P.CPep.time(1));  % Time or reading [min]
-CPep = P.CPep.value * GC.VI(P);  % Amount of C-peptide [pmol]
+CPep = P.CPep.value * GC.VI;  % Amount of C-peptide [pmol]
 
 % Hard coded rate constants.
 % NOTE: why not the SC model parameter values?
 k1 = SC.k1;    %+/- 0.019
 k2 = SC.k2;    %+/- 0.013
-k3 = GC.nK;
+k3 = SC.k3;
 
 %% Interpolation
 ppCPep = griddedInterpolant(t, CPep);

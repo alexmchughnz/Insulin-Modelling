@@ -161,9 +161,6 @@ n = (1 + floor(t));         % Index of current timestep.
 GFast = P.GFast(t);         % Fasting glucose [mol?/L]
 GInfusion = P.GInfusion(n); % Glucose infusion rate [mol/min]
 
-% Patient dependent.
-VG  = GC.VG(P);
-VQ  = GC.VQ(P, SC);
 
 % Derived values.
 QTFast  = Q0 + QDF0;
@@ -172,9 +169,9 @@ QT = Q + QDF;
 %% Computation
 % GC Model (reconstructed)
 % dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI/VQ*(I-Q) - GC.nC*Q;
+dQ     = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
 dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
-dGb    = -GC.pg*(G-GFast) + GI.d2/VG*P2 + GInfusion/VG;
+dGb    = -GC.pg*(G-GFast) + GI.d2/GC.VG*P2 + GInfusion/GC.VG;
 dYGC   = [dQ; dGA; dGb];
 
 % GI Model

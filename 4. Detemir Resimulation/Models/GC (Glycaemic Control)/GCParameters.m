@@ -1,3 +1,5 @@
+global GC
+
 % Parameters
 GC.pg   = 0.004;                       % Non insulin mediated uptake [1/min]
 GC.EGP = 0.96;                        % Endogenous glucose production [mmol/min]

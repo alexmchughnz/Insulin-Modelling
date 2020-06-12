@@ -1,3 +1,5 @@
+global SC
+
 % Parameters
 F = 0.76;
 CHalfLife1 = 4.95;       % Half-life of C-peptide in compartment 1 [min]

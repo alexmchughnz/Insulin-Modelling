@@ -9,9 +9,6 @@ function P = SolveSystem(P)
 %% Setup
 options = odeset('RelTol',1e-5, ...
                  'AbsTol',1e-4);
- 
-tArray = (0 : P.simDuration-1)';  % Simulation time array [min]
-P.results.tArray = tArray;
 
 
 %% Models

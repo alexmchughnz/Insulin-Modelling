@@ -9,7 +9,7 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GI GC SC
+global GI GC
 
 %% Input
 G  = Y(1);

@@ -133,7 +133,7 @@ function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
 %   Y0  - initial conditions of states
 % OUTPUT:
 %   dY  - derivatives of states at time == t
-global GI GC SC
+global GI GC
 
 %% Input
 % Split up states.

@@ -8,6 +8,10 @@ function [P] = GIModel(P, options)
 
 global GI
 
+if ~exist('options', 'var')
+    options = odeset;
+end
+
 % Set up initial conditions.
 Y0 = [GI.P10;
       GI.P20];

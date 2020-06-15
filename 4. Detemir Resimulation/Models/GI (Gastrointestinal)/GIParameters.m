@@ -1,3 +1,5 @@
+global GI
+
 % Initial Values
 GI.P10     = 0.001; % Stomach glucose [mmol]
 GI.P20     = 0;  % Gut glucose [mmol]

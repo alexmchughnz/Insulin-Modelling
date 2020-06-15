@@ -8,6 +8,10 @@ function [P] = IDModel(P, options)
 
 global ID
 
+if ~exist('options', 'var')
+    options = odeset;
+end
+
 % Set up initial conditions.
 Y0 = [ID.ISC0;
       ID.QDFLocal0;

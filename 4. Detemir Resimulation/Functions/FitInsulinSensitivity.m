@@ -11,7 +11,7 @@ load('parameters.mat', 'GI', 'GC')
 %% Setup
 % Define time range.
 intervalDuration = 360;  % Time per interval [min]
-numIntervals = floor(P.simDuration/intervalDuration);
+numIntervals = floor(P.simDuration()/intervalDuration);
 
 % Interpolate G and I with piecewise polynomials.
 iiStart = find(P.G{3}.time == P.simTime(1));   % Sim start [index]
@@ -28,7 +28,7 @@ ppI = griddedInterpolant(tI, vI);  % I(t) piecewise polynomial. Use as function.
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;
 
-P.SI = ones(P.simDuration, 1) * defaultSI;             % SI value at each minute in trial.
+P.SI = ones(P.simDuration(), 1) * defaultSI;             % SI value at each minute in trial.
 intervalSI = ones(numIntervals, 1) * defaultSI;        % SI value at each interval in sim.
 minuteSI = zeros(numIntervals * intervalDuration, 1);  % SI value at each minute in sim.
 
@@ -133,7 +133,7 @@ function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
 %   Y0  - initial conditions of states
 % OUTPUT:
 %   dY  - derivatives of states at time == t
-global GI GC SC
+global GI GC
 
 %% Input
 % Split up states.
@@ -162,8 +162,7 @@ GFast = P.GFast(t);         % Fasting glucose [mol?/L]
 GInfusion = P.GInfusion(n); % Glucose infusion rate [mol/min]
 
 % Patient dependent.
-VG  = GC.VG(P);
-VQ  = GC.VQ(P, SC);
+d2 = P.d2;
 
 % Derived values.
 QTFast  = Q0 + QDF0;
@@ -172,9 +171,9 @@ QT = Q + QDF;
 %% Computation
 % GC Model (reconstructed)
 % dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI/VQ*(I-Q) - GC.nC*Q;
+dQ     = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
 dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
-dGb    = -GC.pg*(G-GFast) + GI.d2/VG*P2 + GInfusion/VG;
+dGb    = -GC.pg*(G-GFast) + d2/GC.VG*P2 + GInfusion/GC.VG;
 dYGC   = [dQ; dGA; dGb];
 
 % GI Model

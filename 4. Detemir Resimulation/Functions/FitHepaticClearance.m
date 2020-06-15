@@ -3,7 +3,7 @@ function P = FitHepaticClearance(P)
 
 global SC GC
 
-tArray = (0 : P.simDuration)';  % Simulation t array [min]
+tArray = (0 : P.simDuration())';  % Simulation t array [min]
 
 % Time and data arrays.
 tI = minutes(P.I.time - P.I.time(1))';  % t of reading [min]
@@ -13,8 +13,8 @@ ppI = griddedInterpolant(tI, P.I.value);
 Q = zeros(length(tArray),1); %analytical solution for Q
 
 % Consider form of dQ/dt = kQ*Q + kI*I.
-kQ = -GC.nC - GC.nI/GC.VQ(P, SC); % Constant term coefficent of Q - easier to use
-kI = GC.nI/GC.VQ(P, SC);  % Constant term coefficent of Q - easier to use
+kQ = -GC.nC - GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
+kI = GC.nI/GC.VQ;  % Constant term coefficent of Q - easier to use
 
 Q0 = P.I.value(1)/2; %ADM: same assumption as elsewhere
 t0 = tArray(1);
@@ -77,8 +77,8 @@ Uen = P.Uen.value;       % Uen values over all time.
 % Set coefficients for MLR.
 % Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*xL + k
 kI = -GC.nK;
-kIQ = -GC.nI./GC.VQ(P, SC);
-k = Uen/GC.VI(P);
+kIQ = -GC.nI./GC.VQ;
+k = Uen/GC.VI;
 
 % Therefore, integrating:
 % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*xL + int{k}
@@ -87,7 +87,7 @@ k = Uen/GC.VI(P);
 cN = cumtrapz(tArray, ...
               -I./(1 + GC.alphaI*I));
 cX = cumtrapz(tArray, ...
-              -Uen/GC.VI(P));
+              -Uen/GC.VI);
           
 % Assembling MLR system:
 % [cN(t), cX(t)] * (nL; xL) = [b(t)]

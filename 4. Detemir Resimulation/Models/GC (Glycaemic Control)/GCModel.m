@@ -9,6 +9,10 @@ function [P] = GCModel(P, options)
 
 global C
 
+if ~exist('options', 'var')
+    options = odeset;
+end
+
 % Set up initial conditions.
 G0Index = find(P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
 G0 = P.G{3}.value(G0Index);

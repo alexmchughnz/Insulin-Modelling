@@ -1,6 +1,7 @@
-modelNames = {'GC', 'GI', 'ID', 'SC'};
+modelNames = {'GI', 'ID', 'SC', 'GC'};
 
 %% Constants / Conversions (C)
+global C
 C.MGlucose = 180.156;  % Glucose molar mass [g/mol]
 C.mIU2pmol = @(uIU) uIU * 6.0;    % Insulin [mIU]  -> Insulin [pmol]
 C.pmol2mIU = @(pmol) pmol / 6.0;  % Insulin [pmol] -> Insulin [mIU]

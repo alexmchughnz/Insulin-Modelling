@@ -16,7 +16,13 @@ N = length(d2Grid);
 
 % Results grids.
 SIGrid = zeros(originalP.simDuration, N);
-GErrorGrid = zeros(1, N);
+GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
+
+% Measured G (for error comparison)
+P = originalP;
+iiTimes = (P.simTime(1) <= P.G{3}.time) & (P.G{3}.time < P.simTime(end));
+measTime = minutes(P.G{3}.time(iiTimes) - P.simTime(1));
+measG = P.G{3}.value(iiTimes);    
 
 
 %% Search
@@ -32,15 +38,27 @@ for ii = 1:N
     P = FitInsulinSensitivity(P);
     SIGrid(:, ii) = P.SI;
     
-    % Simulate G(t) with resulting SI.
+    % Simulate G(t, d2) with resulting SI.
     P = GIModel(P);  % Required for P2.
     P = IDModel(P);  % Required for QDF.
     P = GCModel(P);
     
-    P.G;
+    % Find average error G(t, d2) to measured data.
+    simG = P.results.G(measTime+1);
+    GError = abs(simG - measG)./measG;
+    GErrorGrid(ii) = mean(GError);
     
+%     figure(1)
+%     hold on
+%     plot(P.G{3}.time, P.G{3}.value, 'r*')
+%     time = P.simTime(1) + P.results.tArray/24/60;
+%     plot(time, P.results.G)
+    
+end
 
 %% Solving
+
+
 
 
 end

@@ -7,12 +7,12 @@ function originalP = GridSearch(originalP)
     
 %% Setup
 % Input grid.
-halflifeGrid = 10 : 10 : 90;
-d2Grid = log(2)./halflifeGrid;
+halfLifeGrid = 10 : 10 : 90;
+d2Grid = log(2)./halfLifeGrid;
 N = length(d2Grid);
 
 % Results grids.
-SIGrid = zeros(originalP.simDuration, N);
+SIGrid = zeros(originalP.simDuration(), N);
 GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)

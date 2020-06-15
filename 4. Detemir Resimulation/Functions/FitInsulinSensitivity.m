@@ -11,7 +11,7 @@ load('parameters.mat', 'GI', 'GC')
 %% Setup
 % Define time range.
 intervalDuration = 360;  % Time per interval [min]
-numIntervals = floor(P.simDuration/intervalDuration);
+numIntervals = floor(P.simDuration()/intervalDuration);
 
 % Interpolate G and I with piecewise polynomials.
 iiStart = find(P.G{3}.time == P.simTime(1));   % Sim start [index]
@@ -28,7 +28,7 @@ ppI = griddedInterpolant(tI, vI);  % I(t) piecewise polynomial. Use as function.
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;
 
-P.SI = ones(P.simDuration, 1) * defaultSI;             % SI value at each minute in trial.
+P.SI = ones(P.simDuration(), 1) * defaultSI;             % SI value at each minute in trial.
 intervalSI = ones(numIntervals, 1) * defaultSI;        % SI value at each interval in sim.
 minuteSI = zeros(numIntervals * intervalDuration, 1);  % SI value at each minute in sim.
 

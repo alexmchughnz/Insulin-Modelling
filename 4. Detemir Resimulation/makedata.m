@@ -17,10 +17,10 @@ for ii = 1:length(patientNums)
     P.mass = data.pt_mass;           % Patient mass [kg]
     
     P.trialTime     = [sys.trial_start_t, sys.trial_end_t];
-    P.trialDuration = sys.trial_max_t;
+    P.trialDuration = @() minutes(diff(P.trialTime));
     
     P.simTime     =  [sys.sim_start_t, sys.sim_end_t];
-    P.simDuration =  sys.sim_max_t;
+    P.simDuration =  @() minutes(diff(P.simTime));
     
     P.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
     P.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]

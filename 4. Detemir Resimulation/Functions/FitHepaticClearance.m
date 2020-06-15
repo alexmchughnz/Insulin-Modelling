@@ -3,7 +3,7 @@ function P = FitHepaticClearance(P)
 
 global SC GC
 
-tArray = (0 : P.simDuration)';  % Simulation t array [min]
+tArray = (0 : P.simDuration())';  % Simulation t array [min]
 
 % Time and data arrays.
 tI = minutes(P.I.time - P.I.time(1))';  % t of reading [min]

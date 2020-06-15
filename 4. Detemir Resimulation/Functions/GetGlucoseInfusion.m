@@ -9,7 +9,7 @@ function P = GetGlucoseInfusion(P)
 
 global C
 
-t = 0 : P.simDuration;
+t = 0 : P.simDuration();
 P.GInfusion = zeros(size(t)); % By default, no infusion.
 
 if (P.patientNum == 1)

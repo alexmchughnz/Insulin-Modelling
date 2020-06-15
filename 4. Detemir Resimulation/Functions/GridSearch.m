@@ -1,11 +1,8 @@
-function P = GridSearch(originalP)
+function originalP = GridSearch(originalP)
 % INPUTS:
-%   P   - patient struct
+%   originalP   - patient struct
 % OUTPUT:
-%   P   - modified patient struct with Uen
-
-
-global C GC SC
+%   originalP   - modified patient struct with best found d2
     
     
 %% Setup
@@ -20,9 +17,9 @@ GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)
 P = originalP;
-iiTimes = (P.simTime(1) <= P.G{3}.time) & (P.G{3}.time < P.simTime(end));
-measTime = minutes(P.G{3}.time(iiTimes) - P.simTime(1));
-measG = P.G{3}.value(iiTimes);    
+inSimTime = (P.simTime(1) <= P.G{3}.time) & (P.G{3}.time < P.simTime(end));
+measTime = minutes(P.G{3}.time(inSimTime) - P.simTime(1));
+measG = P.G{3}.value(inSimTime);    
 
 
 %% Search
@@ -57,8 +54,8 @@ for ii = 1:N
 end
 
 %% Solving
-
-
+isBest = GErrorGrid == min(GErrorGrid);
+originalP.d2 = d2Grid(isBest);
 
 
 end

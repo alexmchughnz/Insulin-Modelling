@@ -11,14 +11,13 @@ function P = EstimateInsulinSecretion(P)
 
 global C GC SC
 %% Setup
-% Time and data arrays.
-t = minutes(P.CPep.time - P.CPep.time(1));  % Time or reading [min]
-CPep = P.CPep.value * GC.VI;  % Amount of C-peptide [pmol]
+% Time of reading [min]
+% Amount of C-peptide [pmol]
+[t, CPep] = GetSimTime(P, P.data.CPep);
 
-% Hard coded rate constants.
-% NOTE: why not the SC model parameter values?
-k1 = SC.k1;    %+/- 0.019
-k2 = SC.k2;    %+/- 0.013
+% Rate constants.
+k1 = SC.k1;   
+k2 = SC.k2;   
 k3 = SC.k3;
 
 %% Interpolation
@@ -26,9 +25,8 @@ ppCPep = griddedInterpolant(t, CPep);
 
 % Make 1-minute spaced time vector, and interpolate CPep values.
 dt = 1;
-t = (0 : dt : t(end))';  % Time range,  [min]
+t = P.results.tArray;  % Time range,  [min]
 CPep = ppCPep(t);
-
 
 %% Solving
 % Calculate Y over time. Assumes dY/dt == 0;
@@ -41,8 +39,7 @@ S = [diff(CPep); 0]/dt + (k1 + k3).*CPep - k2*Y;  % C-peptide secretion [pmol/mi
 Uen = C.pmol2mIU(S);                                       % Endogenous insulin secretion [mU/min]
 
 % Write value to patient struct.
-P.Uen.value = Uen;
-P.Uen.time  = t;
+P.results.Uen = Uen;
 fprintf('P%d: Estimated Uen.\n', P.patientNum); 
 
 end

@@ -3,6 +3,7 @@
 % Author : Alex McHugh
 % Created: 04/06/2020
 clear
+clear global
 close all
 clc
 
@@ -22,7 +23,9 @@ for ii = 1:length(patients)
     
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  
-    patients{ii} = FitHepaticClearance(patients{ii});
+%     patients{ii} = FitHepaticClearance(patients{ii});
+    patients{ii}.nL = 0.15;
+    patients{ii}.xL = 0.67;
     
     patients{ii} = GridSearch(patients{ii});
     patients{ii} = FitInsulinSensitivity(patients{ii});

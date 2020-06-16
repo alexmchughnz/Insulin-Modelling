@@ -41,7 +41,7 @@ datetick('x')
 ylim([4 15])
 
 %% Insulin
-ITotal = C.mIU2pmol(P.results.I + P.results.IDF);
+ITotal = C.mU2pmol(P.results.I + P.results.IDF);
 
 subplot(4, 1, 2)
 hold on

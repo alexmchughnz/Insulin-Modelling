@@ -19,7 +19,7 @@ inSimTime = (0 <= t) & (t <= P.simDuration()); % [logical]
 G = G(inSimTime);
 
 G0 = G(1);
-I0 = C.pmol2mIU(P.data.I.value(1)); % [pmol/L] -> [mIU/L]
+I0 = C.pmol2mU(P.data.I.value(1)); % [pmol/L] -> [mIU/L]
 Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 
 Y0 = [G0;   

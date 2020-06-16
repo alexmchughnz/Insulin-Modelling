@@ -5,7 +5,7 @@ function P = FitInsulinSensitivity(P)
 % OUTPUT:
 %   P   - modified patient struct with SI
 
-global GI GC
+global C GI GC
 load('parameters.mat', 'GI', 'GC')
 
 %% Setup
@@ -14,21 +14,20 @@ intervalDuration = 360;  % Time per interval [min]
 numIntervals = floor(P.simDuration()/intervalDuration);
 
 % Interpolate G and I with piecewise polynomials.
-iiStart = find(P.G{3}.time == P.simTime(1));   % Sim start [index]
-iiEnd   = find(P.G{3}.time == P.simTime(end)); % Sim end [index]
+[tG, vG] = GetSimTime(P, P.data.G{3});
+inSimTime = (0 <= tG) & (tG <= P.simDuration()); % [logical]
+tG = tG(inSimTime);
+vG = vG(inSimTime); % Glucose over sim period [mmol/L]
 
-tG = minutes(P.G{3}.time(iiStart:iiEnd) - P.G{3}.time(iiStart)); % Time over sim period [min]
-vG = P.G{3}.value(iiStart:iiEnd);                                % Glucose over sim period [min]
-tI = minutes(P.I.time - P.I.time(1));                            % Time over sim period [min]
-vI = P.I.value;                                                  % Plasma insulin over sim period [min]
-
-ppG = griddedInterpolant(tG, vG);  % G(t) piecewise polynomial. Use as function.
-ppI = griddedInterpolant(tI, vI);  % I(t) piecewise polynomial. Use as function.
+% Plasma insulin over sim period [pmol/L]
+[tI, vI] = GetSimTime(P, P.data.I);
+ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
+ppI = griddedInterpolant(tI, C.pmol2mU(vI));  % I(t) [mU/L] piecewise polynomial. Use as function.
 
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;
 
-P.SI = ones(P.simDuration(), 1) * defaultSI;             % SI value at each minute in trial.
+P.SI = ones(P.simDuration(), 1) * defaultSI;           % SI value at each minute in trial.
 intervalSI = ones(numIntervals, 1) * defaultSI;        % SI value at each interval in sim.
 minuteSI = zeros(numIntervals * intervalDuration, 1);  % SI value at each minute in sim.
 
@@ -46,10 +45,10 @@ optionsLong = odeset('RelTol',1e-5, ...   % Options for other minutes.
                      'InitialStep',0.1);
 
 % Initial conditions.
-YGI0 = [0.001;  % P1(t=0)        GI Model
+YGI0 = [0.001;  % P1(t=0)        GI Model [mmol]
         0]; 	% P2(t=0)  
     
-YID0 = [0;   % ISC(t=0)          ID Model
+YID0 = [0;   % ISC(t=0)          ID Model [mU/L]
         0;   % QDFLocal(t=0)
         0;   % QDBLocal(t=0)
         0;   % IDF(t=0)
@@ -57,8 +56,8 @@ YID0 = [0;   % ISC(t=0)          ID Model
         0;   % QDF(t=0)
         0];  % QDB(t=0)
     
-YGC0 = [0;   % Q(t=0)            GC Model
-        0;   % GA(t=0)
+YGC0 = [0;   % Q(t=0)            GC Model [mU/L]
+        0;   % GA(t=0)                    [mmol/L]
         0];  % Gb(t=0)
     
 Y0 = [YGI0;
@@ -112,7 +111,7 @@ for ii = 1 : numIntervals
 end
 
 % Write estimated data into patient struct, overwriting defaults.
-P.SI(1:length(minuteSI)) = minuteSI;
+P.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
 fprintf('P%d: SI fit successfully. SI(*1e+4) at %d min intervals = ', ...
         P.patientNum, intervalDuration)
@@ -133,7 +132,7 @@ function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
 %   Y0  - initial conditions of states
 % OUTPUT:
 %   dY  - derivatives of states at time == t
-global GI GC
+global GC
 
 %% Input
 % Split up states.
@@ -158,8 +157,8 @@ Q0   = YGC0(1);
 %% Variables
 % Time dependent.
 n = (1 + floor(t));         % Index of current timestep.
-GFast = P.GFast(t);         % Fasting glucose [mol?/L]
-GInfusion = P.GInfusion(n); % Glucose infusion rate [mol/min]
+GFast = P.data.GFast(t);    % Fasting glucose [mmol/L]
+GInfusion = P.data.GInfusion(n); % Glucose infusion rate [mmol/min]
 
 % Patient dependent.
 d2 = P.d2;

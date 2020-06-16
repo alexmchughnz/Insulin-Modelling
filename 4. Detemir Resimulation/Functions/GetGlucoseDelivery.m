@@ -17,7 +17,7 @@ mealEnds = M.startTimes + M.durations;  % [min]
 currentMeals = (mealStarts < t) & (t < mealEnds); % Which meals contribute at time=t? [logical]
 mealRates = M.carbs ./ M.durations;               % Glucose rates of all meals [g/min?]
 
-D = dot(currentMeals, mealRates) / C.MGlucose ;  % Glucose delivery rate [mol/min]
+D = dot(currentMeals, mealRates) / C.MGlucose;  % Glucose delivery rate [mmol/min]
 
 end
 

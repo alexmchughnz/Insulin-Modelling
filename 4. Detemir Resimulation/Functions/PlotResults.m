@@ -25,10 +25,10 @@ F.Position = [n/3*w, 0, w/3, 0.9*h];
 n = n + 1;
 
 %% Glucose
-range = 2 : length(P.G{3}.time) - 1;
+range = 2 : length(P.data.G{3}.time) - 1;
 
 subplot(4, 1, 1)
-plot(P.G{3}.time(range), P.G{3}.value(range),'r*');
+plot(P.data.G{3}.time(range), P.data.G{3}.value(range),'r*');
 hold on
 plot(time, P.results.G, 'k');
 
@@ -45,7 +45,7 @@ ITotal = C.mIU2pmol(P.results.I + P.results.IDF);
 
 subplot(4, 1, 2)
 hold on
-plot(P.I.time,P.I.value,'r*')
+plot(P.data.I.time,P.data.I.value,'r*')
 plot(time, ITotal, 'k')
 
 legend('Blood Test', 'Model')
@@ -56,7 +56,7 @@ ylabel('Plasma Insulin, I [pmol/L]')
 datetick('x')
 
 %% Insulin Senstivity
-range = 1 : length(time)-1;
+range = 1 : length(time);
 
 subplot(4, 1, 3)
 plot(time(range), P.SI(range), 'k')
@@ -68,17 +68,20 @@ datetick('x')
 
 %% Insulin Secretion
 subplot(4, 1, 4)
-plot(time(range), P.Uen.value(range), 'k')
+plot(time, P.results.Uen, 'k')
 
 title([patientLabel 'Estimated Endogenous Insulin Secretion'])
 xlabel('Time')
 ylabel('$U_{en}$ [mU/min]')
 datetick('x')
 
+ylim([0 300])
+
 %%
 path = fullfile("Plots", "patient" + num2str(n));
 savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
+fprintf(" d2 = %.4f \n nL = %.4f \n xL = %.4f \n", P.d2, P.nL, P.xL)
 
 end
 

@@ -18,7 +18,7 @@ GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 % Measured G (for error comparison)
 P = originalP;
 [t, G] = GetSimTime(P, P.data.G{3});
-inSimTime = (0 <= t) & (t <= P.simDuration()); % [logical]
+inSimTime = (0 <= t) & (t < P.simDuration()); % [logical]
 measTime = t(inSimTime);
 measG = G(inSimTime);
 

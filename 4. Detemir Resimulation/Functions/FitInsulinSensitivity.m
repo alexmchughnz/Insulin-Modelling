@@ -19,8 +19,8 @@ inSimTime = (0 <= tG) & (tG <= P.simDuration()); % [logical]
 tG = tG(inSimTime);
 vG = vG(inSimTime); % Glucose over sim period [mmol/L]
 
-% Plasma insulin over sim period [pmol/L]
-[tI, vI] = GetSimTime(P, P.data.I);
+[tI, vI] = GetSimTime(P, P.data.I);% Plasma insulin over sim period [pmol/L]
+
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
 ppI = griddedInterpolant(tI, C.pmol2mU(vI));  % I(t) [mU/L] piecewise polynomial. Use as function.
 

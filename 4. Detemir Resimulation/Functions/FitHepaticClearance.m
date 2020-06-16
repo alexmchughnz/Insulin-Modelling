@@ -10,8 +10,7 @@ global C GC
 
 % Time and data arrays.
 tArray = P.results.tArray;
-I = C.pmol2mU(I);
-ppI = griddedInterpolant(t, I); % [mU/L]
+ppI = griddedInterpolant(t, C.pmol2mU(I)); % [mU/L]
 
 
 %% Analytical Forward Simulation for Q
@@ -34,7 +33,7 @@ for ii = 2:length(tArray)
     % Analytical solution for the Q equation at time==t.
     % Standard soln. for non-homogenous 1st order ODE (page 17).
     Q(ii) = Q0*exp(kQ*(t-t0)) ...
-                    + trapz(tSpan, kI*exp(kQ*(t - tSpan).*ISpan));
+                    + trapz(tSpan, kI*ISpan.*exp(kQ*(t - tSpan)));
 end
 
 

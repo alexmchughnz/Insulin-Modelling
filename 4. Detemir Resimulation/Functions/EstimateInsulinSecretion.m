@@ -9,9 +9,10 @@ function P = EstimateInsulinSecretion(P)
 %   P   - modified patient struct with Uen
 
 
-global C GC SC
+global C SC
+
 %% Setup
-% Time of reading [min]
+% Time of reading in sim [min]
 % Amount of C-peptide [pmol]
 [t, CPep] = GetSimTime(P, P.data.CPep);
 
@@ -36,7 +37,7 @@ Y = exp(-k2*t) .* (Y(1) + cumtrapz(t, exp(k2*t).*k1.*CPep));
 
 % Calculate endogenous secretion rate (Uen).
 S = [diff(CPep); 0]/dt + (k1 + k3).*CPep - k2*Y;  % C-peptide secretion [pmol/min]
-Uen = C.pmol2mIU(S);                                       % Endogenous insulin secretion [mU/min]
+Uen = C.pmol2mIU(S);                              % Endogenous insulin secretion [mU/min]
 
 % Write value to patient struct.
 P.results.Uen = Uen;

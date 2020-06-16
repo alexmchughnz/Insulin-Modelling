@@ -17,10 +17,10 @@ GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)
 P = originalP;
-inSimTime = (P.simTime(1) <= P.G{3}.time) & (P.G{3}.time < P.simTime(end));
-measTime = minutes(P.G{3}.time(inSimTime) - P.simTime(1));
-measG = P.G{3}.value(inSimTime);    
-
+[t, G] = GetSimTime(P, P.data.G{3});
+inSimTime = (0 <= t) & (t <= P.simDuration()); % [logical]
+measTime = t(inSimTime);
+measG = G(inSimTime);
 
 %% Search
 for ii = 1:N 
@@ -29,7 +29,7 @@ for ii = 1:N
             P.patientNum, d2Grid(ii));
     
     % Retrieve d2 value to simulate.
-    P.d2 = d2Grid(ii);
+    P.d2 = d2Grid(ii);  % [1/min]
     
     % Fit SI at this d2 value.
     P = FitInsulinSensitivity(P);
@@ -43,19 +43,12 @@ for ii = 1:N
     % Find average error G(t, d2) to measured data.
     simG = P.results.G(measTime+1);
     GError = abs(simG - measG)./measG;
-    GErrorGrid(ii) = mean(GError);
-    
-%     figure(1)
-%     hold on
-%     plot(P.G{3}.time, P.G{3}.value, 'r*')
-%     time = P.simTime(1) + P.results.tArray/24/60;
-%     plot(time, P.results.G)
-    
+    GErrorGrid(ii) = mean(GError);    
 end
 
 %% Solving
 isBest = GErrorGrid == min(GErrorGrid);
-originalP.d2 = d2Grid(isBest);
+originalP.d2 = d2Grid(isBest);  % [1/min]
 
 
 end

@@ -56,7 +56,7 @@ YID0 = [0;   % ISC(t=0)          ID Model [mU/L]
         0;   % QDF(t=0)
         0];  % QDB(t=0)
     
-YGC0 = [0;   % Q(t=0)            GC Model [mU/L]
+YGC0 = [9;   % Q(t=0)            GC Model [mU/L]
         0;   % GA(t=0)                    [mmol/L]
         0];  % Gb(t=0)
     

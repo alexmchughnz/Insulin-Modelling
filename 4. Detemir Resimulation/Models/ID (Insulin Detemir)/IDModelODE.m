@@ -13,15 +13,14 @@ global C ID GC
 IDH       = Y(1);
 QDFLocal  = Y(2);
 QDBLocal  = Y(3);
-IDF       = Y(4) * C.IU18Factor;
-IDB       = Y(5) * C.IU18Factor;
-QDF       = Y(6) * C.IU18Factor;
-QDB       = Y(7) * C.IU18Factor;
+IDF       = Y(4);
+IDB       = Y(5);
+QDF       = Y(6);
+QDB       = Y(7); %NOTE: Re-removed the factor of 18...?
 
 %% Variables
 % Time dependent.
-n = (1 + floor(t));
-IBolus = P.IBolus(n);
+IBolus = P.data.IBolus(t); % [mU/min]
 
 %% Computation
 dIDH = -ID.ka*IDH + IBolus;

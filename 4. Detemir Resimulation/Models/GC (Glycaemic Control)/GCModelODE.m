@@ -10,22 +10,22 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GI GC
+global GC
 
 %% Input
-G  = Y(1);
-I  = Y(2);
-Q  = Y(3);
-Q0 = Y0(3);
+G  = Y(1);  % [mmol/L]
+I  = Y(2);  % [mU]
+Q  = Y(3);  % [mU]
+Q0 = Y0(3); % [mU]
 
 %% Variables
 % Time dependent.
 n = (1 + floor(t));  % Index of current timestep.
-SI        = P.SI(n);
-Uen       = P.Uen.value(n);
-P2        = P.results.P2(n);
-GInfusion = P.GInfusion(n);   % Glucose infusion rate [mol/min]
-GFast     = P.GFast(t);       % Fasting glucose [mol?/L]
+SI        = P.SI(n);                % [L/mU/min]
+Uen       = P.results.Uen(n);       % [mU/min]
+P2        = P.results.P2(n);        % [mmol]
+GInfusion = P.data.GInfusion(n);    % Glucose infusion rate [mmol/min]
+GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
 
 % Patient dependent.
 d2 = P.d2;
@@ -33,8 +33,8 @@ xL = P.xL;
 nL = P.nL;
  
 % Derived values.
-QTFast  = Q0 + P.results.QDF(1);
-QT      = Q + P.results.QDF(n);
+QTFast  = Q0 + P.results.QDF(1);  % [mU/L]
+QT      = Q + P.results.QDF(n);   % [mU/L]
 
 %% Computation
 dG  = -GC.pg*(G-GFast) ...

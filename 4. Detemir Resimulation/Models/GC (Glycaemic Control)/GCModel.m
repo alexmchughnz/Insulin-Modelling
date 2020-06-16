@@ -14,9 +14,12 @@ if ~exist('options', 'var')
 end
 
 % Set up initial conditions.
-G0Index = find(P.G{3}.time == P.simTime(1));  % Start of G measurements [indices]
-G0 = P.G{3}.value(G0Index);
-I0 = C.pmol2mIU(P.I.value(1)); % [pmol/L] -> [mIU/L]
+[t, G] = GetSimTime(P, P.data.G{3});
+inSimTime = (0 <= t) & (t <= P.simDuration()); % [logical]
+G = G(inSimTime);
+
+G0 = G(1);
+I0 = C.pmol2mIU(P.data.I.value(1)); % [pmol/L] -> [mIU/L]
 Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 
 Y0 = [G0;   

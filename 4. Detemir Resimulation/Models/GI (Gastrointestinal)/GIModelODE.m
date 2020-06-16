@@ -15,7 +15,7 @@ P2     = Y(2);
 
 %% Variables
 % Patient dependent.
-D = GetGlucoseDelivery(t, P);
+D = GetGlucoseDelivery(t, P);  % [mmol/min]
 
 %% Computation
 dP1 = -GI.d1*P1 + D;

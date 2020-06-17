@@ -26,12 +26,15 @@ for ii = 1:length(patients)
     
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  
-    patients{ii} = FitHepaticClearance(patients{ii});
-%     patients{ii}.nL = 0.15;
-%     patients{ii}.xL = 0.67;
-%     
-    patients{ii} = GridSearch(patients{ii});
-    patients{ii} = FitInsulinSensitivity(patients{ii});
+%     patients{ii} = FitHepaticClearance(patients{ii});
+    patients{ii}.nL = 0.15;
+    patients{ii}.xL = 0.67;
+    
+%     patients{ii} = GridSearch(patients{ii});
+    patients{ii}.d2 = 0.0693;
+    
+    %patients{ii} = FitInsulinSensitivity(patients{ii});
+    patients{ii}.SI(1:patients{ii}.simDuration()) = 1e-3;
     
     % Forward simulate models.
     patients{ii} = SolveSystem(patients{ii});

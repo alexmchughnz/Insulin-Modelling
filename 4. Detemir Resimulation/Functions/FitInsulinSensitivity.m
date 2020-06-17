@@ -89,13 +89,13 @@ for ii = 1 : numIntervals
     Y    = [Y1(1, :); Y2];
 
     % Solve linear system to find SI.
-    % deltaG = -int{dGA}*SI + int{dGb}, therefore SI = -GA\(Gb-deltaG).
+    % deltaG = -int{dGA}*SI + int{dGb}, therefore SI = GA\(Gb-deltaG).
     GA = Y(:, ccGA);         % Coefficient of SI in equation.
     Gb = Y(:, ccGb);         % Added terms in equation.
     
     deltaG  = ppG(tb) - ppG(ta);  % Change in G over interval.  
     
-    A = -GA;     
+    A = GA;     
     b = Gb-deltaG;          
     intervalSI(ii) = A\b;
     

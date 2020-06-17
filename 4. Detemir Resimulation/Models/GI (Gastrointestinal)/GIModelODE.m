@@ -20,7 +20,7 @@ d2 = P.d2;
 
 %% Computation
 dP1 = -GI.d1*P1 + D;
-dP2 = GI.d1*P1 - d2*P2;
+dP2 = -d2*P2 + GI.d1*P1 ;
 
 %% Output
 dY = [dP1;

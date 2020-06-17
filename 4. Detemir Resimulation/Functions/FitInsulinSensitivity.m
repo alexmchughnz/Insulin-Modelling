@@ -15,7 +15,7 @@ numIntervals = floor(P.simDuration()/intervalDuration);
 
 % Interpolate G and I with piecewise polynomials.
 [tG, vG] = GetSimTime(P, P.data.G{3});
-inSimTime = (0 <= tG) & (tG <= P.simDuration()); % [logical]
+inSimTime = (0 <= tG) & (tG < P.simDuration()); % [logical]
 tG = tG(inSimTime);
 vG = vG(inSimTime); % Glucose over sim period [mmol/L]
 
@@ -113,9 +113,9 @@ end
 % Write estimated data into patient struct, overwriting defaults.
 P.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
-fprintf('P%d: SI fit successfully. SI(*1e+4) at %d min intervals = ', ...
+fprintf('P%d: SI fit successfully. SI(*1e+3) at %d min intervals = ', ...
         P.patientNum, intervalDuration)
-disp(intervalSI'*1e4)
+disp(intervalSI'*1e3)
 
 end
 

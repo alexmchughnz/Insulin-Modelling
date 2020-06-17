@@ -6,11 +6,12 @@ global C GC DEBUGPLOT
 %% Setup
 % Time of reading in sim [min]
 % Plasma insulin [pmol/L]
-[tI, I] = GetSimTime(P, P.data.I);
+[tI, vI] = GetSimTime(P, P.data.I);
+
 
 % Time and data arrays.
 tArray = P.results.tArray;
-ppI = griddedInterpolant(tI, C.pmol2mU(I)); % [mU/L]
+ppI = griddedInterpolant(tI, C.pmol2mU(vI)); % [mU/L]
 
 
 %% Analytical Forward Simulation for Q
@@ -88,14 +89,13 @@ if DEBUGPLOT
                       - kI * cumtrapz(tArray, GC.nK*I) ...
                       - kIQ * cumtrapz(tArray, I-Q) ...
                       + cumtrapz(tArray, k);
-   plot(tArray, simI)
+%    plot(tArray, simI)
    title("I")
    legend("interpolated", "simulated")
    
    subplot(2,1,2)
    hold on
    plot(tArray, Q)
-   plot(tArray, Qpp)
    title("Q (analytical)")
 end
 

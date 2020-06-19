@@ -89,7 +89,7 @@ if DEBUGPLOT
                       - kI * cumtrapz(tArray, GC.nK*I) ...
                       - kIQ * cumtrapz(tArray, I-Q) ...
                       + cumtrapz(tArray, k);
-%    plot(tArray, simI)
+   plot(tArray, simI)
    title("I")
    legend("interpolated", "simulated")
    

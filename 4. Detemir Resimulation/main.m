@@ -30,11 +30,9 @@ for ii = 1:length(patients)
     patients{ii}.nL = 0.15;
     patients{ii}.xL = 0.67;
     
-%     patients{ii} = GridSearch(patients{ii});
-    patients{ii}.d2 = 0.0693;
+    patients{ii} = GridSearch(patients{ii});
     
-    %patients{ii} = FitInsulinSensitivity(patients{ii});
-    patients{ii}.SI(1:patients{ii}.simDuration()) = 1e-3;
+    patients{ii} = FitInsulinSensitivity(patients{ii});
     
     % Forward simulate models.
     patients{ii} = SolveSystem(patients{ii});

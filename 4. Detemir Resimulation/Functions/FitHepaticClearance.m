@@ -78,7 +78,7 @@ P.nL = nL;  % [1/min]
 P.xL = xL;  % [1]
 
 
-%% 
+%% Debug Plots
 if DEBUGPLOT
    figure()
    

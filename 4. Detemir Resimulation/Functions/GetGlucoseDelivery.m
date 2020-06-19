@@ -10,7 +10,7 @@ global C
 
 % Extract meal times.
 M = P.meal;
-mealStarts = M.startTimes - 10;              % [min]
+mealStarts = M.startTimes;              % [min]
 mealEnds = mealStarts + M.durations;  % [min]
 
 % Add contribution from all meals occuring during this time.

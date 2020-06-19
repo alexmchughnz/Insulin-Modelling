@@ -90,7 +90,7 @@ if DEBUGPLOT
                       - kIQ * cumtrapz(tArray, I-Q) ...
                       + cumtrapz(tArray, k);
    plot(tArray, simI)
-   title("I")
+   title(sprintf("P%d: I", P.patientNum))
    legend("interpolated", "simulated")
    
    subplot(2,1,2)

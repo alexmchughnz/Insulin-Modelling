@@ -49,7 +49,7 @@ fprintf('P%d: Estimated Uen.\n', P.patientNum);
 if DEBUGPLOT
    figure()
    plot(t, Uen)
-   title("Uen")
+   title(sprintf("P%d: Uen", P.patientNum))
 end
 
 end

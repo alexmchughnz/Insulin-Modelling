@@ -15,12 +15,12 @@ time = P.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
 % Set up figure.
 persistent n;
 if (isempty(n))
-    n = 0;
+    n = gcf().Number + 1;
 end
 screensize = get(0,'screensize');
 w = screensize(3);
 h = screensize(4);
-F = figure(P.patientNum);
+F = figure(n);
 F.Position = [n/3*w, 0, w/3, 0.9*h];
 n = n + 1;
 
@@ -78,7 +78,7 @@ datetick('x')
 ylim([0 300])
 
 %%
-path = fullfile("Plots", "patient" + num2str(n));
+path = fullfile("Plots", "patient" + P.patientNum);
 savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
 fprintf(" d2 = %.4f \n nL = %.4f \n xL = %.4f \n", P.d2, P.nL, P.xL)

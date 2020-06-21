@@ -77,7 +77,7 @@ if (P.patientNum == 1)
     
     % Return infusion data.
     iiInfusion = (startTime <= P.results.tArray) & (P.results.tArray < endTime); % 1 if infusion active [logical]
-    P.data.GInfusion = iiInfusion * MAGIC_DEXTROSE_NUMBER/C.MGlucose;  % Glucose infusion over sim time [mmol/min]
+    P.data.GInfusion = iiInfusion .* MAGIC_DEXTROSE_NUMBER/C.MGlucose/60;  % Glucose infusion over sim time [mmol/min]
 end
     
     %%

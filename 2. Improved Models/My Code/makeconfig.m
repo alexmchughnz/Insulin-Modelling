@@ -1,10 +1,15 @@
-DATAPATH  = fullfile(pwd, 'Data');
+set(groot, 'defaultTextInterpreter','latex');
+set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
+set(groot, 'defaultLegendInterpreter','latex');
+set(groot, 'DefaultLineLineWidth', 2.0);
+
+DATAPATH  = fullfile(pwd, '..', 'Data');
 FUNCPATH  = fullfile(pwd, 'Functions');
 MODELPATH = fullfile(pwd, 'Models');
 
-addpath(DATAPATH);
-addpath(FUNCPATH);
-addpath(MODELPATH);
+addpath(genpath(DATAPATH));
+addpath(genpath(FUNCPATH));
+addpath(genpath(MODELPATH));
 
 PATIENTFILE = 'patient_master.xlsx';
 

@@ -3,7 +3,7 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 set(groot, 'DefaultLineLineWidth', 2.0);
 
-DATAPATH  = fullfile(pwd, 'Data');
+DATAPATH  = fullfile(pwd, '..', 'Data');
 FUNCPATH  = fullfile(pwd, 'Functions');
 MODELPATH = fullfile(pwd, 'Models');
 

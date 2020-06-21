@@ -13,16 +13,7 @@ patientLabel = sprintf("Patient %d: ", P.patientNum);
 time = P.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
 
 % Set up figure.
-persistent n;
-if (isempty(n))
-    n = gcf().Number + 1;
-end
-screensize = get(0,'screensize');
-w = screensize(3);
-h = screensize(4);
-F = figure(n);
-F.Position = [n/3*w, 0, w/3, 0.9*h];
-n = n + 1;
+F = PanelFigures(3, 3);
 
 %% Glucose
 range = 2 : length(P.data.G{3}.time) - 1;

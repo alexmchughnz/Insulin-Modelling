@@ -39,7 +39,7 @@ for ii = 1:length(patients)
 end
 
 %% Plot Results
-clear PlotResults
+clear PlotResults PanelFigures
 for ii = 1:length(patients)
     P = patients{ii};
     PlotResults(P);

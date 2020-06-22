@@ -13,12 +13,17 @@ load('parameters.mat', 'GI', 'GC')
 intervalDuration = 360;  % Time per interval [min]
 numIntervals = floor(P.simDuration()/intervalDuration);
 
+% Forward simulate ID model for IDF.
+P = IDModel(P); 
+IDF = P.results.IDF; % [mU/L]
+
 % Interpolate G and I with piecewise polynomials.
 [tG, vG] = GetSimTime(P, P.data.G{3});
-[tI, vI] = GetSimTime(P, P.data.I);% Plasma insulin over sim period [pmol/L]
-
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
-ppI = griddedInterpolant(tI, C.pmol2mU(vI));  % I(t) [mU/L] piecewise polynomial. Use as function.
+
+[tITotal, vITotal] = GetSimTime(P, P.data.I);% Plasma insulin over sim period [pmol/L]
+I = C.pmol2mU(vITotal) - IDF(tITotal + 1);
+ppI = griddedInterpolant(tITotal, I);  % I(t) [mU/L] piecewise polynomial. Use as function.
 
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;

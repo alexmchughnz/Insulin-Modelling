@@ -6,12 +6,16 @@ global C GC DEBUGPLOT
 %% Setup
 % Time of reading in sim [min]
 % Plasma insulin [pmol/L]
-[tI, vI] = GetSimTime(P, P.data.I);
+[tITotal, vITotal] = GetSimTime(P, P.data.I);
 
+% Forward simulate ID model for IDF.
+P = IDModel(P); 
+IDF = P.results.IDF; % [mU/L]
 
 % Time and data arrays.
 tArray = P.results.tArray;
-ppI = griddedInterpolant(tI, C.pmol2mU(vI)); % [mU/L]
+I = C.pmol2mU(vITotal) - IDF(tITotal+1);
+ppI = griddedInterpolant(tITotal, I);  % [mU/L]
 
 
 %% Analytical Forward Simulation for Q

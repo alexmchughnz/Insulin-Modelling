@@ -3,7 +3,7 @@ global SC
 % Parameters
 F = 0.76;
 CHalfLife1 = 4.95;       % Half-life of C-peptide in compartment 1 [min]
-CHalfLife2 = 39.56;      % Half-life of C-peptide in compartment 2 [min]
+CHalfLife2 = 32.4;      % Half-life of C-peptide in compartment 2 [min]
                            %  Average of values fit by Jennifer O 18/06/20
 a = log(2)/CHalfLife1;
 b = log(2)/CHalfLife2;

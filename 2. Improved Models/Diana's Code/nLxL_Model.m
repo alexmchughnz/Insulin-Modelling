@@ -40,6 +40,9 @@ for i=1:num-1
 end
 Qlocal(num)=icfinal(end,2);
 
+%*******************
+Qlocal = zeros(size(Qlocal));
+
 cn=cumtrapz(time,Ipp./(1+(val.alpha_I.*Ipp)));
 cx=cumtrapz(time,val.Uen./val.Vp);
 c=(Ipp(1,1)-Ipp)-cumtrapz(time,val.nK.*Ipp)-cumtrapz(time,(val.nI./val.Vp).*(Ipp-Qpp))+cumtrapz(time,(val.k3./val.Vp).*Qlocal)+cumtrapz(time,val.Uen./val.Vp);
@@ -82,12 +85,12 @@ xL=max(xL,lb);
    subplot(5,1,2)
    plot(time,  -cumtrapz(time,val.nK.*Ipp))
    title("- kI * cumtrapz(time, I)")
-   ylim([-2000 0])
+   ylim([-200 0])
    
    subplot(5,1,3)
    plot(time, -cumtrapz(time,(val.nI./val.Vp).*(Ipp-Qpp)))
    title("- kIQ * cumtrapz(time, I-Q)")
-   ylim([-2000 0])
+   ylim([-100 0])
    
    subplot(5,1,4)
    plot(time, +cumtrapz(time,(val.k3./val.Vp).*Qlocal))

@@ -22,7 +22,7 @@ for ii = 1:length(patientNums)
     P.trialDuration = @() minutes(diff(P.trialTime));
     
     P.simTime     =  [sys.sim_start_t, sys.sim_end_t];
-    P.simDuration =  @() minutes(diff(P.simTime));
+    P.simDuration =  @() minutes(diff(P.simTime)) + 1;
     
     P.results.tArray = (0 : P.simDuration() - 1)';
     
@@ -87,6 +87,7 @@ end
     fprintf('P%d: Saved patient data.\n', patientNum);
 end
 
+%% Debug Plots
 if DEBUGPLOT    
     loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
     patients = {loadpatient(1), loadpatient(3), loadpatient(4)};

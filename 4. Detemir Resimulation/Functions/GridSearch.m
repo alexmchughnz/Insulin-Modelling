@@ -17,10 +17,7 @@ GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)
 P = originalP;
-[t, G] = GetSimTime(P, P.data.G{3});
-inSimTime = (0 <= t) & (t < P.simDuration()); % [logical]
-measTime = t(inSimTime);
-measG = G(inSimTime);
+[tG, vG] = GetSimTime(P, P.data.G{3});
 
 %% Search
 for ii = 1:N 
@@ -41,8 +38,8 @@ for ii = 1:N
     P = GCModel(P);
     
     % Find average error G(t, d2) to measured data.
-    simG = P.results.G(measTime+1);
-    GError = abs(simG - measG)./measG;
+    simG = P.results.G(tG+1);
+    GError = abs(simG - vG)./vG;
     GErrorGrid(ii) = mean(GError);    
 end
 

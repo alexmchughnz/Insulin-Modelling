@@ -15,10 +15,6 @@ numIntervals = floor(P.simDuration()/intervalDuration);
 
 % Interpolate G and I with piecewise polynomials.
 [tG, vG] = GetSimTime(P, P.data.G{3});
-inSimTime = (0 <= tG) & (tG < P.simDuration()); % [logical]
-tG = tG(inSimTime);
-vG = vG(inSimTime); % Glucose over sim period [mmol/L]
-
 [tI, vI] = GetSimTime(P, P.data.I);% Plasma insulin over sim period [pmol/L]
 
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.

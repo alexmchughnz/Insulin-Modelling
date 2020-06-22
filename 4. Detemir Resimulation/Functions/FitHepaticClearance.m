@@ -49,7 +49,7 @@ Uen = P.results.Uen; % [mU/min]
 % Set coefficients for MLR.
 % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
 kI = GC.nK;
-kIQ = GC.nI./GC.VQ;
+kIQ = GC.nI./GC.VI;
 k = Uen/GC.VI;
 
 % Therefore, integrating:

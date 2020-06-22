@@ -83,6 +83,8 @@ P.xL = xL;  % [1]
 
 
 %% Debug Plots
+% nL = 0.67;
+% xL = 0.15;
 if DEBUGPLOT
    figure()
    
@@ -90,7 +92,7 @@ if DEBUGPLOT
    hold on
    plot(tArray, ppI(tArray))
    simI = -A*[nL; xL] + I0 ...
-                      - kI * cumtrapz(tArray, GC.nK*I) ...
+                      - kI * cumtrapz(tArray, I) ...
                       - kIQ * cumtrapz(tArray, I-Q) ...
                       + cumtrapz(tArray, k);
    plot(tArray, simI)
@@ -101,6 +103,24 @@ if DEBUGPLOT
    hold on
    plot(tArray, Q)
    title("Q (analytical)")
+   
+   figure()
+   subplot(4,1,1)
+   plot(tArray, -A*[nL; xL])
+   title("-A*[nL; xL]")
+   ylim()
+   
+   subplot(4,1,2)
+   plot(tArray, - kI * cumtrapz(tArray, I))
+   title("- kI * cumtrapz(tArray, I)")
+   
+   subplot(4,1,3)
+   plot(tArray, - kIQ * cumtrapz(tArray, I-Q))
+   title("- kIQ * cumtrapz(tArray, I-Q)")
+   
+   subplot(4,1,4)
+   plot(tArray, + cumtrapz(tArray, k))
+   title("+ cumtrapz(tArray, k)")
 end
 
 

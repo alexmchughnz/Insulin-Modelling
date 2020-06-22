@@ -51,6 +51,54 @@ xL=x(2,1);
 lb=1e-7;
 nL=max(nL,lb);
 xL=max(xL,lb);
+%% plot
+  figure()
+   
+   subplot(2,1,1)
+   hold on
+   plot(time, Ipp)
+   simI = -A*[nL; xL] ...
+       + Ipp(1,1)...
+       -cumtrapz(time,val.nK.*Ipp)...
+       -cumtrapz(time,(val.nI./val.Vp).*(Ipp-Qpp))...
+       +cumtrapz(time,(val.k3./val.Vp).*Qlocal)...
+       +cumtrapz(time,val.Uen./val.Vp);
+
+   plot(time, simI)
+   title("Diana's code: I")
+   legend("interpolated", "simulated")
+   
+   subplot(2,1,2)
+   hold on
+   plot(time, Qpp)
+   title("Q (analytical)")
+   % -----------------------------
+   figure()
+   subplot(5,1,1)
+   plot(time, -A*[nL; xL])
+   title("-A*[nL; xL]")
+   ylim([-2000 0])
+   
+   subplot(5,1,2)
+   plot(time,  -cumtrapz(time,val.nK.*Ipp))
+   title("- kI * cumtrapz(time, I)")
+   ylim([-2000 0])
+   
+   subplot(5,1,3)
+   plot(time, -cumtrapz(time,(val.nI./val.Vp).*(Ipp-Qpp)))
+   title("- kIQ * cumtrapz(time, I-Q)")
+   ylim([-2000 0])
+   
+   subplot(5,1,4)
+   plot(time, +cumtrapz(time,(val.k3./val.Vp).*Qlocal))
+   title("+cumtrapz(time,(val.k3./val.Vp).*Qlocal)")
+   ylim([0 2000])
+   
+   subplot(5,1,5)
+   plot(time,+cumtrapz(time,val.Uen./val.Vp))
+   title("+ cumtrapz(time, k)")
+   ylim([0 2000])
+   %%
 end
 
 %% function that sets up differential equations to solve for Isc and Qlocal

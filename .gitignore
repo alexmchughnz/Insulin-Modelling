@@ -4,4 +4,4 @@
 
 *.mat
 !Data/*.mat
-patient*.mat
+**/patient?.mat

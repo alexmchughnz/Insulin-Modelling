@@ -7,14 +7,14 @@ clear global
 close all
 clc
 
+global DEBUGPLOT
+DEBUGPLOT = true;
+
 makeconfig
 makeparameters
 makedata
 
 load config
-
-global DEBUGPLOT
-DEBUGPLOT = true;
 
 %% Load Data
 % Patient data structs.

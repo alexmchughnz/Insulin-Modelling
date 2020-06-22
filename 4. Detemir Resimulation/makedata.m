@@ -5,6 +5,7 @@ load config
 patientNums = [1 3 4];
 
 global C
+global DEBUGPLOT
 
 % STUB: grab data from previous code structs
 for ii = 1:length(patientNums)
@@ -85,56 +86,27 @@ end
     save(fullfile(DATAPATH, filename), '-struct', 'P');
     fprintf('P%d: Saved patient data.\n', patientNum);
 end
-%\STUB
 
-clear
-
-
-
-
-% 
-% %% Indices
-% ROW_1 = 2;
-% 
-% COL_T = 3;
-% COL_G = 4;
-% COL_I = 5;
-% COL_CPEP = 6;
-% COLS_MEAL = [7:14, 16];
-% COL_G
-% COL_BOLUS = 15;
-% 
-% 
-% 
-% 
-% %% Load Patient Data
-% 
-% 
-% for ii = 1:length(patientNums)
-%     patientNum = patientNums(ii);
-%     S = struct('patientNum', patientNum); 
-%     [numdata, textdata] = xlsread(PATIENTFILE, patientNum);
-%     
-%     % Trial Time Data
-%     
-%     
-%     % C-peptide Data
-%     
-%     % Insulin Bolus Data
-%     
-%     
-%     % Meal Data
-%     
-%     % Blood Glucose Data
-%     
-%     S.G = 
-%     
-%     % Plasma Insulin Data
-%     
-%     % Fasting Blood Glucose
-%     
-%     
-% end
-% 
-% 
-% %% Load CGM Data
+if DEBUGPLOT    
+    loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
+    patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
+    for ii = 1:length(patients)
+        figure()        
+        P = patients{ii};
+        
+        for tt = 1:P.simDuration()
+            G(tt) = GetGlucoseDelivery(tt, P);
+        end     
+        
+        subplot(2,1,1)
+        plot(P.results.tArray, G)
+        title(sprintf("P%d: G Input", P.patientNum))
+        ylabel("[mmol/min]")
+        
+        
+        subplot(2,1,2)
+        plot(P.results.tArray, P.data.GInfusion)
+        title(sprintf("P%d: G Infusion", P.patientNum))
+        ylabel("[mmol/min]")
+    end
+end

@@ -26,11 +26,11 @@ Uen       = P.results.Uen(n);       % [mU/min]
 P2        = P.results.P2(n);        % [mmol]
 GInfusion = P.data.GInfusion(n);    % Glucose infusion rate [mmol/min]
 GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
+nL        = P.nL(n);                % [1/min]
+xL        = P.xL(n);                % [1]
 
 % Patient dependent.
 d2 = P.d2;
-xL = P.xL;
-nL = P.nL;
  
 % Derived values.
 QTFast  = Q0 + P.results.QDF(1);  % [mU/L]

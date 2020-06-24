@@ -23,7 +23,7 @@ Q = zeros(length(tArray), 1); %analytical solution for Q
 
 % Consider form of dQ/dt = -kQ*Q + kI*I.
 kQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
-kI = GC.nI/GC.VQ;  % Constant term coefficent of Q - easier to use
+kI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
 t0 = tArray(1);
 I0 = ppI(t0);   % [mU]
@@ -69,17 +69,36 @@ b = I0 - I ...
        - kIQ * cumtrapz(tArray, I-Q) ...
        + cumtrapz(tArray, k); 
 
-% Solve and save.
-x = A\b;
-nL = x(1);
-xL = x(2);
+% Split data into daily segments, and fit nL/xL per day.
+day1 = P.simTime(1) - timeofday(P.simTime(1));  % 00:00 on day 1.
+day2 = day1 + 1;                                % 00:00 on day 2.
+tDayEnd = minutes(day2 - P.simTime(1)) - 1;     % Sim time when day 1 ends.
 
-lb = 1e-7; %"lower bound"
-nL = max(nL, lb);
-xL = max(xL, lb);
-
-P.nL = nL;  % [1/min]
-P.xL = xL;  % [1]
+tSplits = [tDayEnd P.simDuration()]; % Times of segment ends.
+P.nL = zeros(size(tArray));
+P.xL = zeros(size(tArray));
+ta = 1;
+tb = tSplits(1);  
+for ii = 1 : length(tSplits)
+    % Fit first segment.
+    segment = ta : tb;
+    An = A(segment, :);
+    bn = b(segment);
+    x = A\b;
+    nL = x(1);
+    xL = x(2);    
+    
+    % Save first segment values.
+    lb = 1e-7;  % Lower bound on nL/xL.
+    P.nL(segment) = max(nL, lb);  % [1/min]
+    P.xL(segment) = max(xL, lb);  % [1]
+    
+    % Update time segments (if continuing).
+    if ii < length(tSplits)
+        ta = tb;
+        tb = tSplits(ii+1);
+    end
+end
 
 
 %% Debug Plots

@@ -72,7 +72,9 @@ ylim([0 300])
 path = fullfile("Plots", "patient" + P.patientNum);
 savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
-fprintf(" d2 = %.4f \n nL = %.4f \n xL = %.4f \n", P.d2, P.nL, P.xL)
+fprintf(" d2 = %.4f", P.d2)
+fprintf(" nL = %.4f | %.4f \n",  P.nL(1), P.nL(end))
+fprintf(" xL = %.4f | %.4f \n",  P.xL(1), P.xL(end))
 
 end
 

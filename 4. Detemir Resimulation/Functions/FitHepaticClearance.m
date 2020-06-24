@@ -9,7 +9,7 @@ global C GC DEBUGPLOT
 [tITotal, vITotal] = GetSimTime(P, P.data.I);
 
 % Forward simulate ID model for IDF.
-P = IDModel(P); 
+P = IDModel(P);
 IDF = P.results.IDF; % [mU/L]
 
 % Time and data arrays.
@@ -38,90 +38,100 @@ for ii = 2:length(tArray)
     % Analytical solution for the Q equation at time==t.
     % Standard soln. for non-homogenous 1st order ODE (page 17).
     Q(ii) = Q0*exp(-kQ*(t-t0)) ...
-                    + trapz(tSpan, kI*ISpan.*exp(-kQ*(t - tSpan)));
+        + trapz(tSpan, kI*ISpan.*exp(-kQ*(t - tSpan)));
 end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
-I = ppI(tArray); % [mU/L]
-I0 = ppI(t0);
-Uen = P.results.Uen; % [mU/min]
+% Split data into daily segments, and fit nL per day.
+P.nL = zeros(size(tArray));
 
-% Set coefficients for MLR.
-% Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-kI = GC.nK;
-kIQ = GC.nI./GC.VI;
-k = Uen/GC.VI;
-
-% Therefore, integrating:
-% I(t) - I(t0) = -kI*int{I} - int{c1}*nL - kIQ*int{I-Q} - int{c2}*xL + int{k}
-% Renaming cN = int{c1} and cX = int{c2}
-% cN*nL + cX*xL = I(t0) - I(t) - kI*int{I} - kIQ*int{I-Q} + int{k}
-cN = cumtrapz(tArray, ...
-              I./(1 + GC.alphaI*I));
-cX = cumtrapz(tArray, ...
-              Uen/GC.VI);
-          
-% Assembling MLR system:
-% [cN(t) cX(t)] * (nL; xL) = [b(t)]
-A = [cN cX];
-b = I0 - I ...
-       - kI * cumtrapz(tArray, I) ...
-       - kIQ * cumtrapz(tArray, I-Q) ...
-       + cumtrapz(tArray, k); 
-
-% Split data into daily segments, and fit nL/xL per day.
 day1 = P.simTime(1) - timeofday(P.simTime(1));  % 00:00 on day 1.
 day2 = day1 + 1;                                % 00:00 on day 2.
 tDayEnd = minutes(day2 - P.simTime(1)) - 1;     % Sim time when day 1 ends.
 
 tSplits = [tDayEnd P.simDuration()]; % Times of segment ends.
-P.nL = zeros(size(tArray));
-P.xL = zeros(size(tArray));
-ta = 1;
-tb = tSplits(1);  
+segment = [1 tSplits(1)];
 for ii = 1 : length(tSplits)
-    % Fit first segment.
-    segment = ta : tb;
-    An = A(segment, :);
-    bn = b(segment);
-    x = A\b;
-    nL = x(1);
-    xL = x(2);    
+    tSegment = [segment(1) : segment(end)]';
+    [nL, ~] = FitSegment(P, ppI, Q, tSegment);
     
-    % Save first segment values.
-    lb = 1e-7;  % Lower bound on nL/xL.
-    P.nL(segment) = max(nL, lb);  % [1/min]
-    P.xL(segment) = max(xL, lb);  % [1]
+    P.nL(tSegment) = nL;
     
     % Update time segments (if continuing).
     if ii < length(tSplits)
-        ta = tb;
-        tb = tSplits(ii+1);
+        segment = [segment(end)+1, tSplits(ii+1)];
     end
 end
 
+% Fit xL for whole time.
+tSegment = [1 : P.simDuration()]';
+[~, xL] = FitSegment(P, ppI, Q, tSegment);
+P.xL = xL*ones(size(tArray));
+
 
 %% Debug Plots
-if DEBUGPLOT
-   figure()
-   
-   subplot(2,1,1)
-   hold on
-   plot(tArray, ppI(tArray))
-   simI = -A*[nL; xL] + I0 ...
-                      - kI * cumtrapz(tArray, GC.nK*I) ...
-                      - kIQ * cumtrapz(tArray, I-Q) ...
-                      + cumtrapz(tArray, k);
-   plot(tArray, simI)
-   title(sprintf("P%d: I", P.patientNum))
-   legend("interpolated", "simulated")
-   
-   subplot(2,1,2)
-   hold on
-   plot(tArray, Q)
-   title("Q (analytical)")
+% if DEBUGPLOT
+%     figure()
+%     
+%     subplot(2,1,1)
+%     hold on
+%     plot(tArray, ppI(tArray))
+%     simI = -A*[nL; xL] + I0 ...
+%         - kI * cumtrapz(tArray, GC.nK*I) ...
+%         - kIQ * cumtrapz(tArray, I-Q) ...
+%         + cumtrapz(tArray, k);
+%     plot(tArray, simI)
+%     title(sprintf("P%d: I", P.patientNum))
+%     legend("interpolated", "simulated")
+%     
+%     subplot(2,1,2)
+%     hold on
+%     plot(tArray, Q)
+%     title("Q (analytical)")
+% end
+
 end
 
 
-
+function [nL, xL] = FitSegment(P, ppI, Q, tSegment)
+    global GC
+    
+    % Retrieve data across segment.
+    I = ppI(tSegment); % [mU/L]
+    Q = Q(tSegment);
+    I0 = I(1);
+    Uen = P.results.Uen(tSegment); % [mU/min]    
+    
+    % Set coefficients for MLR.
+    % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
+    kI = GC.nK;
+    kIQ = GC.nI./GC.VI;
+    k = Uen/GC.VI;
+    
+    % Therefore, integrating:
+    % I(t) - I(t0) = -kI*int{I} - int{c1}*nL - kIQ*int{I-Q} - int{c2}*xL + int{k}
+    % Renaming cN = int{c1} and cX = int{c2}
+    % cN*nL + cX*xL = I(t0) - I(t) - kI*int{I} - kIQ*int{I-Q} + int{k}
+    cN = cumtrapz(tSegment, ...
+        I./(1 + GC.alphaI*I));
+    cX = cumtrapz(tSegment, ...
+        Uen/GC.VI);
+    
+    % Assembling MLR system:
+    % [cN(t) cX(t)] * (nL; xL) = [b(t)]
+    A = [cN cX];
+    b = I0 - I ...
+        - kI * cumtrapz(tSegment, I) ...
+        - kIQ * cumtrapz(tSegment, I-Q) ...
+        + cumtrapz(tSegment, k);
+    
+    % Fit first segment.
+    x = A\b;
+    nL = x(1);
+    xL = x(2);
+    
+    % Save first segment values.
+    lb = 1e-7;  % Lower bound on nL/xL.
+    nL = max(nL, lb);  % [1/min]
+    xL = max(xL, lb);  % [1]
 end

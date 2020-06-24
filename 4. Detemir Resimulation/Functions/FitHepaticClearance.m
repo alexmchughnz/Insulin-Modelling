@@ -78,7 +78,7 @@ day1 = P.simTime(1) - timeofday(P.simTime(1));  % 00:00 on day 1.
 day2 = day1 + 1;                                % 00:00 on day 2.
 tDayEnd = minutes(day2 - P.simTime(1)) - 1;     % Sim time when day 1 ends.
 
-tSplits = [tDayEnd P.simDuration()]; % Times of segment ends.
+tSplits = [tArray(end)]; % Times of segment ends.
 P.nL = zeros(size(tArray));
 P.xL = zeros(size(tArray));
 ta = 1;
@@ -125,6 +125,8 @@ if DEBUGPLOT
    plot(tArray, Q)
    title("Q (analytical)")
    
+   
+   %%
    figure()
    subplot(4,1,1)
    plot(tArray, -A*[nL; xL])
@@ -143,6 +145,20 @@ if DEBUGPLOT
    subplot(4,1,4)
    plot(tArray, + cumtrapz(tArray, k))
    title("+ cumtrapz(tArray, k)")
+   
+   
+   %% -----------------------------
+   load("AC.mat")
+   figure()
+   subplot(3,1,1)
+   plot(time,  A(:,1) - DA(:,1))
+   title("A(1)")
+   subplot(3,1,2)
+   plot(time, A(:,2) - DA(:,2))
+   title("A(2)")
+   subplot(3,1,3)
+   plot(time, b - Dc)
+   title("b")
 end
 
 

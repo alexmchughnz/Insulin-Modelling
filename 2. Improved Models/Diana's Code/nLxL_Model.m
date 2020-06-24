@@ -41,8 +41,6 @@ end
 Qlocal(num)=icfinal(end,2);
 
 %*******************
-Qlocal = zeros(size(Qlocal));
-
 cn=cumtrapz(time,Ipp./(1+(val.alpha_I.*Ipp)));
 cx=cumtrapz(time,val.Uen./val.Vp);
 c=(Ipp(1,1)-Ipp)-cumtrapz(time,val.nK.*Ipp)-cumtrapz(time,(val.nI./val.Vp).*(Ipp-Qpp))+cumtrapz(time,(val.k3./val.Vp).*Qlocal)+cumtrapz(time,val.Uen./val.Vp);
@@ -101,7 +99,17 @@ xL=max(xL,lb);
    plot(time,+cumtrapz(time,val.Uen./val.Vp))
    title("+ cumtrapz(time, k)")
    ylim([0 2000])
-   %%
+   %% -----------------------------
+   figure()
+   subplot(3,1,1)
+   plot(time, A(:,1))
+   title("A(1)")
+   subplot(3,1,2)
+   plot(time, A(:,2))
+   title("A(2)")
+   subplot(3,1,3)
+   plot(time, c)
+   title("b")
 end
 
 %% function that sets up differential equations to solve for Isc and Qlocal

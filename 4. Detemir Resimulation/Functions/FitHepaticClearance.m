@@ -7,19 +7,20 @@ global C GC DEBUGPLOT
 % Time of reading in sim [min]
 % Plasma insulin [pmol/L]
 [tITotal, vITotal] = GetSimTime(P, P.data.I);
-load('Diana.mat')
-tArray = time;
-tITotal = Treal;
-I = Ireal;
+% load('Diana.mat')
+% tArray = time;
+% tITotal = Treal;
+% I = Ireal;
 
 % Forward simulate ID model for IDF.
 P = IDModel(P); 
 IDF = P.results.IDF; % [mU/L]
 
 % Time and data arrays.
-% tArray = P.results.tArray;
-% I = C.pmol2mU(vITotal) - IDF(tITotal+1);
-ppI = griddedInterpolant(tITotal, I);  % [mU/L]
+tArray = P.results.tArray;
+tI = tITotal;
+vI = C.pmol2mU(vITotal) - IDF(tITotal+1);
+ppI = griddedInterpolant(tI, vI);  % [mU/L]
 
 
 %% Analytical Forward Simulation for Q
@@ -48,7 +49,7 @@ end
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
 I = ppI(tArray); % [mU/L]
 I0 = ppI(t0);
-Uen = val.Uen; % [mU/min]
+Uen = P.results.Uen; % [mU/min]
 
 % Set coefficients for MLR.
 % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
@@ -111,7 +112,7 @@ if DEBUGPLOT
    
    subplot(2,1,1)
    hold on
-   plot(tArray, ppI(tArray))
+   plot(tI, vI)
    simI = -A*[nL; xL] + I0 ...
                       - kI * cumtrapz(tArray, I) ...
                       - kIQ * cumtrapz(tArray, I-Q) ...
@@ -148,16 +149,15 @@ if DEBUGPLOT
    
    
    %% -----------------------------
-   load("AC.mat")
    figure()
    subplot(3,1,1)
-   plot(time,  A(:,1) - DA(:,1))
+   plot(tArray,  A(:,1))
    title("A(1)")
    subplot(3,1,2)
-   plot(time, A(:,2) - DA(:,2))
+   plot(tArray, A(:,2))
    title("A(2)")
    subplot(3,1,3)
-   plot(time, b - Dc)
+   plot(tArray, b)
    title("b")
 end
 

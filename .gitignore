@@ -3,5 +3,4 @@
 *.asv
 
 *.mat
-!Data/*.mat
-**/patient?.mat
+!Data/sys?.mat

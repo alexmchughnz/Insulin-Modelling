@@ -8,7 +8,7 @@ close all
 clc
 
 global DEBUGPLOT
-DEBUGPLOT = false;
+DEBUGPLOT = true;
 
 makeconfig
 makeparameters

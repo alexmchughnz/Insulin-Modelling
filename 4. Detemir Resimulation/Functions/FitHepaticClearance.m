@@ -93,6 +93,11 @@ if DEBUGPLOT
     cX = cumtrapz(tArray, ...
         Uen/GC.VI);
     A = [cN cX];
+    b = I0 - I ...
+    - kI * cumtrapz(tSegment, I) ...
+    - kIQ * cumtrapz(tSegment, I-Q) ...
+    + cumtrapz(tSegment, k);
+
     LHS = A .* [P.nL P.xL];
     
     figure()
@@ -169,6 +174,14 @@ if DEBUGPLOT
    subplot(3,1,3)
    plot(tArray, b)
    title("b")
+   
+   %% I Terms
+   
+   figure()
+   hold on
+   plot(tArray,  cumtrapz(tArray, kI*I), 'g')
+   plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
+   legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
 end
 
 end
@@ -186,8 +199,8 @@ Uen = P.results.Uen(segment); % [mU/min]
 
 % Set coefficients for MLR.
 % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-kI = GC.nK;
-kIQ = GC.nI./GC.VI;
+kI = 2*GC.nK;
+kIQ = 2*GC.nI./GC.VI;
 k = Uen/GC.VI;
 
 % Therefore, integrating:

@@ -144,23 +144,21 @@ if DEBUGPLOT
 
     %%
    figure()
-   subplot(4,1,1)
-   plot(tArray, -A*[nL; xL])
-   title("-A*[nL; xL]")
+   hold on
    
-   subplot(4,1,2)
-   plot(tArray, - kI * cumtrapz(tArray, I))
-   title("- kI * cumtrapz(tArray, I)")
-   ylim([-200 0])
+   plt = plot(tArray, A*[nL; xL], 'b');
+   plt.DisplayName = "A*x";
    
-   subplot(4,1,3)
-   plot(tArray, - kIQ * cumtrapz(tArray, I-Q))
-   title("- kIQ * cumtrapz(tArray, I-Q)")
-   ylim([-100 0])
+   plt = plot(tArray, kI * cumtrapz(tArray, I), 'r');
+   plt.DisplayName = "nK * integral(I)";
    
-   subplot(4,1,4)
-   plot(tArray, + cumtrapz(tArray, k))
-   title("+ cumtrapz(tArray, k)")
+   plt = plot(tArray, kIQ * cumtrapz(tArray, I-Q), 'g');
+   plt.DisplayName = "nI/vI * integral(I-Q)";
+   
+   plt = plot(tArray, cumtrapz(tArray, k), 'm');
+   plt.DisplayName = "integral(Uen/vI)";
+   
+   legend()
    
    
    %% -----------------------------

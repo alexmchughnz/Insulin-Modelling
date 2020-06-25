@@ -142,7 +142,7 @@ if DEBUGPLOT
     
     n = n + 1;
 
-    %%
+    %% Equation Terms
    figure()
    hold on
    
@@ -158,20 +158,26 @@ if DEBUGPLOT
    plt = plot(tArray, cumtrapz(tArray, k), 'm');
    plt.DisplayName = "integral(Uen/vI)";
    
+   plt = plot(tArray, I0 - I, 'c');
+   plt.DisplayName = "I - I0";
+   
    legend()
    
    
-   %% -----------------------------
+   %% MLR Terms
    figure()
-   subplot(3,1,1)
-   plot(tArray,  A(:,1))
-   title("A(1)")
-   subplot(3,1,2)
-   plot(tArray, A(:,2))
-   title("A(2)")
-   subplot(3,1,3)
-   plot(tArray, b)
-   title("b")
+   hold on
+   
+   plt = plot(tArray,  A(:,1));
+   plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
+   
+   plt = plot(tArray, A(:,2));
+   plt.DisplayName = "A(column 2) = integral(Uen/VI)";
+   
+   plt = plot(tArray, b);
+   plt.DisplayName = "b = I0 - I...";
+   
+   legend()
    
    %% I Terms
    

@@ -10,7 +10,7 @@ function P = EstimateInsulinSecretion(P)
 
 
 global C SC GC
-global DEBUGPLOT
+global DEBUGPLOTS
 
 %% Setup
 % Time of reading in sim [min]
@@ -46,8 +46,9 @@ P.results.Uen = Uen;
 fprintf('P%d: Estimated Uen.\n', P.patientNum); 
 
 %% Debug Plots
-if DEBUGPLOT
-   figure()
+DP = DEBUGPLOTS.EstimateInsulinSecretion;
+if DP.Uen
+   MakeDebugPlot(P, DP);
    plot(t, Uen)
    title(sprintf("P%d: Uen", P.patientNum))
 end

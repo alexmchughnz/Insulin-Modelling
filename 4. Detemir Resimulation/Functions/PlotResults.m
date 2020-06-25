@@ -69,39 +69,9 @@ datetick('x')
 ylim([0 300])
 
 %%
-persistent n;
-if (isempty(n))
-    n = 1;
-end
-
-tChange = time(end) - timeofday(time(end));
-
-figure(30)
-subplot(2, 3, n)
-plot(time, P.nL, 'b')
-title([patientLabel 'nL'])
-ylim([-0.1 0.1])
-L = line([tChange tChange], ylim);
-L.LineWidth = 1;
-L.Color = 'k';
-
-subplot(2, 3, n+3)
-plot(time, P.xL, 'r')
-title([patientLabel 'xL'])
-ylim([0.9 1.1])
-L = line([tChange tChange], ylim);
-L.LineWidth = 1;
-L.Color = 'k';
-
-n = n + 1;
-
-%%
 path = fullfile("Plots", "patient" + P.patientNum);
 savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
-fprintf(" d2 = %.4f", P.d2)
-fprintf(" nL = %.4f | %.4f \n",  P.nL(1), P.nL(end))
-fprintf(" xL = %.4f | %.4f \n",  P.xL(1), P.xL(end))
 
 end
 

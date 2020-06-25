@@ -3,16 +3,15 @@
 % Author : Alex McHugh
 % Created: 04/06/2020
 clear
+clear FitHepaticClearance  % to clear persistents in nL/xL plots...
 clear global
 close all
 clc
 
-global DEBUGPLOT
-DEBUGPLOT = true;
-
 makeconfig
 makeparameters
 makedata
+makedebugplots
 
 load config
 

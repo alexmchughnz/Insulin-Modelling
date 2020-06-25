@@ -1,7 +1,8 @@
 % Function to fit nL and xL.
 function P = FitHepaticClearance(P)
 
-global C GC DEBUGPLOT
+global C GC
+global DEBUGPLOTS
 
 %% Setup
 % Time of reading in sim [min]
@@ -57,7 +58,7 @@ iiDayEnd = 1 + minutes(day2 - P.simTime(1));     % Sim time when day 1 ends.
 iiSplits = [iiDayEnd P.simDuration()]; % Times of segment ends.
 segment = [1 : iiSplits(1)]';
 for ii = 1 : length(iiSplits)
-    [nL, ~] = FitSegment(P, ppI, Q, tArray, segment);    
+    [nL, ~] = FitSegment(P, ppI, Q, tArray, segment);
     P.nL(segment) = nL;
     
     % Update time segments (if continuing).
@@ -73,8 +74,10 @@ P.xL = xL*ones(size(tArray));
 
 
 %% Debug Plots
-if DEBUGPLOT
-    %% Forward Sim
+DP = DEBUGPLOTS.FitHepaticClearance;
+
+% Forward Simulation of Insulin
+if DP.ForwardSim
     % Retrieve data across segment.
     tSegment = [1 : P.simDuration()]';
     I = ppI(tSegment); % [mU/L]
@@ -100,7 +103,8 @@ if DEBUGPLOT
 
     LHS = A .* [P.nL P.xL];
     
-    figure()
+    % Plot!    
+    MakeDebugPlot(P, DP);
     
     subplot(2,1,1)
     hold on
@@ -117,33 +121,34 @@ if DEBUGPLOT
     hold on
     plot(tArray, Q)
     title("Q (analytical)")
-    
-    
-    %% nL/xL Values
-    persistent n;
-    if (isempty(n))
-        n = 1;
+end
+
+% nL/xL Values per Patient
+if DP.nLxL
+    persistent sp;
+    if (isempty(sp))
+        sp = 1;
     end
     
-    figure(30)
-    subplot(2, 3, n)
+    figure(999)
+    
+    subplot(2, 3, sp)
     plot(tArray, P.nL, 'b')
     title(sprintf("P%d: nL", P.patientNum))
     L = line([iiDayEnd iiDayEnd], ylim);
     L.LineWidth = 1;
     L.Color = 'k';
     
-    subplot(2, 3, n+3)
+    subplot(2, 3, sp+3)
     plot(tArray, P.xL, 'r')
     title(sprintf("P%d: xL", P.patientNum))
     L = line([iiDayEnd iiDayEnd], ylim);
     L.LineWidth = 1;
     L.Color = 'k';
-    
-    n = n + 1;
-
-    %% Equation Terms
-   figure()
+end
+% Equation Terms
+if DP.EquationTerms
+   MakeDebugPlot(P, DP);
    hold on
    
    plt = plot(tArray, A*[nL; xL], 'b');
@@ -162,10 +167,11 @@ if DEBUGPLOT
    plt.DisplayName = "I - I0";
    
    legend()
+end
    
-   
-   %% MLR Terms
-   figure()
+% MLR Terms
+if DP.MLRTerms
+   MakeDebugPlot(P, DP);
    hold on
    
    plt = plot(tArray,  A(:,1));
@@ -178,10 +184,11 @@ if DEBUGPLOT
    plt.DisplayName = "b = I0 - I...";
    
    legend()
-   
-   %% I Terms
-   
-   figure()
+end
+
+% Insulin Terms
+if DP.InsulinTerms   
+   MakeDebugPlot(P, DP);
    hold on
    plot(tArray,  cumtrapz(tArray, kI*I), 'g')
    plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))

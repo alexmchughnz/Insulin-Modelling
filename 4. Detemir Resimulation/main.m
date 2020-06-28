@@ -29,7 +29,7 @@ for ii = 1:length(patients)
 %     patients{ii}.nL = 0.15;
 %     patients{ii}.xL = 0.67;
     
-    patients{ii} = GridSearch(patients{ii});
+    patients{ii} = FindGutEmptyingRate(patients{ii});
     
     patients{ii} = FitInsulinSensitivity(patients{ii});
     

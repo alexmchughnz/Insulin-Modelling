@@ -1,8 +1,9 @@
-function originalP = GridSearch(originalP)
+function P = FindGutEmptyingRate(P)
+% Performs a grid search to find the most suitable gut emptying rate (d2).
 % INPUTS:
-%   originalP   - patient struct
+%   P   - patient struct
 % OUTPUT:
-%   originalP   - modified patient struct with best found d2
+%   P   - modified patient struct with best found d2
     
     
 %% Setup
@@ -12,40 +13,39 @@ d2Grid = log(2)./halfLifeGrid;
 N = length(d2Grid);
 
 % Results grids.
-SIGrid = zeros(originalP.simDuration(), N);
+SIGrid = zeros(P.simDuration(), N);
 GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)
-P = originalP;
 [tG, vG] = GetSimTime(P, P.data.G{3});
 
 %% Search
 for ii = 1:N 
-    P = originalP;
+    copyP = P;
     fprintf('P%d: Forward simulating with d2=%.4f.\n', ...
-            P.patientNum, d2Grid(ii));
+            copyP.patientNum, d2Grid(ii));
     
     % Retrieve d2 value to simulate.
-    P.d2 = d2Grid(ii);  % [1/min]
+    copyP.d2 = d2Grid(ii);  % [1/min]
     
     % Fit SI at this d2 value.
-    P = FitInsulinSensitivity(P);
-    SIGrid(:, ii) = P.SI;
+    copyP = FitInsulinSensitivity(copyP);
+    SIGrid(:, ii) = copyP.SI;
     
     % Simulate G(t, d2) with resulting SI.
-    P = GIModel(P);  % Required for P2.
-    P = IDModel(P);  % Required for QDF.
-    P = GCModel(P);
+    copyP = GIModel(copyP);  % Required for P2.
+    copyP = IDModel(copyP);  % Required for QDF.
+    copyP = GCModel(copyP);
     
     % Find average error G(t, d2) to measured data.
-    simG = P.results.G(tG+1);
+    simG = copyP.results.G(tG+1);
     GError = abs(simG - vG)./vG;
     GErrorGrid(ii) = mean(GError);    
 end
 
 %% Solving
 isBest = GErrorGrid == min(GErrorGrid);
-originalP.d2 = d2Grid(isBest);  % [1/min]
+P.d2 = d2Grid(isBest);  % [1/min]
 
 
 end

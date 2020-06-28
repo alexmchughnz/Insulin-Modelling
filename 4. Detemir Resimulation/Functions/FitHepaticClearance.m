@@ -76,34 +76,34 @@ P.xL = xL*ones(size(tArray));
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
 
-% Forward Simulation of Insulin
-if DP.ForwardSim
-    % Retrieve data across segment.
-    tSegment = [1 : P.simDuration()]';
-    I = ppI(tSegment); % [mU/L]
-    Q = Q(tSegment);
-    I0 = I(1);
-    Uen = P.results.Uen(tSegment); % [mU/min]
-    
-    % Set coefficients for MLR.
-    % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-    kI = GC.nK;
-    kIQ = GC.nI./GC.VI;
-    k = Uen/GC.VI;
-    
-    cN = cumtrapz(tArray, ...
-        I./(1 + GC.alphaI*I));
-    cX = cumtrapz(tArray, ...
-        Uen/GC.VI);
-    A = [cN cX];
-    b = I0 - I ...
-    - kI * cumtrapz(tSegment, I) ...
-    - kIQ * cumtrapz(tSegment, I-Q) ...
-    + cumtrapz(tSegment, k);
+% Retrieve data across segment.
+tSegment = [1 : P.simDuration()]';
+I = ppI(tSegment); % [mU/L]
+Q = Q(tSegment);
+I0 = I(1);
+Uen = P.results.Uen(tSegment); % [mU/min]
 
-    LHS = A .* [P.nL P.xL];
-    
-    % Plot!    
+% Set coefficients for MLR.
+% Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
+kI = GC.nK;
+kIQ = GC.nI./GC.VI;
+k = Uen/GC.VI;
+
+cN = cumtrapz(tArray, ...
+    I./(1 + GC.alphaI*I));
+cX = cumtrapz(tArray, ...
+    Uen/GC.VI);
+A = [cN cX];
+b = I0 - I ...
+- kI * cumtrapz(tSegment, I) ...
+- kIQ * cumtrapz(tSegment, I-Q) ...
++ cumtrapz(tSegment, k);
+
+LHS = A .* [P.nL P.xL];
+
+
+% Forward Simulation of Insulin
+if DP.ForwardSim 
     MakeDebugPlot(P, DP);
     
     subplot(2,1,1)
@@ -145,7 +145,10 @@ if DP.nLxL
     L = line([iiDayEnd iiDayEnd], ylim);
     L.LineWidth = 1;
     L.Color = 'k';
+    
+    sp = sp + 1;
 end
+
 % Equation Terms
 if DP.EquationTerms
    MakeDebugPlot(P, DP);

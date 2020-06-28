@@ -43,3 +43,4 @@ for ii = 1:length(patients)
     P = patients{ii};
     PlotResults(P);
 end
+PanelDebugPlots();

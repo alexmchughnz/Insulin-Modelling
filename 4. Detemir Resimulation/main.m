@@ -2,6 +2,10 @@
 
 % Author : Alex McHugh
 % Created: 04/06/2020
+
+pause 
+fprintf("Running main - press key to start.")
+
 clear
 clear FitHepaticClearance  % to clear persistents in nL/xL plots...
 clear global
@@ -21,24 +25,25 @@ loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
 patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
 
 %% Calculate Patient/Time Dependent Parameters
-for ii = 1:length(patients)
+for ii = 1:length(patients)    
     
     % Solve for dependent parameters.    
-    patients{ii} = EstimateInsulinSecretion(patients{ii});  
-    patients{ii} = FitHepaticClearance(patients{ii});
-%     patients{ii}.nL = 0.15;
-%     patients{ii}.xL = 0.67;
+    patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
-    patients{ii} = FindGutEmptyingRate(patients{ii});
+    patients{ii} = FitHepaticClearance(patients{ii});       % (nL, xL)
     
-    patients{ii} = FitInsulinSensitivity(patients{ii});
+    patients{ii} = FindGutEmptyingRate(patients{ii});       % (d2)
+    
+    patients{ii} = FitInsulinSensitivity(patients{ii});     % (SI)
     
     % Forward simulate models.
     patients{ii} = SolveSystem(patients{ii});
+    
 end
 
 %% Plot Results
 clear PlotResults PanelFigures
+
 for ii = 1:length(patients)
     P = patients{ii};
     PlotResults(P);

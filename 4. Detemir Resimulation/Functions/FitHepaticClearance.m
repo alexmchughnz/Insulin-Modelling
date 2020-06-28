@@ -8,10 +8,6 @@ global DEBUGPLOTS
 % Time of reading in sim [min]
 % Plasma insulin [pmol/L]
 [tITotal, vITotal] = GetSimTime(P, P.data.I);
-% load('Diana.mat')
-% tArray = time;
-% tITotal = Treal;
-% I = Ireal;
 
 % Forward simulate ID model for IDF.
 P = IDModel(P);
@@ -49,17 +45,18 @@ end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
 % Split data into daily segments, and fit nL per day.
-P.nL = zeros(size(tArray));
+P.results.nL = zeros(size(tArray));
 
-day1 = P.simTime(1) - timeofday(P.simTime(1));  % 00:00 on day 1.
+simStart = P.data.simTime(1);
+day1 = simStart - timeofday(simStart);  % 00:00 on day 1.
 day2 = day1 + 1;                                % 00:00 on day 2.
-iiDayEnd = 1 + minutes(day2 - P.simTime(1));     % Sim time when day 1 ends.
+iiDayEnd = 1 + minutes(day2 - simStart);     % Sim time when day 1 ends.
 
-iiSplits = [iiDayEnd P.simDuration()]; % Times of segment ends.
+iiSplits = [iiDayEnd P.data.simDuration()]; % Times of segment ends.
 segment = [1 : iiSplits(1)]';
 for ii = 1 : length(iiSplits)
     [nL, ~] = FitSegment(P, ppI, Q, tArray, segment);
-    P.nL(segment) = nL;
+    P.results.nL(segment) = nL;
     
     % Update time segments (if continuing).
     if ii < length(iiSplits)
@@ -68,16 +65,16 @@ for ii = 1 : length(iiSplits)
 end
 
 % Fit xL for whole time.
-segment = [1 : P.simDuration()]';
+segment = [1 : P.data.simDuration()]';
 [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
-P.xL = xL*ones(size(tArray));
+P.results.xL = xL*ones(size(tArray));
 
 
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
 
 % Retrieve data across segment.
-tSegment = [1 : P.simDuration()]';
+tSegment = [1 : P.data.simDuration()]';
 I = ppI(tSegment); % [mU/L]
 Q = Q(tSegment);
 I0 = I(1);
@@ -99,7 +96,7 @@ b = I0 - I ...
 - kIQ * cumtrapz(tSegment, I-Q) ...
 + cumtrapz(tSegment, k);
 
-LHS = A .* [P.nL P.xL];
+LHS = A .* [P.results.nL P.results.xL];
 
 
 % Forward Simulation of Insulin
@@ -133,14 +130,14 @@ if DP.nLxL
     figure(999)
     
     subplot(2, 3, sp)
-    plot(tArray, P.nL, 'b')
+    plot(tArray, P.results.nL, 'b')
     title(sprintf("P%d: nL", P.patientNum))
     L = line([iiDayEnd iiDayEnd], ylim);
     L.LineWidth = 1;
     L.Color = 'k';
     
     subplot(2, 3, sp+3)
-    plot(tArray, P.xL, 'r')
+    plot(tArray, P.results.xL, 'r')
     title(sprintf("P%d: xL", P.patientNum))
     L = line([iiDayEnd iiDayEnd], ylim);
     L.LineWidth = 1;

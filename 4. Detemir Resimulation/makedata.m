@@ -18,13 +18,13 @@ for ii = 1:length(patientNums)
     P.patientNum = data.PtNo;
     P.data.mass = data.pt_mass;           % Patient mass [kg]
     
-    P.trialTime     = [sys.trial_start_t, sys.trial_end_t];
-    P.trialDuration = @() minutes(diff(P.trialTime));
+    P.data.trialTime     = [sys.trial_start_t, sys.trial_end_t];
+    P.data.trialDuration = @() minutes(diff(P.trialTime));
     
-    P.simTime     =  [sys.sim_start_t, sys.sim_end_t];
-    P.simDuration =  @() minutes(diff(P.simTime)) + 1;
+    P.data.simTime     =  [sys.sim_start_t, sys.sim_end_t];
+    P.data.simDuration =  @() minutes(diff(P.data.simTime)) + 1;
     
-    P.results.tArray = (0 : P.simDuration() - 1)';
+    P.results.tArray = (0 : P.data.simDuration() - 1)';
     
     P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
     P.data.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
@@ -46,10 +46,10 @@ for ii = 1:length(patientNums)
     % Active if time within period.
     P.data.IBolus = @(t) ((tBolus <= t) && (t < tBolus+TBolus)).*IBolus/TBolus;
     
-    P.meal.durations = data.meal_durations;  %[min]
-    P.meal.startTimes = data.meal_start;     %[datetime]
-    P.meal.carbs = data.carbs;               %[g]
-    P.meal.sugar = data.sugar;               %[g]
+    P.data.meal.durations = data.meal_durations;  %[min]
+    P.data.meal.startTimes = data.meal_start;     %[datetime]
+    P.data.meal.carbs = data.carbs;               %[g]
+    P.data.meal.sugar = data.sugar;               %[g]
     
     day1 = sys.sim_start_t;    % Day 1 start, at sim start time [datetime]
     [Y, M, D] = ymd(day1 + 1);
@@ -71,7 +71,7 @@ for ii = 1:length(patientNums)
         duration = duration*60; % ''                   [min]
         
         startTime  = datetime('31/03/2017 05:15');
-        preSimTime = minutes(P.simTime(1) - startTime); % How long infusion ran before sim [min]
+        preSimTime = minutes(P.data.simTime(1) - startTime); % How long infusion ran before sim [min]
         
         startTime = 0 - preSimTime;         % Start of infusion [min]
         endTime   = duration - preSimTime;  % End of infusion [min]
@@ -96,7 +96,7 @@ if DP.GlucoseInput
         P = patients{ii};
         MakeDebugPlot(P, DP);
         
-        for tt = 1:P.simDuration()
+        for tt = 1:P.data.simDuration()
             G(tt) = GetGlucoseDelivery(tt, P);
         end
         

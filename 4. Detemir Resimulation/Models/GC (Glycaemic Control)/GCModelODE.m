@@ -21,16 +21,16 @@ Q0 = Y0(3); % [mU]
 %% Variables
 % Time dependent.
 n = (1 + floor(t));  % Index of current timestep.
-SI        = P.SI(n);                % [L/mU/min]
+SI        = P.results.SI(n);        % [L/mU/min]
 Uen       = P.results.Uen(n);       % [mU/min]
 P2        = P.results.P2(n);        % [mmol]
+nL        = P.results.nL(n);        % [1/min]
+xL        = P.results.xL(n);        % [1]
 GInfusion = P.data.GInfusion(n);    % Glucose infusion rate [mmol/min]
 GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
-nL        = P.nL(n);                % [1/min]
-xL        = P.xL(n);                % [1]
 
 % Patient dependent.
-d2 = P.d2;
+d2 = P.results.d2;
  
 % Derived values.
 QTFast  = Q0 + P.results.QDF(1);  % [mU/L]

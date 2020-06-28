@@ -13,7 +13,7 @@ d2Grid = log(2)./halfLifeGrid;
 N = length(d2Grid);
 
 % Results grids.
-SIGrid = zeros(P.simDuration(), N);
+SIGrid = zeros(P.data.simDuration(), N);
 GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)
@@ -26,11 +26,11 @@ for ii = 1:N
             copyP.patientNum, d2Grid(ii));
     
     % Retrieve d2 value to simulate.
-    copyP.d2 = d2Grid(ii);  % [1/min]
+    copyP.results.d2 = d2Grid(ii);  % [1/min]
     
     % Fit SI at this d2 value.
     copyP = FitInsulinSensitivity(copyP);
-    SIGrid(:, ii) = copyP.SI;
+    SIGrid(:, ii) = copyP.results.SI;
     
     % Simulate G(t, d2) with resulting SI.
     copyP = GIModel(copyP);  % Required for P2.
@@ -45,7 +45,7 @@ end
 
 %% Solving
 isBest = GErrorGrid == min(GErrorGrid);
-P.d2 = d2Grid(isBest);  % [1/min]
+P.results.d2 = d2Grid(isBest);  % [1/min]
 
 
 end

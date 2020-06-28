@@ -10,7 +10,7 @@ function [] = PlotResults(P)
 global C
 
 patientLabel = sprintf("Patient %d: ", P.patientNum);
-time = P.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
+time = P.data.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
 
 % Set up figure.
 F = PanelFigures(3, 3);
@@ -50,7 +50,7 @@ datetick('x')
 range = 1 : length(time);
 
 subplot(4, 1, 3)
-plot(time(range), P.SI(range), 'k')
+plot(time(range), P.results.SI(range), 'k')
 
 title([patientLabel 'Insulin Sensitivity'])
 xlabel('Time')

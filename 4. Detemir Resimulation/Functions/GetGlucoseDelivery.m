@@ -9,7 +9,7 @@ function D = GetGlucoseDelivery(t, P)
 global C
 
 % Extract meal times.
-M = P.meal;
+M = P.data.meal;
 mealStarts = M.startTimes;              % [min]
 mealEnds = mealStarts + M.durations;  % [min]
 

@@ -14,11 +14,9 @@ if ~exist('options', 'var')
 end
 
 % Set up initial conditions.
-[t, G] = GetSimTime(P, P.data.G{3});
-inSimTime = (0 <= t) & (t <= P.simDuration()); % [logical]
-G = G(inSimTime);
+[~, vG] = GetSimTime(P, P.data.G{3});
 
-G0 = G(1);
+G0 = vG(1);
 I0 = C.pmol2mU(P.data.I.value(1)); % [pmol/L] -> [mIU/L]
 Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 

@@ -11,7 +11,7 @@ load('parameters.mat', 'GI', 'GC')
 %% Setup
 % Define time range.
 intervalDuration = 360;  % Time per interval [min]
-numIntervals = floor(P.simDuration()/intervalDuration);
+numIntervals = floor(P.data.simDuration()/intervalDuration);
 
 % Forward simulate ID model for IDF.
 P = IDModel(P); 
@@ -28,7 +28,7 @@ ppI = griddedInterpolant(tITotal, I);  % I(t) [mU/L] piecewise polynomial. Use a
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;
 
-P.SI = ones(P.simDuration(), 1) * defaultSI;           % SI value at each minute in trial.
+P.results.SI = ones(P.data.simDuration(), 1) * defaultSI;           % SI value at each minute in trial.
 intervalSI = ones(numIntervals, 1) * defaultSI;        % SI value at each interval in sim.
 minuteSI = zeros(numIntervals * intervalDuration, 1);  % SI value at each minute in sim.
 
@@ -112,7 +112,7 @@ for ii = 1 : numIntervals
 end
 
 % Write estimated data into patient struct, overwriting defaults.
-P.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
+P.results.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
 fprintf('P%d: SI fit successfully. SI(*1e+3) at %d min intervals = ', ...
         P.patientNum, intervalDuration)
@@ -162,7 +162,7 @@ GFast = P.data.GFast(t);    % Fasting glucose [mmol/L]
 GInfusion = P.data.GInfusion(n); % Glucose infusion rate [mmol/min]
 
 % Patient dependent.
-d2 = P.d2;
+d2 = P.results.d2;
 
 % Derived values.
 QTFast  = Q0 + QDF0;

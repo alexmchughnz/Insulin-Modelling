@@ -5,13 +5,13 @@ load config
 patientNums = [1 3 4];
 
 global C
-global DEBUGPLOT
+global DEBUGPLOTS
 
 % STUB: grab data from previous code structs
 for ii = 1:length(patientNums)
     patientNum = patientNums(ii);
     filename = sprintf("sys%d.mat", patientNum);
-    load(filename);    
+    load(filename);
     data = sys.Data;
     
     clear P
@@ -43,7 +43,7 @@ for ii = 1:length(patientNums)
     tBolus = sys.SC.T;       % Time of bolus delivery [min]
     TBolus = 5;              % Period of bolus action [min]
     % Bolus as function of time, value spread over period.
-    % Active if time within period.   
+    % Active if time within period.
     P.data.IBolus = @(t) ((tBolus <= t) && (t < tBolus+TBolus)).*IBolus/TBolus;
     
     P.meal.durations = data.meal_durations;  %[min]
@@ -61,25 +61,25 @@ for ii = 1:length(patientNums)
     
     %% GInfusion Data (for P1)
     P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
-
-if (P.patientNum == 1)
-    % Information about infusion.    
-    MAGIC_DEXTROSE_NUMBER = 1.54;  % Assume this is some kind of "how much 
-                                   % glucose from 5% dextrose" factor.
-                                   
-    duration = 12;          % Duration of infusion [hrs]
-    duration = duration*60; % ''                   [min]
     
-    startTime  = datetime('31/03/2017 05:15');
-    preSimTime = minutes(P.simTime(1) - startTime); % How long infusion ran before sim [min]
-    
-    startTime = 0 - preSimTime;         % Start of infusion [min]
-    endTime   = duration - preSimTime;  % End of infusion [min]
-    
-    % Return infusion data.
-    iiInfusion = (startTime <= P.results.tArray) & (P.results.tArray < endTime); % 1 if infusion active [logical]
-    P.data.GInfusion = iiInfusion .* MAGIC_DEXTROSE_NUMBER/C.MGlucose/60;  % Glucose infusion over sim time [mmol/min]
-end
+    if (P.patientNum == 1)
+        % Information about infusion.
+        MAGIC_DEXTROSE_NUMBER = 1.54;  % Assume this is some kind of "how much
+        % glucose from 5% dextrose" factor.
+        
+        duration = 12;          % Duration of infusion [hrs]
+        duration = duration*60; % ''                   [min]
+        
+        startTime  = datetime('31/03/2017 05:15');
+        preSimTime = minutes(P.simTime(1) - startTime); % How long infusion ran before sim [min]
+        
+        startTime = 0 - preSimTime;         % Start of infusion [min]
+        endTime   = duration - preSimTime;  % End of infusion [min]
+        
+        % Return infusion data.
+        iiInfusion = (startTime <= P.results.tArray) & (P.results.tArray < endTime); % 1 if infusion active [logical]
+        P.data.GInfusion = iiInfusion .* MAGIC_DEXTROSE_NUMBER/C.MGlucose/60;  % Glucose infusion over sim time [mmol/min]
+    end
     
     %%
     filename = sprintf("patient%d.mat", patientNum);
@@ -88,22 +88,22 @@ end
 end
 
 %% Debug Plots
-if DEBUGPLOT    
+DP = DEBUGPLOTS.makedata;
+if DP.GlucoseInput
     loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
     patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
     for ii = 1:length(patients)
-        figure()        
         P = patients{ii};
+        MakeDebugPlot(P, DP);
         
         for tt = 1:P.simDuration()
             G(tt) = GetGlucoseDelivery(tt, P);
-        end     
+        end
         
         subplot(2,1,1)
         plot(P.results.tArray, G)
         title(sprintf("P%d: G Input", P.patientNum))
         ylabel("[mmol/min]")
-        
         
         subplot(2,1,2)
         plot(P.results.tArray, P.data.GInfusion)

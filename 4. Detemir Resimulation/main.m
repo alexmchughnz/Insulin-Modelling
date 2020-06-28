@@ -8,10 +8,10 @@ clear global
 close all
 clc
 
+makedebugplots
 makeconfig
 makeparameters
 makedata
-makedebugplots
 
 load config
 

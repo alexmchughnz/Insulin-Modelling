@@ -3,3 +3,7 @@
 *.asv
 
 *.mat
+*.mat
+Data/patient1.mat
+Data/patient3.mat
+Data/patient4.mat

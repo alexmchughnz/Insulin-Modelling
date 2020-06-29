@@ -3,14 +3,14 @@
 % Author : Alex McHugh
 % Created: 04/06/2020
 
+clc
+close all
+fprintf("Running main - press key to start.\n")
 pause 
-fprintf("Running main - press key to start.")
 
 clear
 clear FitHepaticClearance  % to clear persistents in nL/xL plots...
 clear global
-close all
-clc
 
 makedebugplots
 makeconfig

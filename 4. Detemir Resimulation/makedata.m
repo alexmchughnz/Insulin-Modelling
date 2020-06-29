@@ -36,8 +36,8 @@ for ii = 1:length(patientNums)
     P.data.G{3}.value = data.bg3;
     P.data.G{3}.time = data.bg3_time;
     
-    P.data.I.value = data.PlasmaI;        % Plasma insulin [?]
-    P.data.I.time  = data.PlasmaI_time;
+    P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [?]
+    P.data.ITotal.time  = data.PlasmaI_time;
     
     IBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
     tBolus = sys.SC.T;       % Time of bolus delivery [min]

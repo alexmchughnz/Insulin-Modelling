@@ -10,18 +10,23 @@ function [] = PlotResults(P)
 global C
 
 patientLabel = sprintf("Patient %d: ", P.patientNum);
-time = P.data.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
+tArray = P.data.simTime(1) + minutes(P.results.tArray);  % Time of results [datetime]
 
 % Set up figure.
 F = PanelFigures(3, 3);
 
-%% Glucose
-[tG, vG] = GetSimTime(P, P.data.G{3});
 
+%% Glucose
 subplot(4, 1, 1)
-plot(tG, vG,'r*');
 hold on
-plot(P.results.tArray, P.results.G, 'k');
+
+[tG, vG] = GetSimTime(P, P.data.G{3});
+tG = P.data.simTime(1) + minutes(tG);
+plt = plot(tG, vG, 'r*');
+plt.DisplayName = 'Blood Test';
+
+plt = plot(tArray, P.results.G, 'k');
+plt.DisplayName = 'Model Prediction';
 
 for ii = 1:length(P.iiSplits)
     split = P.iiSplits(ii);
@@ -30,24 +35,31 @@ for ii = 1:length(P.iiSplits)
     L.Color = 'k';
 end
 
-
-legend('Blood Test','Model')
 title([patientLabel 'Plasma Glucose'])
 xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
+legend()
 
 ylim([4 15])
 
-%% Insulin
-ITotal = C.mU2pmol(P.results.I + P.results.IDF);
-IInterp = C.mU2pmol(P.ppI(P.results.tArray));
-[tI, vI] = GetSimTime(P, P.data.I);
 
+%% Insulin + Detemir
 subplot(4, 1, 2)
 hold on
-plot(tI, vI, 'r*')
-plot(P.results.tArray, IInterp, 'b')
-plot(P.results.tArray, ITotal, 'k')
+
+[tITotal, vITotal] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
+tITotal = P.data.simTime(1) + minutes(tITotal);
+plt = plot(tITotal, vITotal, 'r*');
+plt.DisplayName = 'Blood Test';
+
+
+ITotal = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
+plt = plot(tArray, ITotal, 'k');
+plt.DisplayName = 'Model Prediction';
+
+IInterp = C.mU2pmol(P.ppI(P.results.tArray));
+plt = plot(tArray, IInterp, 'b');
+plt.DisplayName = 'Interpolation';
 
 for ii = 1:length(P.iiSplits)
     split = P.iiSplits(ii);
@@ -56,34 +68,36 @@ for ii = 1:length(P.iiSplits)
     L.Color = 'k';
 end
 
-legend('Blood Test', 'Interpolation', 'Model')
-
-title([patientLabel 'Plasma Insulin'])
+title([patientLabel 'Plasma Insulin + Detemir'])
 xlabel('Time')
-ylabel('Plasma Insulin, I [pmol/L]')
-% datetick('x')
+ylabel('Plasma Insulins, I + IDF [pmol/L]')
+legend()
+
+datetick('x')
+
 
 %% Insulin Senstivity
-range = 1 : length(time);
-
 subplot(4, 1, 3)
-plot(time(range), P.results.SI(range), 'k')
+plot(tArray, P.results.SI, 'k')
 
 title([patientLabel 'Insulin Sensitivity'])
 xlabel('Time')
 ylabel('$S_I$ [L/mU/min]')
+
 datetick('x')
+
 
 %% Insulin Secretion
 subplot(4, 1, 4)
-plot(time, P.results.Uen, 'k')
+plot(tArray, P.results.Uen, 'k')
 
 title([patientLabel 'Estimated Endogenous Insulin Secretion'])
 xlabel('Time')
 ylabel('$U_{en}$ [mU/min]')
-datetick('x')
 
+datetick('x')
 ylim([0 300])
+
 
 %%
 path = fullfile("Plots", "patient" + P.patientNum);

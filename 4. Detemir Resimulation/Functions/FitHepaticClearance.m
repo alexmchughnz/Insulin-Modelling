@@ -54,9 +54,11 @@ elseif P.patientNum == 4
     peaks = [152 715 1540 2155];
 end
 
-window = 60;
-peakSplits = [peaks - window/2; peaks + window/2];
-peakSplits = peakSplits(:).';  % Row vector of splits around peaks.
+window = 60;  % [min]
+delay = 10;   % [min]
+peakSplits = [peaks + delay - window/2; ...
+              peaks + delay + window/2];
+peakSplits = peakSplits(:).';  % Collapse to row vector of splits around peaks.
 
 iiSplits = [peakSplits P.data.simDuration()]; % Times of segment ends.
 

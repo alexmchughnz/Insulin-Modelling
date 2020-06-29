@@ -16,28 +16,37 @@ time = P.data.simTime(1) + P.results.tArray/24/60;  % Time of results [datetime]
 F = PanelFigures(3, 3);
 
 %% Glucose
-range = 2 : length(P.data.G{3}.time) - 1;
+[tG, vG] = GetSimTime(P, P.data.G{3});
 
 subplot(4, 1, 1)
-plot(P.data.G{3}.time(range), P.data.G{3}.value(range),'r*');
+plot(tG, vG,'r*');
 hold on
-plot(time, P.results.G, 'k');
+plot(P.results.tArray, P.results.G, 'k');
+
+for ii = 1:length(P.iiSplits)
+    split = P.iiSplits(ii);
+    L = line([split split], ylim);
+    L.LineWidth = 0.5;
+    L.Color = 'k';
+end
+
 
 legend('Blood Test','Model')
 title([patientLabel 'Plasma Glucose'])
 xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
 
-datetick('x')
 ylim([4 15])
 
 %% Insulin
 ITotal = C.mU2pmol(P.results.I + P.results.IDF);
+IInterp = C.mU2pmol(P.ppI(P.results.tArray));
+[tI, vI] = GetSimTime(P, P.data.I);
 
 subplot(4, 1, 2)
 hold on
-[tI, vI] = GetSimTime(P, P.data.I);
 plot(tI, vI, 'r*')
+plot(P.results.tArray, IInterp, 'b')
 plot(P.results.tArray, ITotal, 'k')
 
 for ii = 1:length(P.iiSplits)
@@ -47,7 +56,7 @@ for ii = 1:length(P.iiSplits)
     L.Color = 'k';
 end
 
-legend('Blood Test', 'Model')
+legend('Blood Test', 'Interpolation', 'Model')
 
 title([patientLabel 'Plasma Insulin'])
 xlabel('Time')

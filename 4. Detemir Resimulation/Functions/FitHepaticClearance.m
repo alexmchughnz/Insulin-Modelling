@@ -47,13 +47,18 @@ end
 P.results.nL = zeros(size(tArray));
 
 if P.patientNum == 1
-    iiSplits = [234 394 580 970 1425 1690 2005];
+    peaks = [115 290 730 1525 1760 2110];
 elseif P.patientNum == 3
-    iiSplits = [240 585 757 1445 1780 2060];
+    peaks = [125 670 1542 2153];
 elseif P.patientNum == 4
-    iiSplits = [360 600 775 1487 2050];
+    peaks = [152 715 1540 2155];
 end
-iiSplits = [iiSplits P.data.simDuration()]; % Times of segment ends.
+
+window = 60;
+peakSplits = [peaks - window/2; peaks + window/2];
+peakSplits = peakSplits(:).';  % Row vector of splits around peaks.
+
+iiSplits = [peakSplits P.data.simDuration()]; % Times of segment ends.
 
 segment = [1 : iiSplits(1)]';
 for ii = 1 : length(iiSplits)
@@ -71,6 +76,7 @@ segment = [1 : P.data.simDuration()]';
 [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
 P.results.xL = xL*ones(size(tArray));
 P.iiSplits = iiSplits;
+P.ppI = ppI;
 
 
 %% Debug Plots

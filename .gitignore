@@ -1,3 +1,7 @@
 *.fig
 
 *.asv
+
+config.mat
+parameters.mat
+patient?.mat

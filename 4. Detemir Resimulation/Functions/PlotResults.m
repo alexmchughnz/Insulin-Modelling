@@ -36,15 +36,23 @@ ITotal = C.mU2pmol(P.results.I + P.results.IDF);
 
 subplot(4, 1, 2)
 hold on
-plot(P.data.I.time,P.data.I.value,'r*')
-plot(time, ITotal, 'k')
+[tI, vI] = GetSimTime(P, P.data.I);
+plot(tI, vI, 'r*')
+plot(P.results.tArray, ITotal, 'k')
+
+for ii = 1:length(P.iiSplits)
+    split = P.iiSplits(ii);
+    L = line([split split], ylim);
+    L.LineWidth = 0.5;
+    L.Color = 'k';
+end
 
 legend('Blood Test', 'Model')
 
 title([patientLabel 'Plasma Insulin'])
 xlabel('Time')
 ylabel('Plasma Insulin, I [pmol/L]')
-datetick('x')
+% datetick('x')
 
 %% Insulin Senstivity
 range = 1 : length(time);

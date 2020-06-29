@@ -44,15 +44,17 @@ for ii = 2:length(tArray)
 end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
-% Split data into daily segments, and fit nL per day.
 P.results.nL = zeros(size(tArray));
 
-simStart = P.data.simTime(1);
-day1 = simStart - timeofday(simStart);  % 00:00 on day 1.
-day2 = day1 + 1;                                % 00:00 on day 2.
-iiDayEnd = 1 + minutes(day2 - simStart);     % Sim time when day 1 ends.
+if P.patientNum == 1
+    iiSplits = [234 394 580 970 1425 1690 2005];
+elseif P.patientNum == 3
+    iiSplits = [240 585 757 1445 1780 2060];
+elseif P.patientNum == 4
+    iiSplits = [360 600 775 1487 2050];
+end
+iiSplits = [iiSplits P.data.simDuration()]; % Times of segment ends.
 
-iiSplits = [iiDayEnd P.data.simDuration()]; % Times of segment ends.
 segment = [1 : iiSplits(1)]';
 for ii = 1 : length(iiSplits)
     [nL, ~] = FitSegment(P, ppI, Q, tArray, segment);
@@ -68,6 +70,7 @@ end
 segment = [1 : P.data.simDuration()]';
 [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
 P.results.xL = xL*ones(size(tArray));
+P.iiSplits = iiSplits;
 
 
 %% Debug Plots
@@ -92,15 +95,15 @@ cX = cumtrapz(tArray, ...
     Uen/GC.VI);
 A = [cN cX];
 b = I0 - I ...
-- kI * cumtrapz(tSegment, I) ...
-- kIQ * cumtrapz(tSegment, I-Q) ...
-+ cumtrapz(tSegment, k);
+    - kI * cumtrapz(tSegment, I) ...
+    - kIQ * cumtrapz(tSegment, I-Q) ...
+    + cumtrapz(tSegment, k);
 
 LHS = dot(A, [P.results.nL P.results.xL], 2);
 
 
 % Forward Simulation of Insulin
-if DP.ForwardSim 
+if DP.ForwardSim
     MakeDebugPlot(P, DP);
     
     subplot(2,1,1)
@@ -132,67 +135,73 @@ if DP.nLxL
     subplot(2, 3, sp)
     plot(tArray, P.results.nL, 'b')
     title(sprintf("P%d: nL", P.patientNum))
-    L = line([iiDayEnd iiDayEnd], ylim);
-    L.LineWidth = 1;
-    L.Color = 'k';
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+    end
     
     subplot(2, 3, sp+3)
     plot(tArray, P.results.xL, 'r')
     title(sprintf("P%d: xL", P.patientNum))
-    L = line([iiDayEnd iiDayEnd], ylim);
-    L.LineWidth = 1;
-    L.Color = 'k';
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+    end
     
     sp = sp + 1;
 end
 
 % Equation Terms
 if DP.EquationTerms
-   MakeDebugPlot(P, DP);
-   hold on
-   
-   plt = plot(tArray, A*[nL; xL], 'b');
-   plt.DisplayName = "A*x";
-   
-   plt = plot(tArray, kI * cumtrapz(tArray, I), 'r');
-   plt.DisplayName = "nK * integral(I)";
-   
-   plt = plot(tArray, kIQ * cumtrapz(tArray, I-Q), 'g');
-   plt.DisplayName = "nI/vI * integral(I-Q)";
-   
-   plt = plot(tArray, cumtrapz(tArray, k), 'm');
-   plt.DisplayName = "integral(Uen/vI)";
-   
-   plt = plot(tArray, I0 - I, 'c');
-   plt.DisplayName = "I - I0";
-   
-   legend()
+    MakeDebugPlot(P, DP);
+    hold on
+    
+    plt = plot(tArray, A*[nL; xL], 'b');
+    plt.DisplayName = "A*x";
+    
+    plt = plot(tArray, kI * cumtrapz(tArray, I), 'r');
+    plt.DisplayName = "nK * integral(I)";
+    
+    plt = plot(tArray, kIQ * cumtrapz(tArray, I-Q), 'g');
+    plt.DisplayName = "nI/vI * integral(I-Q)";
+    
+    plt = plot(tArray, cumtrapz(tArray, k), 'm');
+    plt.DisplayName = "integral(Uen/vI)";
+    
+    plt = plot(tArray, I0 - I, 'c');
+    plt.DisplayName = "I - I0";
+    
+    legend()
 end
-   
+
 % MLR Terms
 if DP.MLRTerms
-   MakeDebugPlot(P, DP);
-   hold on
-   
-   plt = plot(tArray,  A(:,1));
-   plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
-   
-   plt = plot(tArray, A(:,2));
-   plt.DisplayName = "A(column 2) = integral(Uen/VI)";
-   
-   plt = plot(tArray, b);
-   plt.DisplayName = "b = I0 - I...";
-   
-   legend()
+    MakeDebugPlot(P, DP);
+    hold on
+    
+    plt = plot(tArray,  A(:,1));
+    plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
+    
+    plt = plot(tArray, A(:,2));
+    plt.DisplayName = "A(column 2) = integral(Uen/VI)";
+    
+    plt = plot(tArray, b);
+    plt.DisplayName = "b = I0 - I...";
+    
+    legend()
 end
 
 % Insulin Terms
-if DP.InsulinTerms   
-   MakeDebugPlot(P, DP);
-   hold on
-   plot(tArray,  cumtrapz(tArray, kI*I), 'g')
-   plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
-   legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
+if DP.InsulinTerms
+    MakeDebugPlot(P, DP);
+    hold on
+    plot(tArray,  cumtrapz(tArray, kI*I), 'g')
+    plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
+    legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
 end
 
 end

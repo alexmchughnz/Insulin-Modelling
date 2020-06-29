@@ -55,7 +55,7 @@ elseif P.patientNum == 4
 end
 
 window = 60;  % [min]
-delay = 10;   % [min]
+delay = 5;   % [min]
 peakSplits = [peaks + delay - window/2; ...
               peaks + delay + window/2];
 peakSplits = peakSplits(:).';  % Collapse to row vector of splits around peaks.
@@ -153,12 +153,6 @@ if DP.nLxL
     subplot(2, 3, sp+3)
     plot(tArray, P.results.xL, 'r')
     title(sprintf("P%d: xL", P.patientNum))
-    for ii = 1:length(iiSplits)
-        split = iiSplits(ii);
-        L = line([split split], ylim);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-    end
     
     sp = sp + 1;
 end

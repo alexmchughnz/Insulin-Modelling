@@ -96,7 +96,7 @@ b = I0 - I ...
 - kIQ * cumtrapz(tSegment, I-Q) ...
 + cumtrapz(tSegment, k);
 
-LHS = A .* [P.results.nL P.results.xL];
+LHS = dot(A, [P.results.nL P.results.xL], 2);
 
 
 % Forward Simulation of Insulin

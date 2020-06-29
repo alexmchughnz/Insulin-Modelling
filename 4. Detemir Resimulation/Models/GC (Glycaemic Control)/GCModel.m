@@ -7,17 +7,16 @@ function [P] = GCModel(P, options)
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
-global C
-
 if ~exist('options', 'var')
     options = odeset;
 end
 
 % Set up initial conditions.
 [~, vG] = GetSimTime(P, P.data.G{3});
+[~, vI] = GetIFromITotal(P);  % [mU/L]
 
 G0 = vG(1);
-I0 = C.pmol2mU(P.data.I.value(1)); % [pmol/L] -> [mIU/L]
+I0 = vI(1);
 Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 
 Y0 = [G0;   

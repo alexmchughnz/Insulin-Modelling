@@ -1,23 +1,15 @@
 % Function to fit nL and xL.
 function P = FitHepaticClearance(P)
 
-global C GC
+global GC
 global DEBUGPLOTS
 
 %% Setup
-% Time of reading in sim [min]
-% Plasma insulin [pmol/L]
-[tITotal, vITotal] = GetSimTime(P, P.data.I);
-
-% Forward simulate ID model for IDF.
-P = IDModel(P);
-IDF = P.results.IDF; % [mU/L]
-
 % Time and data arrays.
-tArray = P.results.tArray;
-tI = tITotal;
-vI = C.pmol2mU(vITotal) - IDF(tITotal+1);
+[tI, vI] = GetIFromITotal(P);  % [mU/L]
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
+
+tArray = P.results.tArray;
 
 
 %% Analytical Forward Simulation for Q

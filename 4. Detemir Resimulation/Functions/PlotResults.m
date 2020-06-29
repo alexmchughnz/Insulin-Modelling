@@ -36,14 +36,14 @@ ITotal = C.mU2pmol(P.results.I + P.results.IDF);
 
 subplot(4, 1, 2)
 hold on
-plot(P.data.I.time,P.data.I.value,'r*')
+plot(P.data.ITotal.time, P.data.ITotal.value,'r*')
 plot(time, ITotal, 'k')
 
 legend('Blood Test', 'Model')
 
-title([patientLabel 'Plasma Insulin'])
+title([patientLabel 'Plasma Insulin + Detemir'])
 xlabel('Time')
-ylabel('Plasma Insulin, I [pmol/L]')
+ylabel('Plasma Insulins, I + IDF [pmol/L]')
 datetick('x')
 
 %% Insulin Senstivity

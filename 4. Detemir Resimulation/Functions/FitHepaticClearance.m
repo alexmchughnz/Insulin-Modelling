@@ -44,7 +44,7 @@ day1 = simStart - timeofday(simStart);  % 00:00 on day 1.
 day2 = day1 + 1;                                % 00:00 on day 2.
 iiDayEnd = 1 + minutes(day2 - simStart);     % Sim time when day 1 ends.
 
-iiSplits = [iiDayEnd P.data.simDuration()]; % Times of segment ends.
+iiSplits = [P.data.simDuration()]; % Times of segment ends.
 A = zeros(length(tArray), 2);
 bParts = zeros(length(tArray), 4);
 segment = [1 : iiSplits(1)]';
@@ -90,6 +90,9 @@ if DP.ForwardSim
         - kIQ * cumtrapz(tArray, I-Q) ...
         + cumtrapz(tArray, k);
     plot(tArray, simI)
+    
+    xlabel("Time [min]")
+    ylabel("Plasma insulin, I [mU/L]")
     title(sprintf("P%d: I", P.patientNum))
     legend("interpolated", "simulated")
     
@@ -110,7 +113,6 @@ if DP.nLxL
     
     subplot(2, 3, sp)
     plot(tArray, P.results.nL, 'b')
-    title(sprintf("P%d: nL", P.patientNum))
     for ii = 1:length(iiSplits)
         split = iiSplits(ii);
         L = line([split split], ylim);
@@ -118,9 +120,16 @@ if DP.nLxL
         L.Color = 'k';
     end
     
+    title(sprintf("P%d: nL", P.patientNum))
+    ylabel("$n_L$ [1/min]")
+    
+    
     subplot(2, 3, sp+3)
     plot(tArray, P.results.xL, 'r')
+    
     title(sprintf("P%d: xL", P.patientNum))
+    xlabel("Time [min]")
+    ylabel("$x_L$ [-]")
     
     sp = sp + 1;
 end
@@ -139,16 +148,16 @@ if DP.EquationTerms
     plt.DisplayName = "A*x";
     
     plt = plot(tArray, intITerm, 'r');
-    plt.DisplayName = "nK * integral(I)";
+    plt.DisplayName = "-nK * integral(I)";
     
     plt = plot(tArray, intIQTerm, 'g');
-    plt.DisplayName = "nI/vI * integral(I-Q)";
+    plt.DisplayName = "-nI/vI * integral(I-Q)";
     
     plt = plot(tArray, UenTerm, 'm');
-    plt.DisplayName = "integral(Uen/vI)";
+    plt.DisplayName = "-integral(Uen/vI)";
     
     plt = plot(tArray, ITerm, 'c');
-    plt.DisplayName = "I - I0";
+    plt.DisplayName = "I0 - I";
     
     for ii = 1:length(iiSplits)
         split = iiSplits(ii);
@@ -158,6 +167,8 @@ if DP.EquationTerms
         L.HandleVisibility = 'off';
     end
     
+    xlabel("Time [min]")
+    ylabel("Value of integral [mU/L]")
     legend()
 end
 
@@ -183,6 +194,8 @@ if DP.MLRTerms
         L.HandleVisibility = 'off';
     end
     
+    xlabel("Time [min]")
+    ylabel("Value of term [mU/L]")
     legend()
 end
 

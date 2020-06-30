@@ -10,7 +10,8 @@ function [] = PlotResults(P)
 global C
 
 patientLabel = sprintf("Patient %d: ", P.patientNum);
-tArray = P.data.simTime(1) + minutes(P.results.tArray);  % Time of results [datetime]
+tArray = P.results.tArray;                      % Time of results [min]
+dtArray = P.data.simTime(1) + minutes(tArray);  % ''              [datetime]
 
 % Set up figure.
 F = PanelFigures(3, 3);
@@ -21,9 +22,13 @@ subplot(4, 1, 1)
 hold on
 
 [tG, vG] = GetSimTime(P, P.data.G{3});
-tG = P.data.simTime(1) + minutes(tG);
-plt = plot(tG, vG, 'r*');
+dtG = P.data.simTime(1) + minutes(tG);
+plt = plot(dtG, vG, 'r*');
 plt.DisplayName = 'Blood Test';
+
+ppG = griddedInterpolant(tG, vG);
+plt = plot(dtArray, ppG(tArray), 'b');
+plt.DisplayName = 'Interpolation';
 
 plt = plot(tArray, P.results.G, 'k');
 plt.DisplayName = 'Model Prediction';
@@ -42,9 +47,13 @@ subplot(4, 1, 2)
 hold on
 
 [tITotal, vITotal] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
-tITotal = P.data.simTime(1) + minutes(tITotal);
-plt = plot(tITotal, vITotal, 'r*');
+dtITotal = P.data.simTime(1) + minutes(tITotal);
+plt = plot(dtITotal, vITotal, 'r*');
 plt.DisplayName = 'Blood Test';
+
+ppITotal = griddedInterpolant(tITotal, vITotal);
+plt = plot(dtArray, ppITotal(tArray), 'b');
+plt.DisplayName = 'Interpolation';
 
 ITotal = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
 plt = plot(tArray, ITotal, 'k');
@@ -60,7 +69,7 @@ datetick('x')
 
 %% Insulin Senstivity
 subplot(4, 1, 3)
-plot(tArray, P.results.SI, 'k')
+plot(dtArray, P.results.SI, 'k')
 
 title([patientLabel 'Insulin Sensitivity'])
 xlabel('Time')
@@ -71,7 +80,7 @@ datetick('x')
 
 %% Insulin Secretion
 subplot(4, 1, 4)
-plot(tArray, P.results.Uen, 'k')
+plot(dtArray, P.results.Uen, 'k')
 
 title([patientLabel 'Estimated Endogenous Insulin Secretion'])
 xlabel('Time')

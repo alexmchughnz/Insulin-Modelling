@@ -9,11 +9,13 @@ function [] = PlotResults(P)
 
 global C
 
-patientLabel = sprintf("Patient %d: ", P.patientNum);
-tArray = P.results.tArray;                      % Time of results [min]
-dtArray = P.data.simTime(1) + minutes(tArray);  % ''              [datetime]
+toDateTime = @(mins) P.data.simTime(1) + minutes(mins);
+
+tArray = P.results.tArray;     % Time of results [min]
+dtArray = toDateTime(tArray);  % ''              [datetime]
 
 % Set up figure.
+patientLabel = sprintf("Patient %d: ", P.patientNum);
 F = PanelFigures(3, 3);
 
 
@@ -30,8 +32,17 @@ ppG = griddedInterpolant(tG, vG);
 plt = plot(dtArray, ppG(tArray), 'b');
 plt.DisplayName = 'Interpolation';
 
-plt = plot(tArray, P.results.G, 'k');
+plt = plot(dtArray, P.results.G, 'k');
 plt.DisplayName = 'Model Prediction';
+
+lineBounds = ylim;
+for ii = 1:length(P.results.nLxLSplits)
+    split = toDateTime(P.results.nLxLSplits(ii));
+    L = line([split split], lineBounds);
+    L.LineWidth = 0.5;
+    L.Color = 'k';
+    L.HandleVisibility = 'off';
+end
 
 title([patientLabel 'Plasma Glucose'])
 xlabel('Time')
@@ -56,8 +67,17 @@ plt = plot(dtArray, ppITotal(tArray), 'b');
 plt.DisplayName = 'Interpolation';
 
 ITotal = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
-plt = plot(tArray, ITotal, 'k');
+plt = plot(dtArray, ITotal, 'k');
 plt.DisplayName = 'Model Prediction';
+
+lineBounds = ylim;
+for ii = 1:length(P.results.nLxLSplits)
+    split = toDateTime(P.results.nLxLSplits(ii));
+    L = line([split split], lineBounds);
+    L.LineWidth = 0.5;
+    L.Color = 'k';
+    L.HandleVisibility = 'off';
+end
 
 title([patientLabel 'Plasma Insulin + Detemir'])
 xlabel('Time')

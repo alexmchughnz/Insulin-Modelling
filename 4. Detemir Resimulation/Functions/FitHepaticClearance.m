@@ -45,10 +45,14 @@ day2 = day1 + 1;                                % 00:00 on day 2.
 iiDayEnd = 1 + minutes(day2 - simStart);     % Sim time when day 1 ends.
 
 iiSplits = [iiDayEnd P.data.simDuration()]; % Times of segment ends.
+A = zeros(length(tArray), 2);
+bParts = zeros(length(tArray), 4);
 segment = [1 : iiSplits(1)]';
 for ii = 1 : length(iiSplits)
-    [nL, ~] = FitSegment(P, ppI, Q, tArray, segment);
+    [nL, ~, segA, segbParts] = FitSegment(P, ppI, Q, tArray, segment);
     P.results.nL(segment) = nL;
+    A(segment, :) = segA;
+    bParts(segment, :) = segbParts;
     
     % Update time segments (if continuing).
     if ii < length(iiSplits)
@@ -60,46 +64,29 @@ end
 segment = [1 : P.data.simDuration()]';
 [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
 P.results.xL = xL*ones(size(tArray));
+P.results.nLxLSplits = iiSplits;
 
 
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
 
-% Retrieve data across segment.
-tSegment = [1 : P.data.simDuration()]';
-I = ppI(tSegment); % [mU/L]
-Q = Q(tSegment);
-I0 = I(1);
-Uen = P.results.Uen(tSegment); % [mU/min]
-
-% Set coefficients for MLR.
-% Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-kI = GC.nK;
-kIQ = GC.nI./GC.VI;
-k = Uen/GC.VI;
-
-cN = cumtrapz(tArray, ...
-    I./(1 + GC.alphaI*I));
-cX = cumtrapz(tArray, ...
-    Uen/GC.VI);
-A = [cN cX];
-b = I0 - I ...
-- kI * cumtrapz(tSegment, I) ...
-- kIQ * cumtrapz(tSegment, I-Q) ...
-+ cumtrapz(tSegment, k);
-
 LHS = dot(A, [P.results.nL P.results.xL], 2);
-
+b = sum(bParts, 2);
 
 % Forward Simulation of Insulin
-if DP.ForwardSim 
+if DP.ForwardSim
+    I = ppI(tArray);
+    kI = GC.nK;
+    kIQ = GC.nI./GC.VI;
+    k = P.results.Uen/GC.VI;
+    
     MakeDebugPlot(P, DP);
     
     subplot(2,1,1)
     hold on
-    plot(tArray, ppI(tArray))
+    plot(tArray, I)
     simI = -LHS + I0 ...
-        - kI * cumtrapz(tArray, GC.nK*I) ...
+        - kI * cumtrapz(tArray, kI*I) ...
         - kIQ * cumtrapz(tArray, I-Q) ...
         + cumtrapz(tArray, k);
     plot(tArray, simI)
@@ -124,72 +111,93 @@ if DP.nLxL
     subplot(2, 3, sp)
     plot(tArray, P.results.nL, 'b')
     title(sprintf("P%d: nL", P.patientNum))
-    L = line([iiDayEnd iiDayEnd], ylim);
-    L.LineWidth = 1;
-    L.Color = 'k';
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+    end
     
     subplot(2, 3, sp+3)
     plot(tArray, P.results.xL, 'r')
     title(sprintf("P%d: xL", P.patientNum))
-    L = line([iiDayEnd iiDayEnd], ylim);
-    L.LineWidth = 1;
-    L.Color = 'k';
     
     sp = sp + 1;
 end
 
 % Equation Terms
 if DP.EquationTerms
-   MakeDebugPlot(P, DP);
-   hold on
-   
-   plt = plot(tArray, A*[nL; xL], 'b');
-   plt.DisplayName = "A*x";
-   
-   plt = plot(tArray, kI * cumtrapz(tArray, I), 'r');
-   plt.DisplayName = "nK * integral(I)";
-   
-   plt = plot(tArray, kIQ * cumtrapz(tArray, I-Q), 'g');
-   plt.DisplayName = "nI/vI * integral(I-Q)";
-   
-   plt = plot(tArray, cumtrapz(tArray, k), 'm');
-   plt.DisplayName = "integral(Uen/vI)";
-   
-   plt = plot(tArray, I0 - I, 'c');
-   plt.DisplayName = "I - I0";
-   
-   legend()
+    ITerm = bParts(:, 1);
+    intITerm = bParts(:, 2);
+    intIQTerm = bParts(:, 3);
+    UenTerm = bParts(:, 4);
+    
+    MakeDebugPlot(P, DP);
+    hold on
+    
+    plt = plot(tArray, A*[nL; xL], 'b');
+    plt.DisplayName = "A*x";
+    
+    plt = plot(tArray, intITerm, 'r');
+    plt.DisplayName = "nK * integral(I)";
+    
+    plt = plot(tArray, intIQTerm, 'g');
+    plt.DisplayName = "nI/vI * integral(I-Q)";
+    
+    plt = plot(tArray, UenTerm, 'm');
+    plt.DisplayName = "integral(Uen/vI)";
+    
+    plt = plot(tArray, ITerm, 'c');
+    plt.DisplayName = "I - I0";
+    
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
+    
+    legend()
 end
-   
+
 % MLR Terms
 if DP.MLRTerms
-   MakeDebugPlot(P, DP);
-   hold on
-   
-   plt = plot(tArray,  A(:,1));
-   plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
-   
-   plt = plot(tArray, A(:,2));
-   plt.DisplayName = "A(column 2) = integral(Uen/VI)";
-   
-   plt = plot(tArray, b);
-   plt.DisplayName = "b = I0 - I...";
-   
-   legend()
+    MakeDebugPlot(P, DP);
+    hold on
+    
+    plt = plot(tArray,  A(:,1));
+    plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
+    
+    plt = plot(tArray, A(:,2));
+    plt.DisplayName = "A(column 2) = integral(Uen/VI)";
+    
+    plt = plot(tArray, b);
+    plt.DisplayName = "b = I0 - I...";
+    
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
+    
+    legend()
 end
 
 % Insulin Terms
-if DP.InsulinTerms   
-   MakeDebugPlot(P, DP);
-   hold on
-   plot(tArray,  cumtrapz(tArray, kI*I), 'g')
-   plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
-   legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
+if DP.InsulinTerms
+    MakeDebugPlot(P, DP);
+    hold on
+    plot(tArray,  cumtrapz(tArray, kI*I), 'g')
+    plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
+    legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
 end
 
 end
 
-function [nL, xL] = FitSegment(P, ppI, Q, tArray, segment)
+function [nL, xL, A, bParts] = FitSegment(P, ppI, Q, tArray, segment)
 global GC
 
 tSegment = tArray(segment);
@@ -202,8 +210,8 @@ Uen = P.results.Uen(segment); % [mU/min]
 
 % Set coefficients for MLR.
 % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-kI = 2*GC.nK;
-kIQ = 2*GC.nI./GC.VI;
+kI = GC.nK;
+kIQ = GC.nI./GC.VI;
 k = Uen/GC.VI;
 
 % Therefore, integrating:
@@ -218,10 +226,11 @@ cX = cumtrapz(tSegment, ...
 % Assembling MLR system:
 % [cN(t) cX(t)] * (nL; xL) = [b(t)]
 A = [cN cX];
-b = I0 - I ...
-    - kI * cumtrapz(tSegment, I) ...
-    - kIQ * cumtrapz(tSegment, I-Q) ...
-    + cumtrapz(tSegment, k);
+bParts = [I0 - I, ...
+    - kI * cumtrapz(tSegment, I), ...
+    - kIQ * cumtrapz(tSegment, I-Q), ...
+    + cumtrapz(tSegment, k)];
+b = sum(bParts, 2); % Sum along rows.
 
 % Fit first segment.
 x = A\b;

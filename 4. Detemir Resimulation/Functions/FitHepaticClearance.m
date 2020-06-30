@@ -51,13 +51,16 @@ delay = 5;   % [min]
 peakSplits = [peaks + delay - window/2; ...
               peaks + delay + window/2];
 peakSplits = peakSplits(:).';  % Collapse to row vector of splits around peaks.
-
 iiSplits = [peakSplits P.data.simDuration()]; % Times of segment ends.
 
+A = zeros(length(tArray), 2);
+bParts = zeros(length(tArray), 4);
 segment = [1 : iiSplits(1)]';
 for ii = 1 : length(iiSplits)
-    [nL, ~] = FitSegment(P, ppI, Q, tArray, segment);
+    [nL, ~, segA, segbParts] = FitSegment(P, ppI, Q, tArray, segment);
     P.results.nL(segment) = nL;
+    A(segment, :) = segA;
+    bParts(segment, :) = segbParts;
     
     % Update time segments (if continuing).
     if ii < length(iiSplits)
@@ -76,31 +79,13 @@ P.ppI = ppI;
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
 
-% Retrieve data across segment.
-tSegment = [1 : P.data.simDuration()]';
-I = ppI(tSegment); % [mU/L]
-Q = Q(tSegment);
-I0 = I(1);
-Uen = P.results.Uen(tSegment); % [mU/min]
-
-% Set coefficients for MLR.
-% Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-kI = GC.nK;
-kIQ = GC.nI./GC.VI;
-k = Uen/GC.VI;
-
-cN = cumtrapz(tArray, ...
-    I./(1 + GC.alphaI*I));
-cX = cumtrapz(tArray, ...
-    Uen/GC.VI);
-A = [cN cX];
-b = I0 - I ...
-    - kI * cumtrapz(tSegment, I) ...
-    - kIQ * cumtrapz(tSegment, I-Q) ...
-    + cumtrapz(tSegment, k);
+ITerm = bParts(:, 1);
+intITerm = bParts(:, 2);
+intIQTerm = bParts(:, 3);
+UenTerm = bParts(:, 4);
 
 LHS = dot(A, [P.results.nL P.results.xL], 2);
-
+b = sum(bParts, 2);
 
 % Forward Simulation of Insulin
 if DP.ForwardSim
@@ -157,17 +142,25 @@ if DP.EquationTerms
     plt = plot(tArray, A*[nL; xL], 'b');
     plt.DisplayName = "A*x";
     
-    plt = plot(tArray, kI * cumtrapz(tArray, I), 'r');
+    plt = plot(tArray, intITerm, 'r');
     plt.DisplayName = "nK * integral(I)";
     
-    plt = plot(tArray, kIQ * cumtrapz(tArray, I-Q), 'g');
+    plt = plot(tArray, intIQTerm, 'g');
     plt.DisplayName = "nI/vI * integral(I-Q)";
     
-    plt = plot(tArray, cumtrapz(tArray, k), 'm');
+    plt = plot(tArray, UenTerm, 'm');
     plt.DisplayName = "integral(Uen/vI)";
     
-    plt = plot(tArray, I0 - I, 'c');
+    plt = plot(tArray, ITerm, 'c');
     plt.DisplayName = "I - I0";
+    
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
     
     legend()
 end
@@ -186,6 +179,14 @@ if DP.MLRTerms
     plt = plot(tArray, b);
     plt.DisplayName = "b = I0 - I...";
     
+    for ii = 1:length(iiSplits)
+        split = iiSplits(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
+    
     legend()
 end
 
@@ -200,7 +201,7 @@ end
 
 end
 
-function [nL, xL] = FitSegment(P, ppI, Q, tArray, segment)
+function [nL, xL, A, bParts] = FitSegment(P, ppI, Q, tArray, segment)
 global GC
 
 tSegment = tArray(segment);
@@ -229,10 +230,11 @@ cX = cumtrapz(tSegment, ...
 % Assembling MLR system:
 % [cN(t) cX(t)] * (nL; xL) = [b(t)]
 A = [cN cX];
-b = I0 - I ...
-    - kI * cumtrapz(tSegment, I) ...
-    - kIQ * cumtrapz(tSegment, I-Q) ...
-    + cumtrapz(tSegment, k);
+bParts = [I0 - I, ...
+    - kI * cumtrapz(tSegment, I), ...
+    - kIQ * cumtrapz(tSegment, I-Q), ...
+    + cumtrapz(tSegment, k)];
+b = sum(bParts, 2); % Sum along rows.
 
 % Fit first segment.
 x = A\b;

@@ -30,6 +30,7 @@ plt.DisplayName = 'Blood Test';
 
 ppG = griddedInterpolant(tG, vG);
 plt = plot(dtArray, ppG(tArray), 'b');
+plt.LineWidth = 1;
 plt.DisplayName = 'Interpolation';
 
 plt = plot(dtArray, P.results.G, 'k');
@@ -64,6 +65,7 @@ plt.DisplayName = 'Blood Test';
 
 ppITotal = griddedInterpolant(tITotal, vITotal);
 plt = plot(dtArray, ppITotal(tArray), 'b');
+plt.LineWidth = 1;
 plt.DisplayName = 'Interpolation';
 
 ITotal = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]

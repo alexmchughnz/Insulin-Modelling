@@ -66,6 +66,9 @@ segment = [1 : P.data.simDuration()]';
 P.results.xL = xL*ones(size(tArray));
 P.results.nLxLSplits = iiSplits;
 
+% OVERWRITE FOR PLOTS DO NOT COMMIT
+P.results.nL = 0.18*ones(size(tArray));
+P.results.xL = 0.4*ones(size(tArray));
 
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
@@ -144,7 +147,7 @@ if DP.EquationTerms
     MakeDebugPlot(P, DP);
     hold on
     
-    plt = plot(tArray, A*[nL; xL], 'b');
+    plt = plot(tArray, LHS, 'b');
     plt.DisplayName = "A*x";
     
     plt = plot(tArray, intITerm, 'r');

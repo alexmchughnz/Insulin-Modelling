@@ -1,4 +1,6 @@
 %% main.m (Detemir Resimulation)
+% (This code generates a bunch of plots. If you want to hide them, go to
+% makedebugplots.m and change any 1s to 0s!)
 
 % Author : Alex McHugh
 % Created: 04/06/2020

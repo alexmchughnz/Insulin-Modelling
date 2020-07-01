@@ -1,12 +1,17 @@
-function P = FitInsulinSensitivity(P)
+function P = FitInsulinSensitivity(P, allowPlots)
 % Fits data to find SI over time for a patient.
 % INPUTS:
 %   P   - patient struct
 % OUTPUT:
 %   P   - modified patient struct with SI
+%   allowPlots - flag for whether debug plots should appear (allows
+%                suppression)
 
-global GI GC
-load('parameters.mat', 'GI', 'GC')
+global DEBUGPLOTS
+
+if ~exist('allowPlots', 'var')
+    allowPlots = false;
+end
 
 %% Setup
 % Define time range.
@@ -33,32 +38,32 @@ tb = ta + intervalDuration;  % End of current interval [min]
 %% Compute
 % ODE solver settings.
 optionsShort = odeset('RelTol',1e-5, ...  % Options for first minute.
-                      'AbsTol',1e-4, ...
-                      'MaxStep',0.2, ...
-                      'InitialStep',0.01);
+    'AbsTol',1e-4, ...
+    'MaxStep',0.2, ...
+    'InitialStep',0.01);
 optionsLong = odeset('RelTol',1e-5, ...   % Options for other minutes.
-                     'AbsTol',1e-4, ...
-                     'InitialStep',0.1);
+    'AbsTol',1e-4, ...
+    'InitialStep',0.1);
 
 % Initial conditions.
 YGI0 = [0.001;  % P1(t=0)        GI Model [mmol]
-        0]; 	% P2(t=0)  
-    
+    0]; 	% P2(t=0)
+
 YID0 = [0;   % ISC(t=0)          ID Model [mU/L]
-        0;   % QDFLocal(t=0)
-        0;   % QDBLocal(t=0)
-        0;   % IDF(t=0)
-        0;   % IDB(t=0)
-        0;   % QDF(t=0)
-        0];  % QDB(t=0)
-    
+    0;   % QDFLocal(t=0)
+    0;   % QDBLocal(t=0)
+    0;   % IDF(t=0)
+    0;   % IDB(t=0)
+    0;   % QDF(t=0)
+    0];  % QDB(t=0)
+
 YGC0 = [9;   % Q(t=0)            GC Model [mU/L]
-        0;   % GA(t=0)                    [mmol/L]
-        0];  % Gb(t=0)
-    
+    0;   % GA(t=0)                    [mmol/L]
+    0];  % Gb(t=0)
+
 Y0 = [YGI0;
-      YID0;
-      YGC0];
+    YID0;
+    YGC0];
 
 % For each interval, integrate the collection of ODEs,
 % then solve the dG equation for SI.
@@ -67,32 +72,32 @@ ccGb = 12;  % Column index of Gb in Y.
 for ii = 1 : numIntervals
     % First minute: finer solving.
     [t1, Y1] = ode45(@SIModelODE, ...
-                         ta : ta+1, ...
-                         Y0, ...
-                         optionsShort, ...
-                         ppG, ppI, P, Y0);
+        ta : ta+1, ...
+        Y0, ...
+        optionsShort, ...
+        ppG, ppI, P, Y0);
     Y0 = Y1(end, :)';  % Update ICs, picking up where we left off.
     
     % Remaining minutes: coarser solving.
     [t2, Y2] = ode45(@SIModelODE, ...
-                     (ta+1 : ta+intervalDuration-1)', ...
-                     Y0, ...
-                     optionsLong, ...
-                     ppG, ppI, P, Y0);
-                    
-    % Assemble sections (in 1 min intervals).              
+        (ta+1 : ta+intervalDuration-1)', ...
+        Y0, ...
+        optionsLong, ...
+        ppG, ppI, P, Y0);
+    
+    % Assemble sections (in 1 min intervals).
     t    = [t1(1); t2];
     Y    = [Y1(1, :); Y2];
-
+    
     % Solve linear system to find SI.
     % deltaG = -int{dGA}*SI + int{dGb}, therefore SI = GA\(Gb-deltaG).
     GA = Y(:, ccGA);         % Coefficient of SI in equation.
     Gb = Y(:, ccGb);         % Added terms in equation.
     
-    deltaG  = ppG(tb) - ppG(ta);  % Change in G over interval.  
+    deltaG  = ppG(tb) - ppG(ta);  % Change in G over interval.
     
-    A = GA;     
-    b = Gb-deltaG;          
+    A = GA;
+    b = Gb-deltaG;
     intervalSI(ii) = A\b;
     
     % Set SI value over current interval to computed value.
@@ -102,7 +107,7 @@ for ii = 1 : numIntervals
     % Update conditions for next iteration.
     ta = ta + intervalDuration;
     tb = tb + intervalDuration;
-       
+    
     Y0 = Y(end, :);
 end
 
@@ -110,9 +115,22 @@ end
 P.results.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
 fprintf('P%d: SI fit successfully. SI(*1e+3) at %d min intervals = ', ...
-        P.patientNum, intervalDuration)
+    P.patientNum, intervalDuration)
 disp(intervalSI'*1e3)
 
+
+%% Debug Plots
+if allowPlots
+    DP = DEBUGPLOTS.FitInsulinSensitivity;
+    if DP.SI
+        MakeDebugPlot(P, DP);
+        plot(P.results.tArray, P.results.SI, 'k')
+        
+        xlabel('Time')
+        ylabel('$S_I$ [L/mU/min]')
+        title(sprintf("P%d: Insulin Sensitivity", P.patientNum))
+    end
+end
 end
 
 
@@ -179,7 +197,7 @@ dYID = IDModelODE(t, YID, P);
 
 %% Output
 dY = [dYGI;
-      dYID;
-      dYGC];
-  
+    dYID;
+    dYGC];
+
 end

@@ -34,7 +34,7 @@ for ii = 1:length(patients)
     
     patients{ii} = FindGutEmptyingRate(patients{ii});       % (d2)
     
-    patients{ii} = FitInsulinSensitivity(patients{ii});     % (SI)
+    patients{ii} = FitInsulinSensitivity(patients{ii}, true);     % (SI)
     
     % Forward simulate models.
     patients{ii} = SolveSystem(patients{ii});

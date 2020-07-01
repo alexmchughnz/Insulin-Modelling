@@ -20,7 +20,7 @@ F = PanelFigures(3, 3);
 
 
 %% Glucose
-subplot(4, 1, 1)
+subplot(2, 1, 1)
 hold on
 
 [tG, vG] = GetSimTime(P, P.data.G{3});
@@ -55,7 +55,7 @@ ylim([4 15])
 
 
 %% Insulin + Detemir
-subplot(4, 1, 2)
+subplot(2, 1, 2)
 hold on
 
 [tITotal, vITotal] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
@@ -87,29 +87,6 @@ ylabel('Plasma Insulins, I + IDF [pmol/L]')
 legend()
 
 datetick('x')
-
-
-%% Insulin Senstivity
-subplot(4, 1, 3)
-plot(dtArray, P.results.SI, 'k')
-
-title([patientLabel 'Insulin Sensitivity'])
-xlabel('Time')
-ylabel('$S_I$ [L/mU/min]')
-
-datetick('x')
-
-
-%% Insulin Secretion
-subplot(4, 1, 4)
-plot(dtArray, P.results.Uen, 'k')
-
-title([patientLabel 'Estimated Endogenous Insulin Secretion'])
-xlabel('Time')
-ylabel('$U_{en}$ [mU/min]')
-
-datetick('x')
-ylim([0 300])
 
 
 %%

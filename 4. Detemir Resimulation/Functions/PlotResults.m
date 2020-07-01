@@ -37,8 +37,8 @@ plt = plot(dtArray, P.results.G, 'k');
 plt.DisplayName = 'Model Prediction';
 
 lineBounds = ylim;
-for ii = 1:length(P.results.nLxLSplits)
-    split = ToDateTime(P.results.nLxLSplits(ii));
+for ii = 1:length(P.results.nLxLFitBounds)
+    split = ToDateTime(P.results.nLxLFitBounds(ii));
     L = line([split split], lineBounds);
     L.LineWidth = 0.5;
     L.Color = 'k';
@@ -86,8 +86,8 @@ plt = plot(dtArray, ITotal, 'k');
 plt.DisplayName = 'Model Prediction';
 
 lineBounds = ylim;
-for ii = 1:length(P.results.nLxLSplits)
-    split = ToDateTime(P.results.nLxLSplits(ii));
+for ii = 1:length(P.results.nLxLFitBounds)
+    split = ToDateTime(P.results.nLxLFitBounds(ii));
     L = line([split split], lineBounds);
     L.LineWidth = 0.5;
     L.Color = 'k';

@@ -5,11 +5,13 @@ global GC
 global DEBUGPLOTS
 
 %% Setup
-% Time and data arrays.
-[tI, vI] = GetIFromITotal(P);  % [mU/L]
-ppI = griddedInterpolant(tI, vI);  % [mU/L]
+% Design for fits of nL/xL. Pick from {'single', 'daily', 'peaks'}.
+fitMethod = 'peaks';
 
-tArray = P.results.tArray;
+% Time and data arrays.
+[tI, vI] = GetIFromITotal(P);      % [mU/L]
+ppI = griddedInterpolant(tI, vI);  % [mU/L]
+tArray = P.results.tArray;         % [min]
 
 
 %% Analytical Forward Simulation for Q
@@ -37,40 +39,65 @@ end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
 P.results.nL = zeros(size(tArray));
-if P.patientNum == 1
-    peaks = [115 290 730 1525 1760 2110];
-elseif P.patientNum == 3
-    peaks = [125 670 1542 2153];
-elseif P.patientNum == 4
-    peaks = [152 715 1540 2155];
+P.results.xL = zeros(size(tArray));
+iiBounds = [];        % Times of fit segment ends.
+
+if isequal(fitMethod, 'single')
+    % Single value for whole simulation period.
+    iiBounds = [P.data.simDuration()];
+    
+elseif isequal(fitMethod, 'daily')
+    % Split data into daily segments, and fit nL per day.
+    simStart = P.data.simTime(1);
+    day1 = simStart - timeofday(simStart);    % 00:00 on day 1.
+    day2 = day1 + 1;                          % 00:00 on day 2.
+    iiDayEnd = 1 + minutes(day2 - simStart);  % Sim time when day 1 ends.
+    
+    iiBounds = [iiDayEnd P.data.simDuration()];
+    
+elseif isequal(fitMethod, 'peaks')
+    % Fits nL at specified peaks.
+    % Fits are of width 'window', centered at 'peaks' + 'delay'.
+    if P.patientNum == 1
+        peaks = [115 290 730 1525 1760 2110];
+    elseif P.patientNum == 3
+        peaks = [125 670 1542 2153];
+    elseif P.patientNum == 4
+        peaks = [152 715 1540 2155];
+    end
+    window = 60;  % [min]
+    delay = 5;   % [min]
+    
+    peakBounds = [peaks + delay - window/2; ...
+        peaks + delay + window/2];
+    peakBounds = peakBounds(:).';  % Collapse to row vector of bounds around peaks.
+    
+    iiBounds = [peakBounds P.data.simDuration()];
 end
 
-window = 60;  % [min]
-delay = 5;   % [min]
-peakSplits = [peaks + delay - window/2; ...
-              peaks + delay + window/2];
-peakSplits = peakSplits(:).';  % Collapse to row vector of splits around peaks.
-iiSplits = [peakSplits P.data.simDuration()]; % Times of segment ends.
+
+% Fit nL over segments.
 A = zeros(length(tArray), 2);
 bParts = zeros(length(tArray), 4);
-segment = [1 : iiSplits(1)]';
-for ii = 1 : length(iiSplits)
+segment = [1 : iiBounds(1)]';
+for ii = 1 : length(iiBounds)
     [nL, ~, segA, segbParts] = FitSegment(P, ppI, Q, tArray, segment);
     P.results.nL(segment) = nL;
     A(segment, :) = segA;
     bParts(segment, :) = segbParts;
     
     % Update time segments (if continuing).
-    if ii < length(iiSplits)
-        segment = [segment(end)+1 : iiSplits(ii+1)]';
+    if ii < length(iiBounds)
+        segment = [segment(end)+1 : iiBounds(ii+1)]';
     end
 end
+P.results.nLxLFitBounds = iiBounds;
 
 % Fit xL for whole time.
 segment = [1 : P.data.simDuration()]';
 [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
-P.results.xL = xL*ones(size(tArray));
-P.results.nLxLSplits = iiSplits;
+P.results.xL = xL*ones(size(P.results.xL));
+
 
 
 %% Debug Plots
@@ -119,8 +146,8 @@ if DP.nLxL
     
     subplot(2, 3, sp)
     plot(tArray, P.results.nL, 'b')
-    for ii = 1:length(iiSplits)
-        split = iiSplits(ii);
+    for ii = 1:length(iiBounds)
+        split = iiBounds(ii);
         L = line([split split], ylim);
         L.LineWidth = 0.5;
         L.Color = 'k';
@@ -165,8 +192,8 @@ if DP.EquationTerms
     plt = plot(tArray, ITerm, 'c');
     plt.DisplayName = "I0 - I";
     
-    for ii = 1:length(iiSplits)
-        split = iiSplits(ii);
+    for ii = 1:length(iiBounds)
+        split = iiBounds(ii);
         L = line([split split], ylim);
         L.LineWidth = 0.5;
         L.Color = 'k';
@@ -192,8 +219,8 @@ if DP.MLRTerms
     plt = plot(tArray, b);
     plt.DisplayName = "b = I0 - I...";
     
-    for ii = 1:length(iiSplits)
-        split = iiSplits(ii);
+    for ii = 1:length(iiBounds)
+        split = iiBounds(ii);
         L = line([split split], ylim);
         L.LineWidth = 0.5;
         L.Color = 'k';

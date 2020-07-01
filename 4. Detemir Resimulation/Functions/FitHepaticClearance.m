@@ -36,15 +36,21 @@ for ii = 2:length(tArray)
 end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
-% Split data into daily segments, and fit nL per day.
 P.results.nL = zeros(size(tArray));
+if P.patientNum == 1
+    peaks = [115 290 730 1525 1760 2110];
+elseif P.patientNum == 3
+    peaks = [125 670 1542 2153];
+elseif P.patientNum == 4
+    peaks = [152 715 1540 2155];
+end
 
-simStart = P.data.simTime(1);
-day1 = simStart - timeofday(simStart);  % 00:00 on day 1.
-day2 = day1 + 1;                                % 00:00 on day 2.
-iiDayEnd = 1 + minutes(day2 - simStart);     % Sim time when day 1 ends.
-
-iiSplits = [P.data.simDuration()]; % Times of segment ends.
+window = 60;  % [min]
+delay = 5;   % [min]
+peakSplits = [peaks + delay - window/2; ...
+              peaks + delay + window/2];
+peakSplits = peakSplits(:).';  % Collapse to row vector of splits around peaks.
+iiSplits = [peakSplits P.data.simDuration()]; % Times of segment ends.
 A = zeros(length(tArray), 2);
 bParts = zeros(length(tArray), 4);
 segment = [1 : iiSplits(1)]';

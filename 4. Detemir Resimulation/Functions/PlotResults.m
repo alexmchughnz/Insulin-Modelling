@@ -9,10 +9,10 @@ function [] = PlotResults(P)
 
 global C
 
-toDateTime = @(mins) P.data.simTime(1) + minutes(mins);
+ToDateTime = @(mins) P.data.simTime(1) + minutes(mins);
 
 tArray = P.results.tArray;     % Time of results [min]
-dtArray = toDateTime(tArray);  % ''              [datetime]
+dtArray = ToDateTime(tArray);  % ''              [datetime]
 
 % Set up figure.
 patientLabel = sprintf("Patient %d: ", P.patientNum);
@@ -20,11 +20,11 @@ F = PanelFigures(3, 3);
 
 
 %% Glucose
-subplot(2, 1, 1)
+subplot(4, 1, 1)
 hold on
 
 [tG, vG] = GetSimTime(P, P.data.G{3});
-dtG = P.data.simTime(1) + minutes(tG);
+dtG = ToDateTime(tG);
 plt = plot(dtG, vG, 'r*');
 plt.DisplayName = 'Blood Test';
 
@@ -38,7 +38,7 @@ plt.DisplayName = 'Model Prediction';
 
 lineBounds = ylim;
 for ii = 1:length(P.results.nLxLSplits)
-    split = toDateTime(P.results.nLxLSplits(ii));
+    split = ToDateTime(P.results.nLxLSplits(ii));
     L = line([split split], lineBounds);
     L.LineWidth = 0.5;
     L.Color = 'k';
@@ -54,12 +54,25 @@ datetick('x')
 ylim([4 15])
 
 
+%% Glucose Error
+ax = subplot(4, 1, 2);
+
+iiG = GetTimeIndex(tG, tArray);
+simG = P.results.G(iiG);
+GError = 100*abs((simG - vG) ./ vG);
+plot(dtG, GError, 'r');
+
+title([patientLabel 'Plasma Glucose Error'])
+xlabel('Time')
+ylabel('Error [\%]')
+
+
 %% Insulin + Detemir
-subplot(2, 1, 2)
+subplot(4, 1, 3)
 hold on
 
 [tITotal, vITotal] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
-dtITotal = P.data.simTime(1) + minutes(tITotal);
+dtITotal =ToDateTime(tITotal);
 plt = plot(dtITotal, vITotal, 'r*');
 plt.DisplayName = 'Blood Test';
 
@@ -74,7 +87,7 @@ plt.DisplayName = 'Model Prediction';
 
 lineBounds = ylim;
 for ii = 1:length(P.results.nLxLSplits)
-    split = toDateTime(P.results.nLxLSplits(ii));
+    split = ToDateTime(P.results.nLxLSplits(ii));
     L = line([split split], lineBounds);
     L.LineWidth = 0.5;
     L.Color = 'k';
@@ -87,6 +100,19 @@ ylabel('Plasma Insulins, I + IDF [pmol/L]')
 legend()
 
 datetick('x')
+
+
+%% Insulin Error
+ax = subplot(4, 1, 4);
+
+iiITotal = GetTimeIndex(tITotal, tArray);
+simITotal = ITotal(iiITotal);
+ITotalError = 100*abs((simITotal - vITotal) ./ vITotal);
+plot(dtITotal, ITotalError, 'r');
+
+title([patientLabel 'Plasma Insulins Error'])
+xlabel('Time')
+ylabel('Error [\%]')
 
 
 %%

@@ -11,8 +11,11 @@ function P = FindOptimalHepaticClearance(P, method, precision)
 global DEBUGPLOTS
 
 %% Setup
-nLRange = 0 : 0.02 : 0.30;
-xLRange = 0.3 : 0.1 : 1;
+nLDelta = 0.01;
+xLDelta = 0.02;
+
+nLRange = 0 : nLDelta : 0.30;
+xLRange = 0.3 : xLDelta : 1;
 [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
 
 if isequal(method, 'find')
@@ -28,9 +31,6 @@ elseif isequal(method, 'improve')
     
     nLPrecision = precision(1);
     xLPrecision = precision(2);
-    
-    nLDelta = diff(nLRange(1:2));
-    xLDelta = diff(xLRange(1:2));
     
     loop = 0;
     while (nLDelta > nLPrecision) && (xLDelta > nLPrecision)

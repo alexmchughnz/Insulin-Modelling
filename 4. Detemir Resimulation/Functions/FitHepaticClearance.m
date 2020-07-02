@@ -1,17 +1,16 @@
-function P = FitHepaticClearance(P)
+function P = FitHepaticClearance(P, method)
 % Fits data using MLR to find nL and xL.
 % INPUT:
 %   P   - patient struct
 % OUTPUT:
-%   P   - modified patient struct with nL and xL
-
+%   P      - modified patient struct with nL and xL
+%   method - 'single' to fit one nL value for entire period
+%            'daily' to fit one nL value per simulation day
+%            'peaks' to fit at manually-specified locations
 global GC
 global DEBUGPLOTS
 
 %% Setup
-% Design for fits of nL/xL. Pick from {'single', 'daily', 'peaks'}.
-fitMethod = 'peaks';
-
 % Time and data arrays.
 [tI, vI] = GetIFromITotal(P);      % [mU/L]
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
@@ -46,11 +45,11 @@ P.results.nL = zeros(size(tArray));
 P.results.xL = zeros(size(tArray));
 iiBounds = [];        % Times of fit segment ends.
 
-if isequal(fitMethod, 'single')
+if isequal(method, 'single')
     % Single value for whole simulation period.
     iiBounds = [P.data.simDuration()];
     
-elseif isequal(fitMethod, 'daily')
+elseif isequal(method, 'daily')
     % Split data into daily segments, and fit nL per day.
     simStart = P.data.simTime(1);
     day1 = simStart - timeofday(simStart);    % 00:00 on day 1.
@@ -59,7 +58,7 @@ elseif isequal(fitMethod, 'daily')
     
     iiBounds = [iiDayEnd P.data.simDuration()];
     
-elseif isequal(fitMethod, 'peaks')
+elseif isequal(method, 'peaks')
     % Fits nL at specified peaks.
     % Fits are of width 'window', centered at 'peaks' + 'delay'.
     if P.patientNum == 1

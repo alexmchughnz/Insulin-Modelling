@@ -1,5 +1,9 @@
-% Function to fit nL and xL.
 function P = FitHepaticClearance(P)
+% Fits data using MLR to find nL and xL.
+% INPUT:
+%   P   - patient struct
+% OUTPUT:
+%   P   - modified patient struct with nL and xL
 
 global GC
 global DEBUGPLOTS

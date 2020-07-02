@@ -1,6 +1,6 @@
 function P = FitInsulinSensitivity(P, allowPlots)
 % Fits data to find SI over time for a patient.
-% INPUTS:
+% INPUT:
 %   P   - patient struct
 % OUTPUT:
 %   P   - modified patient struct with SI

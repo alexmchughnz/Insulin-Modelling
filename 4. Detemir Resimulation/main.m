@@ -27,7 +27,8 @@ loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
 patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
 
 %% Calculate Patient/Time Dependent Parameters
-for ii = 1:length(patients)    
+for ii = 1:length(patients)
+    fprintf("\n\n===PATIENT %d===\n", patients{ii}.patientNum)
     
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)

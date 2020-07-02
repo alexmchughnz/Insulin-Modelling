@@ -59,6 +59,8 @@ for ii = 1:length(patientNums)
     GFast2 = sys.GC.fasting_bg2;
     P.data.GFast = @(t) (t < tFast)*GFast1 + (t >= tFast)*GFast2;
     
+    P.results.nLxLFitBounds = [];
+    
     %% GInfusion Data (for P1)
     P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
     

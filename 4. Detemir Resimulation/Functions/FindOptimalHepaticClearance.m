@@ -19,7 +19,7 @@ IResiduals = zeros(size(nLGrid));
 tArray = P.results.tArray;
 
 for ii = 1:numel(nLGrid)
-    fprintf('P%d: Trialling nL/xL = %.2f/%.1f in forward simulation\n', ...
+    fprintf('\nP%d: Trialling nL/xL = %.2f/%.1f in forward simulation\n', ...
     P.patientNum, nLGrid(ii), xLGrid(ii))
     
     copyP = P;
@@ -46,11 +46,11 @@ for ii = 1:numel(nLGrid)
     IResiduals(ii) = norm(ITotalError);    
 end
 
-save(sprintf('residualsP%d', P.patientNum), 'nLGrid', 'xLGrid', 'IResiduals')
+save(sprintf('./Results/residualsP%d', P.patientNum), 'nLGrid', 'xLGrid', 'IResiduals')
 
 
 %% Find Optimal nL/xL
-iiOptimal = find(IResiduals == min(IResiduals));
+iiOptimal = find(IResiduals == min(IResiduals(:)));
 nLBest = nLGrid(iiOptimal);
 xLBest = xLGrid(iiOptimal);
 

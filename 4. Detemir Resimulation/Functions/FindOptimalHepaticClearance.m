@@ -84,7 +84,7 @@ if DP.ErrorSurface
     plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
     plt.DisplayName = 'Optimal Point';
     
-    plt = plot3(0, 1, min(IResiduals(:)), 'y*');
+    plt = plot3(0, 1, IResiduals(end, 1), 'g*');
     plt.DisplayName = '$n_L/x_L = 0/1$';
     
     title(sprintf("P%d: Error Surface of (I+IDF) Fitting", P.patientNum))

@@ -57,11 +57,43 @@ end
 
 %% Find Optimal nL/xL
 iiOptimal = find(IResiduals == min(IResiduals(:)));
-nLBest = nLGrid(iiOptimal);
-xLBest = xLGrid(iiOptimal);
+bestnL = nLGrid(iiOptimal);
+bestxL = xLGrid(iiOptimal);
 
-P.results.nL = nLBest * ones(size(tArray));
-P.results.xL = xLBest * ones(size(tArray));
+P.results.nL = bestnL * ones(size(tArray));
+P.results.xL = bestxL * ones(size(tArray));
 
+
+%% Debug Plots
+DP = DEBUGPLOTS.FindOptimalHepaticClearance;
+
+% Error Surface
+if DP.ErrorSurface
+    MakeDebugPlot(P, DP);
+    hold on
+    
+    surf(nLRange, xLRange, IResiduals, ...
+        'HandleVisibility', 'off');
+    
+    levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), 10);
+    contour3(nLRange, xLRange, IResiduals, ...
+        levels, ...
+        'Color', 'r', ...
+        'HandleVisibility', 'off');
+    
+    plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
+    plt.DisplayName = 'Optimal Point';
+    
+    plt = plot3(0, 1, min(IResiduals(:)), 'y*');
+    plt.DisplayName = '$n_L/x_L = 0/1$';
+    
+    title(sprintf("P%d: Error Surface of (I+IDF) Fitting", P.patientNum))
+    xlabel("$n_L$ [-]")
+    ylabel("$x_L$ [1/min]")
+    zlabel("2-norm of residuals, $\psi$ [mU/min]")
+    
+    legend
+    
+end
 
 end

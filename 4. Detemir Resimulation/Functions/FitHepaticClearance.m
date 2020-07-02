@@ -10,6 +10,8 @@ function P = FitHepaticClearance(P, method)
 global GC
 global DEBUGPLOTS
 
+MeanNormalise = @(data) data ./ mean(data);
+
 %% Setup
 % Time and data arrays.
 [tI, vI] = GetIFromITotal(P);      % [mU/L]
@@ -180,19 +182,19 @@ if DP.EquationTerms
     MakeDebugPlot(P, DP);
     hold on
     
-    plt = plot(tArray, LHS, 'b');
+    plt = plot(tArray, MeanNormalise(LHS), 'b');
     plt.DisplayName = "A*x";
     
-    plt = plot(tArray, intITerm, 'r');
+    plt = plot(tArray, MeanNormalise(intITerm), 'r');
     plt.DisplayName = "-nK * integral(I)";
     
-    plt = plot(tArray, intIQTerm, 'g');
+    plt = plot(tArray, MeanNormalise(intIQTerm), 'g');
     plt.DisplayName = "-nI/vI * integral(I-Q)";
     
-    plt = plot(tArray, UenTerm, 'm');
+    plt = plot(tArray, MeanNormalise(UenTerm), 'm');
     plt.DisplayName = "-integral(Uen/vI)";
     
-    plt = plot(tArray, ITerm, 'c');
+    plt = plot(tArray, MeanNormalise(ITerm), 'c');
     plt.DisplayName = "I0 - I";
     
     for ii = 1:length(iiBounds)
@@ -204,7 +206,7 @@ if DP.EquationTerms
     end
     
     xlabel("Time [min]")
-    ylabel("Value of integral [mU/L]")
+    ylabel("Mean-normalised integral of term [mU/L]")
     legend()
 end
 
@@ -213,13 +215,13 @@ if DP.MLRTerms
     MakeDebugPlot(P, DP);
     hold on
     
-    plt = plot(tArray,  A(:,1));
+    plt = plot(tArray,  MeanNormalise(A(:,1)));
     plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
     
-    plt = plot(tArray, A(:,2));
+    plt = plot(tArray, MeanNormalise(A(:,2)));
     plt.DisplayName = "A(column 2) = integral(Uen/VI)";
     
-    plt = plot(tArray, b);
+    plt = plot(tArray, MeanNormalise(b));
     plt.DisplayName = "b = I0 - I...";
     
     for ii = 1:length(iiBounds)
@@ -231,7 +233,7 @@ if DP.MLRTerms
     end
     
     xlabel("Time [min]")
-    ylabel("Value of term [mU/L]")
+    ylabel("Mean-normalised integral of term [mU/L]")
     legend()
 end
 

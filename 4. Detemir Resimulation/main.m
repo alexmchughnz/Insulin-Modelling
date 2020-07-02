@@ -22,9 +22,15 @@ makedata
 load config
 
 %% Load Data
-% Patient data structs.
+patientNums = [1];
+
+% Generate patient data structs.
 loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
-patients = {loadpatient(1), loadpatient(3), loadpatient(4)};
+patients = cell(size(patientNums));
+for ii = 1 : length(patientNums)
+    n = patientNums(ii);
+    patients{ii} = loadpatient(n);
+end
 
 %% Calculate Patient/Time Dependent Parameters
 for ii = 1:length(patients)
@@ -33,7 +39,7 @@ for ii = 1:length(patients)
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, 'load');  % (nL, xL) by search
+    patients{ii} = FindOptimalHepaticClearance(patients{ii}, 'load', 0);  % (nL, xL) by search
 %     patients{ii} = FitHepaticClearance(patients{ii}, 'peaks');  % (nL, xL) by MLR
     
     patients{ii} = FindGutEmptyingRate(patients{ii});       % (d2)

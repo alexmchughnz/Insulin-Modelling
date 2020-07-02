@@ -1,38 +1,56 @@
-function P = FindOptimalHepaticClearance(P, method, precision)
+function P = FindOptimalHepaticClearance(P, method, arg)
 % Find optimal nL and xL, using grid search.
 % Runs a LOT of forward simulations in 'find' mode - very slow!
 % INPUT:
 %   P      - patient struct
 %   method - 'find' to perform grid search
 %            'load' to load previously-generated residuals data
+%            'improve' to load data and iterate it to some precision
+%   arg    - with 'load', the digit of improved residuals to load (eg. 0)
+%            with 'improve', the desired [nL, xL] grid precision
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
 global DEBUGPLOTS
 
 %% Setup
-nLDelta = 0.01;
-xLDelta = 0.02;
-
-nLRange = 0 : nLDelta : 0.30;
-xLRange = 0.3 : xLDelta : 1;
-[nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
-
 if isequal(method, 'find')
+    nLDelta = 0.01;
+    xLDelta = 0.02;
+    
+    nLRange = 0 : nLDelta : 0.30;
+    xLRange = 0.3 : xLDelta : 1;
+    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    
     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, 'residuals');
     
 elseif isequal(method, 'load')
-    load(sprintf('./Results/residualsP%d', P.patientNum), ...
-        'nLGrid', 'xLGrid', 'IResiduals');
+    if ~exist('arg', 'var')
+        load(sprintf('./Results/residualsP%d', P.patientNum), ...
+            'nLGrid', 'xLGrid', 'IResiduals');
+    else
+        dataNum = arg;
+        load(sprintf('./Results/improveresiduals%dP%d',dataNum, P.patientNum), ...
+            'nLGrid', 'xLGrid', 'IResiduals');
+    end
+    nLRange = nLGrid(1, :);
+    xLRange = xLGrid(:, 1);
+    
     
 elseif isequal(method, 'improve')
+    nLPrecision = arg(1);
+    xLPrecision = arg(2);
+    
     load(sprintf('./Results/residualsP%d', P.patientNum), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
-    nLPrecision = precision(1);
-    xLPrecision = precision(2);
+    nLRange = nLGrid(1, :);
+    xLRange = xLGrid(:, 1);    
+    nLDelta = diff(nLRange(1:2));
+    xLDelta = diff(xLRange(1:2));
     
     loop = 0;
+    factor = 2;
     while (nLDelta > nLPrecision) && (xLDelta > nLPrecision)
         % Find optima of current grid.
         iiOpt = find(IResiduals == min(IResiduals(:)));
@@ -50,14 +68,14 @@ elseif isequal(method, 'improve')
         IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
         
         % Update values.
-        if nLDelta > 10*nLPrecision
-            nLDelta = nLDelta / 10;
+        if nLDelta > factor*nLPrecision
+            nLDelta = nLDelta / factor;
         else
             nLDelta = nLPrecision;
         end
         
         if xLDelta > 10*xLPrecision
-            xLDelta = xLDelta / 10;
+            xLDelta = xLDelta / factor;
         else
             xLDelta = xLPrecision;
         end
@@ -87,7 +105,8 @@ if DP.ErrorSurface
     surf(nLRange, xLRange, IResiduals, ...
         'HandleVisibility', 'off');
     
-    levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), 10);
+    numLevels = 50;
+    levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels);
     contour3(nLRange, xLRange, IResiduals, ...
         levels, ...
         'Color', 'r', ...
@@ -96,8 +115,10 @@ if DP.ErrorSurface
     plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
     plt.DisplayName = 'Optimal Point';
     
-    plt = plot3(0, 1, IResiduals(end, 1), 'g*');
-    plt.DisplayName = '$n_L/x_L = 0/1$';
+    if ismember(0, nLRange) && ismember(1, xLRange)
+        plt = plot3(0, 1, IResiduals(end, 1), 'g*');
+        plt.DisplayName = '$n_L/x_L = 0/1$';
+    end
     
     title(sprintf("P%d: Error Surface of (I+IDF) Fitting", P.patientNum))
     xlabel("$n_L$ [-]")

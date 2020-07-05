@@ -84,12 +84,14 @@ end
 % Fit nL over segments.
 A = zeros(length(tArray), 2);
 bParts = zeros(length(tArray), 4);
+condA = zeros(length(tArray), 1);
 segment = [1 : iiBounds(1)]';
 for ii = 1 : length(iiBounds)
-    [nL, ~, segA, segbParts] = FitSegment(P, ppI, Q, tArray, segment);
+    [nL, ~, segA, segbParts, segcondA] = FitSegment(P, ppI, Q, tArray, segment);
     P.results.nL(segment) = nL;
     A(segment, :) = segA;
     bParts(segment, :) = segbParts;
+    condA(segment) = segcondA;
     
     % Update time segments (if continuing).
     if ii < length(iiBounds)
@@ -246,9 +248,27 @@ if DP.InsulinTerms
     legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
 end
 
+% Condition Number
+if DP.ConditionNumber
+    MakeDebugPlot(P, DP);
+    hold on
+    
+    plot(tArray,  condA);
+    
+    for ii = 1:length(iiBounds)
+        split = iiBounds(ii);
+        L = line([split split], ylim);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
+    
+    xlabel("Time [min]")
+    ylabel("Condition number of A (over segment)")
+end
 end
 
-function [nL, xL, A, bParts] = FitSegment(P, ppI, Q, tArray, segment)
+function [nL, xL, A, bParts, condA] = FitSegment(P, ppI, Q, tArray, segment)
 global GC
 
 tSegment = tArray(segment);
@@ -292,4 +312,5 @@ xL = x(2);
 lb = 1e-7;  % Lower bound on nL/xL.
 nL = max(nL, lb);  % [1/min]
 xL = max(xL, lb);  % [1]
+condA = cond(A);
 end

@@ -15,18 +15,23 @@ global DEBUGPLOTS
 
 %% Setup
 if isequal(method, 'find')
-    nLDelta = 0.01;
-    xLDelta = 0.02;
+    nLDelta = 0.05;
+    xLDelta = 0.1;
     
-    nLRange = 0 : nLDelta : 0.30;
-    xLRange = 0.3 : xLDelta : 1;
+    nLBounds = [0 1];
+    xLBounds = [0 1];
+    
+    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     
-    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, 'residuals');
+    savename = sprintf("residuals%g%g%g%g", nLBounds, xLBounds);
+    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
     
 elseif isequal(method, 'load')
     if ~exist('arg', 'var')
-        load(sprintf('./Results/residualsP%d', P.patientNum), ...
+        savename = arg;
+        load(sprintf('./Results/%sP%d', savename, P.patientNum), ...
             'nLGrid', 'xLGrid', 'IResiduals');
     else
         dataNum = arg;
@@ -50,7 +55,8 @@ elseif isequal(method, 'improve')
     xLDelta = diff(xLRange(1:2));
     
     loop = 0;
-    factor = 2;
+    factor = 10;
+    numSegments = 10;
     while (nLDelta > nLPrecision) && (xLDelta > nLPrecision)
         % Find optima of current grid.
         iiOpt = find(IResiduals == min(IResiduals(:)));
@@ -59,8 +65,8 @@ elseif isequal(method, 'improve')
         xLOpt = xLRange(iixLOpt);
         
         % Set up new search range around optima.
-        nLRange = linspace(nLOpt - nLDelta/2, nLOpt + nLDelta/2, 10);
-        xLRange = linspace(xLOpt - xLDelta/2, xLOpt + xLDelta/2, 10);
+        nLRange = linspace(nLOpt - nLDelta, nLOpt + nLDelta, numSegments);
+        xLRange = linspace(xLOpt - xLDelta, xLOpt + xLDelta, numSegments);
         [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
         
         % Evaluate over grid.
@@ -74,7 +80,7 @@ elseif isequal(method, 'improve')
             nLDelta = nLPrecision;
         end
         
-        if xLDelta > 10*xLPrecision
+        if xLDelta > factor*xLPrecision
             xLDelta = xLDelta / factor;
         else
             xLDelta = xLPrecision;
@@ -137,7 +143,7 @@ global C
 
 IResiduals = zeros(size(nLGrid));
 for ii = 1:numel(nLGrid)
-    fprintf('\nP%d: Trialling nL/xL = %.2f/%.1f in forward simulation (%d/%d)\n', ...
+    fprintf('\nP%d: Trialling nL/xL = %g/%g in forward simulation (%d/%d)\n', ...
         P.patientNum, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
     
     copyP = P;

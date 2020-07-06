@@ -4,9 +4,11 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 % INPUT:
 %   P        - patient struct
 %   method   - 'find' to perform grid search
+%              'line' to perform grid search on line
 %              'load' to load previously-generated residuals data
 %              'improve' to load data and iterate it to some precision
-%   varargin - with 'load', the filename to load
+%   varargin - with 'line', [nL-intercept xL-intercept] to search over
+%            - with 'load', the filename to load
 %            - with 'improve', {1} the filename to load and improve
 %                              {2} desired [nL, xL] grid precision
 % OUTPUT:
@@ -19,24 +21,71 @@ global FILEFORMAT
 global resultsfile
 
 RESIDUALSFORMAT = "residuals nL[%g %g]@%g xL[%g %g]@%g";
+LINEFORMAT = "line nL=%g@%g to xL=%g@%g, t=%g";
 FILEFORMAT = '%sP%d.mat';
 resultsfile = @(filename) fullfile(RESULTPATH, filename);
 
 %% Setup
 if isequal(method, 'find')
     nLDelta = 0.2;
-    xLDelta = 0.2;
-    
     nLBounds = [0 1];
-    xLBounds = [-1 0];
-    
     nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+    
+    xLDelta = 0.2;
+    xLBounds = [-1 0];
     xLRange = xLBounds(1) : xLDelta : xLBounds(end);
+    
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     
     savename = sprintf(RESIDUALSFORMAT, ...
         nLBounds, nLDelta, xLBounds, xLDelta);
     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
+    
+elseif isequal(method, 'line')
+    nLIntercept = varargin {1}(1);
+    xLIntercept = varargin {1}(2);
+    
+    % Establish full grid over area.
+    nLDelta = 0.01;
+    nLBounds = [0 nLIntercept];
+    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+    
+    xLDelta = 0.01;
+    xLBounds = [0 xLIntercept];
+    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
+    
+    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    
+    % Define line - a series of slices of xL for each nL value.
+    nLtoxL = @(nL) RoundToMultiple(nLIntercept - nLIntercept/xLIntercept * nL, ...
+        nLDelta);
+    
+    thickness = 0.2;  % In xL axis [-]
+    xLLine = [];
+    nLLine = [];
+    for nL = nLRange
+        xL = nLtoxL(nL);  % Corresponding xL on line for nL.
+        xLSlice = xL-thickness/2 : xLDelta : xL+thickness/2;
+        nLSlice = nL * ones(size(xLSlice));
+        
+        % Append to values along line.
+        xLLine = [xLLine xLSlice];
+        nLLine = [nLLine nLSlice];
+    end
+    
+    % Find residuals along nL/xL ranges.
+    savename = sprintf(LINEFORMAT, ...
+        nLIntercept, nLDelta, xLIntercept, xLDelta, thickness);
+    LineResiduals = EvaluateGrid(P, nLLine, xLLine, savename);
+    
+    % Reshape residuals onto grid.
+    IResiduals = nan(size(nLGrid));
+    for ii = 1 : length(LineResiduals)
+        iinL = find(nLRange == nLLine(ii));
+        iixL = find(xLRange == xLLine(ii));
+        
+        IResiduals(iixL, iinL) = LineResiduals(ii);
+    end
     
 elseif isequal(method, 'load')
     % Load by name.
@@ -51,7 +100,7 @@ elseif isequal(method, 'improve')
     % Load by name.
     loadname = varargin{1};
     nLPrecision = varargin{2}(1);
-    xLPrecision = varargin{2}(2);    
+    xLPrecision = varargin{2}(2);
     
     load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
@@ -80,23 +129,23 @@ elseif isequal(method, 'improve')
         
         % Evaluate over grid.
         savename = sprintf(RESIDUALSFORMAT, ...
-        nLBounds, nLDelta, xLBounds, xLDelta);
+            nLBounds, nLDelta, xLBounds, xLDelta);
         IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
         
-        % Shift window without further precision if best value on boundary.
+        % Update grid settings for next iteration.
         if (iinLOpt == 1) || (iinLOpt == numSegments) ...
-                || (iixLOpt == 1) || (iixLOpt == numSegments)
+                || (iixLOpt == 1) || (iixLOpt == numSegments)            
+            % Best value is on boundary. Next loop will recenter window
+            % at same precision - do nothing and continue!
+            loop = true;
             
-            % Do nothing and continue!
+        elseif (nLDelta == nLPrecision) && (xLDelta == xLPrecision)
+            % We're at desired precision, and optimum isn't on edge.
+            % Time to finish up.
+            loop = false;
             
         else
-            if (nLDelta == nLPrecision) && (xLDelta == xLPrecision)
-                % We're at desired precision, and optimum isn't on edge.
-                % Time to finish up.
-                loop = false;
-            end
-            
-            % Update values for more precision.
+            % Increase precision of grid.
             if nLDelta/factor > nLPrecision
                 nLDelta = nLDelta/factor;
             else
@@ -108,8 +157,8 @@ elseif isequal(method, 'improve')
             else
                 xLDelta = xLPrecision;
             end
-        end        
-    end    
+        end
+    end
 end
 
 %% Find Optimal nL/xL
@@ -166,9 +215,13 @@ global FILEFORMAT
 global resultsfile
 
 IResiduals = zeros(size(nLGrid));
+fitTime = duration();
 for ii = 1:numel(nLGrid)
-    fprintf('\nP%d: Trialling nL/xL = %g/%g in forward simulation (%d/%d)\n', ...
+    tic
+    fprintf('\nP%d: Trialling nL/xL = %g/%g in forward simulation (%d/%d). ', ...
         P.patientNum, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
+    fprintf('Estimated time remaining: %s\n', ...
+        datestr(fitTime*(numel(nLGrid) - ii + 1),'HH:MM:SS'))
     
     copyP = P;
     
@@ -194,6 +247,8 @@ for ii = 1:numel(nLGrid)
     IResiduals(ii) = norm(ITotalError);
     save(resultsfile(sprintf(FILEFORMAT, savename, P.patientNum)), ...
         'nLGrid', 'xLGrid', 'IResiduals')
+    
+    fitTime = duration(seconds(toc));
 end
 
 end

@@ -46,18 +46,18 @@ elseif isequal(method, 'line')
     xLIntercept = varargin {1}(2);
     
     % Establish full grid over area.
-    nLDelta = 0.01;
+    nLDelta = 0.02;
     nLBounds = [0 nLIntercept];
     nLRange = nLBounds(1) : nLDelta : nLBounds(end);
     
-    xLDelta = 0.01;
+    xLDelta = 0.02;
     xLBounds = [0 xLIntercept];
     xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     
     % Define line - a series of slices of xL for each nL value.
-    nLtoxL = @(nL) RoundToMultiple(nLIntercept - nLIntercept/xLIntercept * nL, ...
+    nLtoxL = @(nL) RoundToMultiple(xLIntercept - xLIntercept/nLIntercept * nL, ...
         nLDelta);
     
     thickness = 0.2;  % In xL axis [-]
@@ -92,8 +92,31 @@ elseif isequal(method, 'load')
     loadname = varargin{1};
     load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
-    nLRange = nLGrid(1, :);
-    xLRange = xLGrid(:, 1);
+    
+    words = split(loadname, ' ');
+    if words{1} == "line"        
+        % Reshape residuals onto grid.
+        nLLine = nLGrid;
+        nLRange = sort(unique(nLLine));
+        xLLine = xLGrid;
+        xLRange = sort(unique(xLLine));
+        [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+        
+        LineResiduals = IResiduals;
+        
+        IResiduals = nan(numel(xLRange), numel(nLRange));
+        for ii = 1 : length(IResiduals)
+            iinL = find(nLRange == nLLine(ii));
+            iixL = find(xLRange == xLLine(ii));
+            
+            IResiduals(iixL, iinL) = LineResiduals(ii);
+        end
+        
+    else
+        
+        nLRange = nLGrid(1, :);
+        xLRange = xLGrid(:, 1);
+    end
     
     
 elseif isequal(method, 'improve')
@@ -134,7 +157,7 @@ elseif isequal(method, 'improve')
         
         % Update grid settings for next iteration.
         if (iinLOpt == 1) || (iinLOpt == numSegments) ...
-                || (iixLOpt == 1) || (iixLOpt == numSegments)            
+                || (iixLOpt == 1) || (iixLOpt == numSegments)
             % Best value is on boundary. Next loop will recenter window
             % at same precision - do nothing and continue!
             loop = true;

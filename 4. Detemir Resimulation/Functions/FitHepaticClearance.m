@@ -1,4 +1,4 @@
-function P = FitHepaticClearance(P, method)
+function P = FitHepaticClearance(P, method, arg)
 % Fits data using MLR to find nL and xL.
 % INPUT:
 %   P   - patient struct
@@ -7,6 +7,8 @@ function P = FitHepaticClearance(P, method)
 %   method - 'single' to fit one nL value for entire period
 %            'daily' to fit one nL value per simulation day
 %            'peaks' to fit at manually-specified locations
+%            'fixed' to force [nL xL]
+%   arg    - with 'fixed', [nL xL] values to force
 global GC
 global DEBUGPLOTS
 
@@ -80,31 +82,37 @@ elseif isequal(method, 'peaks')
     iiBounds = [peakBounds P.data.simDuration()];
 end
 
-
-% Fit nL over segments.
-A = zeros(length(tArray), 2);
-bParts = zeros(length(tArray), 4);
-condA = zeros(length(tArray), 1);
-segment = [1 : iiBounds(1)]';
-for ii = 1 : length(iiBounds)
-    [nL, ~, segA, segbParts, segcondA] = FitSegment(P, ppI, Q, tArray, segment);
-    P.results.nL(segment) = nL;
-    A(segment, :) = segA;
-    bParts(segment, :) = segbParts;
-    condA(segment) = segcondA;
+if isequal(method, 'fixed')
+    nL = arg(1);
+    xL = arg(2);
     
-    % Update time segments (if continuing).
-    if ii < length(iiBounds)
-        segment = [segment(end)+1 : iiBounds(ii+1)]';
+    P.results.nL = nL*ones(size(P.results.nL));
+    P.results.xL = xL*ones(size(P.results.xL));
+else
+    % Fit nL over segments.
+    A = zeros(length(tArray), 2);
+    bParts = zeros(length(tArray), 4);
+    condA = zeros(length(tArray), 1);
+    segment = [1 : iiBounds(1)]';
+    for ii = 1 : length(iiBounds)
+        [nL, ~, segA, segbParts, segcondA] = FitSegment(P, ppI, Q, tArray, segment);
+        P.results.nL(segment) = nL;
+        A(segment, :) = segA;
+        bParts(segment, :) = segbParts;
+        condA(segment) = segcondA;
+        
+        % Update time segments (if continuing).
+        if ii < length(iiBounds)
+            segment = [segment(end)+1 : iiBounds(ii+1)]';
+        end
     end
+    P.results.nLxLFitBounds = iiBounds;
+    
+    % Fit xL for whole time.
+    segment = [1 : P.data.simDuration()]';
+    [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
+    P.results.xL = xL*ones(size(P.results.xL));
 end
-P.results.nLxLFitBounds = iiBounds;
-
-% Fit xL for whole time.
-segment = [1 : P.data.simDuration()]';
-[~, xL] = FitSegment(P, ppI, Q, tArray, segment);
-P.results.xL = xL*ones(size(P.results.xL));
-
 
 
 %% Debug Plots

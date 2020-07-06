@@ -5,6 +5,7 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 %   P        - patient struct
 %   method   - 'find' to perform grid search
 %              'line' to perform grid search on line
+%              '2dline' to perform 2D search on line
 %              'load' to load previously-generated residuals data
 %              'improve' to load data and iterate it to some precision
 %   varargin - with 'line', [nL-intercept xL-intercept] to search over
@@ -22,11 +23,18 @@ global resultsfile
 
 RESIDUALSFORMAT = "residuals nL[%g %g]@%g xL[%g %g]@%g";
 LINEFORMAT = "line nL=%g@%g to xL=%g@%g, t=%g";
+LINE2DFORMAT = "2dline nL=%g@%g to xL=%g";
 FILEFORMAT = '%sP%d.mat';
 resultsfile = @(filename) fullfile(RESULTPATH, filename);
 
+nLtoxLFun = @(nLIntercept, xLIntercept, nLDelta) ...
+    (@(nL) RoundToMultiple(xLIntercept - xLIntercept/nLIntercept * nL, ...
+    nLDelta));
+
 %% Setup
 if isequal(method, 'find')
+    type = 'grid';
+    
     nLDelta = 0.2;
     nLBounds = [0 1];
     nLRange = nLBounds(1) : nLDelta : nLBounds(end);
@@ -42,6 +50,8 @@ if isequal(method, 'find')
     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
     
 elseif isequal(method, 'line')
+    type = 'line';
+    
     nLIntercept = varargin {1}(1);
     xLIntercept = varargin {1}(2);
     
@@ -57,8 +67,7 @@ elseif isequal(method, 'line')
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     
     % Define line - a series of slices of xL for each nL value.
-    nLtoxL = @(nL) RoundToMultiple(xLIntercept - xLIntercept/nLIntercept * nL, ...
-        nLDelta);
+    nLtoxL = nLtoxLFun(nLIntercept, xLIntercept, nLDelta);
     
     thickness = 0.2;  % In xL axis [-]
     xLLine = [];
@@ -87,6 +96,26 @@ elseif isequal(method, 'line')
         IResiduals(iixL, iinL) = LineResiduals(ii);
     end
     
+    
+elseif isequal(method, '2dline')
+    type = '2dline';
+    
+    nLIntercept = varargin {1}(1);
+    xLIntercept = varargin {1}(2);
+    
+    % Establish full grid over area.
+    nLDelta = 0.01;
+    nLBounds = [0 nLIntercept];
+    nLGrid = nLBounds(1) : nLDelta : nLBounds(end);
+    
+    nLtoxL = nLtoxLFun(nLIntercept, xLIntercept, nLDelta);
+    xLGrid = nLtoxL(nLGrid);
+    
+    % Find residuals along nL/xL line.
+    savename = sprintf(LINE2DFORMAT, ...
+        nLIntercept, nLDelta, xLIntercept);
+    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
+    
 elseif isequal(method, 'load')
     % Load by name.
     loadname = varargin{1};
@@ -94,7 +123,8 @@ elseif isequal(method, 'load')
         'nLGrid', 'xLGrid', 'IResiduals');
     
     words = split(loadname, ' ');
-    if words{1} == "line"        
+    type = words{1};
+    if type == "line"
         % Reshape residuals onto grid.
         nLLine = nLGrid;
         nLRange = sort(unique(nLLine));
@@ -111,15 +141,15 @@ elseif isequal(method, 'load')
             
             IResiduals(iixL, iinL) = LineResiduals(ii);
         end
-        
-    else
-        
+    else        
         nLRange = nLGrid(1, :);
         xLRange = xLGrid(:, 1);
     end
     
     
 elseif isequal(method, 'improve')
+    type = 'grid';
+    
     % Load by name.
     loadname = varargin{1};
     nLPrecision = varargin{2}(1);
@@ -185,7 +215,7 @@ elseif isequal(method, 'improve')
 end
 
 %% Find Optimal nL/xL
-iiOptimal = find(IResiduals == min(IResiduals(:)));
+[minIResidual, iiOptimal] = min(IResiduals(:));
 bestnL = nLGrid(iiOptimal);
 bestxL = xLGrid(iiOptimal);
 
@@ -200,31 +230,46 @@ DP = DEBUGPLOTS.FindOptimalHepaticClearance;
 if DP.ErrorSurface
     MakeDebugPlot(P, DP);
     hold on
-    
-    surf(nLRange, xLRange, IResiduals, ...
-        'HandleVisibility', 'off');
-    
-    numLevels = 50;
-    levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels);
-    contour3(nLRange, xLRange, IResiduals, ...
-        levels, ...
-        'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
-    plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
-    plt.DisplayName = 'Optimal Point';
-    
-    if ismember(0, nLRange) && ismember(1, xLRange)
-        plt = plot3(0, 1, IResiduals(end, 1), 'g*');
-        plt.DisplayName = '$n_L/x_L = 0/1$';
+    if type == "2dline"
+        plt = plot(nLGrid, IResiduals);
+        plt.DisplayName = 'Residuals';
+        
+        plt = plot(nLGrid(iiOptimal), minIResidual, 'r*');
+        plt.DisplayName = 'Optimal Point';       
+        
+        title(sprintf("P%d: Error Line of (I+IDF) Fitting Along (...)", P.patientNum))
+        xlabel("$n_L$ [-]")
+        ylabel("2-norm of residuals, $\psi$ [mU/min]")
+        
+        legend
+        
+    else
+        
+        surf(nLRange, xLRange, IResiduals, ...
+            'HandleVisibility', 'off');
+        
+        numLevels = 50;
+        levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels);
+        contour3(nLRange, xLRange, IResiduals, ...
+            levels, ...
+            'Color', 'r', ...
+            'HandleVisibility', 'off');
+        
+        plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
+        plt.DisplayName = 'Optimal Point';
+        
+        if ismember(0, nLRange) && ismember(1, xLRange)
+            plt = plot3(0, 1, IResiduals(end, 1), 'g*');
+            plt.DisplayName = '$n_L/x_L = 0/1$';
+        end
+        
+        title(sprintf("P%d: Error Surface of (I+IDF) Fitting", P.patientNum))
+        xlabel("$n_L$ [-]")
+        ylabel("$x_L$ [1/min]")
+        zlabel("2-norm of residuals, $\psi$ [mU/min]")
+        
+        legend
     end
-    
-    title(sprintf("P%d: Error Surface of (I+IDF) Fitting", P.patientNum))
-    xlabel("$n_L$ [-]")
-    ylabel("$x_L$ [1/min]")
-    zlabel("2-norm of residuals, $\psi$ [mU/min]")
-    
-    legend
     
 end
 

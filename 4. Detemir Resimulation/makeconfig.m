@@ -6,13 +6,15 @@ set(groot, 'DefaultLineLineWidth', 2.0);
 DATAPATH  = fullfile(pwd, '..', 'Data');
 FUNCPATH  = fullfile(pwd, 'Functions');
 MODELPATH = fullfile(pwd, 'Models');
+RESULTPATH = fullfile(pwd, 'Results');
 
 addpath(genpath(DATAPATH));
 addpath(genpath(FUNCPATH));
 addpath(genpath(MODELPATH));
+addpath(genpath(RESULTPATH));
 
 PATIENTFILE = 'patient_master.xlsx';
 
-save config DATAPATH FUNCPATH MODELPATH
+save config DATAPATH FUNCPATH MODELPATH RESULTPATH
 disp('Config updated.')
 clear

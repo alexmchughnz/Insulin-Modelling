@@ -257,18 +257,18 @@ if DP.ErrorSurface
         ax1.XColor = 'b';
         ax1XTick = ax1.XTick';
         
-        ax2 = axes();        
+        ax2 = axes();
         ax2.XAxisLocation = 'top';
         ax2.XDir = 'reverse';
         ax2.Color = 'none';
-        ax2.XColor = 'r';        
+        ax2.XColor = 'r';
         ax2.XTick = linspace(0, 1, length(ax1XTick));
         ax2.XTickLabel = num2str(flip(nLtoxL(ax1XTick)));
-        ax2.YAxis.Visible = 'off';        
+        ax2.YAxis.Visible = 'off';
         
         figTitle = sprintf("P%d: Error Line of (I+IDF) Fitting Along $x_L = %.2f - %.2f n_L$", ...
             P.patientNum, xLIntercept, xLIntercept/nLIntercept);
-        title(figTitle)        
+        title(figTitle)
         xlabel(ax1, "$n_L$ [-]");
         xlabel(ax2, "$x_L$ [1/min]");
         ylabel(ax1, "2-norm of residuals, $\psi$ [mU/min]")
@@ -345,10 +345,12 @@ for ii = 1:numel(nLGrid)
     
     % Save residuals.
     IResiduals(ii) = norm(ITotalError);
-    save(resultsfile(sprintf(FILEFORMAT, savename, P.patientNum)), ...
-        'nLGrid', 'xLGrid', 'IResiduals')
     
     fitTime = duration(seconds(toc));
 end
+
+% Export results.
+save(resultsfile(sprintf(FILEFORMAT, savename, P.patientNum)), ...
+    'nLGrid', 'xLGrid', 'IResiduals')
 
 end

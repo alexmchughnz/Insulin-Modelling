@@ -39,7 +39,7 @@ for ii = 1:length(patients)
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, '2dline', [0.55 0.9]);  % (nL, xL) by search
+    patients{ii} = FindOptimalHepaticClearance(patients{ii}, 'load', '2dline nL=0.55@0.01 to xL=0.9');  % (nL, xL) by search
 %     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
     
     patients{ii} = FindGutEmptyingRate(patients{ii});       % (d2)

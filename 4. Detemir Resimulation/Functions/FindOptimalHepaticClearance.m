@@ -27,7 +27,7 @@ LINE2DFORMAT = "2dline nL=%g@%g to xL=%g";
 FILEFORMAT = '%sP%d.mat';
 resultsfile = @(filename) fullfile(RESULTPATH, filename);
 
-nLtoxLFun = @(nLIntercept, xLIntercept, nLDelta) ...
+nLtoxLLineFun = @(nLIntercept, xLIntercept, nLDelta) ...
     (@(nL) RoundToMultiple(xLIntercept - xLIntercept/nLIntercept * nL, ...
     nLDelta));
 
@@ -67,7 +67,7 @@ elseif isequal(method, 'line')
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     
     % Define line - a series of slices of xL for each nL value.
-    nLtoxL = nLtoxLFun(nLIntercept, xLIntercept, nLDelta);
+    nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
     
     thickness = 0.2;  % In xL axis [-]
     xLLine = [];
@@ -108,7 +108,7 @@ elseif isequal(method, '2dline')
     nLBounds = [0 nLIntercept];
     nLGrid = nLBounds(1) : nLDelta : nLBounds(end);
     
-    nLtoxL = nLtoxLFun(nLIntercept, xLIntercept, nLDelta);
+    nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
     xLGrid = nLtoxL(nLGrid);
     
     % Find residuals along nL/xL line.
@@ -141,7 +141,14 @@ elseif isequal(method, 'load')
             
             IResiduals(iixL, iinL) = LineResiduals(ii);
         end
-    else        
+    elseif type == "2dline"
+        nLIntercept = nLGrid(xLGrid == 0);
+        xLIntercept = xLGrid(nLGrid == 0);
+        nLDelta = diff(nLGrid(1:2));
+        
+        nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
+        
+    else
         nLRange = nLGrid(1, :);
         xLRange = xLGrid(:, 1);
     end
@@ -235,14 +242,30 @@ if DP.ErrorSurface
         plt.DisplayName = 'Residuals';
         
         plt = plot(nLGrid(iiOptimal), minIResidual, 'r*');
-        plt.DisplayName = 'Optimal Point';       
+        plt.DisplayName = 'Optimal Point';
         
-        title(sprintf("P%d: Error Line of (I+IDF) Fitting Along (...)", P.patientNum))
-        xlabel("$n_L$ [-]")
+        ax1 = gca;
+        ax1.XColor = 'b';
+        ax1XTick = ax1.XTick';
+        
+        ax2 = axes();        
+        ax2.XAxisLocation = 'top';
+        ax2.XDir = 'reverse';
+        ax2.Color = 'none';
+        ax2.XColor = 'r';        
+        ax2.XTick = linspace(0, 1, length(ax1XTick));
+        ax2.XTickLabel = num2str(flip(nLtoxL(ax1XTick)));
+        ax2.YAxis.Visible = 'off';        
+        
+        figTitle = sprintf("P%d: Error Line of (I+IDF) Fitting Along $x_L = %.2f - %.2f n_L$", ...
+            P.patientNum, xLIntercept, xLIntercept/nLIntercept);
+        title(figTitle)        
+        xlabel(ax1, "$n_L$ [-]");
+        xlabel(ax2, "$x_L$ [1/min]");
         ylabel("2-norm of residuals, $\psi$ [mU/min]")
         
-        legend
-        
+        grid on
+        ax1.Position = ax2.Position;
     else
         
         surf(nLRange, xLRange, IResiduals, ...

@@ -262,7 +262,7 @@ if DP.ErrorSurface
         title(figTitle)        
         xlabel(ax1, "$n_L$ [-]");
         xlabel(ax2, "$x_L$ [1/min]");
-        ylabel("2-norm of residuals, $\psi$ [mU/min]")
+        ylabel(ax1, "2-norm of residuals, $\psi$ [mU/min]")
         
         grid on
         ax1.Position = ax2.Position;

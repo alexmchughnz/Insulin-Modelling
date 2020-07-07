@@ -63,21 +63,17 @@ elseif isequal(method, 'line')
     xLIntercept = varargin{2};
     delta = varargin{3};
     
-    % Establish full grid over area.
+    % Establish nL range.
     nLDelta = delta(1);
-    nLBounds = [0 nLIntercept];
-    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
-    
     xLDelta = delta(end);
-    xLBounds = [0 xLIntercept];
-    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     
-    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    nLBounds = [0 1];
+    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
     
     % Define line - a series of slices of xL for each nL value.
     nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
     
-    thickness = 0.2;  % In xL axis [-]
+    thickness = 0.3;  % In xL axis [-]
     xLLine = [];
     nLLine = [];
     for nL = nLRange
@@ -96,6 +92,9 @@ elseif isequal(method, 'line')
     LineResiduals = EvaluateGrid(P, nLLine, xLLine, savename);
     
     % Reshape residuals onto grid.
+    xLRange = sort(unique(xLLine));
+    
+    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     IResiduals = nan(size(nLGrid));
     for ii = 1 : length(LineResiduals)
         iinL = find(nLRange == nLLine(ii));

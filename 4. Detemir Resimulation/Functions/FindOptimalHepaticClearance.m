@@ -8,7 +8,12 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 %              '2dline' to perform 2D search on line
 %              'load' to load previously-generated residuals data
 %              'improve' to load data and iterate it to some precision
-%   varargin - with 'line', [nL-intercept xL-intercept] to search over
+%   varargin - with 'find', {1} nL bounds, and
+%                           {2} xL bounds to search over
+%                           {3} desired [nL, xL] grid precision
+%            - with 'line'/'2dline', {1} nL-intercept, and
+%                                    {2} xL-intercept to search between
+%                                    {3} desired [nL, xL] grid precision
 %            - with 'load', the filename to load
 %            - with 'improve', {1} the filename to load and improve
 %                              {2} desired [nL, xL] grid precision
@@ -35,12 +40,14 @@ nLtoxLLineFun = @(nLIntercept, xLIntercept, nLDelta) ...
 if isequal(method, 'find')
     type = 'grid';
     
-    nLDelta = 0.2;
-    nLBounds = [0 1];
+    nLBounds = varargin{1};
+    xLBounds = varargin{2};
+    delta = varargin{3};
+    
+    nLDelta = delta(1);
     nLRange = nLBounds(1) : nLDelta : nLBounds(end);
     
-    xLDelta = 0.2;
-    xLBounds = [-1 0];
+    xLDelta = delta(end);
     xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
@@ -52,15 +59,16 @@ if isequal(method, 'find')
 elseif isequal(method, 'line')
     type = 'line';
     
-    nLIntercept = varargin {1}(1);
-    xLIntercept = varargin {1}(2);
+    nLIntercept = varargin{1};
+    xLIntercept = varargin{2};
+    delta = varargin{3};
     
     % Establish full grid over area.
-    nLDelta = 0.02;
+    nLDelta = delta(1);
     nLBounds = [0 nLIntercept];
     nLRange = nLBounds(1) : nLDelta : nLBounds(end);
     
-    xLDelta = 0.02;
+    xLDelta = delta(end);
     xLBounds = [0 xLIntercept];
     xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     
@@ -100,12 +108,13 @@ elseif isequal(method, 'line')
 elseif isequal(method, '2dline')
     type = '2dline';
     
-    nLIntercept = varargin {1}(1);
-    xLIntercept = varargin {1}(2);
+    nLIntercept = varargin{1};
+    xLIntercept = varargin{2};
+    delta = varargin{3};
     
     % Establish full grid over area.
-    nLDelta = 0.01;
-    nLBounds = [0 nLIntercept];
+    nLDelta = delta(1);
+    nLBounds = [0 1];
     nLGrid = nLBounds(1) : nLDelta : nLBounds(end);
     
     nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
@@ -141,6 +150,7 @@ elseif isequal(method, 'load')
             
             IResiduals(iixL, iinL) = LineResiduals(ii);
         end
+        
     elseif type == "2dline"
         nLIntercept = nLGrid(xLGrid == 0);
         xLIntercept = xLGrid(nLGrid == 0);

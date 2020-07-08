@@ -1,14 +1,14 @@
 function P = FindOptimalHepaticClearance(P, method, varargin)
 % Find optimal nL and xL, using grid search.
-% Runs a LOT of forward simulations in 'find' mode - very slow!
+% Runs a LOT of forward simulations in 'grid' mode - very slow!
 % INPUT:
 %   P        - patient struct
-%   method   - 'find' to perform grid search
+%   method   - 'grid' to perform grid search
 %              'line' to perform grid search on line
 %              '2dline' to perform 2D search on line
 %              'load' to load previously-generated residuals data
 %              'improve' to load data and iterate it to some precision
-%   varargin - with 'find', {1} nL bounds, and
+%   varargin - with 'grid', {1} nL bounds, and
 %                           {2} xL bounds to search over
 %                           {3} desired [nL, xL] grid precision
 %            - with 'line'/'2dline', {1} nL-intercept, and
@@ -37,7 +37,7 @@ nLtoxLLineFun = @(nLIntercept, xLIntercept, nLDelta) ...
     nLDelta));
 
 %% Setup
-if isequal(method, 'find')
+if isequal(method, 'grid')
     type = 'grid';
     
     nLBounds = varargin{1};

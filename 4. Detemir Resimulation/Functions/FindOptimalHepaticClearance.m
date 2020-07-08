@@ -339,31 +339,66 @@ if DP.ErrorSurface
         grid on
         ax1.Position = ax2.Position;
     else
+        surfaces = {};
         
-        surf(nLRange, xLRange, IResiduals, ...
-            'HandleVisibility', 'off');
+        % Queue original surface.
+        S = struct('IResiduals', IResiduals, ...
+            'nLGrid', nLGrid, ...
+            'name', 'Residuals');
+        surfaces = [surfaces S];
         
-        numLevels = 50;
-        levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels);
-        contour3(nLRange, xLRange, IResiduals, ...
-            levels, ...
-            'Color', 'r', ...
-            'HandleVisibility', 'off');
-        
-        plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
-        plt.DisplayName = 'Optimal Point';
-        
-        if ismember(0, nLRange) && ismember(1, xLRange)
-            plt = plot3(0, 1, IResiduals(end, 1), 'g*');
-            plt.DisplayName = '$n_L/x_L = 0/1$';
+        % Queue best/worst if they exist.
+        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
+        if exist(bestFile, 'file')
+            load(resultsfile(bestFile), ...
+                'nLGrid', 'IResiduals');
+            S = struct('IResiduals', IResiduals, ...
+                'nLGrid', nLGrid, ...
+                'name', 'Best Case Data Residuals');
+            surfaces = [surfaces S];
         end
         
-        title(sprintf("P%d: Error Surface of (I+IDF) Fitting", P.patientNum))
+        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
+        if exist(worstFile, 'file')
+            load(resultsfile(worstFile), ...
+                'nLGrid', 'IResiduals');
+            S = struct('IResiduals', IResiduals, ...
+                'nLGrid', nLGrid, ...
+                'name', 'Worst Case Data Residuals');
+            surfaces = [surfaces S];
+        end
+        
+        % Plot each surface.
+        for ii = 1:length(surfaces)
+            subplot(1, length(surfaces), ii)
+            hold on
+            S = surfaces{ii};
+            
+            surf(nLRange, xLRange, S.IResiduals, ...
+                'HandleVisibility', 'off');
+            
+            numLevels = 50;
+            levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels);
+            contour3(nLRange, xLRange, S.IResiduals, ...
+                levels, ...
+                'Color', 'r', ...
+                'HandleVisibility', 'off');
+            
+%             plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
+%             plt.DisplayName = 'Optimal Point';
+%             
+%             if ismember(0, nLRange) && ismember(1, xLRange)
+%                 plt = plot3(0, 1, IResiduals(end, 1), 'g*');
+%                 plt.DisplayName = '$n_L/x_L = 0/1$';
+%             end
+
+        title(sprintf("P%d: %s", P.patientNum, S.name))
+        
         xlabel("$n_L$ [-]")
         ylabel("$x_L$ [1/min]")
         zlabel("2-norm of residuals, $\psi$ [mU/min]")
+        end             
         
-        legend
     end
     
 end

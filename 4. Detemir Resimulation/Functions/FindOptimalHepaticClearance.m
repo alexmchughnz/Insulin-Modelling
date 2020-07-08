@@ -26,7 +26,7 @@ global DEBUGPLOTS
 global FILEFORMAT
 global resultsfile
 
-RESIDUALSFORMAT = "residuals nL[%g %g]@%g xL[%g %g]@%g";
+GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
 LINEFORMAT = "line nL=%g@%g to xL=%g@%g, t=%g";
 LINE2DFORMAT = "2dline nL=%g@%g to xL=%g";
 FILEFORMAT = '%sP%d.mat';
@@ -52,7 +52,7 @@ if isequal(method, 'find')
     
     [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
     
-    savename = sprintf(RESIDUALSFORMAT, ...
+    savename = sprintf(GRIDFORMAT, ...
         nLBounds, nLDelta, xLBounds, xLDelta);
     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
     
@@ -197,7 +197,7 @@ elseif isequal(method, 'improve')
         [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
         
         % Evaluate over grid.
-        savename = sprintf(RESIDUALSFORMAT, ...
+        savename = sprintf(GRIDFORMAT, ...
             nLBounds, nLDelta, xLBounds, xLDelta);
         IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename);
         
@@ -238,9 +238,6 @@ elseif isequal(method, 'variance')
     load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
         'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated');
     
-    nLIntercept = nLGrid(xLGrid == 0);
-    xLIntercept = xLGrid(nLGrid == 0);
-    
     words = split(loadname, ' ');
     type = words{1};
     
@@ -266,13 +263,11 @@ elseif isequal(method, 'variance')
     end
     
     % Evaluate original nL/xL range for both worst and best cases.
-    % Best Case
-    savename = sprintf("%s best", loadname);
-    BestIResiduals = EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
+    savename = sprintf("%s best", loadname);  % Best Case
+    EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
     
-    % Worst Case
-    savename = sprintf("%s worst", loadname);
-    WorstIResiduals = EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
+    savename = sprintf("%s worst", loadname);  % Worst Case
+    EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
     
 end
 
@@ -318,7 +313,7 @@ if DP.ErrorSurface
         
         plt = plot(nLGrid(iiOptimal), minIResidual, 'r*');
         plt.DisplayName = 'Optimal Point';
-                
+        
         legend
         
         ax1 = gca;

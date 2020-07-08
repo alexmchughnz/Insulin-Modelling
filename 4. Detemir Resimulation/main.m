@@ -22,7 +22,7 @@ makedata
 load config
 
 %% Load Data
-patientNums = [1 3 4];
+patientNums = [1];
 
 % Generate patient data structs.
 loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
@@ -38,6 +38,9 @@ for ii = 1:length(patients)
     
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
+    
+    AnalyseInsulinVariance(patients{ii}, 0.1);
+    
     
 %     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
 %         'line', 0.55, 0.9, [0.01]);  % (nL, xL) by search

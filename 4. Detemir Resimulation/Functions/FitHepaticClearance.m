@@ -65,13 +65,7 @@ elseif isequal(method, 'daily')
 elseif isequal(method, 'peaks')
     % Fits nL at specified peaks.
     % Fits are of width 'window', centered at 'peaks' + 'delay'.
-    if P.patientNum == 1
-        peaks = [115 290 730 1525 1760 2110];
-    elseif P.patientNum == 3
-        peaks = [125 670 1542 2153];
-    elseif P.patientNum == 4
-        peaks = [152 715 1540 2155];
-    end
+    peaks = P.data.IPeaks;
     window = 60;  % [min]
     delay = 5;   % [min]
     

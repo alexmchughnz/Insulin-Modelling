@@ -151,15 +151,10 @@ if DP.ForwardSim
 end
 
 % nL/xL Values per Patient
-if DP.nLxL
-    persistent sp;
-    if (isempty(sp))
-        sp = 1;
-    end
+if DP.nLxL    
+    MakeDebugPlot(P, DP);
     
-    figure(999)
-    
-    subplot(2, 3, sp)
+    subplot (2, 1, 1)
     plot(tArray, P.results.nL, 'b')
     for ii = 1:length(iiBounds)
         split = iiBounds(ii);
@@ -172,14 +167,13 @@ if DP.nLxL
     ylabel("$n_L$ [1/min]")
     
     
-    subplot(2, 3, sp+3)
+    subplot(2, 1, 2)
     plot(tArray, P.results.xL, 'r')
     
     title(sprintf("P%d: xL", P.patientNum))
     xlabel("Time [min]")
     ylabel("$x_L$ [-]")
     
-    sp = sp + 1;
 end
 
 % Equation Terms

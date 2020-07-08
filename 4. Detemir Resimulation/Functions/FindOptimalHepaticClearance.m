@@ -253,15 +253,15 @@ elseif isequal(method, 'variance')
     for ii = length(ISimulated)
         isModelOver = (ISimulated{ii} > vITotal);
         
-        bestVariance = (1-variance)*isModelOver + (1+variance)*~isModelOver;
-        worstVariance = (1+variance)*isModelOver + (1-variance)*~isModelOver;
+        bestDataVariance = (1+variance)*isModelOver + (1-variance)*~isModelOver;
+        worstDataVariance = (1-variance)*isModelOver + (1+variance)*~isModelOver;
         
         bestP = P;
-        bestP.data.ITotal.value = bestP.data.ITotal.value .* bestVariance;
+        bestP.data.ITotal.value = bestP.data.ITotal.value .* bestDataVariance;
         bestPArray = [bestPArray bestP];
         
         worstP = P;
-        worstP.data.ITotal.value = worstP.data.ITotal.value .* worstVariance;
+        worstP.data.ITotal.value = worstP.data.ITotal.value .* worstDataVariance;
         worstPArray = [worstPArray worstP];
     end
     

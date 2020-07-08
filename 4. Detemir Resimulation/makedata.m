@@ -113,3 +113,8 @@ if DP.GlucoseInput
         ylabel("[mmol/min]")
     end
 end
+
+
+
+% Clear variables.
+clear

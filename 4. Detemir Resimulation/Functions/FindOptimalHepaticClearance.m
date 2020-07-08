@@ -264,10 +264,10 @@ elseif isequal(method, 'variance')
     
     % Evaluate original nL/xL range for both worst and best cases.
     savename = sprintf("%s best", loadname);  % Best Case
-    EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
+    bestIResiduals = EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
     
     savename = sprintf("%s worst", loadname);  % Worst Case
-    EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
+    worstIResiduals = EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
     
 end
 

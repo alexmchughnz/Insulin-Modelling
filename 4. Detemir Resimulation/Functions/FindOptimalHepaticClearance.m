@@ -228,6 +228,52 @@ elseif isequal(method, 'improve')
             end
         end
     end
+    
+    
+elseif isequal(method, 'variance')
+    % Load by name.
+    loadname = varargin{1};
+    variance = varargin{2};
+    
+    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
+        'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated');
+    
+    nLIntercept = nLGrid(xLGrid == 0);
+    xLIntercept = xLGrid(nLGrid == 0);
+    
+    words = split(loadname, ' ');
+    type = words{1};
+    
+    % Prepare array of patients for each nL/xL point.
+    bestPArray = [];
+    worstPArray = [];
+    
+    [~, vITotal] = GetSimTime(P, P.data.ITotal);  % Data [pmol/L]
+    
+    for ii = length(ISimulated)
+        isModelOver = (ISimulated{ii} > vITotal);
+        
+        bestVariance = (1-variance)*isModelOver + (1+variance)*~isModelOver;
+        worstVariance = (1+variance)*isModelOver + (1-variance)*~isModelOver;
+        
+        bestP = P;
+        bestP.data.ITotal.value = bestP.data.ITotal.value .* bestVariance;
+        bestPArray = [bestPArray bestP];
+        
+        worstP = P;
+        worstP.data.ITotal.value = worstP.data.ITotal.value .* worstVariance;
+        worstPArray = [worstPArray worstP];
+    end
+    
+    % Evaluate original nL/xL range for both worst and best cases.
+    % Best Case
+    savename = sprintf("%s best", loadname);
+    BestIResiduals = EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
+    
+    % Worst Case
+    savename = sprintf("%s worst", loadname);
+    WorstIResiduals = EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
+    
 end
 
 %% Find Optimal nL/xL
@@ -238,6 +284,7 @@ bestxL = xLGrid(iiOptimal);
 P.results.nL = bestnL * ones(size(P.results.tArray));
 P.results.xL = bestxL * ones(size(P.results.tArray));
 
+%% ------------------------------------------------------------------------
 
 %% Debug Plots
 DP = DEBUGPLOTS.FindOptimalHepaticClearance;
@@ -247,11 +294,32 @@ if DP.ErrorSurface
     MakeDebugPlot(P, DP);
     hold on
     if type == "2dline"
-        plt = plot(nLGrid, IResiduals);
+        originalResiduals = IResiduals;
+        plt = plot(nLGrid, originalResiduals);
         plt.DisplayName = 'Residuals';
+        
+        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
+        if exist(bestFile, 'file')
+            load(resultsfile(bestFile), ...
+                'nLGrid', 'IResiduals');
+            bestResiduals = IResiduals;
+            plt = plot(nLGrid, bestResiduals);
+            plt.DisplayName = 'Best Case Data Residuals';
+        end
+        
+        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
+        if exist(worstFile, 'file')
+            load(resultsfile(worstFile), ...
+                'nLGrid', 'IResiduals');
+            worstResiduals = IResiduals;
+            plt = plot(nLGrid, worstResiduals);
+            plt.DisplayName = 'Worst Case Data Residuals';
+        end
         
         plt = plot(nLGrid(iiOptimal), minIResidual, 'r*');
         plt.DisplayName = 'Optimal Point';
+                
+        legend
         
         ax1 = gca;
         ax1.XColor = 'b';
@@ -307,27 +375,32 @@ end
 
 end
 
-
-function IResiduals = EvaluateGrid(P, nLGrid, xLGrid, savename)
+%% Functions
+function [IResiduals, simITotal] = EvaluateGrid(PArray, nLGrid, xLGrid, savename)
 global C
 
 global FILEFORMAT
 global resultsfile
 
+ISimulated = cell(size(nLGrid));
 IResiduals = zeros(size(nLGrid));
 fitTime = duration();
 for ii = 1:numel(nLGrid)
     tic
     fprintf('\nP%d: Trialling nL/xL = %g/%g in forward simulation (%d/%d). ', ...
-        P.patientNum, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
+        PArray.patientNum, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
     fprintf('Estimated time remaining: %s\n', ...
         datestr(fitTime*(numel(nLGrid) - ii + 1),'HH:MM:SS'))
     
-    copyP = P;
+    if length(PArray) == 1
+        copyP = PArray(1);
+    else
+        copyP = PArray(ii);
+    end
     
     % Apply nL/xL for iteration.
-    copyP.results.nL = nLGrid(ii) * ones(size(P.results.tArray));
-    copyP.results.xL = xLGrid(ii) * ones(size(P.results.tArray));
+    copyP.results.nL = nLGrid(ii) * ones(size(PArray.results.tArray));
+    copyP.results.xL = xLGrid(ii) * ones(size(PArray.results.tArray));
     
     % Get other parameters and forward simulate models.
     copyP = FindGutEmptyingRate(copyP);
@@ -336,7 +409,7 @@ for ii = 1:numel(nLGrid)
     
     % Determine error.
     [tITotal, vITotal] = GetSimTime(copyP, copyP.data.ITotal);  % Data [pmol/L]
-    iiITotal = GetTimeIndex(tITotal, P.results.tArray);
+    iiITotal = GetTimeIndex(tITotal, PArray.results.tArray);
     
     simITotal = C.mU2pmol(copyP.results.I + copyP.results.IDF);  % Sim [mU/L] -> [pmol/L]
     simITotal = simITotal(iiITotal);
@@ -345,12 +418,13 @@ for ii = 1:numel(nLGrid)
     
     % Save residuals.
     IResiduals(ii) = norm(ITotalError);
+    ISimulated{ii} = simITotal;
     
     fitTime = duration(seconds(toc));
 end
 
 % Export results.
-save(resultsfile(sprintf(FILEFORMAT, savename, P.patientNum)), ...
-    'nLGrid', 'xLGrid', 'IResiduals')
+save(resultsfile(sprintf(FILEFORMAT, savename, PArray.patientNum)), ...
+    'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated')
 
 end

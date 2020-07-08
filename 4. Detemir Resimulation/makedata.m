@@ -85,11 +85,11 @@ for ii = 1:length(patientNums)
     
     % Manual patient insulin peak data.
     if P.patientNum == 1
-        P.data.IPeaks = [115 290 730 1525 1760 2110];
+        P.data.tIPeaks = [115 290 730 1525 1760 2110];
     elseif P.patientNum == 3
-        P.data.IPeaks = [125 670 1542 2153];
+        P.data.tIPeaks = [125 670 1542 2153];
     elseif P.patientNum == 4
-        P.data.IPeaks = [152 715 1540 2155];
+        P.data.tIPeaks = [152 715 1540 2155];
     end
     
     

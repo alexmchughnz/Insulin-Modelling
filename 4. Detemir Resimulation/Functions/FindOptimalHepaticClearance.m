@@ -73,7 +73,7 @@ elseif isequal(method, 'line')
     % Define line - a series of slices of xL for each nL value.
     nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
     
-    thickness = 0.3;  % In xL axis [-]
+    thickness = 0.2;  % In xL axis [-]
     xLLine = [];
     nLLine = [];
     for nL = nLRange
@@ -382,7 +382,8 @@ if DP.ErrorSurface
             contour3(nLRange, xLRange, S.IResiduals, ...
                 levels, ...
                 'Color', 'r', ...
-                'HandleVisibility', 'off');
+                'HandleVisibility', 'off');            
+            
             
 %             plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
 %             plt.DisplayName = 'Optimal Point';
@@ -397,7 +398,15 @@ if DP.ErrorSurface
         xlabel("$n_L$ [-]")
         ylabel("$x_L$ [1/min]")
         zlabel("2-norm of residuals, $\psi$ [mU/min]")
-        end             
+        end            
+        
+        tolerance = 2/100;
+        bestFlatDomain = abs(surfaces{2}.IResiduals - IResiduals)./IResiduals <= tolerance;
+        worstFlatDomain = abs(surfaces{3}.IResiduals - IResiduals)./IResiduals <= tolerance;
+        flatDomain = bestFlatDomain & worstFlatDomain;
+            subplot(1, length(surfaces), 1)
+        plt = plot3(nLGrid, xLGrid, flatDomain*1000, 'y');
+%             plt.DisplayName = 'Optimal Point';
         
     end
     

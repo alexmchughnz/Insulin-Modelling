@@ -17,10 +17,10 @@ P.results.xL = xL*ones(size(P.results.tArray));
 [~, vITotal] = GetSimTime(P, P.data.ITotal);
 
 %% Simulate
-SSE = zeros(1, N);
+MSE = zeros(1, N);
 scaleFactors = cell(1, N);
 
-SSE(1) = GetSimError(P);
+MSE(1) = GetSimError(P);
 scaleFactors{1} = zeros(size(vITotal));
 for ii = 2:N+1
     % Randomly vary data according to normal distribution.
@@ -29,10 +29,12 @@ for ii = 2:N+1
     
     copyP = P;
     copyP.data.ITotal.value = trialITotal;
-    SSE(ii) = GetSimError(copyP);
+    MSE(ii) = GetSimError(copyP);
     
     EstimateTimeRemaining(ii, N+1);
 end
+
+save
 
 %% Debug Plots
 DP = DEBUGPLOTS.AnalyseInsulinVariance;
@@ -41,23 +43,23 @@ DP = DEBUGPLOTS.AnalyseInsulinVariance;
 if DP.Error
     MakeDebugPlot(P, DP);    
     
-    histogram(SSE, 50, ...
+    histogram(MSE, 50, ...
         'Normalization', 'probability');
     
-    xlabel("Sum Squared Error")
+    xlabel("Mean Squared Error")
     
-    title(sprintf("Distribution of Model SSEs to Data + Normally-Distributed Noise with SD = %g%% (N = %d)", ...
+    title(sprintf("Distribution of Model MSEs to Data + Normally-Distributed Noise with SD = %g%% (N = %d)", ...
         stddev*100, N))
 end
 
-stdError = std(SSE);
-fprintf("1 std. dev. of SSE is %g\n", stdError)
+stdError = std(MSE);
+fprintf("1 std. dev. of MSE is %g\n", stdError)
 
 end
 
 
 
-function SSE = GetSimError(P)
+function MSE = GetSimError(P)
 global C
 
 % Get other parameters and forward simulate models.
@@ -72,7 +74,7 @@ simITotal = C.mU2pmol(P.results.I + P.results.IDF);  % Sim [mU/L] -> [pmol/L]
 simITotal = simITotal(iiITotal);
 
 error = simITotal - vITotal;
-SSE = sum(error.^2);
+MSE = sum(error.^2)/length(vITotal);
 end
 
 

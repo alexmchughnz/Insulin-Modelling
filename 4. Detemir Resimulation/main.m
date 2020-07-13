@@ -38,7 +38,10 @@ for ii = 1:length(patients)
     
     % Solve for dependent parameters.    
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
-%     
+    
+    AnalyseInsulinVariance(patients{ii}, 0.1);
+    
+    
 %     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
 %         'grid', [0 0.4], [0.5 1], 0.02);  % (nL, xL) by search
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 

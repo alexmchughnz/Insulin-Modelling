@@ -374,8 +374,11 @@ if DP.ErrorSurface
             hold on
             S = surfaces{ii};
             
+            gridMin = min(IResiduals(:));
+            caxis([gridMin gridMin*1.3]);
             surf(nLRange, xLRange, S.IResiduals, ...
-                'HandleVisibility', 'off');
+                'HandleVisibility', 'off', ...
+                'FaceColor', 'interp');
             
             numLevels = 50;
             levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels);

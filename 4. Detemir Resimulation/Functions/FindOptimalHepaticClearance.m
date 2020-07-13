@@ -289,10 +289,12 @@ if DP.ErrorSurface
     MakeDebugPlot(P, DP);
     hold on
     if type == "2dline"
+        % Load original.
         originalResiduals = IResiduals;
         plt = plot(nLGrid, originalResiduals);
         plt.DisplayName = 'Residuals';
         
+        % Load best/worst files if they exist.
         bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
         if exist(bestFile, 'file')
             load(resultsfile(bestFile), ...
@@ -338,6 +340,7 @@ if DP.ErrorSurface
         
         grid on
         ax1.Position = ax2.Position;
+        
     else
         surfaces = {};
         
@@ -370,46 +373,38 @@ if DP.ErrorSurface
         
         % Plot each surface.
         for ii = 1:length(surfaces)
+            S = surfaces{ii};
             subplot(1, length(surfaces), ii)
             hold on
-            S = surfaces{ii};
             
+            % > Surface
+            std2Norm = 66.15; % HARDCODED from AnalyseInsulinVariance.
             gridMin = min(IResiduals(:));
-            caxis([gridMin gridMin*1.3]);
-            surf(nLRange, xLRange, S.IResiduals, ...
+            isSameAsMin = (abs(S.IResiduals - gridMin) <= std2Norm);
+            
+            CO(:,:,1) = zeros(size(S.IResiduals)); % red
+            CO(:,:,2) = isSameAsMin.*0.5; % green
+            CO(:,:,3) = ~isSameAsMin.*linspace(0.5, 0.7, size(S.IResiduals, 2)); % blue
+            %             caxis([gridMin gridMin*1.3]);
+            
+            surf(nLRange, xLRange, S.IResiduals, CO,...
                 'HandleVisibility', 'off', ...
                 'FaceColor', 'interp');
             
+            % > Contour
             numLevels = 50;
             levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels);
             contour3(nLRange, xLRange, S.IResiduals, ...
                 levels, ...
                 'Color', 'r', ...
-                'HandleVisibility', 'off');            
+                'HandleVisibility', 'off');
             
+            title(sprintf("P%d: %s", P.patientNum, S.name))
             
-%             plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
-%             plt.DisplayName = 'Optimal Point';
-%             
-%             if ismember(0, nLRange) && ismember(1, xLRange)
-%                 plt = plot3(0, 1, IResiduals(end, 1), 'g*');
-%                 plt.DisplayName = '$n_L/x_L = 0/1$';
-%             end
-
-        title(sprintf("P%d: %s", P.patientNum, S.name))
-        
-        xlabel("$n_L$ [-]")
-        ylabel("$x_L$ [1/min]")
-        zlabel("2-norm of residuals, $\psi$ [mU/min]")
-        end            
-        
-        tolerance = 2/100;
-        bestFlatDomain = abs(surfaces{2}.IResiduals - IResiduals)./IResiduals <= tolerance;
-        worstFlatDomain = abs(surfaces{3}.IResiduals - IResiduals)./IResiduals <= tolerance;
-        flatDomain = bestFlatDomain & worstFlatDomain;
-            subplot(1, length(surfaces), 1)
-        plt = plot3(nLGrid, xLGrid, flatDomain*1000, 'y');
-%             plt.DisplayName = 'Optimal Point';
+            xlabel("$n_L$ [-]")
+            ylabel("$x_L$ [1/min]")
+            zlabel("2-norm of residuals, $\psi$ [mU/min]")
+        end
         
     end
     
@@ -426,13 +421,9 @@ global resultsfile
 
 ISimulated = cell(size(nLGrid));
 IResiduals = zeros(size(nLGrid));
-fitTime = duration();
 for ii = 1:numel(nLGrid)
-    tic
     fprintf('\nP%d: Trialling nL/xL = %g/%g in forward simulation (%d/%d). ', ...
         PArray.patientNum, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
-    fprintf('Estimated time remaining: %s\n', ...
-        datestr(fitTime*(numel(nLGrid) - ii + 1),'HH:MM:SS'))
     
     if length(PArray) == 1
         copyP = PArray(1);
@@ -462,7 +453,7 @@ for ii = 1:numel(nLGrid)
     IResiduals(ii) = norm(ITotalError);
     ISimulated{ii} = simITotal;
     
-    fitTime = duration(seconds(toc));
+    EstimateTimeRemaining(ii, numel(nLGrid))
 end
 
 % Export results.

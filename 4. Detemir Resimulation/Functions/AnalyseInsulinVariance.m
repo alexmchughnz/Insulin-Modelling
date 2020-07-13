@@ -1,82 +1,78 @@
-function P = AnalyseInsulinVariance(P, variance)
+function P = AnalyseInsulinVariance(P, stddev, N)
 % Find optimal nL and xL, using grid search.
 % Runs a LOT of forward simulations in 'find' mode - very slow!
 % INPUT:
-%   P        - patient struct
-%   method   - 'find' to perform grid search
-%              'line' to perform grid search on line
-%              '2dline' to perform 2D search on line
-%              'load' to load previously-generated residuals data
-%              'improve' to load data and iterate it to some precision
-%   varargin - with 'find', {1} nL bounds, and
-%                           {2} xL bounds to search over
-%                           {3} desired [nL, xL] grid precision
-%            - with 'line'/'2dline', {1} nL-intercept, and
-%                                    {2} xL-intercept to search between
-%                                    {3} desired [nL, xL] grid precision
-%            - with 'load', the filename to load
-%            - with 'improve', {1} the filename to load and improve
-%                              {2} desired [nL, xL] grid precision
+%   P   - patient struct
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
 global DEBUGPLOTS
 
 %% Setup
-[tITotal, vITotal] = GetSimTime(P, P.data.ITotal);
+nL = 0.22;
+xL = 0.50;
+P.results.nL = nL*ones(size(P.results.tArray));
+P.results.xL = xL*ones(size(P.results.tArray));
 
-tPeaks = P.data.tIPeaks;
-iiPeaks = find(ismember(tITotal, tPeaks))';
-nL = [];
-xL = [];
-for peak = iiPeaks
-    trialITotal = [1-variance, 1, 1+variance] .* vITotal(peak);
+[~, vITotal] = GetSimTime(P, P.data.ITotal);
+
+%% Simulate
+SSE = zeros(1, N);
+scaleFactors = cell(1, N);
+
+SSE(1) = GetSimError(P);
+scaleFactors{1} = zeros(size(vITotal));
+for ii = 2:N+1
+    % Randomly vary data according to normal distribution.
+    scaleFactors{ii} = 1 + stddev*randn(size(vITotal));
+    trialITotal =  scaleFactors{ii} .* vITotal;
     
-    for ITotal = trialITotal
-        % Simulate with changed data point.
-        copyP = P;
-        copyP.data.ITotal.value(peak) = ITotal;
-        
-        copyP = FitHepaticClearance(copyP, 'peaks');  % (nL, xL) by MLR
-        
-        % Extract nL/xL results.
-        tIndex = GetTimeIndex(tITotal(peak), copyP.results.tArray);
-        nL = [nL copyP.results.nL(tIndex)];
-        xL = [xL copyP.results.xL(tIndex)];
-    end
+    copyP = P;
+    copyP.data.ITotal.value = trialITotal;
+    SSE(ii) = GetSimError(copyP);
+    
+    EstimateTimeRemaining(ii, N+1);
 end
-
-nL = reshape(nL, [length(trialITotal) length(iiPeaks)]);
-xL = reshape(xL, [length(trialITotal) length(iiPeaks)]);
 
 %% Debug Plots
 DP = DEBUGPLOTS.AnalyseInsulinVariance;
 
-% Error Surface
-if DP.Data
-    MakeDebugPlot(P, DP);
+% Error
+if DP.Error
+    MakeDebugPlot(P, DP);    
     
-    error = variance * vITotal;
+    histogram(SSE, 50, ...
+        'Normalization', 'probability');
     
-    plt = errorbar(tITotal, vITotal, error);
-    plt.DisplayName = 'Blood Test';      
+    xlabel("Sum Squared Error")
     
-    lineBounds = ylim;
-    for ii = 1:length(P.results.nLxLFitBounds)
-        split = ToDateTime(P.results.nLxLFitBounds(ii));
-        L = line([split split], lineBounds);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-        L.HandleVisibility = 'off';
-    end
-    
-    title('Plasma Insulin + Detemir')
-    xlabel('Time')
-    ylabel('Plasma Insulins, I + IDF [pmol/L]')
-    legend()
-    
+    title(sprintf("Distribution of Model SSEs to Data + Normally-Distributed Noise with SD = %g%% (N = %d)", ...
+        stddev*100, N))
 end
 
+stdError = std(SSE);
+fprintf("1 std. dev. of SSE is %g\n", stdError)
+
+end
+
+
+
+function SSE = GetSimError(P)
+global C
+
+% Get other parameters and forward simulate models.
+P = FindGutEmptyingRate(P);
+P = FitInsulinSensitivity(P, true);
+P = SolveSystem(P);
+
+% Determine error.
+[tITotal, vITotal] = GetSimTime(P, P.data.ITotal);
+iiITotal = GetTimeIndex(tITotal, P.results.tArray);
+simITotal = C.mU2pmol(P.results.I + P.results.IDF);  % Sim [mU/L] -> [pmol/L]
+simITotal = simITotal(iiITotal);
+
+error = simITotal - vITotal;
+SSE = sum(error.^2);
 end
 
 

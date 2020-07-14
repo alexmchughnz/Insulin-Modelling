@@ -1,25 +1,21 @@
 function P = AnalyseInsulinVariance(P, stddev, N)
-% Find optimal nL and xL, using grid search.
-% Runs a LOT of forward simulations in 'find' mode - very slow!
+% Runs a Monte Carlo simulation, varying insulin data by a normal
+% distributed scale factor with SD = stddev*data.
 % INPUT:
-%   P   - patient struct
+%   P        - patient struct
+%   stddev   - proportional
+%   N        - number of trials to run
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
 global DEBUGPLOTS
 
 %% Setup
-nL = 0.22;
-xL = 0.50;
-P.results.nL = nL*ones(size(P.results.tArray));
-P.results.xL = xL*ones(size(P.results.tArray));
-
 [~, vITotal] = GetSimTime(P, P.data.ITotal);
-
-%% Simulate
 MSE = zeros(1, N);
 scaleFactors = cell(1, N);
 
+%% Simulate
 MSE(1) = GetSimError(P);
 scaleFactors{1} = zeros(size(vITotal));
 for ii = 2:N+1
@@ -34,8 +30,13 @@ for ii = 2:N+1
     EstimateTimeRemaining(ii, N+1);
 end
 
-save(ResultsPath(sprintf("montecarlodata%gP%d", stddev, P.patientNum)))
+save(ResultsPath(sprintf("montecarlodata%gx%d P%d", stddev, N, P.patientNum)))
 
+% Save to patient.
+stddevError = std(MSE);
+P.results.stdError = stddevError;
+
+%% ==================================================
 %% Debug Plots
 DP = DEBUGPLOTS.AnalyseInsulinVariance;
 
@@ -53,13 +54,12 @@ if DP.Error
         stddev*100, N))
 end
 
-stdError = std(MSE);
-fprintf("1 std. dev. of MSE is %g\n", stdError)
+fprintf("1 std. dev. of MSE is %g\n", stddevError)
 
 end
 
 
-
+%% Functions
 function MSE = GetSimError(P)
 global C
 

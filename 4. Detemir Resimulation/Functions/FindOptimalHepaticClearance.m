@@ -286,32 +286,45 @@ DP = DEBUGPLOTS.FindOptimalHepaticClearance;
 % Error Surface
 if DP.ErrorSurface
     MakeDebugPlot(P, DP);
-    hold on
+    hold on    
+    
+    surfaces = {};
+    
+    % Queue original surface.
+    S = struct('IResiduals', IResiduals, ...
+        'nLGrid', nLGrid, ...
+        'name', 'Residuals');
+    surfaces = [surfaces S];
+    
+    % Queue best/worst if they exist.
+    bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
+    if exist(bestFile, 'file')
+        load(ResultsPath(bestFile), ...
+            'nLGrid', 'IResiduals');
+        S = struct('IResiduals', IResiduals, ...
+            'nLGrid', nLGrid, ...
+            'name', 'Best Case Data Residuals');
+        surfaces = [surfaces S];
+    end
+    
+    worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
+    if exist(worstFile, 'file')
+        load(ResultsPath(bestFile), ...
+            'nLGrid', 'IResiduals');
+        S = struct('IResiduals', IResiduals, ...
+            'nLGrid', nLGrid, ...
+            'name', 'Worst Case Data Residuals');
+        surfaces = [surfaces S];
+    end
+    
     if type == "2dline"
-        originalResiduals = IResiduals;
-        plt = plot(nLGrid, originalResiduals);
-        plt.DisplayName = 'Residuals';
         
-        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
-        if exist(bestFile, 'file')
-            load(ResultsPath(bestFile), ...
-                'nLGrid', 'IResiduals');
-            bestResiduals = IResiduals;
-            plt = plot(nLGrid, bestResiduals);
-            plt.DisplayName = 'Best Case Data Residuals';
+        % Plot each line.
+        for ii = 1:length(surfaces)
+            S = surfaces{ii};
+            plt = plot(S.nLGrid, S.IResiduals);
+            plt.DisplayName = S.name;
         end
-        
-        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
-        if exist(worstFile, 'file')
-            load(ResultsPath(worstFile), ...
-                'nLGrid', 'IResiduals');
-            worstResiduals = IResiduals;
-            plt = plot(nLGrid, worstResiduals);
-            plt.DisplayName = 'Worst Case Data Residuals';
-        end
-        
-        plt = plot(nLGrid(iiOptimal), minIResidual, 'r*');
-        plt.DisplayName = 'Optimal Point';
         
         legend
         
@@ -338,34 +351,6 @@ if DP.ErrorSurface
         grid on
         ax1.Position = ax2.Position;
     else
-        surfaces = {};
-        
-        % Queue original surface.
-        S = struct('IResiduals', IResiduals, ...
-            'nLGrid', nLGrid, ...
-            'name', 'Residuals');
-        surfaces = [surfaces S];
-        
-        % Queue best/worst if they exist.
-        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
-        if exist(bestFile, 'file')            
-            load(ResultsPath(bestFile), ...
-                'nLGrid', 'IResiduals');
-            S = struct('IResiduals', IResiduals, ...
-                'nLGrid', nLGrid, ...
-                'name', 'Best Case Data Residuals');
-            surfaces = [surfaces S];
-        end
-        
-        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
-        if exist(worstFile, 'file')
-            load(ResultsPath(bestFile), ...
-                'nLGrid', 'IResiduals');
-            S = struct('IResiduals', IResiduals, ...
-                'nLGrid', nLGrid, ...
-                'name', 'Worst Case Data Residuals');
-            surfaces = [surfaces S];
-        end
         
         % Plot each surface.
         for ii = 1:length(surfaces)
@@ -384,31 +369,31 @@ if DP.ErrorSurface
             contour3(nLRange, xLRange, S.IResiduals, ...
                 levels, ...
                 'Color', 'r', ...
-                'HandleVisibility', 'off');            
+                'HandleVisibility', 'off');
             
             
-%             plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
-%             plt.DisplayName = 'Optimal Point';
-%             
-%             if ismember(0, nLRange) && ismember(1, xLRange)
-%                 plt = plot3(0, 1, IResiduals(end, 1), 'g*');
-%                 plt.DisplayName = '$n_L/x_L = 0/1$';
-%             end
-
-        title(sprintf("P%d: %s", P.patientNum, S.name))
-        
-        xlabel("$n_L$ [-]")
-        ylabel("$x_L$ [1/min]")
-        zlabel("2-norm of residuals, $\psi$ [mU/min]")
-        end            
+            %             plt = plot3(bestnL, bestxL, min(IResiduals(:)), 'r*');
+            %             plt.DisplayName = 'Optimal Point';
+            %
+            %             if ismember(0, nLRange) && ismember(1, xLRange)
+            %                 plt = plot3(0, 1, IResiduals(end, 1), 'g*');
+            %                 plt.DisplayName = '$n_L/x_L = 0/1$';
+            %             end
+            
+            title(sprintf("P%d: %s", P.patientNum, S.name))
+            
+            xlabel("$n_L$ [-]")
+            ylabel("$x_L$ [1/min]")
+            zlabel("2-norm of residuals, $\psi$ [mU/min]")
+        end
         
         tolerance = 2/100;
         bestFlatDomain = abs(surfaces{2}.IResiduals - IResiduals)./IResiduals <= tolerance;
         worstFlatDomain = abs(surfaces{3}.IResiduals - IResiduals)./IResiduals <= tolerance;
         flatDomain = bestFlatDomain & worstFlatDomain;
-            subplot(1, length(surfaces), 1)
+        subplot(1, length(surfaces), 1)
         plt = plot3(nLGrid, xLGrid, flatDomain*1000, 'y');
-%             plt.DisplayName = 'Optimal Point';
+        %             plt.DisplayName = 'Optimal Point';
         
     end
     

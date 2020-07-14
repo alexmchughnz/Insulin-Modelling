@@ -16,12 +16,15 @@ MSE = zeros(1, N);
 scaleFactors = cell(1, N);
 
 %% Simulate
-MSE(1) = GetSimError(P);
-scaleFactors{1} = zeros(size(vITotal));
-for ii = 2:N+1
+for ii = 1:N
     % Randomly vary data according to normal distribution.
+    randNums = randn(size(vITotal));
+    while any(randNums > 3)  % Limit to within 3 SDs.
+        randNums = randn(size(vITotal));
+    end
     scaleFactors{ii} = 1 + stddev*randn(size(vITotal));
-    trialITotal =  scaleFactors{ii} .* vITotal;
+     
+    trialITotal = scaleFactors{ii} .* vITotal;
     
     copyP = P;
     copyP.data.ITotal.value = trialITotal;
@@ -30,15 +33,12 @@ for ii = 2:N+1
     EstimateTimeRemaining(ii, N+1);
 end
 
-save(ResultsPath(sprintf("montecarlodata%gx%d P%d", stddev, N, P.patientNum)))
-
-% Save to patient.
-stddevError = std(MSE);
-P.results.stdError = stddevError;
+save(ResultsPath(sprintf("montecarlodata%gx%d P%d.mat", stddev, N, P.patientNum)))
 
 %% ==================================================
 %% Debug Plots
 DP = DEBUGPLOTS.AnalyseInsulinVariance;
+stddevError = std(MSE);
 
 % Error
 if DP.Error
@@ -50,11 +50,14 @@ if DP.Error
     xlabel("Mean Squared Error")
     ylabel("Probability")
     
-    title(sprintf("Distribution of Model MSEs to Data plus Normally-Distributed Noise with SD = %g%% (N = %d)", ...
-        stddev*100, N))
+    title(sprintf("P%d: Distribution of Model MSEs with Noise SD = %g*data (N = %d)", ...
+        P.patientNum, stddev, N))
+    
+    txt = sprintf("SD = %g", stddevError);
+    text(0, 1, txt);
 end
 
-fprintf("1 std. dev. of MSE is %g\n", stddevError)
+fprintf("P%d: 1 std. dev. of MSE is %g\n", P.patientNum, stddevError)
 
 end
 

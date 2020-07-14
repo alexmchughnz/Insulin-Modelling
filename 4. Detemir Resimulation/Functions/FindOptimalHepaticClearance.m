@@ -378,16 +378,18 @@ if DP.ErrorSurface
             hold on
             
             % > Surface
-            std2Norm = 66.15; % HARDCODED from AnalyseInsulinVariance.
+            IResiduals = S.IResiduals;
+            stdMSE = 6002.65; % HARDCODED from AnalyseInsulinVariance.
             gridMin = min(IResiduals(:));
-            isSameAsMin = (abs(S.IResiduals - gridMin) <= std2Norm);
+            gridMax = max(IResiduals(:));
+            isSameAsMin = (abs(IResiduals - gridMin) <= stdMSE);
             
-            CO(:,:,1) = zeros(size(S.IResiduals)); % red
-            CO(:,:,2) = isSameAsMin.*0.5; % green
-            CO(:,:,3) = ~isSameAsMin.*linspace(0.5, 0.7, size(S.IResiduals, 2)); % blue
-            %             caxis([gridMin gridMin*1.3]);
+            CO(:,:,1) = zeros(size(IResiduals)); %  red
+            CO(:,:,2) = isSameAsMin * 0.5; % green
+            CO(:,:,3) = ~isSameAsMin .* (gridMax-IResiduals)/gridMax; % blue
+            caxis([gridMin, gridMin + stdMSE]);
             
-            surf(nLRange, xLRange, S.IResiduals, CO,...
+            surf(nLRange, xLRange, IResiduals, CO,...
                 'HandleVisibility', 'off', ...
                 'FaceColor', 'interp');
             
@@ -403,7 +405,7 @@ if DP.ErrorSurface
             
             xlabel("$n_L$ [-]")
             ylabel("$x_L$ [1/min]")
-            zlabel("2-norm of residuals, $\psi$ [mU/min]")
+            zlabel("Mean of squared errors [(mU/min)^2]")
         end
         
     end
@@ -447,10 +449,10 @@ for ii = 1:numel(nLGrid)
     simITotal = C.mU2pmol(copyP.results.I + copyP.results.IDF);  % Sim [mU/L] -> [pmol/L]
     simITotal = simITotal(iiITotal);
     
-    ITotalError = 100*abs((simITotal - vITotal) ./ vITotal);
+    IErrors = simITotal - vITotal;
     
     % Save residuals.
-    IResiduals(ii) = norm(ITotalError);
+    IResiduals(ii) = sum(IErrors.^2)/numel(vITotal);  % Mean Squared Errors
     ISimulated{ii} = simITotal;
     
     EstimateTimeRemaining(ii, numel(nLGrid))

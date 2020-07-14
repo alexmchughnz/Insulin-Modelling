@@ -355,7 +355,7 @@ if DP.ErrorSurface
         surfaces = [surfaces S];
         
         % Queue best/worst if they exist.
-        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
+        bestFile = ResultsPath(sprintf(FILEFORMAT, loadname + " best", P.patientNum));
         if exist(bestFile, 'file')
             load(resultsfile(bestFile), ...
                 'nLGrid', 'IResiduals');
@@ -365,7 +365,7 @@ if DP.ErrorSurface
             surfaces = [surfaces S];
         end
         
-        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
+        worstFile = ResultsPath(sprintf(FILEFORMAT, loadname + " worst", P.patientNum));
         if exist(worstFile, 'file')
             load(resultsfile(worstFile), ...
                 'nLGrid', 'IResiduals');

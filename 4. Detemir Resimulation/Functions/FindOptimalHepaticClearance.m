@@ -288,6 +288,10 @@ DP = DEBUGPLOTS.FindOptimalHepaticClearance;
 if DP.ErrorSurface
     MakeDebugPlot(P, DP);
     hold on
+    if ~exist('loadname', 'var')
+        loadname = savename;
+    end
+    
     if type == "2dline"
         % Load original.
         originalResiduals = IResiduals;

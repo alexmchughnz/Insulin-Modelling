@@ -34,7 +34,7 @@ for ii = 2:N+1
     EstimateTimeRemaining(ii, N+1);
 end
 
-save
+save(ResultsPath(sprintf("montecarlodata%gP%d", stddev, P.patientNum)))
 
 %% Debug Plots
 DP = DEBUGPLOTS.AnalyseInsulinVariance;

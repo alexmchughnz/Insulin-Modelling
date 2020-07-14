@@ -47,8 +47,9 @@ if DP.Error
         'Normalization', 'probability');
     
     xlabel("Mean Squared Error")
+    ylabel("Probability")
     
-    title(sprintf("Distribution of Model MSEs to Data + Normally-Distributed Noise with SD = %g%% (N = %d)", ...
+    title(sprintf("Distribution of Model MSEs to Data plus Normally-Distributed Noise with SD = %g%% (N = %d)", ...
         stddev*100, N))
 end
 

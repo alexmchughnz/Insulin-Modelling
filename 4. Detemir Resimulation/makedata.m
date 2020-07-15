@@ -2,7 +2,7 @@
 
 load config
 
-patientNums = [1 3 4];
+patientNums = [4];
 
 global C
 global DEBUGPLOTS
@@ -91,6 +91,16 @@ for ii = 1:length(patientNums)
     elseif P.patientNum == 4
         P.data.tIPeaks = [152 715 1540 2155];
     end
+    
+    % Manual patient MSE distribution data.    
+    if P.patientNum == 1
+        P.data.stddevMSE = 6000;
+    elseif P.patientNum == 3
+        P.data.stddevMSE = 8050;
+    elseif P.patientNum == 4
+        P.data.stddevMSE = 50;
+    end
+    
     
     
     %%

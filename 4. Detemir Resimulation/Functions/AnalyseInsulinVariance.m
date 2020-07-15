@@ -30,7 +30,7 @@ for ii = 1:N
     copyP.data.ITotal.value = trialITotal;
     MSE(ii) = GetSimError(copyP);
     
-    EstimateTimeRemaining(ii, N+1);
+    EstimateTimeRemaining(ii, N);
 end
 
 save(ResultsPath(sprintf("montecarlodata%gx%d P%d.mat", stddev, N, P.patientNum)))

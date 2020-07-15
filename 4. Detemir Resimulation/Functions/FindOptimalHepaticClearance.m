@@ -264,10 +264,10 @@ elseif isequal(method, 'variance')
     
     % Evaluate original nL/xL range for both worst and best cases.
     savename = sprintf("%s best", loadname);  % Best Case
-    bestIResiduals = EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
+    EvaluateGrid(bestPArray, nLGrid, xLGrid, savename);
     
     savename = sprintf("%s worst", loadname);  % Worst Case
-    worstIResiduals = EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
+    EvaluateGrid(worstPArray, nLGrid, xLGrid, savename);
     
 end
 
@@ -383,22 +383,23 @@ if DP.ErrorSurface
             
             % > Surface
             IResiduals = S.IResiduals;
-            stdMSE = 6002.65; % HARDCODED from AnalyseInsulinVariance.
+            stddevMSE = P.data.stddevMSE;
             gridMin = min(IResiduals(:));
             gridMax = max(IResiduals(:));
-            isSameAsMin = (abs(IResiduals - gridMin) <= stdMSE);
+            isWithin1SD = (abs(IResiduals - gridMin) <= stddevMSE);
+            isWithin3SD = ~isWithin1SD & (abs(IResiduals - gridMin) <= 3*stddevMSE);
             
-            CO(:,:,1) = zeros(size(IResiduals)); %  red
-            CO(:,:,2) = isSameAsMin * 0.5; % green
-            CO(:,:,3) = ~isSameAsMin .* (gridMax-IResiduals)/gridMax; % blue
-            caxis([gridMin, gridMin + stdMSE]);
+            CO(:,:,1) = isWithin3SD * 0.5; %  red
+            CO(:,:,2) = (isWithin1SD|isWithin3SD) * 0.5; % green
+            CO(:,:,3) = ~(isWithin1SD|isWithin3SD) .* (gridMax-IResiduals)/gridMax; % blue
+            caxis([gridMin, gridMin + stddevMSE]);
             
             surf(nLRange, xLRange, IResiduals, CO,...
                 'HandleVisibility', 'off', ...
                 'FaceColor', 'interp');
             
             % > Contour
-            numLevels = 50;
+            numLevels = 25;
             levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels);
             contour3(nLRange, xLRange, S.IResiduals, ...
                 levels, ...

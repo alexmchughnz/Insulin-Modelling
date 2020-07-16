@@ -19,13 +19,14 @@ scaleFactors = cell(1, N);
 for ii = 1:N
     % Randomly vary data according to normal distribution.
     randNums = randn(size(vITotal));
-    while any(randNums > 3)  % Limit to within 3 SDs.
+    while any(abs(randNums) > 3)  % Limit to within 3 SDs.
         randNums = randn(size(vITotal));
     end
-    scaleFactors{ii} = 1 + stddev*randn(size(vITotal));
+    scaleFactors{ii} = 1 + stddev*randNums;
      
     trialITotal = scaleFactors{ii} .* vITotal;
     
+    % Forward simulate with varied data.
     copyP = P;
     copyP.data.ITotal.value = trialITotal;
     MSE(ii) = GetSimError(copyP);
@@ -54,7 +55,9 @@ if DP.Error
         P.patientNum, stddev, N))
     
     txt = sprintf("SD = %g", stddevError);
-    text(0, 1, txt);
+    xlimits = xlim;
+    ylimits = ylim;
+    text(0.9*xlimits(end), 0.9*ylimits(end), txt);
 end
 
 fprintf("P%d: 1 std. dev. of MSE is %g\n", P.patientNum, stddevError)

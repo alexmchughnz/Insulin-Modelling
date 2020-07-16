@@ -47,7 +47,7 @@ for ii = 1:length(patients)
 
     %% Analyse data variance.
 %     stddev = 5/100; 
-%     N = 100;    
+%     N = 1000;    
 %     AnalyseInsulinVariance(patients{ii}, stddev, N);    
     
     %% Find other dependent parameters. 

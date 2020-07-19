@@ -148,7 +148,23 @@ elseif dataset == "DISST"
         times = T{code, repmat("time", 1, N) + (1:N)}';
         P.data.G.time = times;
         P.data.I.time = times;
-        P.data.CPep.time = times;   
+        P.data.CPep.time = times;        
+        
+        vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
+        tIBolus = T{code, "timeIB"};   % Time of bolus delivery [min]
+        TIBolus = 1;                          % Period of bolus action [min]
+        % Bolus as function of time, value spread over period.
+        % Active if time within period.
+        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;
+        
+        vGBolus = T{code, "GB"};                % Glucose bolus [g]
+        vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
+        tGBolus = T{code, "timeGB"};        % Time of bolus delivery [min]
+        TGBolus = 1;                            % Period of bolus action [min]
+        % Bolus as function of time, value spread over period.
+        % Active if time within period.
+        P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;
+        
         
         % Time
         P.data.simTime = [min(times), max(times)];
@@ -158,13 +174,7 @@ elseif dataset == "DISST"
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
-        
-        vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
-        tIBolus = T{code, "timeIB"} * 1e+3;  % Time of bolus delivery [min]
-        TIBolus = 1;                          % Period of bolus action [min]
-        % Bolus as function of time, value spread over period.
-        % Active if time within period.
-        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;
+       
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);

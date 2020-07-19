@@ -1,7 +1,8 @@
-function P = SolveSystem(P)
+function P = SolveSystem(P, source)
 % Fits data to find SI over time for a patient.
 % INPUTS:
-%   P   - patient struct
+%   P        - patient struct
+%   source   - string of trial type, e.g. "DISST"
 % OUTPUT:
 %   P   - modified patient struct with SI
 
@@ -14,6 +15,6 @@ options = odeset('RelTol',1e-5, ...
 %% Models
 P = GIModel(P, options);
 P = IDModel(P, options);
-P = GCModel(P, options);
+P = GCModel(P, source, options);
 
 end

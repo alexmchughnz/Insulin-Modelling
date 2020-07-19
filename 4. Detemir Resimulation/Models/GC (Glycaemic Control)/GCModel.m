@@ -1,8 +1,9 @@
-function [P] = GCModel(P, options)
+function [P] = GCModel(P, source, options)
 % Function for GC model forward simulation.
 % Pequires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
 %   P        - patient struct, must have tArray, qGut(t) and QLocal(t)
+%   source   - string of trial type, e.g. "DISST"
 %   options  - ode45 options
 % OUTPUT:
 %   P  - patient struct updated with model results 
@@ -22,9 +23,15 @@ Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 Y0 = [G0;   
       I0; 
       Q0];
+
+if source == "Detemir"
+    GCModelODE = @GCModelODESlow;
+else
+    GCModelODE = @GCModelODEFast;
+end
     
 % Forward simulate.
-[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  
+[~, Y] = ode45(GCModelODE, P.results.tArray, Y0, options, P, Y0);  
 
 % Store results.
 P.results.G = Y(:,1);

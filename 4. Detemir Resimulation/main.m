@@ -50,7 +50,7 @@ for ii = 1:length(patients)
     patients{ii} = FitInsulinSensitivity(patients{ii}, true);     % (SI)
     
     %% Forward simulate models.
-    patients{ii} = SolveSystem(patients{ii});
+    patients{ii} = SolveSystem(patients{ii}, source);
     
 end
 

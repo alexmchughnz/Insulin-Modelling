@@ -1,7 +1,8 @@
-function P = FindGutEmptyingRate(P)
+function P = FindGutEmptyingRate(P, source)
 % Performs a grid search to find the most suitable gut emptying rate (d2).
 % INPUTS:
-%   P   - patient struct
+%   P      - patient struct
+%   source - string of trial type, e.g. "DISST"
 % OUTPUT:
 %   P   - modified patient struct with best found d2
     
@@ -33,9 +34,7 @@ for ii = 1:N
     SIGrid(:, ii) = copyP.results.SI;
     
     % Simulate G(t, d2) with resulting SI.
-    copyP = GIModel(copyP);  % Required for P2.
-    copyP = IDModel(copyP);  % Required for QDF.
-    copyP = GCModel(copyP);
+    copyP = SolveSystem(copyP, source);  % Required for P2 and QDF.
     
     % Find average error G(t, d2) to measured data.
     simG = copyP.results.G(tG+1);

@@ -9,12 +9,17 @@ function P = SolveSystem(P, source)
 
 %% Setup
 options = odeset('RelTol',1e-5, ...
-                 'AbsTol',1e-4);
+    'AbsTol',1e-4);
 
 
 %% Models
-P = GIModel(P, options);
-P = IDModel(P, options);
-P = GCModel(P, source, options);
+if source == "Detemir"
+    P = GIModel(P, options);
+    P = IDModel(P, options);
+    P = GCModel(P, source, options);
+else
+    P = GIModel(P, options);
+    P = GCModel(P, source, options);
+end
 
 end

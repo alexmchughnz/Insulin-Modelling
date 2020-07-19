@@ -43,12 +43,12 @@ if dataset == "Detemir"
         P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [?]
         P.data.ITotal.time  = data.PlasmaI_time;
         
-        vIBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
-        tIBolus = sys.SC.T;       % Time of bolus delivery [min]
-        TIBolus = 5;              % Period of bolus action [min]
+        vIDBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
+        tIDBolus = sys.SC.T;       % Time of bolus delivery [min]
+        TIDBolus = 5;              % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
-        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;
+        P.data.IDBolus = @(t) ((tIDBolus <= t) && (t < tIDBolus+TIDBolus)).*vIDBolus/TIDBolus;
         
         P.data.meal.durations = data.meal_durations;  %[min]
         P.data.meal.startTimes = data.meal_start;     %[datetime]
@@ -155,7 +155,7 @@ elseif dataset == "DISST"
         TIBolus = 1;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
-        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;
+        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;  % [mU/min]
         
         vGBolus = T{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
@@ -163,7 +163,7 @@ elseif dataset == "DISST"
         TGBolus = 1;                            % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
-        P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;
+        P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
         
         % Time

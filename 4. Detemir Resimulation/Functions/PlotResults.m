@@ -75,9 +75,8 @@ subplot(4, 1, 3)
 hold on
 if source == "Detemir"
     [tI, vI] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
-    tI =ToDateTime(tI);
     
-    ppI = griddedInterpolant(tI, vI);
+    ppI = griddedInterpolant(tI, vI);    
     
     I = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
     
@@ -85,6 +84,7 @@ if source == "Detemir"
     pltxlabel = 'Time';
     pltylabel = 'Plasma Insulins, I + IDF [pmol/L]';
     pltxarray = dtArray;
+    pltxdata  = ToDateTime(tI);
     
     datetick('x')
     
@@ -99,6 +99,7 @@ elseif source == "DISST"
     pltxlabel = 'Time';
     pltylabel = 'Plasma Insulin, I [pmol/L]';
     pltxarray = tArray;
+    pltxdata = tI;
 end
 
 lineBounds = ylim;
@@ -110,7 +111,7 @@ for ii = 1:length(P.results.nLxLFitBounds)
     L.HandleVisibility = 'off';
 end
 
-plt = plot(tI, vI, 'r*');
+plt = plot(pltxdata, vI, 'r*');
 plt.DisplayName = 'Blood Test';
 
 plt = plot(pltxarray, ppI(tArray), 'b');

@@ -1,11 +1,12 @@
-function [] = PlotResults(P)
+function [] = PlotResults(P, source)
 % Plots patient data:
 %     - blood glucose, G
 %     - plasma insulin, I
 %     - insulin sensitivity, SI
 %     - estimated endogenous insulin secretion, Uen
 % INPUTS:
-%   P - patient struct
+%   P      - patient struct
+%   source - string of trial type, e.g. "DISST"
 
 global C
 
@@ -23,7 +24,7 @@ F = PanelFigures(3, 3);
 subplot(4, 1, 1)
 hold on
 
-[tG, vG] = GetSimTime(P, P.data.G{3});
+[tG, vG] = GetSimTime(P, P.data.G);
 dtG = ToDateTime(tG);
 plt = plot(dtG, vG, 'r*');
 plt.DisplayName = 'Blood Test';
@@ -50,7 +51,9 @@ xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
 legend()
 
-datetick('x')
+if source == "Detemir"
+    datetick('x')
+end
 ylim([4 15])
 
 
@@ -67,23 +70,36 @@ xlabel('Time')
 ylabel('Error [\%]')
 
 
-%% Insulin + Detemir
+%% Insulin (+ Detemir)
 subplot(4, 1, 3)
 hold on
-
-[tITotal, vITotal] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
-dtITotal =ToDateTime(tITotal);
-plt = plot(dtITotal, vITotal, 'r*');
-plt.DisplayName = 'Blood Test';
-
-ppITotal = griddedInterpolant(tITotal, vITotal);
-plt = plot(dtArray, ppITotal(tArray), 'b');
-plt.LineWidth = 1;
-plt.DisplayName = 'Interpolation';
-
-ITotal = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
-plt = plot(dtArray, ITotal, 'k');
-plt.DisplayName = 'Model Prediction';
+if source == "Detemir"
+    [tI, vI] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
+    tI =ToDateTime(tI);
+    
+    ppI = griddedInterpolant(tI, vI);
+    
+    I = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
+    
+    plttitle = [patientLabel 'Plasma Insulin + Detemir'];
+    pltxlabel = 'Time';
+    pltylabel = 'Plasma Insulins, I + IDF [pmol/L]';
+    pltxarray = dtArray;
+    
+    datetick('x')
+    
+elseif source == "DISST"
+    [tI, vI] = GetSimTime(P, P.data.I);  % [pmol/L]
+    
+    ppI = griddedInterpolant(tI, vI);
+    
+    I = C.mU2pmol(P.results.I);  % [mU/L] -> [pmol/L]
+    
+    plttitle = [patientLabel 'Plasma Insulin'];
+    pltxlabel = 'Time';
+    pltylabel = 'Plasma Insulin, I [pmol/L]';
+    pltxarray = tArray;
+end
 
 lineBounds = ylim;
 for ii = 1:length(P.results.nLxLFitBounds)
@@ -94,21 +110,29 @@ for ii = 1:length(P.results.nLxLFitBounds)
     L.HandleVisibility = 'off';
 end
 
-title([patientLabel 'Plasma Insulin + Detemir'])
-xlabel('Time')
-ylabel('Plasma Insulins, I + IDF [pmol/L]')
+plt = plot(tI, vI, 'r*');
+plt.DisplayName = 'Blood Test';
+
+plt = plot(pltxarray, ppI(tArray), 'b');
+plt.LineWidth = 1;
+plt.DisplayName = 'Interpolation';
+
+plt = plot(pltxarray, I, 'k');
+plt.DisplayName = 'Model Prediction';
+
+
+title(plttitle)
+xlabel(pltxlabel)
+ylabel(pltylabel)
 legend()
-
-datetick('x')
-
 
 %% Insulin Error
 ax = subplot(4, 1, 4);
 
-iiITotal = GetTimeIndex(tITotal, tArray);
-simITotal = ITotal(iiITotal);
-ITotalError = 100*abs((simITotal - vITotal) ./ vITotal);
-plot(dtITotal, ITotalError, 'r');
+iiI = GetTimeIndex(tI, tArray);
+simI = I(iiI);
+ITotalError = 100*abs((simI - vI) ./ vI);
+plot(tI, ITotalError, 'r');
 
 title([patientLabel 'Plasma Insulins Error'])
 xlabel('Time')

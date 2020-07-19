@@ -9,15 +9,17 @@ function D = GetGlucoseDelivery(t, P)
 global C
 
 % Extract meal times.
-M = P.data.meal;
-mealStarts = M.startTimes;              % [min]
-mealEnds = mealStarts + M.durations;  % [min]
-
-% Add contribution from all meals occuring during this time.
-currentMeals = (mealStarts < t) & (t < mealEnds); % Which meals contribute at time=t? [logical]
-mealRates = M.carbs ./ M.durations;               % Glucose rates of all meals [g/min?]
-
-D = dot(currentMeals, mealRates) / C.MGlucose * 1000;  % Glucose delivery rate [mmol/min]
-
+if isfield(P.data, 'meal')
+    M = P.data.meal;
+    mealStarts = M.startTimes;              % [min]
+    mealEnds = mealStarts + M.durations;  % [min]
+    
+    % Add contribution from all meals occuring during this time.
+    currentMeals = (mealStarts < t) & (t < mealEnds); % Which meals contribute at time=t? [logical]
+    mealRates = M.carbs ./ M.durations;               % Glucose rates of all meals [g/min?]
+    
+    D = dot(currentMeals, mealRates) / C.MGlucose * 1000;  % Glucose delivery rate [mmol/min]
+else
+    D = 0;
 end
 

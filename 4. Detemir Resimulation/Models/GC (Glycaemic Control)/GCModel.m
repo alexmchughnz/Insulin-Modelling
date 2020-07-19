@@ -12,7 +12,7 @@ if ~exist('options', 'var')
 end
 
 % Set up initial conditions.
-[~, vG] = GetSimTime(P, P.data.G{3});
+[~, vG] = GetSimTime(P, P.data.G);
 [~, vI] = GetIFromITotal(P);  % [mU/L]
 
 G0 = vG(1);

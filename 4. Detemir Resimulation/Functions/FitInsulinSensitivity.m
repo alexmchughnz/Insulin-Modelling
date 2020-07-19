@@ -19,7 +19,7 @@ intervalDuration = 360;  % Time per interval [min]
 numIntervals = floor(P.data.simDuration()/intervalDuration);
 
 % Interpolate G and I with piecewise polynomials.
-[tG, vG] = GetSimTime(P, P.data.G{3});
+[tG, vG] = GetSimTime(P, P.data.G);
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
 
 [tI, vI] = GetIFromITotal(P);  % [mU/L]

@@ -33,22 +33,22 @@ if dataset == "Detemir"
         P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
         P.data.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
         
-        P.data.G{1}.value = data.bg1;         % Blood glucose reading [mmol/L?]
-        P.data.G{1}.time = data.bg1_time;     % Time of blood glucose reading [datetime]
-        P.data.G{2}.value = data.bg2;
-        P.data.G{2}.time = data.bg2_time;
-        P.data.G{3}.value = data.bg3;
-        P.data.G{3}.time = data.bg3_time;
+        P.data.GOther{1}.value = data.bg1;         % Blood glucose reading [mmol/L?]
+        P.data.GOther{1}.time = data.bg1_time;     % Time of blood glucose reading [datetime]
+        P.data.GOther{2}.value = data.bg2;
+        P.data.GOther{2}.time = data.bg2_time;
+        P.data.G.value = data.bg3;
+        P.data.G.time = data.bg3_time;
         
         P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [?]
         P.data.ITotal.time  = data.PlasmaI_time;
         
-        IBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
-        tBolus = sys.SC.T;       % Time of bolus delivery [min]
-        TBolus = 5;              % Period of bolus action [min]
+        vIBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
+        tIBolus = sys.SC.T;       % Time of bolus delivery [min]
+        TIBolus = 5;              % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
-        P.data.IBolus = @(t) ((tBolus <= t) && (t < tBolus+TBolus)).*IBolus/TBolus;
+        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;
         
         P.data.meal.durations = data.meal_durations;  %[min]
         P.data.meal.startTimes = data.meal_start;     %[datetime]
@@ -138,17 +138,33 @@ elseif dataset == "DISST"
     for ii = 1:height(T)
         code = T.Properties.RowNames{ii};
         P.patientCode = code;
-%         P.patientNum = ii;
+        P.patientNum = ii;        
         
         % Data        
-        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)};
-        P.data.I.value = T{code, repmat("I", 1, N) + (1:N)};
-        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)};
+        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';
+        P.data.I.value = T{code, repmat("I", 1, N) + (1:N)}';
+        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';
         
-        times = T{code, repmat("time", 1, N) + (1:N)};
+        times = T{code, repmat("time", 1, N) + (1:N)}';
         P.data.G.time = times;
         P.data.I.time = times;
-        P.data.CPep.time = times;
+        P.data.CPep.time = times;   
+        
+        % Time
+        P.data.simTime = [min(times), max(times)];
+        P.data.simDuration =  @() diff(P.data.simTime) + 1;
+        P.results.tArray = (0 : P.data.simDuration() - 1)';
+        
+        % Other Fields
+        P.data.GFast = @(~) P.data.G.value(1);
+        P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
+        
+        vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
+        tIBolus = T{code, "timeIB"} * 1e+3;  % Time of bolus delivery [min]
+        TIBolus = 1;                          % Period of bolus action [min]
+        % Bolus as function of time, value spread over period.
+        % Active if time within period.
+        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);

@@ -17,7 +17,7 @@ SIGrid = zeros(P.data.simDuration(), N);
 GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)
-[tG, vG] = GetSimTime(P, P.data.G{3});
+[tG, vG] = GetSimTime(P, P.data.G);
 
 %% Search
 for ii = 1:N 

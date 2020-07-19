@@ -18,6 +18,7 @@ if dataset == "Detemir"
         data = sys.Data;
         
         clear P
+        P.source = "Detemir";
         P.patientNum = data.PtNo;
         P.patientCode = num2str(P.patientNum);
         P.data.mass = data.pt_mass;           % Patient mass [kg]
@@ -137,6 +138,7 @@ elseif dataset == "DISST"
     pp = 1; % Index for patients saved.
     for ii = 1:height(T)
         code = T.Properties.RowNames{ii};
+        P.source = "DISST";
         P.patientCode = code;
         P.patientNum = ii;        
         

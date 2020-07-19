@@ -1,9 +1,9 @@
 function P = FitInsulinSensitivity(P, allowPlots)
 % Fits data to find SI over time for a patient.
-% INPUT:
-%   P   - patient struct
+% INPUTS:
+%   P      - patient struct
 % OUTPUT:
-%   P   - modified patient struct with SI
+%   P          - modified patient struct with SI
 %   allowPlots - flag for whether debug plots should appear (allows
 %                suppression)
 
@@ -61,17 +61,34 @@ YGC0 = [9;   % Q(t=0)            GC Model [mU/L]
     0;   % GA(t=0)                    [mmol/L]
     0];  % Gb(t=0)
 
-Y0 = [YGI0;
-    YID0;
-    YGC0];
+
+% Set up for different model types.
+if P.source == "Detemir"
+    SIModelODE = @SIModelODESlow;
+    
+    Y0 = [YGI0;
+        YID0;
+        YGC0];
+    
+    ccGA = 11;  % Column index of GA in Y.
+    ccGb = 12;  % Column index of Gb in Y.
+    
+else
+    SIModelODE = @SIModelODEFast;
+    
+    Y0 = [YGI0;
+        YGC0];
+
+    ccGA = 4;  % Column index of GA in Y.
+    ccGb = 5;  % Column index of Gb in Y.
+end
+
 
 % For each interval, integrate the collection of ODEs,
 % then solve the dG equation for SI.
-ccGA = 11;  % Column index of GA in Y.
-ccGb = 12;  % Column index of Gb in Y.
 for ii = 1 : numIntervals
     % First minute: finer solving.
-    [t1, Y1] = ode45(@SIModelODE, ...
+    [t1, Y1] = ode45(SIModelODE, ...
         ta : ta+1, ...
         Y0, ...
         optionsShort, ...
@@ -79,7 +96,7 @@ for ii = 1 : numIntervals
     Y0 = Y1(end, :)';  % Update ICs, picking up where we left off.
     
     % Remaining minutes: coarser solving.
-    [t2, Y2] = ode45(@SIModelODE, ...
+    [t2, Y2] = ode45(SIModelODE, ...
         (ta+1 : ta+intervalDuration-1)', ...
         Y0, ...
         optionsLong, ...
@@ -115,8 +132,8 @@ end
 P.results.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
 fprintf(['P%d: SI fit successfully. SI(*1e+3) at %d min intervals = [', ...
-        repmat('%8.3f', 1, length(intervalSI)), ']\n'], ...
-        P.patientNum, intervalDuration, intervalSI*1e3);
+    repmat('%8.3f', 1, length(intervalSI)), ']\n'], ...
+    P.patientNum, intervalDuration, intervalSI*1e3);
 
 
 %% Debug Plots
@@ -135,11 +152,11 @@ end
 
 
 % Adapted from fit_SI/FAERIES_integrals.
-function [dY] = SIModelODE(t, Y, ppG, ppI, P, Y0)
+function [dY] = SIModelODESlow(t, Y, ppG, ppI, P, Y0)
 % Collection of full system ODEs used to compute SI. Use with ode45.
 % INPUTS:
 %   t   - time at which to evaluate ODE
-%   Y   - states [P1; P2; G; I; Q] at time == t
+%   Y   - states at time == t
 %   ppG - piecewise polynomial interpolant of G over time
 %   ppI - piecewise polynomial interpolant of I over time
 %   P   - patient struct
@@ -198,6 +215,62 @@ dYID = IDModelODE(t, YID, P);
 %% Output
 dY = [dYGI;
     dYID;
+    dYGC];
+
+end
+
+
+function [dY] = SIModelODEFast(t, Y, ppG, ppI, P, Y0)
+% Collection of full system ODEs used to compute SI. Use with ode45.
+% INPUTS:
+%   t   - time at which to evaluate ODE
+%   Y   - states at time == t
+%   ppG - piecewise polynomial interpolant of G over time
+%   ppI - piecewise polynomial interpolant of I over time
+%   P   - patient struct
+%   Y0  - initial conditions of states
+% OUTPUT:
+%   dY  - derivatives of states at time == t
+global GC
+
+%% Input
+% Split up states.
+YGI = Y(1:2);
+YGC = Y(3:5);
+
+P2  = YGI(2);
+Q   = YGC(1);
+
+G   = ppG(t);   % Current blood glucose (interpolated)  [mmol/L]
+I   = ppI(t);   % Current plasma insulin (interpolated) [mU/L]
+
+% Split up initial conditions.
+YGC0 = Y0(3:5);
+Q0   = YGC0(1);
+
+%% Variables
+% Time dependent.
+n = (1 + floor(t));         % Index of current timestep.
+GFast     = P.data.GFast(t);      % Fasting glucose [mmol/L]
+GBolus    = P.data.GBolus(t);     % Glucose bolus [mmol/min]
+GInfusion = P.data.GInfusion(n);  % Glucose infusion rate [mmol/min]
+
+% Patient dependent.
+d2 = P.results.d2;
+
+%% Computation
+% GC Model (reconstructed)
+% dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
+dQ     = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
+dGA    = (G*Q - GFast*Q0)/(1 + GC.alphaG*Q);
+dGb    = -GC.pg*(G-GFast) + d2/GC.VG*P2 + (GInfusion + GBolus)/GC.VG;
+dYGC   = [dQ; dGA; dGb];
+
+% GI Model
+dYGI = GIModelODE(t, YGI, P);
+
+%% Output
+dY = [dYGI;
     dYGC];
 
 end

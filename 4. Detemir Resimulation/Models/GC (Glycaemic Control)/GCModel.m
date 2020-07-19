@@ -1,9 +1,8 @@
-function [P] = GCModel(P, source, options)
+function [P] = GCModel(P, options)
 % Function for GC model forward simulation.
 % Pequires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
 %   P        - patient struct, must have tArray, qGut(t) and QLocal(t)
-%   source   - string of trial type, e.g. "DISST"
 %   options  - ode45 options
 % OUTPUT:
 %   P  - patient struct updated with model results 
@@ -24,7 +23,7 @@ Y0 = [G0;
       I0; 
       Q0];
 
-if source == "Detemir"
+if P.source == "Detemir"
     GCModelODE = @GCModelODESlow;
 else
     GCModelODE = @GCModelODEFast;

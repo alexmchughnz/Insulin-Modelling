@@ -1,4 +1,4 @@
-function [] = PlotResults(P, source)
+function [] = PlotResults(P)
 % Plots patient data:
 %     - blood glucose, G
 %     - plasma insulin, I
@@ -6,7 +6,6 @@ function [] = PlotResults(P, source)
 %     - estimated endogenous insulin secretion, Uen
 % INPUTS:
 %   P      - patient struct
-%   source - string of trial type, e.g. "DISST"
 
 global C
 
@@ -51,7 +50,7 @@ xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
 legend()
 
-if source == "Detemir"
+if P.source == "Detemir"
     datetick('x')
 end
 ylim([4 15])
@@ -73,7 +72,7 @@ ylabel('Error [\%]')
 %% Insulin (+ Detemir)
 subplot(4, 1, 3)
 hold on
-if source == "Detemir"
+if P.source == "Detemir"
     [tI, vI] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
     
     ppI = griddedInterpolant(tI, vI);    
@@ -88,7 +87,7 @@ if source == "Detemir"
     
     datetick('x')
     
-elseif source == "DISST"
+elseif P.source == "DISST"
     [tI, vI] = GetSimTime(P, P.data.I);  % [pmol/L]
     
     ppI = griddedInterpolant(tI, vI);

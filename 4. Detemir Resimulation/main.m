@@ -21,7 +21,7 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1 3];
+patientNums = [1];
 source = "DISST";
 patients = makedata(source, patientNums);
 
@@ -45,12 +45,12 @@ for ii = 1:length(patients)
 %     AnalyseInsulinVariance(patients{ii}, stddev, N);    
     
     %% Find other dependent parameters. 
-    patients{ii} = FindGutEmptyingRate(patients{ii}, source);  % (d2)
+    patients{ii} = FindGutEmptyingRate(patients{ii});  % (d2)
     
     patients{ii} = FitInsulinSensitivity(patients{ii}, true);  % (SI)
     
     %% Forward simulate models.
-    patients{ii} = SolveSystem(patients{ii}, source);
+    patients{ii} = SolveSystem(patients{ii});
     
 end
 
@@ -59,6 +59,6 @@ clear PlotResults PanelFigures
 
 for ii = 1:length(patients)
     P = patients{ii};
-    PlotResults(P, source);
+    PlotResults(P);
 end
 PanelDebugPlots();

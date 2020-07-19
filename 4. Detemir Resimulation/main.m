@@ -17,20 +17,13 @@ clear global
 makedebugplots
 makeconfig
 makeparameters
-makedata
 
 load config
 
 %% Load Data
 patientNums = [1 3 4];
+patients = makedata("Detemir", patientNums);
 
-% Generate patient data structs.
-loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
-patients = cell(size(patientNums));
-for ii = 1 : length(patientNums)
-    n = patientNums(ii);
-    patients{ii} = loadpatient(n);
-end
 
 %% Calculate Patient/Time Dependent Parameters
 for ii = 1:length(patients)

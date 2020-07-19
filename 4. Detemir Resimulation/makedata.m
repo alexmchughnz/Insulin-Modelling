@@ -19,6 +19,7 @@ if dataset == "Detemir"
         
         clear P
         P.patientNum = data.PtNo;
+        P.patientCode = num2str(P.patientNum);
         P.data.mass = data.pt_mass;           % Patient mass [kg]
         
         P.data.trialTime     = [sys.trial_start_t, sys.trial_end_t];
@@ -105,10 +106,10 @@ if dataset == "Detemir"
         end
         
         
-        % Save patient structs.
-        filename = sprintf("patient%d.mat", P.patientNum);
+        % Save patient structs.        
+        filename = sprintf("patient%s.mat", P.patientCode);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
-        fprintf('P%d: Saved patient data.\n', P.patientNum);
+        fprintf('%s: Saved patient data.\n', P.patientCode);
         
     end
     
@@ -119,9 +120,36 @@ if dataset == "Detemir"
         patientSet{pp} = loadpatient(n);
     end
     
-elseif dataset == "DISST"    
-    ogttTable = readtable(fullfile(DATAPATH, dataset, "OGTT recent"));
+elseif dataset == "DISST"
+    numRows = 51;
+    T = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"));
+    T = T(1:numRows, :);
     
+    T.Properties.VariableNames = T{1, :};
+    T.Properties.RowNames = T.code;
+    T = T(2:end, 2:end);
+    
+    N = 5;  % Number of measurements.    
+    for ii = 1:height(T)
+        code = T.Properties.RowNames{ii};
+        P.patientCode = code;
+        P.patientNum = ii;
+        
+        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)};
+        P.data.I.value = T{code, repmat("I", 1, N) + (1:N)};
+        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)};
+        
+        times = T{code, repmat("time ", 1, N) + (1:N)};
+        P.data.G.time = times;
+        P.data.I.time = times;
+        P.data.CPep.time = times;        
+        
+        
+        % Save patient structs.
+        filename = sprintf("patient%s.mat", P.patientCode);
+        save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
+        fprintf('%s: Saved patient data.\n', P.patientCode);
+    end
     
 end
 %% --------------------------------------------------

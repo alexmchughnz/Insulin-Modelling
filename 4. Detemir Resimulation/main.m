@@ -22,7 +22,7 @@ load config
 
 %% Load Data
 patientNums = [1 3 4];
-patients = makedata("Detemir", patientNums);
+patients = makedata("DISST", patientNums);
 
 
 %% Calculate Patient/Time Dependent Parameters

@@ -14,7 +14,7 @@ if dataset == "Detemir"
     for ii = 1:length(patientNums)
         patientNum = patientNums(ii);
         filename = sprintf("sys%d.mat", patientNum);
-        load(filename);
+        load(fullfile(DATAPATH, dataset, filename));
         data = sys.Data;
         
         clear P
@@ -107,19 +107,21 @@ if dataset == "Detemir"
         
         % Save patient structs.
         filename = sprintf("patient%d.mat", P.patientNum);
-        save(fullfile(DATAPATH, filename), '-struct', 'P');
+        save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
         fprintf('P%d: Saved patient data.\n', P.patientNum);
         
     end
     
     % Generate patient data structs.
-    loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
+    loadpatient = @(n) load(fullfile(DATAPATH, dataset, sprintf("patient%d.mat", n)));
     for pp = 1 : length(patientNums)
         n = patientNums(pp);
         patientSet{pp} = loadpatient(n);
     end
     
-elseif dataset == "DISST"
+elseif dataset == "DISST"    
+    ogttTable = readtable(fullfile(DATAPATH, dataset, "OGTT recent"));
+    
     
 end
 %% --------------------------------------------------

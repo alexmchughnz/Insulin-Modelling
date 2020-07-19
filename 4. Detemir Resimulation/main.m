@@ -21,13 +21,13 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1 3 4];
+patientNums = [1 2 3];
 patients = makedata("DISST", patientNums);
 
 
 %% Calculate Patient/Time Dependent Parameters
 for ii = 1:length(patients)
-    fprintf("\n\n===PATIENT %d===\n", patients{ii}.patientNum)
+    fprintf("\n\n===PATIENT %s===\n", patients{ii}.patientCode)
     
     %% Determine Uen.
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)

@@ -120,38 +120,58 @@ if dataset == "Detemir"
         patientSet{pp} = loadpatient(n);
     end
     
-elseif dataset == "DISST"
-    numRows = 51;
-    T = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"));
-    T = T(1:numRows, :);
+elseif dataset == "DISST"    
     
-    T.Properties.VariableNames = T{1, :};
-    T.Properties.RowNames = T.code;
-    T = T(2:end, 2:end);
+    % Load table.
+    opts = spreadsheetImportOptions(...
+        'NumVariables', 25, ...
+        'DataRange', 'A3:Y52', ...
+        'VariableNamesRange', '2:2');
+    opts = setvartype(opts, 'double');
     
-    N = 5;  % Number of measurements.    
+    T = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"), opts, ...
+        'ReadRowNames', true, ...
+        'ReadVariableNames', true);
+    
+    N = 5;  % Number of measurements.   
+    pp = 1; % Index for patients saved.
     for ii = 1:height(T)
         code = T.Properties.RowNames{ii};
         P.patientCode = code;
-        P.patientNum = ii;
+%         P.patientNum = ii;
         
+        % Data        
         P.data.G.value = T{code, repmat("G", 1, N) + (1:N)};
         P.data.I.value = T{code, repmat("I", 1, N) + (1:N)};
         P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)};
         
-        times = T{code, repmat("time ", 1, N) + (1:N)};
+        times = T{code, repmat("time", 1, N) + (1:N)};
         P.data.G.time = times;
         P.data.I.time = times;
-        P.data.CPep.time = times;        
-        
+        P.data.CPep.time = times;
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
-        fprintf('%s: Saved patient data.\n', P.patientCode);
+        fprintf('%s: Saved patient data.\n', P.patientCode);       
+        
+    
+        % Generate patient data structs.
+        loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
+        if ismember(ii, patientNums)
+            patientSet{pp} = loadpatient(P.patientCode);
+            pp = pp + 1;
+        end
+    
+        
     end
     
+    
 end
+
+
+
+
 %% --------------------------------------------------
 
 %% Debug Plots

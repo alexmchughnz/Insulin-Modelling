@@ -168,8 +168,9 @@ elseif isequal(method, 'improve')
     
     % Load by name.
     loadname = varargin{1};
-    nLPrecision = varargin{2}(1);
-    xLPrecision = varargin{2}(2);
+    delta = varargin{2};
+    nLPrecision = delta(1);
+    xLPrecision = delta(end);
     
     load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
         'nLGrid', 'xLGrid', 'IResiduals');

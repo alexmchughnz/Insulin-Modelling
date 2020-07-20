@@ -131,10 +131,6 @@ end
 % Write estimated data into patient struct, overwriting defaults.
 P.results.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
-fprintf(['P%d: SI fit successfully. SI(*1e+3) at %d min intervals = [', ...
-    repmat('%8.3f', 1, length(intervalSI)), ']\n'], ...
-    P.patientNum, intervalDuration, intervalSI*1e3);
-
 
 %% Debug Plots
 if allowPlots

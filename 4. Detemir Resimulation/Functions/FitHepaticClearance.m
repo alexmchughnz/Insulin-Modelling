@@ -82,6 +82,8 @@ if isequal(method, 'fixed')
     
     P.results.nL = nL*ones(size(P.results.nL));
     P.results.xL = xL*ones(size(P.results.xL));
+    
+    P.results.nLxLFitBounds = [1 P.data.simDuration()];
 else
     % Fit nL over segments.
     A = zeros(length(tArray), 2);
@@ -112,38 +114,6 @@ end
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
 
-LHS = dot(A, [P.results.nL P.results.xL], 2);
-b = sum(bParts, 2);
-
-% Forward Simulation of Insulin
-if DP.ForwardSim
-    I = ppI(tArray);
-    kI = GC.nK;
-    kIQ = GC.nI./GC.VI;
-    k = P.results.Uen/GC.VI + P.data.IBolus(tArray)/GC.VI;
-    
-    MakeDebugPlot(P, DP);
-    
-    subplot(2,1,1)
-    hold on
-    plot(tArray, I)
-    simI = -LHS + I0 ...
-        - kI * cumtrapz(tArray, kI*I) ...
-        - kIQ * cumtrapz(tArray, I-Q) ...
-        + cumtrapz(tArray, k);
-    plot(tArray, simI)
-    
-    xlabel("Time [min]")
-    ylabel("Plasma insulin, I [mU/L]")
-    title(sprintf("P%d: I", P.patientNum))
-    legend("interpolated", "simulated")
-    
-    subplot(2,1,2)
-    hold on
-    plot(tArray, Q)
-    title("Q (analytical)")
-end
-
 % nL/xL Values per Patient
 if DP.nLxL
     MakeDebugPlot(P, DP);
@@ -170,97 +140,132 @@ if DP.nLxL
     
 end
 
-% Equation Terms
-if DP.EquationTerms
-    ITerm = bParts(:, 1);
-    intITerm = bParts(:, 2);
-    intIQTerm = bParts(:, 3);
-    UenTerm = bParts(:, 4);
+if ~isequal(method, 'fixed')
     
-    MakeDebugPlot(P, DP);
-    hold on
     
-    plt = plot(tArray, MeanNormalise(LHS), 'b');
-    plt.DisplayName = "A*x";
+    LHS = dot(A, [P.results.nL P.results.xL], 2);
+    b = sum(bParts, 2);
     
-    plt = plot(tArray, MeanNormalise(intITerm), 'r');
-    plt.DisplayName = "-nK * integral(I)";
-    
-    plt = plot(tArray, MeanNormalise(intIQTerm), 'g');
-    plt.DisplayName = "-nI/vI * integral(I-Q)";
-    
-    plt = plot(tArray, MeanNormalise(UenTerm), 'm');
-    plt.DisplayName = "-integral(Uen/vI)";
-    
-    plt = plot(tArray, MeanNormalise(ITerm), 'c');
-    plt.DisplayName = "I0 - I";
-    
-    for ii = 1:length(iiBounds)
-        split = iiBounds(ii);
-        L = line([split split], ylim);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-        L.HandleVisibility = 'off';
+    % Forward Simulation of Insulin
+    if DP.ForwardSim
+        I = ppI(tArray);
+        kI = GC.nK;
+        kIQ = GC.nI./GC.VI;
+        k = P.results.Uen/GC.VI + P.data.IBolus(tArray)/GC.VI;
+        
+        MakeDebugPlot(P, DP);
+        
+        subplot(2,1,1)
+        hold on
+        plot(tArray, I)
+        simI = -LHS + I0 ...
+            - kI * cumtrapz(tArray, kI*I) ...
+            - kIQ * cumtrapz(tArray, I-Q) ...
+            + cumtrapz(tArray, k);
+        plot(tArray, simI)
+        
+        xlabel("Time [min]")
+        ylabel("Plasma insulin, I [mU/L]")
+        title(sprintf("P%d: I", P.patientNum))
+        legend("interpolated", "simulated")
+        
+        subplot(2,1,2)
+        hold on
+        plot(tArray, Q)
+        title("Q (analytical)")
+    end
+    % Equation Terms
+    if DP.EquationTerms
+        ITerm = bParts(:, 1);
+        intITerm = bParts(:, 2);
+        intIQTerm = bParts(:, 3);
+        UenTerm = bParts(:, 4);
+        
+        MakeDebugPlot(P, DP);
+        hold on
+        
+        plt = plot(tArray, MeanNormalise(LHS), 'b');
+        plt.DisplayName = "A*x";
+        
+        plt = plot(tArray, MeanNormalise(intITerm), 'r');
+        plt.DisplayName = "-nK * integral(I)";
+        
+        plt = plot(tArray, MeanNormalise(intIQTerm), 'g');
+        plt.DisplayName = "-nI/vI * integral(I-Q)";
+        
+        plt = plot(tArray, MeanNormalise(UenTerm), 'm');
+        plt.DisplayName = "-integral(Uen/vI)";
+        
+        plt = plot(tArray, MeanNormalise(ITerm), 'c');
+        plt.DisplayName = "I0 - I";
+        
+        for ii = 1:length(iiBounds)
+            split = iiBounds(ii);
+            L = line([split split], ylim);
+            L.LineWidth = 0.5;
+            L.Color = 'k';
+            L.HandleVisibility = 'off';
+        end
+        
+        xlabel("Time [min]")
+        ylabel("Mean-normalised integral of term [mU/L]")
+        legend()
     end
     
-    xlabel("Time [min]")
-    ylabel("Mean-normalised integral of term [mU/L]")
-    legend()
-end
-
-% MLR Terms
-if DP.MLRTerms
-    MakeDebugPlot(P, DP);
-    hold on
-    
-    plt = plot(tArray,  MeanNormalise(A(:,1)));
-    plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
-    
-    plt = plot(tArray, MeanNormalise(A(:,2)));
-    plt.DisplayName = "A(column 2) = integral(Uen/VI)";
-    
-    plt = plot(tArray, MeanNormalise(b));
-    plt.DisplayName = "b = I0 - I...";
-    
-    for ii = 1:length(iiBounds)
-        split = iiBounds(ii);
-        L = line([split split], ylim);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-        L.HandleVisibility = 'off';
+    % MLR Terms
+    if DP.MLRTerms
+        MakeDebugPlot(P, DP);
+        hold on
+        
+        plt = plot(tArray,  MeanNormalise(A(:,1)));
+        plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
+        
+        plt = plot(tArray, MeanNormalise(A(:,2)));
+        plt.DisplayName = "A(column 2) = integral(Uen/VI)";
+        
+        plt = plot(tArray, MeanNormalise(b));
+        plt.DisplayName = "b = I0 - I...";
+        
+        for ii = 1:length(iiBounds)
+            split = iiBounds(ii);
+            L = line([split split], ylim);
+            L.LineWidth = 0.5;
+            L.Color = 'k';
+            L.HandleVisibility = 'off';
+        end
+        
+        xlabel("Time [min]")
+        ylabel("Mean-normalised integral of term [mU/L]")
+        legend()
     end
     
-    xlabel("Time [min]")
-    ylabel("Mean-normalised integral of term [mU/L]")
-    legend()
-end
-
-% Insulin Terms
-if DP.InsulinTerms
-    MakeDebugPlot(P, DP);
-    hold on
-    plot(tArray,  cumtrapz(tArray, kI*I), 'g')
-    plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
-    legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
-end
-
-% Condition Number
-if DP.ConditionNumber
-    MakeDebugPlot(P, DP);
-    hold on
-    
-    plot(tArray,  condA);
-    
-    for ii = 1:length(iiBounds)
-        split = iiBounds(ii);
-        L = line([split split], ylim);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-        L.HandleVisibility = 'off';
+    % Insulin Terms
+    if DP.InsulinTerms
+        MakeDebugPlot(P, DP);
+        hold on
+        plot(tArray,  cumtrapz(tArray, kI*I), 'g')
+        plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
+        legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
     end
     
-    xlabel("Time [min]")
-    ylabel("Condition number of A (over segment)")
+    % Condition Number
+    if DP.ConditionNumber
+        MakeDebugPlot(P, DP);
+        hold on
+        
+        plot(tArray,  condA);
+        
+        for ii = 1:length(iiBounds)
+            split = iiBounds(ii);
+            L = line([split split], ylim);
+            L.LineWidth = 0.5;
+            L.Color = 'k';
+            L.HandleVisibility = 'off';
+        end
+        
+        xlabel("Time [min]")
+        ylabel("Condition number of A (over segment)")
+    end
 end
 end
 

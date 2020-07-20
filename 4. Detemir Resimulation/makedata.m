@@ -154,7 +154,7 @@ elseif dataset == "DISST"
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
         tIBolus = T{code, "timeIB"};          % Time of bolus delivery [min]
-        TIBolus = 1;                          % Period of bolus action [min]
+        TIBolus = 5;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
         P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;  % [mU/min]

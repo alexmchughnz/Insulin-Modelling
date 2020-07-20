@@ -44,6 +44,8 @@ if dataset == "Detemir"
         P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [pmol/L]
         P.data.ITotal.time  = data.PlasmaI_time;
         
+        P.data.IBolus = @(~) 0;  % No fast-I bolus here!
+        
         vIDBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
         tIDBolus = sys.SC.T;       % Time of bolus delivery [min]
         TIDBolus = 5;              % Period of bolus action [min]
@@ -108,7 +110,7 @@ if dataset == "Detemir"
         
         
         % Save patient structs.        
-        filename = sprintf("patient%s.mat", P.patientCode);
+        filename = sprintf("patient%d.mat", P.patientNum);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
         fprintf('%s: Saved patient data.\n', P.patientCode);
         

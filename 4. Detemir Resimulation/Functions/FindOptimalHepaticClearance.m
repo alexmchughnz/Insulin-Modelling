@@ -29,7 +29,7 @@ global resultsfile
 GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
 LINEFORMAT = "line nL=%g@%g to xL=%g@%g, t=%g";
 LINE2DFORMAT = "2dline nL=%g@%g to xL=%g";
-FILEFORMAT = '%sP%d.mat';
+FILEFORMAT = '%s%s.mat';
 resultsfile = @(filename) fullfile(RESULTPATH, filename);
 
 nLtoxLLineFun = @(nLIntercept, xLIntercept, nLDelta) ...
@@ -127,7 +127,7 @@ elseif isequal(method, '2dline')
 elseif isequal(method, 'load')
     % Load by name.
     loadname = varargin{1};
-    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
+    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
     words = split(loadname, ' ');
@@ -171,7 +171,7 @@ elseif isequal(method, 'improve')
     nLPrecision = varargin{2}(1);
     xLPrecision = varargin{2}(2);
     
-    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
+    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
     nLRange = nLGrid(1, :);
@@ -235,7 +235,7 @@ elseif isequal(method, 'variance')
     loadname = varargin{1};
     variance = varargin{2};
     
-    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientNum)), ...
+    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
         'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated');
     
     words = split(loadname, ' ');
@@ -299,7 +299,7 @@ if DP.ErrorSurface
         plt.DisplayName = 'Residuals';
         
         % Load best/worst files if they exist.
-        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientNum);
+        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientCode);
         if exist(bestFile, 'file')
             load(resultsfile(bestFile), ...
                 'nLGrid', 'IResiduals');
@@ -308,7 +308,7 @@ if DP.ErrorSurface
             plt.DisplayName = 'Best Case Data Residuals';
         end
         
-        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientNum);
+        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientCode);
         if exist(worstFile, 'file')
             load(resultsfile(worstFile), ...
                 'nLGrid', 'IResiduals');
@@ -355,7 +355,7 @@ if DP.ErrorSurface
         surfaces = [surfaces S];
         
         % Queue best/worst if they exist.
-        bestFile = ResultsPath(sprintf(FILEFORMAT, loadname + " best", P.patientNum));
+        bestFile = ResultsPath(sprintf(FILEFORMAT, loadname + " best", P.patientCode));
         if exist(bestFile, 'file')
             load(resultsfile(bestFile), ...
                 'nLGrid', 'IResiduals');
@@ -365,7 +365,7 @@ if DP.ErrorSurface
             surfaces = [surfaces S];
         end
         
-        worstFile = ResultsPath(sprintf(FILEFORMAT, loadname + " worst", P.patientNum));
+        worstFile = ResultsPath(sprintf(FILEFORMAT, loadname + " worst", P.patientCode));
         if exist(worstFile, 'file')
             load(resultsfile(worstFile), ...
                 'nLGrid', 'IResiduals');
@@ -420,7 +420,7 @@ end
 end
 
 %% Functions
-function [IResiduals, simITotal] = EvaluateGrid(PArray, nLGrid, xLGrid, savename)
+function [IResiduals, simI] = EvaluateGrid(PArray, nLGrid, xLGrid, savename)
 global C
 
 global FILEFORMAT
@@ -429,18 +429,18 @@ global resultsfile
 ISimulated = cell(size(nLGrid));
 IResiduals = zeros(size(nLGrid));
 for ii = 1:numel(nLGrid)
-    fprintf('\nP%d: Trialling nL/xL = %g/%g in forward simulation (%d/%d). ', ...
-        PArray.patientNum, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
-    
     if length(PArray) == 1
         copyP = PArray(1);
     else
         copyP = PArray(ii);
     end
     
+    fprintf('\n%s: Trialling nL/xL = %g/%g in forward simulation (%d/%d). ', ...
+        copyP.patientCode, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
+    
     % Apply nL/xL for iteration.
-    copyP.results.nL = nLGrid(ii) * ones(size(PArray.results.tArray));
-    copyP.results.xL = xLGrid(ii) * ones(size(PArray.results.tArray));
+    copyP.results.nL = nLGrid(ii) * ones(size(copyP.results.tArray));
+    copyP.results.xL = xLGrid(ii) * ones(size(copyP.results.tArray));
     
     % Get other parameters and forward simulate models.
     copyP = FindGutEmptyingRate(copyP);
@@ -448,23 +448,26 @@ for ii = 1:numel(nLGrid)
     copyP = SolveSystem(copyP);
     
     % Determine error.
-    [tITotal, vITotal] = GetSimTime(copyP, copyP.data.ITotal);  % Data [pmol/L]
-    iiITotal = GetTimeIndex(tITotal, PArray.results.tArray);
-    
-    simITotal = C.mU2pmol(copyP.results.I + copyP.results.IDF);  % Sim [mU/L] -> [pmol/L]
-    simITotal = simITotal(iiITotal);
-    
-    IErrors = simITotal - vITotal;
+    if (copyP.source == "Detemir")
+        [tI, vI] = GetSimTime(copyP, copyP.data.ITotal);        % Data [pmol/L]
+        simI = C.mU2pmol(copyP.results.I + copyP.results.IDF);  % Sim [mU/L] -> [pmol/L]
+    else
+        [tI, vI] = GetSimTime(copyP, copyP.data.I);             % Data [pmol/L]
+        simI = C.mU2pmol(copyP.results.I);                      % Sim [mU/L] -> [pmol/L]
+    end
+    iiI = GetTimeIndex(tI, copyP.results.tArray);
+    simI = simI(iiI);
+    IErrors = simI - vI;
     
     % Save residuals.
-    IResiduals(ii) = sum(IErrors.^2)/numel(vITotal);  % Mean Squared Errors
-    ISimulated{ii} = simITotal;
+    IResiduals(ii) = sum(IErrors.^2)/numel(vI);  % Mean Squared Errors
+    ISimulated{ii} = simI;
     
     EstimateTimeRemaining(ii, numel(nLGrid))
 end
 
 % Export results.
-save(resultsfile(sprintf(FILEFORMAT, savename, PArray.patientNum)), ...
+save(resultsfile(sprintf(FILEFORMAT, savename, PArray.patientCode)), ...
     'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated')
 
 end

@@ -5,6 +5,7 @@
 % Author : Alex McHugh
 % Created: 04/06/2020
 
+tic
 clc
 close all
 fprintf("Running main - press key to start.\n")
@@ -35,7 +36,7 @@ for ii = 1:length(patients)
     
     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'find', 'grid nL[0 0.4]@0.02 xL[0.5 1]@0.02');  % (nL, xL) by search
+        'grid', [0 0.4], [0.5 1], 0.1);  % (nL, xL) by search
     
 %     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
 

@@ -1,4 +1,4 @@
-function F = PanelDebugPlots()
+function F = PanelDebugPlots(monitor)
 
 GetFigNum = @(figrow) dot([100 10 1], figrow);
 
@@ -29,9 +29,7 @@ if ~isempty(figData)
         pIndex = find(seenPatients == currentPatient);
         nIndex = nCounts(pIndex);
         
-        % Position figure.
-        monitor = 1;
-        
+        % Position figure.        
         screensize = num2cell(get(groot, 'MonitorPositions'));
         [x, y, w, h] = screensize{monitor, :};
         

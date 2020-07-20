@@ -147,13 +147,14 @@ elseif dataset == "DISST"
         P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
         P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
         
-        times = T{code, repmat("time", 1, N) + (1:N)}';
+        times = T{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
+        times = round(times);
         P.data.G.time = times;
         P.data.I.time = times;
         P.data.CPep.time = times;        
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
-        tIBolus = T{code, "timeIB"};          % Time of bolus delivery [min]
+        tIBolus = T{code, "timeIB"}/60;       % Time of bolus delivery [min]
         TIBolus = 5;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
@@ -170,7 +171,7 @@ elseif dataset == "DISST"
         
         % Time
         P.data.simTime = [min(times), max(times)];
-        P.data.simDuration =  @() diff(P.data.simTime) + 1;
+        P.data.simDuration =  @() floor(diff(P.data.simTime));
         P.results.tArray = (0 : P.data.simDuration() - 1)';
         
         % Other Fields

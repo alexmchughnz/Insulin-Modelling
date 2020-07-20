@@ -37,12 +37,14 @@ plt = plot(dtArray, P.results.G, 'k');
 plt.DisplayName = 'Model Prediction';
 
 lineBounds = ylim;
-for ii = 1:length(P.results.nLxLFitBounds)
-    split = ToDateTime(P.results.nLxLFitBounds(ii));
-    L = line([split split], lineBounds);
-    L.LineWidth = 0.5;
-    L.Color = 'k';
-    L.HandleVisibility = 'off';
+if isfield(P.results, 'nLxLFitBounds')
+    for ii = 1:length(P.results.nLxLFitBounds)
+        split = ToDateTime(P.results.nLxLFitBounds(ii));
+        L = line([split split], lineBounds);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
 end
 
 title([patientLabel 'Plasma Glucose'])
@@ -75,7 +77,7 @@ hold on
 if P.source == "Detemir"
     [tI, vI] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
     
-    ppI = griddedInterpolant(tI, vI);    
+    ppI = griddedInterpolant(tI, vI);
     
     I = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
     
@@ -102,12 +104,15 @@ elseif P.source == "DISST"
 end
 
 lineBounds = ylim;
-for ii = 1:length(P.results.nLxLFitBounds)
-    split = ToDateTime(P.results.nLxLFitBounds(ii));
-    L = line([split split], lineBounds);
-    L.LineWidth = 0.5;
-    L.Color = 'k';
-    L.HandleVisibility = 'off';
+
+if isfield(P.results, 'nLxLFitBounds')
+    for ii = 1:length(P.results.nLxLFitBounds)
+        split = ToDateTime(P.results.nLxLFitBounds(ii));
+        L = line([split split], lineBounds);
+        L.LineWidth = 0.5;
+        L.Color = 'k';
+        L.HandleVisibility = 'off';
+    end
 end
 
 plt = plot(pltxdata, vI, 'r*');

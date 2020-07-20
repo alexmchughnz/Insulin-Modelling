@@ -383,9 +383,14 @@ if DP.ErrorSurface
             
             % > Surface
             IResiduals = S.IResiduals;
-            stddevMSE = P.data.stddevMSE;
             gridMin = min(IResiduals(:));
             gridMax = max(IResiduals(:));
+            
+            if isfield(P.data, 'stddevMSE')
+                stddevMSE = P.data.stddevMSE;
+            else
+                stddevMSE = 20/100 * gridMin;  % Default to 20%.
+            end
             isWithin1SD = (abs(IResiduals - gridMin) <= stddevMSE);
             isWithin3SD = ~isWithin1SD & (abs(IResiduals - gridMin) <= 3*stddevMSE);
             
@@ -444,7 +449,7 @@ for ii = 1:numel(nLGrid)
     
     % Get other parameters and forward simulate models.
     copyP = FindGutEmptyingRate(copyP);
-    copyP = FitInsulinSensitivity(copyP, true);
+    copyP = FitInsulinSensitivity(copyP, false);
     copyP = SolveSystem(copyP);
     
     % Determine error.

@@ -29,7 +29,7 @@ for ii = 1:N
     copyP.results.d2 = d2Grid(ii);  % [1/min]
     
     % Fit SI at this d2 value.
-    copyP = FitInsulinSensitivity(copyP);
+    copyP = FitInsulinSensitivity(copyP, false);
     SIGrid(:, ii) = copyP.results.SI;
     
     % Simulate G(t, d2) with resulting SI.

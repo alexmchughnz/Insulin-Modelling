@@ -336,8 +336,8 @@ if DP.ErrorSurface
         ax2.XTickLabel = num2str(flip(nLtoxL(ax1XTick)));
         ax2.YAxis.Visible = 'off';
         
-        figTitle = sprintf("P%d: Error Line of (I+IDF) Fitting Along $x_L = %.2f - %.2f n_L$", ...
-            P.patientNum, xLIntercept, xLIntercept/nLIntercept);
+        figTitle = sprintf("%s: Error Line of (I+IDF) Fitting Along $x_L = %.2f - %.2f n_L$", ...
+            P.patientCode, xLIntercept, xLIntercept/nLIntercept);
         title(figTitle)
         xlabel(ax1, "$n_L$ [-]");
         xlabel(ax2, "$x_L$ [1/min]");
@@ -412,7 +412,7 @@ if DP.ErrorSurface
                 'Color', 'r', ...
                 'HandleVisibility', 'off');
             
-            title(sprintf("P%d: %s", P.patientNum, S.name))
+            title(sprintf("%s: %s", P.patientCode, S.name))
             
             xlabel("$n_L$ [-]")
             ylabel("$x_L$ [1/min]")

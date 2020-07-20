@@ -50,7 +50,10 @@ DP = DEBUGPLOTS.EstimateInsulinSecretion;
 if DP.Uen
    MakeDebugPlot(P, DP);
    plot(t, Uen)
-   title(sprintf("P%d: Uen", P.patientNum))
+   title(sprintf("%s: Uen", P.patientCode))
+   
+   xlabel("Time [min]")
+   ylabel("Uen [mU/min]")
 end
 
 end

@@ -22,7 +22,7 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1];
+patientNums = [1 2 3];
 source = "DISST";
 patients = makedata(source, patientNums);
 

@@ -20,7 +20,7 @@ if dataset == "Detemir"
         clear P
         P.source = "Detemir";
         P.patientNum = data.PtNo;
-        P.patientCode = num2str(P.patientNum);
+        P.patientCode = sprintf("P%d", P.patientNum);
         P.data.mass = data.pt_mass;           % Patient mass [kg]
         
         P.data.trialTime     = [sys.trial_start_t, sys.trial_end_t];

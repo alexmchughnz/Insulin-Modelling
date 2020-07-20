@@ -34,14 +34,14 @@ if dataset == "Detemir"
         P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
         P.data.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
         
-        P.data.GOther{1}.value = data.bg1;         % Blood glucose reading [mmol/L?]
+        P.data.GOther{1}.value = data.bg1;         % Blood glucose reading [mmol/L]
         P.data.GOther{1}.time = data.bg1_time;     % Time of blood glucose reading [datetime]
         P.data.GOther{2}.value = data.bg2;
         P.data.GOther{2}.time = data.bg2_time;
         P.data.G.value = data.bg3;
         P.data.G.time = data.bg3_time;
         
-        P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [?]
+        P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [pmol/L]
         P.data.ITotal.time  = data.PlasmaI_time;
         
         vIDBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
@@ -143,9 +143,9 @@ elseif dataset == "DISST"
         P.patientNum = ii;        
         
         % Data        
-        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';
-        P.data.I.value = T{code, repmat("I", 1, N) + (1:N)}';
-        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';
+        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';             % Plasma glucose [mmol/L]
+        P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
+        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
         
         times = T{code, repmat("time", 1, N) + (1:N)}';
         P.data.G.time = times;
@@ -153,7 +153,7 @@ elseif dataset == "DISST"
         P.data.CPep.time = times;        
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
-        tIBolus = T{code, "timeIB"};   % Time of bolus delivery [min]
+        tIBolus = T{code, "timeIB"};          % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
@@ -161,7 +161,7 @@ elseif dataset == "DISST"
         
         vGBolus = T{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
-        tGBolus = T{code, "timeGB"};        % Time of bolus delivery [min]
+        tGBolus = T{code, "timeGB"};            % Time of bolus delivery [min]
         TGBolus = 1;                            % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.

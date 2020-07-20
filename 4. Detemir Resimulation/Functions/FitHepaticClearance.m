@@ -120,7 +120,7 @@ if DP.ForwardSim
     I = ppI(tArray);
     kI = GC.nK;
     kIQ = GC.nI./GC.VI;
-    k = P.results.Uen/GC.VI;
+    k = P.results.Uen/GC.VI + P.data.IBolus(tArray)/GC.VI;
     
     MakeDebugPlot(P, DP);
     
@@ -145,7 +145,7 @@ if DP.ForwardSim
 end
 
 % nL/xL Values per Patient
-if DP.nLxL    
+if DP.nLxL
     MakeDebugPlot(P, DP);
     
     subplot (2, 1, 1)
@@ -275,11 +275,17 @@ Q = Q(segment);
 I0 = I(1);
 Uen = P.results.Uen(segment); % [mU/min]
 
+IBolus = zeros(size(segment));
+for ii = 1:length(segment)
+    t = segment(ii);
+    IBolus(ii) = P.data.IBolus(t);
+end
+
 % Set coefficients for MLR.
 % Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
 kI = GC.nK;
 kIQ = GC.nI./GC.VI;
-k = Uen/GC.VI;
+k = Uen/GC.VI + IBolus/GC.VI;
 
 % Therefore, integrating:
 % I(t) - I(t0) = -kI*int{I} - int{c1}*nL - kIQ*int{I-Q} - int{c2}*xL + int{k}

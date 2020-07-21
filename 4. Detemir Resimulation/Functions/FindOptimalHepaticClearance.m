@@ -50,7 +50,7 @@ if isequal(method, 'grid')
     xLDelta = delta(end);
     xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     
-    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     
     savename = sprintf(GRIDFORMAT, ...
         nLBounds, nLDelta, xLBounds, xLDelta);
@@ -94,7 +94,7 @@ elseif isequal(method, 'line')
     % Reshape residuals onto grid.
     xLRange = sort(unique(xLLine));
     
-    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     IResiduals = nan(size(nLGrid));
     for ii = 1 : length(LineResiduals)
         iinL = find(nLRange == nLLine(ii));
@@ -138,16 +138,16 @@ elseif isequal(method, 'load')
         nLRange = sort(unique(nLLine));
         xLLine = xLGrid;
         xLRange = sort(unique(xLLine));
-        [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+        [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
         
         LineResiduals = IResiduals;
         
-        IResiduals = nan(numel(xLRange), numel(nLRange));
+        IResiduals = nan(numel(nLRange), numel(xLRange));
         for ii = 1 : length(IResiduals)
             iinL = find(nLRange == nLLine(ii));
             iixL = find(xLRange == xLLine(ii));
             
-            IResiduals(iixL, iinL) = LineResiduals(ii);
+            IResiduals(iinL, iixL) = LineResiduals(ii);
         end
         
     elseif type == "2dline"
@@ -158,8 +158,8 @@ elseif isequal(method, 'load')
         nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
         
     else
-        nLRange = nLGrid(1, :);
-        xLRange = xLGrid(:, 1);
+        nLRange = nLGrid(:, 1);
+        xLRange = xLGrid(1, :);
     end
     
     
@@ -175,8 +175,8 @@ elseif isequal(method, 'improve')
     load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
-    nLRange = nLGrid(1, :);
-    xLRange = xLGrid(:, 1);
+    nLRange = nLGrid(:, 1);
+    xLRange = xLGrid(1, :);
     nLDelta = diff(nLRange(1:2));
     xLDelta = diff(xLRange(1:2));
     
@@ -195,7 +195,7 @@ elseif isequal(method, 'improve')
         xLBounds = [xLOpt - xLDelta,  xLOpt + xLDelta];
         nLRange = linspace(nLBounds(1), nLBounds(end), numSegments);
         xLRange = linspace(xLBounds(1), xLBounds(end), numSegments);
-        [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+        [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
         
         % Evaluate over grid.
         savename = sprintf(GRIDFORMAT, ...
@@ -400,22 +400,22 @@ if DP.ErrorSurface
             CO(:,:,3) = ~(isWithin1SD|isWithin3SD) .* (gridMax-IResiduals)/gridMax; % blue
             caxis([gridMin, gridMin + stddevMSE]);
             
-            surf(nLRange, xLRange, IResiduals, CO,...
+            surf(xLRange, nLRange, IResiduals, CO,...
                 'HandleVisibility', 'off', ...
                 'FaceColor', 'interp');
             
             % > Contour
             numLevels = 25;
             levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels);
-            contour3(nLRange, xLRange, S.IResiduals, ...
+            contour3(xLRange, nLRange, S.IResiduals, ...
                 levels, ...
                 'Color', 'r', ...
                 'HandleVisibility', 'off');
             
             title(sprintf("%s: %s", P.patientCode, S.name))
             
-            xlabel("$n_L$ [-]")
-            ylabel("$x_L$ [1/min]")
+            xlabel("$x_L$ [1/min]")
+            ylabel("$n_L$ [-]")
             zlabel("Mean of squared errors [(mU/min)^2]")
         end
         

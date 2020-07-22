@@ -15,7 +15,7 @@ tArray = P.results.tArray;     % Time of results [min]
 dtArray = ToDateTime(tArray);  % ''              [datetime]
 
 % Set up figure.
-patientLabel = sprintf("Patient %d: ", P.patientNum);
+patientLabel = sprintf("%s: ", P.patientCode);
 F = PanelFigures(3, 3);
 
 
@@ -47,7 +47,7 @@ if isfield(P.results, 'nLxLFitBounds')
     end
 end
 
-title([patientLabel 'Plasma Glucose'])
+title(patientLabel + "Plasma Glucose")
 xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
 legend()
@@ -66,7 +66,7 @@ simG = P.results.G(iiG);
 GError = 100*abs((simG - vG) ./ vG);
 plot(dtG, GError, 'r');
 
-title([patientLabel 'Plasma Glucose Error'])
+title(patientLabel + "Plasma Glucose Error")
 xlabel('Time')
 ylabel('Error [\%]')
 
@@ -81,7 +81,7 @@ if P.source == "Detemir"
     
     I = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
     
-    plttitle = [patientLabel 'Plasma Insulin + Detemir'];
+    plttitle = patientLabel + "Plasma Insulin + Detemir";
     pltxlabel = 'Time';
     pltylabel = 'Plasma Insulins, I + IDF [pmol/L]';
     pltxarray = dtArray;
@@ -96,7 +96,7 @@ elseif P.source == "DISST"
     
     I = C.mU2pmol(P.results.I);  % [mU/L] -> [pmol/L]
     
-    plttitle = [patientLabel 'Plasma Insulin'];
+    plttitle = patientLabel + "Plasma Insulin";
     pltxlabel = 'Time';
     pltylabel = 'Plasma Insulin, I [pmol/L]';
     pltxarray = tArray;
@@ -139,15 +139,14 @@ simI = I(iiI);
 ITotalError = 100*abs((simI - vI) ./ vI);
 plot(tI, ITotalError, 'r');
 
-title([patientLabel 'Plasma Insulins Error'])
+title(patientLabel + "Plasma Insulins Error")
 xlabel('Time')
 ylabel('Error [\%]')
 
 
 %%
-path = fullfile("Plots", "patient" + P.patientCode);
-savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
+saveopenfigures;
 
 end
 

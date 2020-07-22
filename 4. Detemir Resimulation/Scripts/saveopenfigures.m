@@ -5,7 +5,7 @@ for iFig = 1:length(FigList)
   set(0, 'CurrentFigure', FigHandle)
   set(gcf, 'Position', [0 0 800 600])
   
-  AxisHandle = get(FigHandle, 'CurrentAxes');
+  AxisHandle = FigHandle.Children(end);
   FigName   = get(AxisHandle.Title, 'String');
   FigName = matlab.lang.makeValidName(FigName);
   savefig(FigHandle, fullfile(FolderName, FigName + ".fig"));

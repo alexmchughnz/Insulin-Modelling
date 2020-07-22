@@ -141,10 +141,46 @@ if DP.nLxL
 end
 
 if ~isequal(method, 'fixed')
-    
-    
     LHS = dot(A, [P.results.nL P.results.xL], 2);
     b = sum(bParts, 2);
+    
+    % Graphical Identifiability Method (Docherty, 2010)
+    if DP.GraphicalID
+        cN = A(:, 1);
+        cX = A(:, 2);        
+        cNnorm = MeanNormalise(cN);
+        cXnorm = MeanNormalise(cX);        
+        delta2norm = norm(cNnorm - cXnorm);
+        
+        [sampleTimes, ~] = GetIFromITotal(P); % Abuse function to get sample times for any patient.
+        
+        MakeDebugPlot(P, DP);
+        hold on
+        
+        plt = plot(tArray, cNnorm);
+        plt.DisplayName = "$n_L$ coeff.";
+        
+        plt = plot(tArray, cXnorm);
+        plt.DisplayName = "$x_L$ coeff.";
+        
+        for ss = 1:length(sampleTimes)
+            t = sampleTimes(ss);
+            ii = GetTimeIndex(t, tArray);
+            
+            plt = plot([t t], [cNnorm(ii) cXnorm(ii)], 'k');
+            plt.Marker = 'o';
+            plt.MarkerFaceColor = 'auto';
+            plt.HandleVisibility = 'off';
+        end        
+        plt.HandleVisibility = 'on';
+        plt.DisplayName = "Samples";
+        
+        title(sprintf("%s: Graphical Identifiability ($||\\Delta||_2$ = %.4g)", P.patientCode, delta2norm)) 
+        xlabel("Time [min]")
+        ylabel("Mean-normalised integral value")
+        legend('Location', 'northwest')
+        
+    end    
     
     % Forward Simulation of Insulin
     if DP.ForwardSim

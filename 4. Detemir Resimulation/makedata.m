@@ -173,7 +173,7 @@ elseif dataset == "DISST"
         
         % Time
         P.data.simTime = [min(times), max(times)];
-        P.data.simDuration =  @() floor(diff(P.data.simTime));
+        P.data.simDuration =  @() floor(diff(P.data.simTime)) + 1;
         P.results.tArray = (0 : P.data.simDuration() - 1)';
         
         % Other Fields

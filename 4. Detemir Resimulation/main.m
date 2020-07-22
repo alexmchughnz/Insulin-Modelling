@@ -22,7 +22,7 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1 2 3];
+patientNums = [1 8 2 3 13 5 7 9 10 24];
 source = "DISST";
 patients = makedata(source, patientNums);
 
@@ -36,7 +36,7 @@ for ii = 1:length(patients)
     
     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'grid', [0 0.3], [0.6 1], 0.02);  % (nL, xL) by search
+        'grid', [-0.1 0.775], [0.075 0.95], 0.025);  % (nL, xL) by search
     
 %     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
 

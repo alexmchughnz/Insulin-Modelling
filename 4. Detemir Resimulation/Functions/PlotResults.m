@@ -145,7 +145,7 @@ ylabel('Error [\%]')
 
 
 %%
-path = fullfile("Plots", "patient" + P.patientNum);
+path = fullfile("Plots", "patient" + P.patientCode);
 savefig(F, path);
 fprintf("P%d: Plotted results.\n", P.patientNum)
 

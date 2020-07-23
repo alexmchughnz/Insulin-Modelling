@@ -22,7 +22,7 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1 3 4];
+patientNums = [1 8 5 7 2 3 13 9 10 24];
 source = "DISST";
 patients = makedata(source, patientNums);
 
@@ -35,15 +35,15 @@ for ii = 1:length(patients)
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
     %% Determine nL/xL.
-%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-%         'grid', [-0.1 0.775], [0.075 0.95], 0.025);  % (nL, xL) by search
+    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+        'load', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');  % (nL, xL) by search
 %     
-    patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
+%     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
 
     %% Analyse data variance.
-%     stddev = 5/100; 
-%     N = 1000;    
-%     AnalyseInsulinVariance(patients{ii}, stddev, N);    
+    stddev = 5/100; 
+    N = 1000;    
+    AnalyseInsulinVariance(patients{ii}, stddev, N);    
     
     %% Find other dependent parameters. 
     patients{ii} = FindGutEmptyingRate(patients{ii});  % (d2)

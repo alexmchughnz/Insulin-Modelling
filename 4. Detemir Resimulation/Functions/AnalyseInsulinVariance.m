@@ -11,39 +11,47 @@ function P = AnalyseInsulinVariance(P, stddev, N)
 global DEBUGPLOTS
 
 %% Setup
-[~, vITotal] = GetSimTime(P, P.data.ITotal);
+[tData, ~] = GetIFromITotal(P);
 MSE = zeros(1, N);
 scaleFactors = cell(1, N);
 
 %% Simulate
 for ii = 1:N
     % Randomly vary data according to normal distribution.
-    randNums = randn(size(vITotal));
+    randNums = randn(size(tData));
     while any(abs(randNums) > 3)  % Limit to within 3 SDs.
-        randNums = randn(size(vITotal));
+        randNums = randn(size(tData));
     end
     scaleFactors{ii} = 1 + stddev*randNums;
-     
-    trialITotal = scaleFactors{ii} .* vITotal;
+    
+    % Vary correct data based on trial.
+    copyP = P;
+    
+    if isfield(P, 'ITotal')
+        [~, vITotal] = GetSimTime(P, P.data.ITotal);
+        trialITotal = scaleFactors{ii} .* vITotal;
+        copyP.data.ITotal.value = trialITotal;
+    else
+        [~, vI] = GetSimTime(P, P.data.I);
+        trialI = scaleFactors{ii} .* vI;
+        copyP.data.I.value = trialI;
+    end
     
     % Forward simulate with varied data.
-    copyP = P;
-    copyP.data.ITotal.value = trialITotal;
     MSE(ii) = GetSimError(copyP);
     
     EstimateTimeRemaining(ii, N);
 end
-
-save(ResultsPath(sprintf("montecarlodata%gx%d P%d.mat", stddev, N, P.patientNum)))
+stddevError = std(MSE);
+save(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, N)))
 
 %% ==================================================
 %% Debug Plots
 DP = DEBUGPLOTS.AnalyseInsulinVariance;
-stddevError = std(MSE);
 
 % Error
 if DP.Error
-    MakeDebugPlot(P, DP);    
+    MakeDebugPlot(P, DP);
     
     histogram(MSE, 50, ...
         'Normalization', 'probability');
@@ -75,13 +83,19 @@ P = FitInsulinSensitivity(P, true);
 P = SolveSystem(P);
 
 % Determine error.
-[tITotal, vITotal] = GetSimTime(P, P.data.ITotal);
-iiITotal = GetTimeIndex(tITotal, P.results.tArray);
-simITotal = C.mU2pmol(P.results.I + P.results.IDF);  % Sim [mU/L] -> [pmol/L]
-simITotal = simITotal(iiITotal);
+if isfield(P, 'ITotal')
+    [tI, vI] = GetSimTime(P, P.data.ITotal);
+    simI = C.mU2pmol(P.results.I + P.results.IDF);  % Sim [mU/L] -> [pmol/L]
+else
+    [tI, vI] = GetSimTime(P, P.data.I);
+    simI = C.mU2pmol(P.results.I);  % Sim [mU/L] -> [pmol/L]
+end
 
-error = simITotal - vITotal;
-MSE = sum(error.^2)/length(vITotal);
+iiI = GetTimeIndex(tI, P.results.tArray);
+simI = simI(iiI);
+
+error = simI - vI;
+MSE = sum(error.^2)/length(vI);
 end
 
 

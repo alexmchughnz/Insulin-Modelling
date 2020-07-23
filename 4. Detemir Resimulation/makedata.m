@@ -201,6 +201,9 @@ elseif dataset == "DISST"
 end
 
 
+load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, N)), ...
+    stddevError)
+P.data.stddevMSE = stddevError;
 
 
 %% --------------------------------------------------

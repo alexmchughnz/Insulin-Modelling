@@ -26,7 +26,7 @@ global FILEFORMAT
 GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
 LINEFORMAT = "line nL=%g@%g to xL=%g@%g, t=%g";
 LINE2DFORMAT = "2dline nL=%g@%g to xL=%g";
-FILEFORMAT = '%s%s.mat';
+FILEFORMAT = '%s_%s.mat';
 
 nLtoxLLineFun = @(nLIntercept, xLIntercept, nLDelta) ...
     (@(nL) RoundToMultiple(xLIntercept - xLIntercept/nLIntercept * nL, ...
@@ -123,7 +123,7 @@ elseif isequal(method, '2dline')
 elseif isequal(method, 'load')
     % Load by name.
     loadname = varargin{1};
-    load(ResultsPath(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
+    load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
     words = split(loadname, ' ');
@@ -168,7 +168,7 @@ elseif isequal(method, 'improve')
     nLPrecision = delta(1);
     xLPrecision = delta(end);
     
-    load(ResultsPath(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
+    load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
     nLRange = nLGrid(:, 1);
@@ -232,7 +232,7 @@ elseif isequal(method, 'variance')
     loadname = varargin{1};
     variance = varargin{2};
     
-    load(ResultsPath(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
+    load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated');
     
     words = split(loadname, ' ');
@@ -296,7 +296,7 @@ if DP.ErrorSurface
         plt.DisplayName = 'Residuals';
         
         % Load best/worst files if they exist.
-        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientCode);
+        bestFile = sprintf(FILEFORMAT, P.patientCode, loadname + " best");
         if exist(bestFile, 'file')
             load(ResultsPath(bestFile), ...
                 'nLGrid', 'IResiduals');
@@ -305,7 +305,7 @@ if DP.ErrorSurface
             plt.DisplayName = 'Best Case Data Residuals';
         end
         
-        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientCode);
+        worstFile = sprintf(FILEFORMAT, P.patientCode, loadname + " worst");
         if exist(worstFile, 'file')
             load(ResultsPath(worstFile), ...
                 'nLGrid', 'IResiduals');
@@ -352,7 +352,7 @@ if DP.ErrorSurface
         surfaces = [surfaces S];
         
         % Queue best/worst if they exist.
-        bestFile = ResultsPath(sprintf(FILEFORMAT, loadname + " best", P.patientCode));
+        bestFile = ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname + " best"));
         if exist(bestFile, 'file')
             load(ResultsPath(bestFile), ...
                 'nLGrid', 'IResiduals');
@@ -362,7 +362,7 @@ if DP.ErrorSurface
             surfaces = [surfaces S];
         end
         
-        worstFile = ResultsPath(sprintf(FILEFORMAT, loadname + " worst", P.patientCode));
+        worstFile = ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname + " worst"));
         if exist(worstFile, 'file')
             load(ResultsPath(worstFile), ...
                 'nLGrid', 'IResiduals');
@@ -469,7 +469,7 @@ for ii = 1:numel(nLGrid)
 end
 
 % Export results.
-save(ResultsPath(sprintf(FILEFORMAT, savename, PArray.patientCode)), ...
+save(ResultsPath(sprintf(FILEFORMAT, PArray.patientCode, savename)), ...
     'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated')
 
 end

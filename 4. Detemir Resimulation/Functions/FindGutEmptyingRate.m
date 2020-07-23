@@ -36,7 +36,8 @@ for ii = 1:N
     copyP = SolveSystem(copyP);  % Required for P2 and QDF.
     
     % Find average error G(t, d2) to measured data.
-    simG = copyP.results.G(tG+1);
+    iiG = GetTimeIndex(tG, P.results.tArray);
+    simG = copyP.results.G(iiG);
     GError = abs(simG - vG)./vG;
     GErrorGrid(ii) = mean(GError);    
 end

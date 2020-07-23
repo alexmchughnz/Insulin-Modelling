@@ -154,8 +154,8 @@ elseif isequal(method, 'load')
         nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
         
     else
-        nLRange = nLGrid(:, 1);
-        xLRange = xLGrid(1, :);
+        nLRange = sort(unique(nLGrid));
+        xLRange = sort(unique(xLGrid));
     end
     
     
@@ -171,8 +171,8 @@ elseif isequal(method, 'improve')
     load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
-    nLRange = nLGrid(:, 1);
-    xLRange = xLGrid(1, :);
+    nLRange = sort(unique(nLGrid));
+    xLRange = sort(unique(xLGrid));
     nLDelta = diff(nLRange(1:2));
     xLDelta = diff(xLRange(1:2));
     
@@ -348,6 +348,7 @@ if DP.ErrorSurface
         % Queue original surface.
         S = struct('IResiduals', IResiduals, ...
             'nLGrid', nLGrid, ...
+            'xLGrid', xLGrid, ...
             'name', 'Residuals');
         surfaces = [surfaces S];
         
@@ -358,6 +359,7 @@ if DP.ErrorSurface
                 'nLGrid', 'IResiduals');
             S = struct('IResiduals', IResiduals, ...
                 'nLGrid', nLGrid, ...
+                'xLGrid', xLGrid, ...
                 'name', 'Best Case Data Residuals');
             surfaces = [surfaces S];
         end
@@ -368,16 +370,20 @@ if DP.ErrorSurface
                 'nLGrid', 'IResiduals');
             S = struct('IResiduals', IResiduals, ...
                 'nLGrid', nLGrid, ...
+                'xLGrid', xLGrid, ...
                 'name', 'Worst Case Data Residuals');
             surfaces = [surfaces S];
         end
         
         % Plot each surface.
         for ii = 1:length(surfaces)
+            nLRange = sort(unique(S.nLGrid));
+            xLRange = sort(unique(S.xLGrid));
+            
             S = surfaces{ii};
             subplot(1, length(surfaces), ii)
             hold on
-            
+                        
             % > Surface
             IResiduals = S.IResiduals;
             gridMin = min(IResiduals(:));
@@ -409,9 +415,12 @@ if DP.ErrorSurface
                 'Color', 'r', ...
                 'HandleVisibility', 'off');
                         
-            NE = [max(xlim) max(ylim)]-[diff(xlim) diff(ylim)]*0.20;
-            text(NE(1), NE(2), sprintf("$\\sigma = %.2f$", P.data.stddevMSE),...
-                "Color", "green")
+            dim = [0.2 0.5 0.3 0.3];
+            txt = sprintf("SD = %.2f, %.1f%% of minimum MSE", ...
+                P.data.stddevMSE, P.data.stddevMSE/gridMin*100);            
+            annotation('textbox', dim, 'String', txt, ...
+                'FitBoxToText', 'on', ...
+                'BackgroundColor', 'white');
             
             title(sprintf("%s: %s", P.patientCode, S.name))
             

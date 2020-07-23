@@ -408,6 +408,10 @@ if DP.ErrorSurface
                 levels, ...
                 'Color', 'r', ...
                 'HandleVisibility', 'off');
+                        
+            NE = [max(xlim) max(ylim)]-[diff(xlim) diff(ylim)]*0.20;
+            text(NE(1), NE(2), sprintf("$\\sigma = %.2f$", P.data.stddevMSE),...
+                "Color", "green")
             
             title(sprintf("%s: %s", P.patientCode, S.name))
             

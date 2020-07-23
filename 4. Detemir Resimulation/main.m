@@ -41,9 +41,9 @@ for ii = 1:length(patients)
 %     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
 
     %% Analyse data variance.
-    stddev = 5/100; 
-    N = 1000;    
-    AnalyseInsulinVariance(patients{ii}, stddev, N);    
+%     stddev = 5/100; 
+%     N = 1000;    
+%     AnalyseInsulinVariance(patients{ii}, stddev, N);    
     
     %% Find other dependent parameters. 
     patients{ii} = FindGutEmptyingRate(patients{ii});  % (d2)
@@ -62,4 +62,5 @@ for ii = 1:length(patients)
     P = patients{ii};
     PlotResults(P);
 end
+saveopenfigures;
 PanelDebugPlots(1);

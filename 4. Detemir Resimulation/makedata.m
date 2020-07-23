@@ -109,7 +109,7 @@ if dataset == "Detemir"
         end
         
         
-        % Save patient structs.        
+        % Save patient structs.
         filename = sprintf("patient%d.mat", P.patientNum);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
         fprintf('%s: Saved patient data.\n', P.patientCode);
@@ -123,7 +123,7 @@ if dataset == "Detemir"
         patientSet{pp} = loadpatient(n);
     end
     
-elseif dataset == "DISST"    
+elseif dataset == "DISST"
     
     % Load table.
     opts = spreadsheetImportOptions(...
@@ -136,15 +136,15 @@ elseif dataset == "DISST"
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
-    N = 5;  % Number of measurements.   
+    N = 5;  % Number of measurements.
     pp = 1; % Index for patients saved.
     for ii = 1:height(T)
         code = T.Properties.RowNames{ii};
         P.source = "DISST";
         P.patientCode = code;
-        P.patientNum = ii;        
+        P.patientNum = ii;
         
-        % Data        
+        % Data
         P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';             % Plasma glucose [mmol/L]
         P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
         P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
@@ -153,7 +153,7 @@ elseif dataset == "DISST"
         times = round(times);
         P.data.G.time = times;
         P.data.I.time = times;
-        P.data.CPep.time = times;        
+        P.data.CPep.time = times;
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
         tIBolus = T{code, "timeIB"}/60;       % Time of bolus delivery [min]
@@ -179,32 +179,33 @@ elseif dataset == "DISST"
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
-       
+        
+        if ismember(ii, patientNums)
+            stddev = 5/100;
+            nTrials = 1000;
+            load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
+                'stddevError')
+            P.data.stddevMSE = stddevError;
+        end
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
-        fprintf('%s: Saved patient data.\n', P.patientCode);       
+        fprintf('%s: Saved patient data.\n', P.patientCode);
         
-    
+        
         % Generate patient data structs.
         loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
         if ismember(ii, patientNums)
             patientSet{pp} = loadpatient(P.patientCode);
             pp = pp + 1;
         end
-    
+        
         
     end
     
     
 end
-
-
-load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, N)), ...
-    stddevError)
-P.data.stddevMSE = stddevError;
-
 
 %% --------------------------------------------------
 

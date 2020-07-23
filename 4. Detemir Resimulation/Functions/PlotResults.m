@@ -146,7 +146,6 @@ ylabel('Error [\%]')
 
 %%
 fprintf("P%d: Plotted results.\n", P.patientNum)
-saveopenfigures;
 
 end
 

@@ -275,11 +275,10 @@ global GC
 tSegment = tArray(segment);
 
 % Retrieve data across segment.
-I = ppI(segment); % [mU/L]
+Uen = P.results.Uen(segment); % [mU/min]
+I = ppI(tSegment); % [mU/L]
 Q = Q(segment);
 I0 = I(1);
-Uen = P.results.Uen(segment); % [mU/min]
-
 IBolus = zeros(size(segment));
 for ii = 1:length(segment)
     t = segment(ii);

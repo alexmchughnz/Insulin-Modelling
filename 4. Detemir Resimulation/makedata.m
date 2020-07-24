@@ -4,7 +4,7 @@ function patientSet = makedata(dataset, patientNums)
 
 load config
 
-global C
+global C GC
 global DEBUGPLOTS
 
 if dataset == "Detemir"
@@ -156,7 +156,7 @@ elseif dataset == "DISST"
         P.data.CPep.time = times;        
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
-        tIBolus = T{code, "timeIB"}/60;       % Time of bolus delivery [min]
+        tIBolus = round(T{code, "timeIB"}/60);       % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
@@ -164,12 +164,30 @@ elseif dataset == "DISST"
         
         vGBolus = T{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
-        tGBolus = T{code, "timeGB"};            % Time of bolus delivery [min]
+        tGBolus = round(T{code, "timeGB"}/60);         % Time of bolus delivery [min]
         TGBolus = 1;                            % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
+        
+        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';             % Plasma glucose [mmol/L]
+        P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
+        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
+        
+        times = T{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
+        times = round(times);
+        P.data.G.time = times;
+        P.data.I.time = times;
+        P.data.CPep.time = times;
+        
+        % Shuffle in fake insulin/glucose data point.
+        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
+        fakeData = [P.data.G.value; vGBolus/GC.VG + P.data.G.value(3)];
+        P.data.G.value = fakeData(order);
+        [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
+        fakeData = [P.data.I.value; vIBolus/GC.VI + P.data.I.value(3)];
+        P.data.I.value = fakeData(order);
         
         % Time
         P.data.simTime = [min(times), max(times)];

@@ -158,9 +158,10 @@ if ~isequal(method, 'fixed')
         subplot(2,1,1)
         hold on
         plot(tArray, I)
-        simI = -LHS + I0 ...
-            - kI * cumtrapz(tArray, kI*I) ...
-            - kIQ * cumtrapz(tArray, I-Q) ...
+        
+        simI = LHS + I0 ...
+            + kI * cumtrapz(tArray, kI*I) ...
+            + kIQ * cumtrapz(tArray, I-Q) ...
             + cumtrapz(tArray, k);
         plot(tArray, simI)
         
@@ -188,16 +189,16 @@ if ~isequal(method, 'fixed')
         plt.DisplayName = "A*x";
         
         plt = plot(tArray, MeanNormalise(intITerm), 'r');
-        plt.DisplayName = "-nK * integral(I)";
+        plt.DisplayName = "nK * integral(I)";
         
         plt = plot(tArray, MeanNormalise(intIQTerm), 'g');
-        plt.DisplayName = "-nI/vI * integral(I-Q)";
+        plt.DisplayName = "nI/vI * integral(I-Q)";
         
         plt = plot(tArray, MeanNormalise(UenTerm), 'm');
-        plt.DisplayName = "-integral(Uen/vI)";
+        plt.DisplayName = "-integral((Uen+IBolus)/vI)";
         
         plt = plot(tArray, MeanNormalise(ITerm), 'c');
-        plt.DisplayName = "I0 - I";
+        plt.DisplayName = "I - I0";
         
         for ii = 1:length(iiBounds)
             split = iiBounds(ii);
@@ -286,27 +287,27 @@ for ii = 1:length(segment)
 end
 
 % Set coefficients for MLR.
-% Consider dI/dt = -kI*I - c1*nL - kIQ*(I-Q) - c2*xL + k
-kI = GC.nK;
-kIQ = GC.nI./GC.VI;
+% Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*xL + k
+kI = -GC.nK;
+kIQ = -GC.nI./GC.VI;
 k = Uen/GC.VI + IBolus/GC.VI;
 
 % Therefore, integrating:
-% I(t) - I(t0) = -kI*int{I} - int{c1}*nL - kIQ*int{I-Q} - int{c2}*xL + int{k}
+% I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*xL + int{k}
 % Renaming cN = int{c1} and cX = int{c2}
-% cN*nL + cX*xL = I(t0) - I(t) - kI*int{I} - kIQ*int{I-Q} + int{k}
+% cN*nL + cX*xL = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k}
 cN = cumtrapz(tSegment, ...
-    I./(1 + GC.alphaI*I));
+    -I./(1 + GC.alphaI*I));
 cX = cumtrapz(tSegment, ...
-    Uen/GC.VI);
+    -Uen/GC.VI);
 
 % Assembling MLR system:
 % [cN(t) cX(t)] * (nL; xL) = [b(t)]
 A = [cN cX];
-bParts = [I0 - I, ...
+bParts = [I - I0, ...
     - kI * cumtrapz(tSegment, I), ...
     - kIQ * cumtrapz(tSegment, I-Q), ...
-    + cumtrapz(tSegment, k)];
+    - cumtrapz(tSegment, k)];
 b = sum(bParts, 2); % Sum along rows.
 
 % Fit first segment.

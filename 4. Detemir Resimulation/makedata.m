@@ -109,7 +109,7 @@ if dataset == "Detemir"
         end
         
         
-        % Save patient structs.        
+        % Save patient structs.
         filename = sprintf("patient%d.mat", P.patientNum);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
         fprintf('%s: Saved patient data.\n', P.patientCode);
@@ -123,7 +123,7 @@ if dataset == "Detemir"
         patientSet{pp} = loadpatient(n);
     end
     
-elseif dataset == "DISST"    
+elseif dataset == "DISST"
     
     % Load table.
     opts = spreadsheetImportOptions(...
@@ -136,15 +136,15 @@ elseif dataset == "DISST"
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
-    N = 5;  % Number of measurements.   
+    N = 5;  % Number of measurements.
     pp = 1; % Index for patients saved.
     for ii = 1:height(T)
         code = T.Properties.RowNames{ii};
         P.source = "DISST";
         P.patientCode = code;
-        P.patientNum = ii;        
+        P.patientNum = ii;
         
-        % Data        
+        % Data
         P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';             % Plasma glucose [mmol/L]
         P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
         P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
@@ -153,14 +153,14 @@ elseif dataset == "DISST"
         times = round(times);
         P.data.G.time = times;
         P.data.I.time = times;
-        P.data.CPep.time = times;        
+        P.data.CPep.time = times;
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
         tIBolus = round(T{code, "timeIB"}/60);       % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
-        P.data.IBolus = @(t) ((tIBolus <= t) && (t < tIBolus+TIBolus)).*vIBolus/TIBolus;  % [mU/min]
+        P.data.IBolus = @(t) ((tIBolus <= t) & (t < tIBolus+TIBolus)).*vIBolus/TIBolus;  % [mU/min]
         
         vGBolus = T{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
@@ -181,37 +181,69 @@ elseif dataset == "DISST"
         P.data.I.time = times;
         P.data.CPep.time = times;
         
-        % Shuffle in fake insulin/glucose data point.
-        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-        fakeData = [P.data.G.value; vGBolus/GC.VG + P.data.G.value(3)];
-        P.data.G.value = fakeData(order);
-        [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
-        fakeData = [P.data.I.value; vIBolus/GC.VI + P.data.I.value(3)];
-        P.data.I.value = fakeData(order);
-        
         % Time
         P.data.simTime = [min(times), max(times)];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
-        P.results.tArray = (0 : P.data.simDuration() - 1)';
+        P.results.tArray = (0 : P.data.simDuration() - 1)';        
+        
+        % Generate minute-wise insulin profile
+        fakeIData = zeros(size(P.results.tArray));
+        
+        % >Interpolate pre-bolus 
+        isDataPreBolus = (P.data.I.time < tIBolus);
+        ppI = griddedInterpolant(P.data.I.time(isDataPreBolus), P.data.I.value(isDataPreBolus));  % [pmol/L]
+        IInterp = ppI(P.results.tArray);
+        
+        isSimPreBolus = (P.results.tArray < tIBolus);
+        fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
+        
+        % >Bolus
+        tAfterBolus = tIBolus;
+        fun = @(x, tdata) x(5) + (tdata > tAfterBolus).*(x(1)*exp(-x(2)*(tdata - tAfterBolus)) + x(3)*exp(-x(4)*(tdata - tAfterBolus)));
+        x0 = [1e3; 1; 1e2; 1; P.data.I.value(3)];
+        tdata = P.data.I.time(~isDataPreBolus);
+        Idata = P.data.I.value(~isDataPreBolus);
+        x = lsqcurvefit(fun, x0, tdata, Idata);        
+        
+        fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));
+        
+        DP = DEBUGPLOTS.makedata;
+        if DP.DISSTBolusFit
+            if ismember(P.patientNum, patientNums)
+                MakeDebugPlot(P, DP);
+                hold on
+                plt = plot(P.results.tArray, fun(x0, P.results.tArray), ':');
+                plt.DisplayName = "First Guess";
+                plt = plot(P.data.I.time, P.data.I.value, 'r*');
+                plt.DisplayName = "Data";
+                plt = plot(P.results.tArray, fakeIData, 'x');
+                plt.DisplayName = "Fake Minute-wise Data";
+                legend()
+            end
+        end
+        
+        P.data.I.value = fakeIData;
+        P.data.I.time = P.results.tArray;
+        
         
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
-       
+        
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
         save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
-        fprintf('%s: Saved patient data.\n', P.patientCode);       
+        fprintf('%s: Saved patient data.\n', P.patientCode);
         
-    
+        
         % Generate patient data structs.
         loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
         if ismember(ii, patientNums)
             patientSet{pp} = loadpatient(P.patientCode);
             pp = pp + 1;
         end
-    
+        
         
     end
     

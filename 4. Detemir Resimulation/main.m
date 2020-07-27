@@ -22,7 +22,7 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1 2 3];
+patientNums = [1];
 source = "DISST";
 patients = makedata(source, patientNums);
 
@@ -62,4 +62,4 @@ for ii = 1:length(patients)
     P = patients{ii};
     PlotResults(P);
 end
-PanelDebugPlots(2);
+PanelDebugPlots(1);

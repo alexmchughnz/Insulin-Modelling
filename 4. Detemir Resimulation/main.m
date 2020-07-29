@@ -22,7 +22,7 @@ makeparameters
 load config
 
 %% Load Data
-patientNums = [1];
+patientNums = [1 5 7];
 source = "DISST";
 patients = makedata(source, patientNums);
 
@@ -53,6 +53,13 @@ for ii = 1:length(patients)
     %% Forward simulate models.
     patients{ii} = SolveSystem(patients{ii});
     
+end
+
+[~, I] = sort(patientNums);
+for ii = 1:length(patientNums)
+   idx = find(I == ii);
+   P = patients{idx};
+   fprintf("%s\t %.2f/%.2f\n", P.patientCode, P.results.nL(1), P.results.xL(1));
 end
 
 %% Plot Results

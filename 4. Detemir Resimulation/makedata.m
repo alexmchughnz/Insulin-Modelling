@@ -138,7 +138,7 @@ elseif dataset == "DISST"
     
     N = 5;  % Number of measurements.
     pp = 1; % Index for patients saved.
-    for ii = 1:height(T)
+    for ii = patientNums
         code = T.Properties.RowNames{ii};
         P.source = "DISST";
         P.patientCode = code;
@@ -182,7 +182,7 @@ elseif dataset == "DISST"
         P.data.CPep.time = times;
         
         % Time
-        P.data.simTime = [min(times), max(times)];
+        P.data.simTime = [min(times), max(times)+1];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         P.results.tArray = (0 : P.data.simDuration() - 1)';        
         
@@ -190,7 +190,7 @@ elseif dataset == "DISST"
         fakeIData = zeros(size(P.results.tArray));
         
         % >Interpolate pre-bolus 
-        isDataPreBolus = (P.data.I.time < tIBolus);
+        isDataPreBolus = (P.data.I.time <= tIBolus);
         ppI = griddedInterpolant(P.data.I.time(isDataPreBolus), P.data.I.value(isDataPreBolus));  % [pmol/L]
         IInterp = ppI(P.results.tArray);
         
@@ -198,14 +198,23 @@ elseif dataset == "DISST"
         fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
         
         % >Bolus
-        tAfterBolus = tIBolus;
-        fun = @(x, tdata) x(5) + (tdata > tAfterBolus).*(x(1)*exp(-x(2)*(tdata - tAfterBolus)) + x(3)*exp(-x(4)*(tdata - tAfterBolus)));
-        x0 = [1e3; 1; 1e2; 1; P.data.I.value(3)];
+        tAfterIBolus = tIBolus;
+%         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)) + x(3)*exp(-x(4)*(tdata - tAfterIBolus)));
+        fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
+        x0 = [1e3; 1; 1e2; 1];
         tdata = P.data.I.time(~isDataPreBolus);
         Idata = P.data.I.value(~isDataPreBolus);
-        x = lsqcurvefit(fun, x0, tdata, Idata);        
+        x = lsqcurvefit(fun, x0, tdata, Idata);
+        fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
-        fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));
+        % > Shuffle in fake data points.
+        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
+        fakeData = [P.data.G.value; vGBolus/GC.VG + P.data.G.value(3)];
+        P.data.G.value = fakeData(order);
+        
+        [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
+        fakeData = [P.data.I.value; max(fakeIData)];
+        P.data.I.value = fakeData(order);
         
         DP = DEBUGPLOTS.makedata;
         if DP.DISSTBolusFit
@@ -221,10 +230,6 @@ elseif dataset == "DISST"
                 legend()
             end
         end
-        
-        P.data.I.value = fakeIData;
-        P.data.I.time = P.results.tArray;
-        
         
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);

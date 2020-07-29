@@ -7,11 +7,13 @@ DATAPATH  = fullfile(pwd, '..', 'Data');
 FUNCPATH  = fullfile(pwd, 'Functions');
 MODELPATH = fullfile(pwd, 'Models');
 RESULTPATH = fullfile(pwd, 'Results');
+SCRIPTPATH = fullfile(pwd, 'Scripts');
 
 addpath(genpath(DATAPATH));
 addpath(genpath(FUNCPATH));
 addpath(genpath(MODELPATH));
 addpath(genpath(RESULTPATH));
+addpath(genpath(SCRIPTPATH));
 
 PATIENTFILE = 'patient_master.xlsx';
 

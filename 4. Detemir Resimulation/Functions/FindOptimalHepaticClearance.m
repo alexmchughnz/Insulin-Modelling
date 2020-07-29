@@ -20,17 +20,13 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-load('config', 'RESULTPATH');
-
 global DEBUGPLOTS
 global FILEFORMAT
-global resultsfile
 
 GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
 LINEFORMAT = "line nL=%g@%g to xL=%g@%g, t=%g";
 LINE2DFORMAT = "2dline nL=%g@%g to xL=%g";
-FILEFORMAT = '%s%s.mat';
-resultsfile = @(filename) fullfile(RESULTPATH, filename);
+FILEFORMAT = '%s_%s.mat';
 
 nLtoxLLineFun = @(nLIntercept, xLIntercept, nLDelta) ...
     (@(nL) RoundToMultiple(xLIntercept - xLIntercept/nLIntercept * nL, ...
@@ -50,7 +46,7 @@ if isequal(method, 'grid')
     xLDelta = delta(end);
     xLRange = xLBounds(1) : xLDelta : xLBounds(end);
     
-    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     
     savename = sprintf(GRIDFORMAT, ...
         nLBounds, nLDelta, xLBounds, xLDelta);
@@ -94,7 +90,7 @@ elseif isequal(method, 'line')
     % Reshape residuals onto grid.
     xLRange = sort(unique(xLLine));
     
-    [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     IResiduals = nan(size(nLGrid));
     for ii = 1 : length(LineResiduals)
         iinL = find(nLRange == nLLine(ii));
@@ -127,7 +123,7 @@ elseif isequal(method, '2dline')
 elseif isequal(method, 'load')
     % Load by name.
     loadname = varargin{1};
-    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
+    load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
     words = split(loadname, ' ');
@@ -138,16 +134,16 @@ elseif isequal(method, 'load')
         nLRange = sort(unique(nLLine));
         xLLine = xLGrid;
         xLRange = sort(unique(xLLine));
-        [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+        [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
         
         LineResiduals = IResiduals;
         
-        IResiduals = nan(numel(xLRange), numel(nLRange));
+        IResiduals = nan(numel(nLRange), numel(xLRange));
         for ii = 1 : length(IResiduals)
             iinL = find(nLRange == nLLine(ii));
             iixL = find(xLRange == xLLine(ii));
             
-            IResiduals(iixL, iinL) = LineResiduals(ii);
+            IResiduals(iinL, iixL) = LineResiduals(ii);
         end
         
     elseif type == "2dline"
@@ -158,8 +154,8 @@ elseif isequal(method, 'load')
         nLtoxL = nLtoxLLineFun(nLIntercept, xLIntercept, nLDelta);
         
     else
-        nLRange = nLGrid(1, :);
-        xLRange = xLGrid(:, 1);
+        nLRange = sort(unique(nLGrid));
+        xLRange = sort(unique(xLGrid));
     end
     
     
@@ -172,11 +168,11 @@ elseif isequal(method, 'improve')
     nLPrecision = delta(1);
     xLPrecision = delta(end);
     
-    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
+    load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals');
     
-    nLRange = nLGrid(1, :);
-    xLRange = xLGrid(:, 1);
+    nLRange = sort(unique(nLGrid));
+    xLRange = sort(unique(xLGrid));
     nLDelta = diff(nLRange(1:2));
     xLDelta = diff(xLRange(1:2));
     
@@ -195,7 +191,7 @@ elseif isequal(method, 'improve')
         xLBounds = [xLOpt - xLDelta,  xLOpt + xLDelta];
         nLRange = linspace(nLBounds(1), nLBounds(end), numSegments);
         xLRange = linspace(xLBounds(1), xLBounds(end), numSegments);
-        [nLGrid, xLGrid] = meshgrid(nLRange, xLRange);
+        [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
         
         % Evaluate over grid.
         savename = sprintf(GRIDFORMAT, ...
@@ -236,7 +232,7 @@ elseif isequal(method, 'variance')
     loadname = varargin{1};
     variance = varargin{2};
     
-    load(resultsfile(sprintf(FILEFORMAT, loadname, P.patientCode)), ...
+    load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname)), ...
         'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated');
     
     words = split(loadname, ' ');
@@ -300,18 +296,18 @@ if DP.ErrorSurface
         plt.DisplayName = 'Residuals';
         
         % Load best/worst files if they exist.
-        bestFile = sprintf(FILEFORMAT, loadname + " best", P.patientCode);
+        bestFile = sprintf(FILEFORMAT, P.patientCode, loadname + " best");
         if exist(bestFile, 'file')
-            load(resultsfile(bestFile), ...
+            load(ResultsPath(bestFile), ...
                 'nLGrid', 'IResiduals');
             bestResiduals = IResiduals;
             plt = plot(nLGrid, bestResiduals);
             plt.DisplayName = 'Best Case Data Residuals';
         end
         
-        worstFile = sprintf(FILEFORMAT, loadname + " worst", P.patientCode);
+        worstFile = sprintf(FILEFORMAT, P.patientCode, loadname + " worst");
         if exist(worstFile, 'file')
-            load(resultsfile(worstFile), ...
+            load(ResultsPath(worstFile), ...
                 'nLGrid', 'IResiduals');
             worstResiduals = IResiduals;
             plt = plot(nLGrid, worstResiduals);
@@ -352,36 +348,42 @@ if DP.ErrorSurface
         % Queue original surface.
         S = struct('IResiduals', IResiduals, ...
             'nLGrid', nLGrid, ...
+            'xLGrid', xLGrid, ...
             'name', 'Residuals');
         surfaces = [surfaces S];
         
         % Queue best/worst if they exist.
-        bestFile = ResultsPath(sprintf(FILEFORMAT, loadname + " best", P.patientCode));
+        bestFile = ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname + " best"));
         if exist(bestFile, 'file')
-            load(resultsfile(bestFile), ...
+            load(ResultsPath(bestFile), ...
                 'nLGrid', 'IResiduals');
             S = struct('IResiduals', IResiduals, ...
                 'nLGrid', nLGrid, ...
+                'xLGrid', xLGrid, ...
                 'name', 'Best Case Data Residuals');
             surfaces = [surfaces S];
         end
         
-        worstFile = ResultsPath(sprintf(FILEFORMAT, loadname + " worst", P.patientCode));
+        worstFile = ResultsPath(sprintf(FILEFORMAT, P.patientCode, loadname + " worst"));
         if exist(worstFile, 'file')
-            load(resultsfile(worstFile), ...
+            load(ResultsPath(worstFile), ...
                 'nLGrid', 'IResiduals');
             S = struct('IResiduals', IResiduals, ...
                 'nLGrid', nLGrid, ...
+                'xLGrid', xLGrid, ...
                 'name', 'Worst Case Data Residuals');
             surfaces = [surfaces S];
         end
         
         % Plot each surface.
         for ii = 1:length(surfaces)
+            nLRange = sort(unique(S.nLGrid));
+            xLRange = sort(unique(S.xLGrid));
+            
             S = surfaces{ii};
             subplot(1, length(surfaces), ii)
             hold on
-            
+                        
             % > Surface
             IResiduals = S.IResiduals;
             gridMin = min(IResiduals(:));
@@ -400,22 +402,30 @@ if DP.ErrorSurface
             CO(:,:,3) = ~(isWithin1SD|isWithin3SD) .* (gridMax-IResiduals)/gridMax; % blue
             caxis([gridMin, gridMin + stddevMSE]);
             
-            surf(nLRange, xLRange, IResiduals, CO,...
+            surf(xLRange, nLRange, IResiduals, CO,...
                 'HandleVisibility', 'off', ...
                 'FaceColor', 'interp');
             
             % > Contour
             numLevels = 25;
-            levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels);
-            contour3(nLRange, xLRange, S.IResiduals, ...
+            levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels); % non-linear spacing
+%             levels = linspace(min(S.IResiduals(:)), max(S.IResiduals(:)), numLevels); % linear spacing
+            contour3(xLRange, nLRange, S.IResiduals, ...
                 levels, ...
                 'Color', 'r', ...
                 'HandleVisibility', 'off');
+                        
+            dim = [0.2 0.5 0.3 0.3];
+            txt = sprintf("SD = %.2f, %.1f%% of minimum MSE", ...
+                P.data.stddevMSE, P.data.stddevMSE/gridMin*100);            
+            annotation('textbox', dim, 'String', txt, ...
+                'FitBoxToText', 'on', ...
+                'BackgroundColor', 'white');
             
             title(sprintf("%s: %s", P.patientCode, S.name))
             
-            xlabel("$n_L$ [-]")
-            ylabel("$x_L$ [1/min]")
+            xlabel("$x_L$ [1/min]")
+            ylabel("$n_L$ [-]")
             zlabel("Mean of squared errors [(mU/min)^2]")
         end
         
@@ -432,7 +442,6 @@ function [IResiduals, simI] = EvaluateGrid(PArray, nLGrid, xLGrid, savename)
 global C
 
 global FILEFORMAT
-global resultsfile
 
 ISimulated = cell(size(nLGrid));
 IResiduals = zeros(size(nLGrid));
@@ -475,7 +484,7 @@ for ii = 1:numel(nLGrid)
 end
 
 % Export results.
-save(resultsfile(sprintf(FILEFORMAT, savename, PArray.patientCode)), ...
+save(ResultsPath(sprintf(FILEFORMAT, PArray.patientCode, savename)), ...
     'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated')
 
 end

@@ -235,6 +235,13 @@ elseif dataset == "DISST"
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
         
+        if ismember(ii, patientNums)
+            stddev = 5/100;
+            nTrials = 1000;
+            load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
+                'stddevError')
+            P.data.stddevMSE = stddevError;
+        end
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
@@ -254,9 +261,6 @@ elseif dataset == "DISST"
     
     
 end
-
-
-
 
 %% --------------------------------------------------
 

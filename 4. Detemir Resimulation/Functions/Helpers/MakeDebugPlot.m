@@ -4,31 +4,31 @@ global DEBUGPLOTS
 
 GetFigNum = @(p, s, n) 100*p + 10*s + n;
 
-persistent patient;
-    if isempty(patient)
-        patient = struct('patientNum', 0);
-    end
-persistent plotset;
-    if isempty(plotset)
-        plotset = struct();
-    end
-persistent set;
-    if isempty(set)
-        set = 1;
-    end
-persistent num;
-    if isempty(num)
-        num = 1;
-    end
+
+persistent seenPatients;
+if isempty(seenPatients)
+    seenPatients = [];
+end
+
+persistent stateData;
+if isempty(stateData)
+    stateData = {};
+end
+
     
-if ~isequal(patient.patientNum, P.patientNum)
-   % New patient, reset set and num counters.
+if ~ismember(P.patientNum, seenPatients)
+   % New patient.
+   seenPatients = [seenPatients P.patientNum];
    set = 1;
    num = 1;
-elseif ~isequal(plotset, DP)
-   % New set of plots, increment set counter and reset num.
-   set = set + 1;
+elseif ~isequal(stateData{P.patientNum}.prevDP, DP)    
+   % New set of plots for patient in previous set.
+   set = stateData{P.patientNum}.prevset + 1;
    num = 1;
+else
+   % New plot in previous set.
+   set = stateData{P.patientNum}.prevset;
+   num = stateData{P.patientNum}.prevNum + 1;
 end
 
 % Make figure.
@@ -37,7 +37,7 @@ F = figure(fignum);
 DEBUGPLOTS.FIGURES = vertcat(DEBUGPLOTS.FIGURES, [P.patientNum, set, num]);
 
 % Update pointers.
-num = num + 1;
-plotset = DP;
-patient = P;
+stateData{P.patientNum}.prevDP = DP;
+stateData{P.patientNum}.prevset = set;
+stateData{P.patientNum}.prevNum = num;
 end

@@ -208,12 +208,14 @@ elseif dataset == "DISST"
         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
         % > Shuffle in fake data points.
+        fakeG = vGBolus/GC.VG + P.data.G.value(3);
         [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-        fakeData = [P.data.G.value; vGBolus/GC.VG + P.data.G.value(3)];
+        fakeData = [P.data.G.value; fakeG];
         P.data.G.value = fakeData(order);
         
+        fakeI = max(fakeIData);
         [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
-        fakeData = [P.data.I.value; max(fakeIData)];
+        fakeData = [P.data.I.value; fakeI];
         P.data.I.value = fakeData(order);
         
         DP = DEBUGPLOTS.makedata;

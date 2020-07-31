@@ -151,9 +151,9 @@ if ~isequal(method, 'fixed')
         cNNorm = MeanNormalise(cN);
         cXNorm = MeanNormalise(cX);
         bNorm = MeanNormalise(b);
-        delta2Norm = norm(cNNorm - cXNorm);
-        delta2NormnL = norm(cNNorm - bNorm);
-        delta2NormxL = norm(cXNorm - bNorm);
+        delta2Norm = norm(cNNorm - cXNorm) / length(cN);
+        delta2NormnL = norm(cNNorm - bNorm) / length(cN);
+        delta2NormxL = norm(cXNorm - bNorm) / length(cN);
         
         [sampleTimes, ~] = GetIFromITotal(P); % Abuse function to get sample times for any patient.
         
@@ -186,10 +186,10 @@ if ~isequal(method, 'fixed')
         ylabel("Mean-normalised integral value")
         legend('Location', 'northwest')
         
-        SE = [max(xlim) min(ylim)]+[-diff(xlim) diff(ylim)]*0.20;
-        label = sprintf("$||\\Delta_{n_L}||_2$ = %.4g\n $||\\Delta_{x_L}||_2$ = %.4g", ...
-            delta2NormnL, delta2NormxL);
-        text(SE(1), SE(2), label);
+%         SE = [max(xlim) min(ylim)]+[-diff(xlim) diff(ylim)]*0.20;
+%         label = sprintf("$||\\Delta_{n_L}||_2$ = %.4g\n $||\\Delta_{x_L}||_2$ = %.4g", ...
+%             delta2NormnL, delta2NormxL);
+%         text(SE(1), SE(2), label);
         
     end
     

@@ -431,9 +431,6 @@ if DP.ErrorSurface
         end
         
     end
-    
-sprintf("%s \n%.2f \n\%d \n.1f%%\n\n", ...
-    P.patientCode, P.data.stddevMSE, gridMin, P.data.stddevMSE/gridMin*100)
 end
 
 end

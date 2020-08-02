@@ -11,6 +11,13 @@ T{code, "xL"} = P.results.xL(1);
 if isfield(P.results, "delta2Norm")
     T{code, "delta2Norm"} = P.results.delta2Norm;
 end
+if isfield(P.data, "stddevMSE")
+    T{code, "stddevMSE"} = P.data.stddevMSE;
+end
+if isfield(P.results, "minGridMSE")
+    T{code, "minGridMSE"} = P.results.minGridMSE;
+    T{code, "SD min error %"} = 100 * P.data.stddevMSE / P.results.minGridMSE;
+end
 
 end
 

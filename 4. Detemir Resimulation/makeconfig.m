@@ -2,6 +2,7 @@ set(groot, 'defaultTextInterpreter','latex');
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
 set(groot, 'DefaultLineLineWidth', 2.0);
+set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 8 6]);
 
 DATAPATH  = fullfile(pwd, '..', 'Data');
 FUNCPATH  = fullfile(pwd, 'Functions');

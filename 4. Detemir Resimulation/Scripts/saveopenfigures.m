@@ -3,7 +3,7 @@ FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
 for iFig = 1:length(FigList)
   FigHandle = FigList(iFig);
   set(0, 'CurrentFigure', FigHandle)
-  set(gcf, 'Position', [0 0 800 600])
+%   set(gcf, 'Position', [0 0 800 600])
   
   AxisHandle = FigHandle.Children(end);
   FigName   = get(AxisHandle.Title, 'String');

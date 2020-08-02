@@ -106,9 +106,9 @@ end
 plt = plot(pltxdata, vI, 'r*');
 plt.DisplayName = 'Blood Test';
 
-plt = plot(pltxarray, ppI(tArray), 'b');
-plt.LineWidth = 1;
-plt.DisplayName = 'Interpolation';
+% plt = plot(pltxarray, ppI(tArray), 'b');
+% plt.LineWidth = 1;
+% plt.DisplayName = 'Interpolation';
 
 plt = plot(pltxarray, I, 'k');
 plt.DisplayName = 'Model Prediction';

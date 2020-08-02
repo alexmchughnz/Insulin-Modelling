@@ -191,36 +191,41 @@ elseif dataset == "DISST"
         fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
         
         % >Bolus
-        tAfterIBolus = tIBolus;
+        tAfterIBolus = tIBolus + TIBolus;
         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
-        x0 = [1e3; 1; 1e2; 1];
+        x0 = [1e3; 0.1];
         tdata = P.data.I.time(~isDataPreBolus);
         Idata = P.data.I.value(~isDataPreBolus);
-        x = lsqcurvefit(fun, x0, tdata, Idata);
+        lb = zeros(size(x0));
+        ub = C.mU2pmol(vIBolus)/GC.VI;
+        x = lsqcurvefit(fun, x0, tdata, Idata, lb, ub)
+        
         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
         % > Shuffle in fake data points.
-%         fakeG = vGBolus/GC.VG + P.data.G.value(3);
-%         [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-%         fakeData = [P.data.G.value; fakeG];
-%         P.data.G.value = fakeData(order);
-%         
-%         fakeI = max(fakeIData);
-%         [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
-%         fakeData = [P.data.I.value; fakeI];
-%         P.data.I.value = fakeData(order);
+        fakeG = vGBolus/GC.VG + P.data.G.value(3);
+        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
+        fakeData = [P.data.G.value; fakeG];
+        P.data.G.value = fakeData(order);
+        
+        fakeI = max(fakeIData);
+        [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
+        fakeData = [P.data.I.value; fakeI];
+        P.data.I.value = fakeData(order);
         
         DP = DEBUGPLOTS.makedata;
         if DP.DISSTBolusFit
             if ismember(P.patientNum, patientNums)
                 MakeDebugPlot(P, DP);
                 hold on
-                plt = plot(P.results.tArray, fun(x0, P.results.tArray), ':');
-                plt.DisplayName = "First Guess";
+%                 plt = plot(P.results.tArray, fun(x0, P.results.tArray), ':');
+%                 plt.DisplayName = "First Guess";
+                plt = plot(P.results.tArray, fakeIData, '.');
+                plt.DisplayName = "Fake Minute-wise Data";
                 plt = plot(P.data.I.time, P.data.I.value, 'r*');
                 plt.DisplayName = "Data";
-                plt = plot(P.results.tArray, fakeIData, 'x');
-                plt.DisplayName = "Fake Minute-wise Data";
+                plt = plot(P.data.I.time(4), P.data.I.value(4), 'y*');
+                plt.DisplayName = "False Point";
                 legend()
             end
         end

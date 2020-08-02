@@ -1,4 +1,10 @@
 *.fig
+*.pdf
+*.png
+*.doc
+*.docx
+*.ppt
+*.pptx
 
 *.asv
 

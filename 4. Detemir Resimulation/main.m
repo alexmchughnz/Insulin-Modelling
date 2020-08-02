@@ -22,8 +22,13 @@ makeparameters
 load config
 
 %% Load Data
+% patientNums = [1 3 4];
+% source = "Detemir";
+
 patientNums = [1 8 5 7 2 3 13 9 10 24];
+% patientNums = [1];
 source = "DISST";
+
 patients = makedata(source, patientNums);
 
 
@@ -36,9 +41,9 @@ for ii = 1:length(patients)
     
     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');  % (nL, xL) by search
-%     
-%     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
+        'load', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');  % (nL, xL) by search    
+    
+    patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 
@@ -65,9 +70,17 @@ end
 %% Plot Results
 clear PlotResults PanelFigures
 
+T = table;
+
 for ii = 1:length(patients)
     P = patients{ii};
+    
     PlotResults(P);
+    T = TabulateResults(T, P);
 end
+
 saveopenfigures;
 PanelDebugPlots(1);
+
+disp(T);
+writetable(T, fullfile(RESULTPATH, 'table.txt'));

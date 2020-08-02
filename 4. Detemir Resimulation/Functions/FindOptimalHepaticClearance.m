@@ -275,6 +275,7 @@ bestxL = xLGrid(iiOptimal);
 
 P.results.nL = bestnL * ones(size(P.results.tArray));
 P.results.xL = bestxL * ones(size(P.results.tArray));
+P.results.minGridMSE = minIResidual;
 
 %% ------------------------------------------------------------------------
 
@@ -407,7 +408,7 @@ if DP.ErrorSurface
                 'FaceColor', 'interp');
             
             % > Contour
-            numLevels = 25;
+            numLevels = 15;
             levels = logspace(log10(min(S.IResiduals(:))), log10(max(S.IResiduals(:))), numLevels); % non-linear spacing
 %             levels = linspace(min(S.IResiduals(:)), max(S.IResiduals(:)), numLevels); % linear spacing
             contour3(xLRange, nLRange, S.IResiduals, ...
@@ -415,12 +416,12 @@ if DP.ErrorSurface
                 'Color', 'r', ...
                 'HandleVisibility', 'off');
                         
-            dim = [0.2 0.5 0.3 0.3];
-            txt = sprintf("SD = %.2f, %.1f%% of minimum MSE", ...
-                P.data.stddevMSE, P.data.stddevMSE/gridMin*100);            
-            annotation('textbox', dim, 'String', txt, ...
-                'FitBoxToText', 'on', ...
-                'BackgroundColor', 'white');
+%             dim = [0.2 0.5 0.3 0.3];
+%             txt = sprintf("SD = %.2f, %.1f%% of minimum MSE", ...
+%                 P.data.stddevMSE, P.data.stddevMSE/gridMin*100);            
+%             annotation('textbox', dim, 'String', txt, ...
+%                 'FitBoxToText', 'on', ...
+%                 'BackgroundColor', 'white');
             
             title(sprintf("%s: %s", P.patientCode, S.name))
             

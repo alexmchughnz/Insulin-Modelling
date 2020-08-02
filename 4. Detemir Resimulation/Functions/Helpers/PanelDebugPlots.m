@@ -1,4 +1,5 @@
 function F = PanelDebugPlots(monitor)
+set(groot, 'defaultFigureUnits', 'pixels');
 
 GetFigNum = @(figrow) dot([100 10 1], figrow);
 

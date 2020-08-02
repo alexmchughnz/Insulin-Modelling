@@ -8,5 +8,10 @@ for iFig = 1:length(FigList)
   AxisHandle = FigHandle.Children(end);
   FigName   = get(AxisHandle.Title, 'String');
   FigName = matlab.lang.makeValidName(FigName);
-  savefig(FigHandle, fullfile(FolderName, FigName + ".fig"));
+  savefig(FigHandle, fullfile(FolderName, 'fig', FigName + ".fig"));
+  saveas(FigHandle, fullfile(FolderName, 'png', FigName + ".png"));
+  
+  pdfFile = fullfile(FolderName, 'pdf', FigName + ".pdf");
+  saveas(FigHandle, pdfFile);
+%   system(sprintf("pdfcrop %s %s", pdfFile, pdfFile));
 end

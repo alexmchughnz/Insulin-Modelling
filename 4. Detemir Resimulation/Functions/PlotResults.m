@@ -10,17 +10,17 @@ function [] = PlotResults(P)
 global C
 
 ToDateTime = @(mins) P.data.simTime(1) + minutes(mins);
+patientfigure = @(n) figure(10*P.patientNum + n);
 
 tArray = P.results.tArray;     % Time of results [min]
 dtArray = ToDateTime(tArray);  % ''              [datetime]
 
 % Set up figure.
 patientLabel = sprintf("%s: ", P.patientCode);
-F = PanelFigures(3, 3);
 
 
-%% Glucose
-subplot(4, 1, 1)
+%% Plasma Glucose
+patientfigure(1)
 hold on
 
 [tG, vG] = GetSimTime(P, P.data.G);
@@ -58,22 +58,10 @@ end
 ylim([4 15])
 
 
-%% Glucose Error
-ax = subplot(4, 1, 2);
-
-iiG = GetTimeIndex(tG, tArray);
-simG = P.results.G(iiG);
-GError = 100*abs((simG - vG) ./ vG);
-plot(dtG, GError, 'r');
-
-title(patientLabel + "Plasma Glucose Error")
-xlabel('Time')
-ylabel('Error [\%]')
-
-
 %% Insulin (+ Detemir)
-subplot(4, 1, 3)
+patientfigure(2)
 hold on
+
 if P.source == "Detemir"
     [tI, vI] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
     
@@ -131,17 +119,6 @@ xlabel(pltxlabel)
 ylabel(pltylabel)
 legend()
 
-%% Insulin Error
-ax = subplot(4, 1, 4);
-
-iiI = GetTimeIndex(tI, tArray);
-simI = I(iiI);
-ITotalError = 100*abs((simI - vI) ./ vI);
-plot(tI, ITotalError, 'r');
-
-title(patientLabel + "Plasma Insulins Error")
-xlabel('Time')
-ylabel('Error [\%]')
 
 
 %%

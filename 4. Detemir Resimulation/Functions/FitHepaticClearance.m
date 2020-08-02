@@ -110,6 +110,19 @@ else
     P.results.xL = xL*ones(size(P.results.xL));
 end
 
+% Save graphical ID statistics.
+cN = A(:, 1);
+cX = A(:, 2);
+cNNorm = MeanNormalise(cN);
+cXNorm = MeanNormalise(cX);
+delta2Norm = norm(cNNorm - cXNorm) / length(cN);
+
+b = sum(bParts, 2);
+bNorm = MeanNormalise(b);
+delta2NormnL = norm(cNNorm - bNorm) / length(cN);
+delta2NormxL = norm(cXNorm - bNorm) / length(cN);
+        
+P.results.delta2Norm = delta2Norm;
 
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
@@ -146,15 +159,6 @@ if ~isequal(method, 'fixed')
     
     % Graphical Identifiability Method (Docherty, 2010)
     if DP.GraphicalID
-        cN = A(:, 1);
-        cX = A(:, 2);
-        cNNorm = MeanNormalise(cN);
-        cXNorm = MeanNormalise(cX);
-        bNorm = MeanNormalise(b);
-        delta2Norm = norm(cNNorm - cXNorm) / length(cN);
-        delta2NormnL = norm(cNNorm - bNorm) / length(cN);
-        delta2NormxL = norm(cXNorm - bNorm) / length(cN);
-        
         [sampleTimes, ~] = GetIFromITotal(P); % Abuse function to get sample times for any patient.
         
         MakeDebugPlot(P, DP);
@@ -181,7 +185,7 @@ if ~isequal(method, 'fixed')
         plt.HandleVisibility = 'on';
         plt.DisplayName = "Samples";
         
-        title(sprintf("%s: Graphical Identifiability ($||\\Delta||_2$ = %.4g)", P.patientCode, delta2Norm))
+        title(sprintf("%s: Graphical Identifiability", P.patientCode))
         xlabel("Time [min]")
         ylabel("Mean-normalised integral value")
         legend('Location', 'northwest')

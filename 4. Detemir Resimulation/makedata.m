@@ -29,7 +29,9 @@ if dataset == "Detemir"
         P.data.simTime     =  [sys.sim_start_t, sys.sim_end_t];
         P.data.simDuration =  @() minutes(diff(P.data.simTime)) + 1;
         
-        P.results.tArray = (0 : P.data.simDuration() - 1)';
+        P.results.tArray = (0 : P.data.simDuration())';
+        P.results.tArray = P.results.tArray(1:end-1);
+        
         
         P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
         P.data.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
@@ -150,13 +152,12 @@ elseif dataset == "DISST"
         P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
         
         times = T{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
-        times = round(times);
         P.data.G.time = times;
         P.data.I.time = times;
         P.data.CPep.time = times;
         
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
-        tIBolus = round(T{code, "timeIB"}/60);       % Time of bolus delivery [min]
+        tIBolus = T{code, "timeIB"}/60;       % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
@@ -164,27 +165,19 @@ elseif dataset == "DISST"
         
         vGBolus = T{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
-        tGBolus = round(T{code, "timeGB"}/60);         % Time of bolus delivery [min]
+        tGBolus = T{code, "timeGB"}/60;         % Time of bolus delivery [min]
         TGBolus = 1;                            % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
         
-        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';             % Plasma glucose [mmol/L]
-        P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
-        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
-        
-        times = T{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
-        times = round(times);
-        P.data.G.time = times;
-        P.data.I.time = times;
-        P.data.CPep.time = times;
-        
         % Time
         P.data.simTime = [min(times), max(times)+1];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
-        P.results.tArray = (0 : P.data.simDuration() - 1)';        
+        
+        P.results.tArray = (0 : 1/60 : P.data.simDuration())';
+        P.results.tArray = P.results.tArray(1:end-1);      
         
         % Generate minute-wise insulin profile
         fakeIData = zeros(size(P.results.tArray));
@@ -199,7 +192,6 @@ elseif dataset == "DISST"
         
         % >Bolus
         tAfterIBolus = tIBolus;
-%         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)) + x(3)*exp(-x(4)*(tdata - tAfterIBolus)));
         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
         x0 = [1e3; 1; 1e2; 1];
         tdata = P.data.I.time(~isDataPreBolus);
@@ -208,15 +200,15 @@ elseif dataset == "DISST"
         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
         % > Shuffle in fake data points.
-        fakeG = vGBolus/GC.VG + P.data.G.value(3);
-        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-        fakeData = [P.data.G.value; fakeG];
-        P.data.G.value = fakeData(order);
-        
-        fakeI = max(fakeIData);
-        [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
-        fakeData = [P.data.I.value; fakeI];
-        P.data.I.value = fakeData(order);
+%         fakeG = vGBolus/GC.VG + P.data.G.value(3);
+%         [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
+%         fakeData = [P.data.G.value; fakeG];
+%         P.data.G.value = fakeData(order);
+%         
+%         fakeI = max(fakeIData);
+%         [P.data.I.time, order] = sort([P.data.I.time; tIBolus+TIBolus]);
+%         fakeData = [P.data.I.value; fakeI];
+%         P.data.I.value = fakeData(order);
         
         DP = DEBUGPLOTS.makedata;
         if DP.DISSTBolusFit

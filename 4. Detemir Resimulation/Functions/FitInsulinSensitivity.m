@@ -28,11 +28,11 @@ ppI = griddedInterpolant(tI, vI);  % I(t) [mU/L] piecewise polynomial. Use as fu
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;
 
-P.results.SI = ones(P.data.simDuration(), 1) * defaultSI;           % SI value at each minute in trial.
+P.results.SI = ones(size(P.results.tArray)) * defaultSI;  % SI value at each time in trial.
 intervalSI = ones(numIntervals, 1) * defaultSI;        % SI value at each interval in sim.
 minuteSI = zeros(numIntervals * intervalDuration, 1);  % SI value at each minute in sim.
 
-ta = 0;                      % Start of current interval [min]
+ta = P.results.tArray(1);                      % Start of current interval [min]
 tb = ta + intervalDuration;  % End of current interval [min]
 
 %% Compute
@@ -183,7 +183,7 @@ Q0   = YGC0(1);
 
 %% Variables
 % Time dependent.
-n = (1 + floor(t));         % Index of current timestep.
+n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 GFast = P.data.GFast(t);    % Fasting glucose [mmol/L]
 GInfusion = P.data.GInfusion(n); % Glucose infusion rate [mmol/min]
 
@@ -246,7 +246,7 @@ Q0   = YGC0(1);
 
 %% Variables
 % Time dependent.
-n = (1 + floor(t));         % Index of current timestep.
+n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 GFast     = P.data.GFast(t);      % Fasting glucose [mmol/L]
 GBolus    = P.data.GBolus(t);     % Glucose bolus [mmol/min]
 GInfusion = P.data.GInfusion(n);  % Glucose infusion rate [mmol/min]

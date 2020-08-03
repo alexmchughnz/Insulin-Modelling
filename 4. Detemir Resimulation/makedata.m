@@ -156,6 +156,7 @@ elseif dataset == "DISST"
         P.data.I.time = times;
         P.data.CPep.time = times;
         
+        %  > Bolus        
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
         tIBolus = T{code, "timeIB"}/60;       % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
@@ -171,18 +172,24 @@ elseif dataset == "DISST"
         % Active if time within period.
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
+        %  > Add early steady-state points.
+        earlyTime = -5;
+        P.data.I.time = [earlyTime; P.data.I.time];
+        P.data.I.value = [P.data.I.value(1); P.data.I.value];
+        P.data.G.time = [earlyTime; P.data.G.time];
+        P.data.G.value = [P.data.G.value(1); P.data.G.value];
         
         % Time
-        P.data.simTime = [min(times), max(times)+1];
+        P.data.simTime = [earlyTime, max(times)+1];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         
-        P.results.tArray = (0 : 1/60 : P.data.simDuration())';
+        P.results.tArray = (earlyTime : 1/60 : P.data.simDuration())';
         P.results.tArray = P.results.tArray(1:end-1);      
         
-        % Generate minute-wise insulin profile
+        % Generate minute-wise insulin profile.
         fakeIData = zeros(size(P.results.tArray));
         
-        % >Interpolate pre-bolus 
+        %  > Interpolate pre-bolus 
         isDataPreBolus = (P.data.I.time <= tIBolus);
         ppI = griddedInterpolant(P.data.I.time(isDataPreBolus), P.data.I.value(isDataPreBolus));  % [pmol/L]
         IInterp = ppI(P.results.tArray);
@@ -190,7 +197,7 @@ elseif dataset == "DISST"
         isSimPreBolus = (P.results.tArray < tIBolus);
         fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
         
-        % >Bolus
+        %  > Bolus
         tAfterIBolus = tIBolus;
         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
         x0 = [1e3; 0.1];
@@ -198,11 +205,11 @@ elseif dataset == "DISST"
         Idata = P.data.I.value(~isDataPreBolus);
         lb = zeros(size(x0));
         ub = C.mU2pmol(vIBolus)/GC.VI;
-        x = lsqcurvefit(fun, x0, tdata, Idata, lb, ub)
+        x = lsqcurvefit(fun, x0, tdata, Idata, lb, ub);
         
         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
-        % > Shuffle in fake data points.
+        %  > Shuffle in fake data points.
         fakeG = vGBolus/GC.VG + P.data.G.value(3);
         [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
         fakeData = [P.data.G.value; fakeG];
@@ -212,6 +219,7 @@ elseif dataset == "DISST"
         [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
         fakeData = [P.data.I.value; fakeI];
         P.data.I.value = fakeData(order);
+        
         
         DP = DEBUGPLOTS.makedata;
         if DP.DISSTBolusFit
@@ -224,7 +232,8 @@ elseif dataset == "DISST"
                 plt.DisplayName = "Fake Minute-wise Data";
                 plt = plot(P.data.I.time, P.data.I.value, 'r*');
                 plt.DisplayName = "Data";
-                plt = plot(P.data.I.time(4), P.data.I.value(4), 'y*');
+                fakeii = (P.data.I.value==fakeI);
+                plt = plot(P.data.I.time(fakeii), P.data.I.value(fakeii), 'y*');
                 plt.DisplayName = "False Point";
                 legend()
             end
@@ -237,9 +246,14 @@ elseif dataset == "DISST"
         if ismember(ii, patientNums)
             stddev = 5/100;
             nTrials = 1000;
+            try
             load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
                 'stddevError')
             P.data.stddevMSE = stddevError;
+            catch
+                fprintf("No stddevMSE - run AnalyseInsulinVariance!\n") 
+                pause(2)
+            end
         end
         
         % Save patient structs.

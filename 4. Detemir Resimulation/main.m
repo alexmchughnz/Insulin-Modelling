@@ -26,7 +26,7 @@ load config
 % source = "Detemir";
 
 % patientNums = [1 8 5 7 2 3 13 9 10 24];
-patientNums = [1 2 5];
+patientNums = [19];
 source = "DISST";
 
 patients = makedata(source, patientNums);
@@ -40,8 +40,8 @@ for ii = 1:length(patients)
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
     %% Determine nL/xL.
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');  % (nL, xL) by search    
+%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+%         'load', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');  % (nL, xL) by search    
     
     patients{ii} = FitHepaticClearance(patients{ii}, 'single');  % (nL, xL) by MLR
 

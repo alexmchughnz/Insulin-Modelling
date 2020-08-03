@@ -13,7 +13,7 @@ d2Grid = log(2)./halfLifeGrid;
 N = length(d2Grid);
 
 % Results grids.
-SIGrid = zeros(P.data.simDuration(), N);
+SIGrid = zeros(length(P.results.tArray), N);
 GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 
 % Measured G (for error comparison)

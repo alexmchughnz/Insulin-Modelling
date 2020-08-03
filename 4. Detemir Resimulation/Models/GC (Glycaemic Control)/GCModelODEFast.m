@@ -20,7 +20,7 @@ Q0 = Y0(3); % [mU]
 
 %% Variables
 % Time dependent.
-n = (1 + floor(t));  % Index of current timestep.
+n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 SI        = P.results.SI(n);        % [L/mU/min]
 Uen       = P.results.Uen(n);       % [mU/min]
 P2        = P.results.P2(n);        % [mmol]

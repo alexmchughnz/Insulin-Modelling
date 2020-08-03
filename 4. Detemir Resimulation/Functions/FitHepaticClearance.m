@@ -13,7 +13,6 @@ global GC
 global DEBUGPLOTS
 
 MeanNormalise = @(data) data ./ mean(data);
-MeanNormalise = @(data) data;
 
 %% Setup
 % Time and data arrays.
@@ -324,7 +323,7 @@ end
 
 function [nL, xL, A, bParts, condA] = FitSegment(P, ppI, Q, tArray, segment)
 global GC
-INTERVALS = false;
+INTERVALS = true;
 
 tSegment = tArray(segment);
 
@@ -366,7 +365,7 @@ if INTERVALS
     % Evaluate at specified intervals.
     interval = 2; %[min]
     dt = tArray(2) - tArray(1);
-    n = interval/dt; % How many indices to get the next value?
+    n = round(interval/dt); % How many indices to get the next value?
     
     A = A(1+n:n:end, :) - A(1:n:end-n, :);
     bParts = bParts(1+n:n:end, :) - bParts(1:n:end-n, :);

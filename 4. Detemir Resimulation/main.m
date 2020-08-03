@@ -25,8 +25,8 @@ load config
 % patientNums = [1 3 4];
 % source = "Detemir";
 
-patientNums = [1 8 5 7 2 3 13 9 10 24];
-% patientNums = [1];
+% patientNums = [1 8 5 7 2 3 13 9 10 24];
+patientNums = [1 2 5];
 source = "DISST";
 
 patients = makedata(source, patientNums);
@@ -79,7 +79,7 @@ for ii = 1:length(patients)
     T = TabulateResults(T, P);
 end
 
-saveopenfigures;
+% saveopenfigures;
 PanelDebugPlots(1);
 
 disp(T);

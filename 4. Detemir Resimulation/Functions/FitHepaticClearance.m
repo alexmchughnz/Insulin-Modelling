@@ -14,7 +14,7 @@ global DEBUGPLOTS
 
 MeanNormalise = @(data) data ./ mean(data);
 
-%% Setup
+%% Setup 
 % Time and data arrays.
 [tI, vI] = GetIFromITotal(P);      % [mU/L]
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
@@ -51,7 +51,7 @@ iiBounds = [];        % Times of fit segment ends.
 
 if isequal(method, 'single')
     % Single value for whole simulation period.
-    iiBounds = [P.data.simDuration()];
+    iiBounds = [length(P.results.tArray)];
     
 elseif isequal(method, 'daily')
     % Split data into daily segments, and fit nL per day.
@@ -60,7 +60,7 @@ elseif isequal(method, 'daily')
     day2 = day1 + 1;                          % 00:00 on day 2.
     iiDayEnd = 1 + minutes(day2 - simStart);  % Sim time when day 1 ends.
     
-    iiBounds = [iiDayEnd P.data.simDuration()];
+    iiBounds = [iiDayEnd length(P.results.tArray)];
     
 elseif isequal(method, 'peaks')
     % Fits nL at specified peaks.
@@ -73,7 +73,7 @@ elseif isequal(method, 'peaks')
         peaks + delay + window/2];
     peakBounds = peakBounds(:).';  % Collapse to row vector of bounds around peaks.
     
-    iiBounds = [peakBounds P.data.simDuration()];
+    iiBounds = [peakBounds length(P.results.tArray)];
 end
 
 if isequal(method, 'fixed')
@@ -83,7 +83,7 @@ if isequal(method, 'fixed')
     P.results.nL = nL*ones(size(P.results.nL));
     P.results.xL = xL*ones(size(P.results.xL));
     
-    P.results.nLxLFitBounds = [1 P.data.simDuration()];
+    P.results.nLxLFitBounds = [1 length(P.results.tArray)];
 else
     % Fit nL over segments.
     A = zeros(length(tArray), 2);
@@ -105,7 +105,7 @@ else
     P.results.nLxLFitBounds = iiBounds;
     
     % Fit xL for whole time.
-    segment = [1 : P.data.simDuration()]';
+    segment = [1 : length(P.results.tArray)]';
     [~, xL] = FitSegment(P, ppI, Q, tArray, segment);
     P.results.xL = xL*ones(size(P.results.xL));
 end
@@ -361,7 +361,14 @@ bParts = [I - I0, ...
     - cumtrapz(tSegment, k)];
 b = sum(bParts, 2); % Sum along rows.
 
-% Fit first segment.
+% Evaluate at specified intervals.
+interval = 2; %[min]
+dt = tArray(2) - tArray(1);
+k = interval/dt; % How many indices to get the next value?
+
+A = A(1+k:k:end, :) - A(1:k:end-k, :);
+b = b(1+k:k:end) - b(1:k:end-k);
+
 x = A\b;
 nL = x(1);
 xL = x(2);
@@ -371,4 +378,16 @@ lb = 1e-7;  % Lower bound on nL/xL.
 nL = max(nL, lb);  % [1/min]
 xL = max(xL, lb);  % [1]
 condA = cond(A);
+
+% Reshape A and b at the resolution of tArray.
+A = repelem(A, k, 1);
+b = repelem(b, k, 1);
+
+oldlen = length(b);
+newlen = length(tArray);
+
+A(oldlen:newlen, 1) = A(end, 1);
+A(oldlen:newlen, 2) = A(end, 2);
+b(oldlen:newlen) = b(end);
+
 end

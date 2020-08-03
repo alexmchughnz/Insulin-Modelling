@@ -9,11 +9,9 @@ function [] = PlotResults(P)
 
 global C
 
-ToDateTime = @(mins) P.data.simTime(1) + minutes(mins);
 patientfigure = @(n) figure(10*P.patientNum + n);
 
 tArray = P.results.tArray;     % Time of results [min]
-dtArray = ToDateTime(tArray);  % ''              [datetime]
 
 % Set up figure.
 patientLabel = sprintf("%s: ", P.patientCode);
@@ -24,22 +22,21 @@ patientfigure(1)
 hold on
 
 [tG, vG] = GetSimTime(P, P.data.G);
-dtG = ToDateTime(tG);
-plt = plot(dtG, vG, 'r*');
+plt = plot(tG, vG, 'r*');
 plt.DisplayName = 'Blood Test';
 
 ppG = griddedInterpolant(tG, vG);
-plt = plot(dtArray, ppG(tArray), 'b');
+plt = plot(tArray, ppG(tArray), 'b');
 plt.LineWidth = 1;
 plt.DisplayName = 'Interpolation';
 
-plt = plot(dtArray, P.results.G, 'k');
+plt = plot(tArray, P.results.G, 'k');
 plt.DisplayName = 'Model Prediction';
 
-lineBounds = ylim;
 if isfield(P.results, 'nLxLFitBounds')
+    lineBounds = ylim;
     for ii = 1:length(P.results.nLxLFitBounds)
-        split = ToDateTime(P.results.nLxLFitBounds(ii));
+        split = tArray(P.results.nLxLFitBounds(ii));
         L = line([split split], lineBounds);
         L.LineWidth = 0.5;
         L.Color = 'k';
@@ -52,9 +49,6 @@ xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
 legend()
 
-if P.source == "Detemir"
-    datetick('x')
-end
 ylim([4 15])
 
 
@@ -70,10 +64,7 @@ if P.source == "Detemir"
     I = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
     
     plttitle = patientLabel + "Plasma Insulin + Detemir";
-    pltxlabel = 'Time';
     pltylabel = 'Plasma Insulins, I + IDF [pmol/L]';
-    pltxarray = dtArray;
-    pltxdata  = ToDateTime(tI);
     
     datetick('x')
     
@@ -85,17 +76,13 @@ elseif P.source == "DISST"
     I = C.mU2pmol(P.results.I);  % [mU/L] -> [pmol/L]
     
     plttitle = patientLabel + "Plasma Insulin";
-    pltxlabel = 'Time';
     pltylabel = 'Plasma Insulin, I [pmol/L]';
-    pltxarray = tArray;
-    pltxdata = tI;
 end
 
-lineBounds = ylim;
-
 if isfield(P.results, 'nLxLFitBounds')
+    lineBounds = ylim;
     for ii = 1:length(P.results.nLxLFitBounds)
-        split = ToDateTime(P.results.nLxLFitBounds(ii));
+        split = tArray(P.results.nLxLFitBounds(ii));
         L = line([split split], lineBounds);
         L.LineWidth = 0.5;
         L.Color = 'k';
@@ -103,19 +90,19 @@ if isfield(P.results, 'nLxLFitBounds')
     end
 end
 
-plt = plot(pltxdata, vI, 'r*');
+plt = plot(tI, vI, 'r*');
 plt.DisplayName = 'Blood Test';
 
 % plt = plot(pltxarray, ppI(tArray), 'b');
 % plt.LineWidth = 1;
 % plt.DisplayName = 'Interpolation';
 
-plt = plot(pltxarray, I, 'k');
+plt = plot(tArray, I, 'k');
 plt.DisplayName = 'Model Prediction';
 
 
 title(plttitle)
-xlabel(pltxlabel)
+xlabel('Time [min]')
 ylabel(pltylabel)
 legend()
 

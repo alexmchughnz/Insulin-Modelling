@@ -22,7 +22,7 @@ patientfigure(1)
 hold on
 
 [tG, vG] = GetSimTime(P, P.data.G);
-plt = plot(tG, vG, 'r*');
+plt = plot(tG, vG, 'r.');
 plt.DisplayName = 'Blood Test';
 
 ppG = griddedInterpolant(tG, vG);
@@ -90,7 +90,7 @@ if isfield(P.results, 'nLxLFitBounds')
     end
 end
 
-plt = plot(tI, vI, 'r*');
+plt = plot(tI, vI, 'r.');
 plt.DisplayName = 'Blood Test';
 
 % plt = plot(pltxarray, ppI(tArray), 'b');

@@ -209,17 +209,21 @@ elseif dataset == "DISST"
         
         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
-        %  > Shuffle in fake data points.
-        fakeG = vGBolus/GC.VG + P.data.G.value(3);
-        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-        fakeData = [P.data.G.value; fakeG];
-        P.data.G.value = fakeData(order);
+%         %  > Shuffle in fake data points.
+%         fakeG = vGBolus/GC.VG + P.data.G.value(3);
+%         [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
+%         fakeData = [P.data.G.value; fakeG];
+%         P.data.G.value = fakeData(order);
+%         
+%         fakeI = max(fakeIData);
+%         [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
+%         fakeData = [P.data.I.value; fakeI];
+%         P.data.I.value = fakeData(order);
         
-        fakeI = max(fakeIData);
-        [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
-        fakeData = [P.data.I.value; fakeI];
-        P.data.I.value = fakeData(order);
-        
+        % Supplant real data with fake profile.        
+        P.data.I.time = P.results.tArray;
+        P.data.I.value = fakeIData;
+          
         
         DP = DEBUGPLOTS.makedata;
         if DP.DISSTBolusFit
@@ -232,9 +236,6 @@ elseif dataset == "DISST"
                 plt.DisplayName = "Fake Minute-wise Data";
                 plt = plot(P.data.I.time, P.data.I.value, 'r*');
                 plt.DisplayName = "Data";
-                fakeii = (P.data.I.value==fakeI);
-                plt = plot(P.data.I.time(fakeii), P.data.I.value(fakeii), 'y*');
-                plt.DisplayName = "False Point";
                 legend()
             end
         end

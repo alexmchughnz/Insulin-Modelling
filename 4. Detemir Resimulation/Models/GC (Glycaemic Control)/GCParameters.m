@@ -7,9 +7,6 @@ GC.CNS = 0.3;                         % Central nervous system glucose uptake [m
 GC.alphaI = 0.0017;                   % Hepatic clearance saturation constant [L/mU]
 GC.alphaG = 0.0154;                   % Saturation of insulin binding to cells [L/mU]
 
-GC.uMin = 16.7;                       % Minimum endogenous insulin secretion [mU/min]
-GC.uMax = 267;                        % Maximum endogenous insulin secretion [mU/min]
-
 
 % Dependent Parameters
 global SC

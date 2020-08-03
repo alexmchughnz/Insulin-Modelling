@@ -191,7 +191,7 @@ elseif dataset == "DISST"
         fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
         
         % >Bolus
-        tAfterIBolus = tIBolus + TIBolus;
+        tAfterIBolus = tIBolus;
         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
         x0 = [1e3; 0.1];
         tdata = P.data.I.time(~isDataPreBolus);

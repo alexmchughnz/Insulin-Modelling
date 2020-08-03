@@ -13,8 +13,9 @@ global GC
 global DEBUGPLOTS
 
 MeanNormalise = @(data) data ./ mean(data);
+MeanNormalise = @(data) data;
 
-%% Setup 
+%% Setup
 % Time and data arrays.
 [tI, vI] = GetIFromITotal(P);      % [mU/L]
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
@@ -121,7 +122,7 @@ b = sum(bParts, 2);
 bNorm = MeanNormalise(b);
 delta2NormnL = norm(cNNorm - bNorm) / length(cN);
 delta2NormxL = norm(cXNorm - bNorm) / length(cN);
-        
+
 P.results.delta2Norm = delta2Norm;
 
 %% Debug Plots
@@ -190,10 +191,10 @@ if ~isequal(method, 'fixed')
         ylabel("Mean-normalised integral value")
         legend('Location', 'northwest')
         
-%         SE = [max(xlim) min(ylim)]+[-diff(xlim) diff(ylim)]*0.20;
-%         label = sprintf("$||\\Delta_{n_L}||_2$ = %.4g\n $||\\Delta_{x_L}||_2$ = %.4g", ...
-%             delta2NormnL, delta2NormxL);
-%         text(SE(1), SE(2), label);
+        %         SE = [max(xlim) min(ylim)]+[-diff(xlim) diff(ylim)]*0.20;
+        %         label = sprintf("$||\\Delta_{n_L}||_2$ = %.4g\n $||\\Delta_{x_L}||_2$ = %.4g", ...
+        %             delta2NormnL, delta2NormxL);
+        %         text(SE(1), SE(2), label);
         
     end
     
@@ -231,7 +232,7 @@ if ~isequal(method, 'fixed')
         ITerm = bParts(:, 1);
         intITerm = bParts(:, 2);
         intIQTerm = bParts(:, 3);
-        UenTerm = bParts(:, 4);
+        intUenTerm = bParts(:, 4);
         
         MakeDebugPlot(P, DP);
         hold on
@@ -245,14 +246,14 @@ if ~isequal(method, 'fixed')
         plt = plot(tArray, MeanNormalise(intIQTerm), 'g');
         plt.DisplayName = "nI/vI * integral(I-Q)";
         
-        plt = plot(tArray, MeanNormalise(UenTerm), 'm');
+        plt = plot(tArray, MeanNormalise(intUenTerm), 'm');
         plt.DisplayName = "-integral((Uen+IBolus)/vI)";
         
         plt = plot(tArray, MeanNormalise(ITerm), 'c');
         plt.DisplayName = "I - I0";
         
         for ii = 1:length(iiBounds)
-            split = iiBounds(ii);
+        split = tArray(P.results.nLxLFitBounds(ii));
             L = line([split split], ylim);
             L.LineWidth = 0.5;
             L.Color = 'k';
@@ -260,7 +261,7 @@ if ~isequal(method, 'fixed')
         end
         
         xlabel("Time [min]")
-        ylabel("Mean-normalised integral of term [mU/L]")
+        ylabel("Mean-normalised value of term [mU/L]")
         legend()
     end
     
@@ -279,7 +280,7 @@ if ~isequal(method, 'fixed')
         plt.DisplayName = "b = I0 - I...";
         
         for ii = 1:length(iiBounds)
-            split = iiBounds(ii);
+        split = tArray(P.results.nLxLFitBounds(ii));
             L = line([split split], ylim);
             L.LineWidth = 0.5;
             L.Color = 'k';
@@ -308,7 +309,7 @@ if ~isequal(method, 'fixed')
         plot(tArray,  condA);
         
         for ii = 1:length(iiBounds)
-            split = iiBounds(ii);
+        split = tArray(P.results.nLxLFitBounds(ii));
             L = line([split split], ylim);
             L.LineWidth = 0.5;
             L.Color = 'k';
@@ -323,6 +324,7 @@ end
 
 function [nL, xL, A, bParts, condA] = FitSegment(P, ppI, Q, tArray, segment)
 global GC
+INTERVALS = false;
 
 tSegment = tArray(segment);
 
@@ -359,35 +361,40 @@ bParts = [I - I0, ...
     - kI * cumtrapz(tSegment, I), ...
     - kIQ * cumtrapz(tSegment, I-Q), ...
     - cumtrapz(tSegment, k)];
+
+if INTERVALS
+    % Evaluate at specified intervals.
+    interval = 2; %[min]
+    dt = tArray(2) - tArray(1);
+    n = interval/dt; % How many indices to get the next value?
+    
+    A = A(1+n:n:end, :) - A(1:n:end-n, :);
+    bParts = bParts(1+n:n:end, :) - bParts(1:n:end-n, :);
+end
+
+% Solve.
+condA = cond(A);
 b = sum(bParts, 2); % Sum along rows.
-
-% Evaluate at specified intervals.
-interval = 2; %[min]
-dt = tArray(2) - tArray(1);
-k = interval/dt; % How many indices to get the next value?
-
-A = A(1+k:k:end, :) - A(1:k:end-k, :);
-b = b(1+k:k:end) - b(1:k:end-k);
-
 x = A\b;
 nL = x(1);
 xL = x(2);
+
+if INTERVALS
+    % Reshape A and b at the resolution of tArray.
+    A = repelem(A, n, 1);
+    bParts = repelem(bParts, n, 1);
+    
+    oldlen = size(A, 1);
+    newlen = length(tArray);
+    newrows = newlen - oldlen;
+    
+    A(oldlen+1:newlen, :) = repmat(A(end, :), newrows, 1);
+    bParts(oldlen+1:newlen, :) = repmat(bParts(end, :), newrows, 1);
+end
 
 % Save first segment values.
 lb = 1e-7;  % Lower bound on nL/xL.
 nL = max(nL, lb);  % [1/min]
 xL = max(xL, lb);  % [1]
-condA = cond(A);
-
-% Reshape A and b at the resolution of tArray.
-A = repelem(A, k, 1);
-b = repelem(b, k, 1);
-
-oldlen = length(b);
-newlen = length(tArray);
-
-A(oldlen:newlen, 1) = A(end, 1);
-A(oldlen:newlen, 2) = A(end, 2);
-b(oldlen:newlen) = b(end);
 
 end

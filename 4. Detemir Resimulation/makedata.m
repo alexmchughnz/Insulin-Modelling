@@ -173,17 +173,20 @@ elseif dataset == "DISST"
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
         %  > Add early steady-state points.
-        earlyTime = -5;
+        earlyTime = -4.5;
         P.data.I.time = [earlyTime; P.data.I.time];
         P.data.I.value = [P.data.I.value(1); P.data.I.value];
-        P.data.G.time = [earlyTime; P.data.G.time];
-        P.data.G.value = [P.data.G.value(1); P.data.G.value];
+%         P.data.G.time = [earlyTime; P.data.G.time];
+%         P.data.G.value = [P.data.G.value(1); P.data.G.value];
+        P.data.CPep.time = [earlyTime; P.data.CPep.time];
+        P.data.CPep.value = [P.data.CPep.value(1); P.data.CPep.value];
         
         % Time
-        P.data.simTime = [earlyTime, max(times)+1];
+        allTimes = [P.data.CPep.time; P.data.G.time; P.data.I.time];
+        P.data.simTime = [min(allTimes), max(allTimes)+1];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         
-        P.results.tArray = (earlyTime : 1/60 : P.data.simDuration())';
+        P.results.tArray = (P.data.simTime(1) : 1/60 : P.data.simTime(end))';
         P.results.tArray = P.results.tArray(1:end-1);      
         
         % Generate minute-wise insulin profile.
@@ -209,20 +212,20 @@ elseif dataset == "DISST"
         
         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
-%         %  > Shuffle in fake data points.
-%         fakeG = vGBolus/GC.VG + P.data.G.value(3);
-%         [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-%         fakeData = [P.data.G.value; fakeG];
-%         P.data.G.value = fakeData(order);
-%         
-%         fakeI = max(fakeIData);
-%         [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
-%         fakeData = [P.data.I.value; fakeI];
-%         P.data.I.value = fakeData(order);
+        %  > a) Shuffle in fake data points.
+        fakeG = vGBolus/GC.VG + P.data.G.value(3);
+        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
+        fakeData = [P.data.G.value; fakeG];
+        P.data.G.value = fakeData(order);
         
-        % Supplant real data with fake profile.        
-        P.data.I.time = P.results.tArray;
-        P.data.I.value = fakeIData;
+        fakeI = max(fakeIData);
+        [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
+        fakeData = [P.data.I.value; fakeI];
+        P.data.I.value = fakeData(order);
+        
+%         %  > b) Supplant real data with fake profile.        
+%         P.data.I.time = P.results.tArray;
+%         P.data.I.value = fakeIData;
           
         
         DP = DEBUGPLOTS.makedata;
@@ -252,8 +255,7 @@ elseif dataset == "DISST"
                 'stddevError')
             P.data.stddevMSE = stddevError;
             catch
-                fprintf("No stddevMSE - run AnalyseInsulinVariance!\n") 
-                pause(2)
+                fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
             end
         end
         

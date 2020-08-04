@@ -1,12 +1,9 @@
 function [tI, vI] = GetIFromITotal(P)
-% NOTE: takes data in pmol, and returns in mU!!
-global C
 
 if isfield(P.data, 'ITotal')    
     % Time of reading in sim [min]
-    % Plasma insulin + Detemir [pmol/L]
+    % Plasma insulin + Detemir [mU/L]
     [tITotal, vITotal] = GetSimTime(P, P.data.ITotal);
-    vITotal = C.pmol2mU(vITotal);
     
     % Forward simulate ID model for IDF.
     P = IDModel(P);
@@ -21,7 +18,6 @@ if isfield(P.data, 'ITotal')
 else
     % Non-detemir trial.
     [tI, vI] = GetSimTime(P, P.data.I);
-    vI = C.pmol2mU(vI);
 end
 
 end

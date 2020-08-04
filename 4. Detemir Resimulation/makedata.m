@@ -147,9 +147,9 @@ elseif dataset == "DISST"
         P.patientNum = ii;
         
         % Data
-        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';             % Plasma glucose [mmol/L]
-        P.data.I.value = C.mU2pmol(T{code, repmat("I", 1, N) + (1:N)}');  % Plasma insulin [mU/L] -> [pmol/L]
-        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';          % C-peptide readings [pmol/L]
+        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';     % Plasma glucose [mmol/L]
+        P.data.I.value = T{code, repmat("I", 1, N) + (1:N)}';     % Plasma insulin [mU/L]
+        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';  % C-peptide readings [pmol/L]
         
         times = T{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
         P.data.G.time = times;
@@ -173,13 +173,13 @@ elseif dataset == "DISST"
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
         %  > Add early steady-state points.
-        earlyTime = -4.5;
-        P.data.I.time = [earlyTime; P.data.I.time];
-        P.data.I.value = [P.data.I.value(1); P.data.I.value];
-%         P.data.G.time = [earlyTime; P.data.G.time];
-%         P.data.G.value = [P.data.G.value(1); P.data.G.value];
-        P.data.CPep.time = [earlyTime; P.data.CPep.time];
-        P.data.CPep.value = [P.data.CPep.value(1); P.data.CPep.value];
+%         earlyTime = -4.5;
+%         P.data.I.time = [earlyTime; P.data.I.time];
+%         P.data.I.value = [P.data.I.value(1); P.data.I.value];
+% %         P.data.G.time = [earlyTime; P.data.G.time];
+% %         P.data.G.value = [P.data.G.value(1); P.data.G.value];
+%         P.data.CPep.time = [earlyTime; P.data.CPep.time];
+%         P.data.CPep.value = [P.data.CPep.value(1); P.data.CPep.value];
         
         % Time
         allTimes = [P.data.CPep.time; P.data.G.time; P.data.I.time];
@@ -202,15 +202,15 @@ elseif dataset == "DISST"
         
         %  > Bolus
         tAfterIBolus = tIBolus;
-        fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
-        x0 = [1e3; 0.1];
-        tdata = P.data.I.time(~isDataPreBolus);
-        Idata = P.data.I.value(~isDataPreBolus);
-        lb = zeros(size(x0));
-        ub = C.mU2pmol(vIBolus)/GC.VI;
-        x = lsqcurvefit(fun, x0, tdata, Idata, lb, ub);
+%         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
+%         x0 = [1e3; 0.1];
+%         tdata = P.data.I.time(~isDataPreBolus);
+%         Idata = P.data.I.value(~isDataPreBolus);
+%         lb = zeros(size(x0));
+%         ub = C.mU2pmol(vIBolus)/GC.VI;
+%         x = lsqcurvefit(fun, x0, tdata, Idata, lb, ub);
         
-        fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
+%         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
         
         %  > a) Shuffle in fake data points.
         fakeG = vGBolus/GC.VG + P.data.G.value(3);
@@ -218,7 +218,7 @@ elseif dataset == "DISST"
         fakeData = [P.data.G.value; fakeG];
         P.data.G.value = fakeData(order);
         
-        fakeI = max(fakeIData);
+        fakeI = vIBolus/GC.VI + P.data.I.value(3);
         [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
         fakeData = [P.data.I.value; fakeI];
         P.data.I.value = fakeData(order);

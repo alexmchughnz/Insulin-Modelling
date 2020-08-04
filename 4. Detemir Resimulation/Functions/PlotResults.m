@@ -9,7 +9,7 @@ function [] = PlotResults(P)
 
 global C
 
-patientfigure = @(n) figure(10*P.patientNum + n);
+patientfigure = @(n) figure(10*(10*P.patientNum + n));
 
 tArray = P.results.tArray;     % Time of results [min]
 

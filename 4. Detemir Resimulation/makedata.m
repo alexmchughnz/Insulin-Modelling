@@ -155,6 +155,7 @@ elseif dataset == "DISST"
         P.data.G.time = times;
         P.data.I.time = times;
         P.data.CPep.time = times;
+        P.data.rawTimes = times;
         
         %  > Bolus        
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
@@ -183,22 +184,20 @@ elseif dataset == "DISST"
         
         % Time
         allTimes = [P.data.CPep.time; P.data.G.time; P.data.I.time];
-        P.data.simTime = [min(allTimes), max(allTimes)+1];
+        P.data.simTime = [floor(min(allTimes)), ceil(max(allTimes))];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         
         P.results.tArray = (P.data.simTime(1) : 1/60 : P.data.simTime(end))';
         P.results.tArray = P.results.tArray(1:end-1);      
         
-        % Generate minute-wise insulin profile.
-        fakeIData = zeros(size(P.results.tArray));
-        
+        % Generate minute-wise insulin profile.        
         %  > Interpolate pre-bolus 
-        isDataPreBolus = (P.data.I.time <= tIBolus);
-        ppI = griddedInterpolant(P.data.I.time(isDataPreBolus), P.data.I.value(isDataPreBolus));  % [pmol/L]
-        IInterp = ppI(P.results.tArray);
-        
-        isSimPreBolus = (P.results.tArray < tIBolus);
-        fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
+%         isDataPreBolus = (P.data.I.time <= tIBolus);
+%         ppI = griddedInterpolant(P.data.I.time(isDataPreBolus), P.data.I.value(isDataPreBolus));  % [pmol/L]
+%         IInterp = ppI(P.results.tArray);
+%         
+%         isSimPreBolus = (P.results.tArray < tIBolus);
+%         fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
         
         %  > Bolus
         tAfterIBolus = tIBolus;
@@ -235,8 +234,8 @@ elseif dataset == "DISST"
                 hold on
 %                 plt = plot(P.results.tArray, fun(x0, P.results.tArray), ':');
 %                 plt.DisplayName = "First Guess";
-                plt = plot(P.results.tArray, fakeIData, '.');
-                plt.DisplayName = "Fake Minute-wise Data";
+%                 plt = plot(P.results.tArray, fakeIData, '.');
+%                 plt.DisplayName = "Fake Minute-wise Data";
                 plt = plot(P.data.I.time, P.data.I.value, 'r*');
                 plt.DisplayName = "Data";
                 legend()

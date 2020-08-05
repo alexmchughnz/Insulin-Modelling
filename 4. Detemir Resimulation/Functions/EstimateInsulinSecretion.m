@@ -2,7 +2,7 @@ function P = EstimateInsulinSecretion(P)
 % Estimates pancreatic insulin secretion rate (Uen) using a patient's 
 % C-peptide data.
 % Model from Van Cauter et al. (1992).
-% Code based on van_cauter.m.
+% Code based on DISST_nL_xL_test.m from J Ormsbee / P Docherty.
 % INPUTS:
 %   P   - patient struct
 % OUTPUT:
@@ -27,7 +27,7 @@ k3 = SC.k3;
 ppCPep = griddedInterpolant(tCPep, vCPep);
 
 % Make 1-minute spaced time vector, and interpolate CPep values.
-tArray = [P.data.simTime(1) : P.data.simTime(end)]';  % Time range [min]
+tArray = [P.data.simTime(1) : P.data.simTime(end)-1]';  % Minute-wise time range [min]
 dt = tArray(2) - tArray(1);
 vCPep = ppCPep(tArray);
 
@@ -50,8 +50,9 @@ dvCPep = [diff(vCPep)/dt; 0];
 S = (dvCPep + (k1+k3).*vCPep - k2*Y);  % C-peptide secretion [(pmol/L)/min]
 Uen = C.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 
-% Write value to patient struct.
-P.results.Uen = Uen;
+% Expand to original time, and write value to patient struct.
+dt = P.results.tArray(2) - P.results.tArray(1);
+P.results.Uen = repelem(Uen, 1/dt, 1);
 fprintf('P%d: Estimated Uen.\n', P.patientNum); 
 
 %% Debug Plots

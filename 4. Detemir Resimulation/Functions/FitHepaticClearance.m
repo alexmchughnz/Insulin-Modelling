@@ -13,7 +13,7 @@ MeanNormalise = @(data) data ./ mean(data);
 % Time and data arrays.
 [tI, vI] = GetIFromITotal(P);      % [mU/L]
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
-tArray = [P.data.simTime(1) : P.data.simTime(end)]';  % Minute-wise time range [min]
+tArray = [P.data.simTime(1) : P.data.simTime(end)-1]';  % Minute-wise time range [min]
 
 
 %% Analytical Forward Simulation for Q
@@ -222,7 +222,8 @@ function [nL, xL, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray)
 global GC
 
 % Retrieve data.
-Uen = P.results.Uen; % [mU/min]
+iiMinutes = GetTimeIndex(tArray, P.results.tArray);
+Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
 I = ppI(tArray); % [mU/L]
 I0 = I(1);
 Q0 = I0/2;

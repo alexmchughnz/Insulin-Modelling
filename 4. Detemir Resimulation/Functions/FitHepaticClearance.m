@@ -61,13 +61,12 @@ P.results.xL = xL*ones(size(P.results.tArray));
 CNNorm = MeanNormalise(CN);
 CXNorm = MeanNormalise(CX);
 delta2Norm = norm(CNNorm - CXNorm) / length(CN);
+P.results.delta2Norm = delta2Norm;
 
 b = sum(CParts, 2);
 bNorm = MeanNormalise(b);
-delta2NormnL = norm(CNNorm - bNorm) / length(CN);
-delta2NormxL = norm(CXNorm - bNorm) / length(CN);
-
-P.results.delta2Norm = delta2Norm;
+P.results.delta2NormnL = norm(CNNorm - bNorm) / length(CN);
+P.results.delta2NormxL = norm(CXNorm - bNorm) / length(CN);
 
 %% Debug Plots
 DP = DEBUGPLOTS.FitHepaticClearance;
@@ -134,11 +133,6 @@ if DP.GraphicalID
     xlabel("Time [min]")
     ylabel("Mean-normalised integral value")
     legend('Location', 'northwest')
-    
-    %         SE = [max(xlim) min(ylim)]+[-diff(xlim) diff(ylim)]*0.20;
-    %         label = sprintf("$||\\Delta_{n_L}||_2$ = %.4g\n $||\\Delta_{x_L}||_2$ = %.4g", ...
-    %             delta2NormnL, delta2NormxL);
-    %         text(SE(1), SE(2), label);
     
 end
 

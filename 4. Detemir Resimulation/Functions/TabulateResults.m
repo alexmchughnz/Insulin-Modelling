@@ -11,6 +11,12 @@ T{code, "xL"} = P.results.xL(1);
 if isfield(P.results, "delta2Norm")
     T{code, "delta2Norm"} = P.results.delta2Norm;
 end
+if isfield(P.results, "delta2NormnL")
+    T{code, "delta2NormnL"} = P.results.delta2NormnL;
+end
+if isfield(P.results, "delta2NormxL")
+    T{code, "delta2NormxL"} = P.results.delta2NormxL;
+end
 if isfield(P.data, "stddevMSE")
     T{code, "stddevMSE"} = P.data.stddevMSE;
     if isfield(P.results, "minGridMSE")

@@ -143,8 +143,8 @@ for ii = 1:numel(nLGrid)
         copyP = PArray(ii);
     end
     
-    fprintf('\n%s: Trialling nL/xL = %g/%g in forward simulation (%d/%d). ', ...
-        copyP.patientCode, nLGrid(ii), xLGrid(ii), ii, numel(nLGrid))
+    fprintf('\nP%d: Searching at nL/xL = %g/%g...\n', ...
+        copyP.patientNum, nLGrid(ii), xLGrid(ii))
     
     % Apply nL/xL for iteration.
     copyP.results.nL = nLGrid(ii) * ones(size(copyP.results.tArray));

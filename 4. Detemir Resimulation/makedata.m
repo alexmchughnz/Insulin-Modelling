@@ -155,7 +155,6 @@ elseif dataset == "DISST"
         P.data.G.time = times;
         P.data.I.time = times;
         P.data.CPep.time = times;
-        P.data.rawTimes = times;
         
         %  > Bolus        
         vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
@@ -164,6 +163,8 @@ elseif dataset == "DISST"
         % Bolus as function of time, value spread over period.
         % Active if time within period.
         P.data.IBolus = @(t) ((tIBolus <= t) & (t < tIBolus+TIBolus)).*vIBolus/TIBolus;  % [mU/min]
+        P.data.tIBolus = tIBolus;
+        P.data.vIBolus = vIBolus;
         
         vGBolus = T{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
@@ -173,75 +174,14 @@ elseif dataset == "DISST"
         % Active if time within period.
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
         
-        %  > Add early steady-state points.
-%         earlyTime = -4.5;
-%         P.data.I.time = [earlyTime; P.data.I.time];
-%         P.data.I.value = [P.data.I.value(1); P.data.I.value];
-% %         P.data.G.time = [earlyTime; P.data.G.time];
-% %         P.data.G.value = [P.data.G.value(1); P.data.G.value];
-%         P.data.CPep.time = [earlyTime; P.data.CPep.time];
-%         P.data.CPep.value = [P.data.CPep.value(1); P.data.CPep.value];
-        
         % Time
         allTimes = [P.data.CPep.time; P.data.G.time; P.data.I.time];
         P.data.simTime = [floor(min(allTimes)), ceil(max(allTimes))];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         
         P.results.tArray = (P.data.simTime(1) : 1/60 : P.data.simTime(end))';
-        P.results.tArray = P.results.tArray(1:end-1);      
-        
-        % Generate minute-wise insulin profile.        
-        %  > Interpolate pre-bolus 
-%         isDataPreBolus = (P.data.I.time <= tIBolus);
-%         ppI = griddedInterpolant(P.data.I.time(isDataPreBolus), P.data.I.value(isDataPreBolus));  % [pmol/L]
-%         IInterp = ppI(P.results.tArray);
-%         
-%         isSimPreBolus = (P.results.tArray < tIBolus);
-%         fakeIData(isSimPreBolus) = IInterp(isSimPreBolus);
-        
-        %  > Bolus
-        tAfterIBolus = tIBolus;
-%         fun = @(x, tdata) P.data.I.value(3) + (tdata > tAfterIBolus).*(x(1)*exp(-x(2)*(tdata - tAfterIBolus)));
-%         x0 = [1e3; 0.1];
-%         tdata = P.data.I.time(~isDataPreBolus);
-%         Idata = P.data.I.value(~isDataPreBolus);
-%         lb = zeros(size(x0));
-%         ub = C.mU2pmol(vIBolus)/GC.VI;
-%         x = lsqcurvefit(fun, x0, tdata, Idata, lb, ub);
-        
-%         fakeIData(~isSimPreBolus) = fun(x, P.results.tArray(~isSimPreBolus));        
-        
-        %  > a) Shuffle in fake data points.
-        fakeG = vGBolus/GC.VG + P.data.G.value(3);
-        [P.data.G.time, order] = sort([P.data.G.time; tGBolus+TGBolus]);
-        fakeData = [P.data.G.value; fakeG];
-        P.data.G.value = fakeData(order);
-        
-        fakeI = vIBolus/GC.VI + P.data.I.value(3);
-        [P.data.I.time, order] = sort([P.data.I.time; tAfterIBolus]);
-        fakeData = [P.data.I.value; fakeI];
-        P.data.I.value = fakeData(order);
-        
-%         %  > b) Supplant real data with fake profile.        
-%         P.data.I.time = P.results.tArray;
-%         P.data.I.value = fakeIData;
-          
-        
-        DP = DEBUGPLOTS.makedata;
-        if DP.DISSTBolusFit
-            if ismember(P.patientNum, patientNums)
-                MakeDebugPlot(P, DP);
-                hold on
-%                 plt = plot(P.results.tArray, fun(x0, P.results.tArray), ':');
-%                 plt.DisplayName = "First Guess";
-%                 plt = plot(P.results.tArray, fakeIData, '.');
-%                 plt.DisplayName = "Fake Minute-wise Data";
-                plt = plot(P.data.I.time, P.data.I.value, 'r*');
-                plt.DisplayName = "Data";
-                legend()
-            end
-        end
-        
+        P.results.tArray = P.results.tArray(1:end-1); 
+                
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.

@@ -162,12 +162,9 @@ for ii = 1:numel(nLGrid)
     else
         [tI, vI] = GetSimTime(copyP, copyP.data.I);  % Data [mU/L]
         simI = copyP.results.I;                      % Sim [mU/L]
-    end
-    
-    simI = simI(ismember(copyP.results.tArray, copyP.data.rawTimes));
-    vI = vI(ismember(tI, copyP.data.rawTimes));
-    
-    IErrors = simI - vI;
+    end  
+    inSimTime = GetTimeIndex(tI, copyP.results.tArray);
+    IErrors = simI(inSimTime) - vI;
     
     % Save residuals.
     IResiduals(ii) = sum(IErrors.^2)/numel(vI);  % Mean Squared Errors

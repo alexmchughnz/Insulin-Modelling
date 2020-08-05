@@ -11,9 +11,21 @@ MeanNormalise = @(data) data ./ mean(data);
 
 %% Setup
 % Time and data arrays.
-[tI, vI] = GetIFromITotal(P);      % [mU/L]
-ppI = griddedInterpolant(tI, vI);  % [mU/L]
 tArray = [P.data.simTime(1) : P.data.simTime(end)-1]';  % Minute-wise time range [min]
+[tI, vI] = GetIFromITotal(P); % [mU/L]
+
+if P.source == "DISST"
+    % Need to add 'false' point for improved fitting.
+    [tI, order] = sort([tI; P.data.tIBolus]);
+    iiBeforeFakePoint = find(order == length(order)) - 1;
+    
+    fakeI = P.data.vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
+    
+    fakeData = [vI; fakeI];
+    vI = fakeData(order);
+end
+
+ppI = griddedInterpolant(tI, vI);  % [mU/L]
 
 
 %% Analytical Forward Simulation for Q
@@ -260,7 +272,7 @@ for II = 1:5
     
     % Assembling MLR system, evaluating only at sample points:
     % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    sampleTimes = P.data.rawTimes;
+    sampleTimes = P.data.I.time;
     ppCN = griddedInterpolant(tArray, CN);
     ppCX = griddedInterpolant(tArray, CX);
     ppC  = griddedInterpolant(tArray, C);

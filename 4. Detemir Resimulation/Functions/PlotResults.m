@@ -7,8 +7,6 @@ function [] = PlotResults(P)
 % INPUTS:
 %   P      - patient struct
 
-global C
-
 patientfigure = @(n) figure(10*(10*P.patientNum + n));
 
 tArray = P.results.tArray;     % Time of results [min]
@@ -33,17 +31,6 @@ plt.DisplayName = 'Interpolation';
 plt = plot(tArray, P.results.G, 'k');
 plt.DisplayName = 'Model Prediction';
 
-if isfield(P.results, 'nLxLFitBounds')
-    lineBounds = ylim;
-    for ii = 1:length(P.results.nLxLFitBounds)
-        split = tArray(P.results.nLxLFitBounds(ii));
-        L = line([split split], lineBounds);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-        L.HandleVisibility = 'off';
-    end
-end
-
 title(patientLabel + "Plasma Glucose")
 xlabel('Time')
 ylabel('Plasma Glucose, G [mmol/L]')
@@ -57,42 +44,26 @@ patientfigure(2)
 hold on
 
 if P.source == "Detemir"
-    [tI, vI] = GetSimTime(P, P.data.ITotal);  % [pmol/L]
-    
-    ppI = griddedInterpolant(tI, vI);
-    
-    I = C.mU2pmol(P.results.I + P.results.IDF);  % [mU/L] -> [pmol/L]
+    [tI, vI] = GetSimTime(P, P.data.ITotal);  % [mU/L]    
+    I = P.results.I + P.results.IDF;  % [mU/L]
     
     plttitle = patientLabel + "Plasma Insulin + Detemir";
-    pltylabel = 'Plasma Insulins, I + IDF [pmol/L]';
+    pltylabel = 'Plasma Insulins, I + IDF [mU/L]';
     
     datetick('x')
     
 elseif P.source == "DISST"
-    [tI, vI] = GetSimTime(P, P.data.I);  % [pmol/L]
-    
-    ppI = griddedInterpolant(tI, vI);
-    
-    I = C.mU2pmol(P.results.I);  % [mU/L] -> [pmol/L]
+    [tI, vI] = GetSimTime(P, P.data.I);  % [mU/L]
+    I = P.results.I;  % [mU/L]
     
     plttitle = patientLabel + "Plasma Insulin";
-    pltylabel = 'Plasma Insulin, I [pmol/L]';
-end
-
-if isfield(P.results, 'nLxLFitBounds')
-    lineBounds = ylim;
-    for ii = 1:length(P.results.nLxLFitBounds)
-        split = tArray(P.results.nLxLFitBounds(ii));
-        L = line([split split], lineBounds);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-        L.HandleVisibility = 'off';
-    end
+    pltylabel = 'Plasma Insulin, I [mU/L]';
 end
 
 plt = plot(tI, vI, 'r.');
 plt.DisplayName = 'Blood Test';
 
+% ppI = griddedInterpolant(tI, vI);
 % plt = plot(pltxarray, ppI(tArray), 'b');
 % plt.LineWidth = 1;
 % plt.DisplayName = 'Interpolation';

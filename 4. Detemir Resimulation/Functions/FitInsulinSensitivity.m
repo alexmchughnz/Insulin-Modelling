@@ -197,9 +197,9 @@ QT = Q + QDF;
 %% Computation
 % GC Model (reconstructed)
 % dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
+dQ     = GC.nI(P)/GC.VQ(P)*(I-Q) - GC.nC(P)*Q;
 dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
-dGb    = -GC.pg*(G-GFast) + d2/GC.VG*P2 + GInfusion/GC.VG;
+dGb    = -GC.pg*(G-GFast) + d2/GC.VG(P)*P2 + GInfusion/GC.VG(P);
 dYGC   = [dQ; dGA; dGb];
 
 % GI Model
@@ -257,9 +257,9 @@ d2 = P.results.d2;
 %% Computation
 % GC Model (reconstructed)
 % dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
+dQ     = GC.nI(P)/GC.VQ(P)*(I-Q) - GC.nC(P)*Q;
 dGA    = (G*Q - GFast*Q0)/(1 + GC.alphaG*Q);
-dGb    = -GC.pg*(G-GFast) + d2/GC.VG*P2 + (GInfusion + GBolus)/GC.VG;
+dGb    = -GC.pg*(G-GFast) + d2/GC.VG(P)*P2 + (GInfusion + GBolus)/GC.VG(P);
 dYGC   = [dQ; dGA; dGb];
 
 % GI Model

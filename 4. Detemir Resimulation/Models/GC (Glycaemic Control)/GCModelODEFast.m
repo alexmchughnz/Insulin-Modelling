@@ -33,14 +33,19 @@ IBolus    = P.data.IBolus(t);       % Insulin bolus [mU/min]
 
 % Patient dependent.
 d2 = P.results.d2;
+VG = GC.VG(P);
+VQ = GC.VQ(P);
+nI = GC.nI(P);
+nC = GC.nC(P);
+nK = GC.nK(P);
 
 %% Computation
 dG  = -GC.pg*(G-GFast) ...
           - SI*(G*Q - GFast*Q0)/(1 + GC.alphaG*Q) ...
-          + d2/GC.VG*P2 + (GInfusion + GBolus)/GC.VG;      
-dI  = -GC.nK*I - nL*I/(1 + GC.alphaI*I) - GC.nI/GC.VI*(I-Q) ...
+          + d2/VG*P2 + (GInfusion + GBolus)/VG;      
+dI  = -nK*I - nL*I/(1 + GC.alphaI*I) - nI/GC.VI*(I-Q) ...
           + Uen*(1 - xL)/GC.VI + IBolus/GC.VI;
-dQ  = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
+dQ  = nI/VQ*(I-Q) - nC*Q;
 
 %% Output
 dY = [dG;

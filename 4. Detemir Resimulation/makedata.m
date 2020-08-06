@@ -4,7 +4,7 @@ function patientSet = makedata(dataset, patientNums)
 
 load config
 
-global C
+global C SC
 global DEBUGPLOTS
 
 if dataset == "Detemir"
@@ -160,6 +160,9 @@ elseif dataset == "DISST"
         P.data.BMI = TB{code, "bmi"};
         
         % Data
+        [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
+        
+        
         P.data.G.value = TD{code, repmat("G", 1, N) + (1:N)}';     % Plasma glucose [mmol/L]
         P.data.I.value = TD{code, repmat("I", 1, N) + (1:N)}';     % Plasma insulin [mU/L]
         P.data.CPep.value = TD{code, repmat("C", 1, N) + (1:N)}';  % C-peptide readings [pmol/L]

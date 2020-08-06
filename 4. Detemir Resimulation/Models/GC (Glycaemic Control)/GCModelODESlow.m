@@ -31,6 +31,11 @@ GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
 
 % Patient dependent.
 d2 = P.results.d2;
+VG = GC.VG(P);
+VQ = GC.VQ(P);
+nI = GC.nI(P);
+nC = GC.nC(P);
+nK = GC.nK(P);
  
 % Derived values.
 QTFast  = Q0 + P.results.QDF(1);  % [mU/L]
@@ -39,10 +44,10 @@ QT      = Q + P.results.QDF(n);   % [mU/L]
 %% Computation
 dG  = -GC.pg*(G-GFast) ...
           - SI*(G*QT - GFast*QTFast)/(1 + GC.alphaG*QT) ...
-          + d2/GC.VG*P2 + GInfusion/GC.VG;      
-dI  = -GC.nK*I - nL*I/(1 + GC.alphaI*I) - GC.nI/GC.VI*(I-Q) ...
+          + d2/VG*P2 + GInfusion/VG;      
+dI  = -nK*I - nL*I/(1 + GC.alphaI*I) - nI/GC.VI*(I-Q) ...
           + Uen*(1 - xL)/GC.VI;
-dQ  = GC.nI/GC.VQ*(I-Q) - GC.nC*Q;
+dQ  = nI/VQ*(I-Q) - nC*Q;
 
 %% Output
 dY = [dG;

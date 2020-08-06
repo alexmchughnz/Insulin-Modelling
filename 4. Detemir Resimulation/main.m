@@ -45,8 +45,8 @@ for ii = 1:length(patients)
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
         'load');  % (nL, xL) by search
     
-    nL = patients{ii}.results.nL;
-    xL = patients{ii}.results.xL;    
+    nL = patients{ii}.results.nL(1);
+    xL = patients{ii}.results.xL(1);    
     patients{ii} = FitHepaticClearance(patients{ii}, [nL xL]);  % (nL, xL) by MLR
 
     %% Analyse data variance.

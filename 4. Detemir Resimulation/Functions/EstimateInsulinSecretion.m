@@ -9,19 +9,18 @@ function P = EstimateInsulinSecretion(P)
 %   P   - modified patient struct with Uen
 
 
-global C SC GC
+global C GC
 global DEBUGPLOTS
 
 %% Setup
 % Time of reading in sim [min]
 % Concentraton of C-peptide [pmol/L]
 [tCPep, vCPep] = GetSimTime(P, P.data.CPep);
-% vCPep = vCPep * GC.VI; % Total C-peptides [pmol]
 
 % Rate constants.
-k1 = SC.k1;   
-k2 = SC.k2;   
-k3 = SC.k3;
+k1 = P.data.k1;   
+k2 = P.data.k2;   
+k3 = P.data.k3;
 
 %% Interpolation
 ppCPep = griddedInterpolant(tCPep, vCPep);

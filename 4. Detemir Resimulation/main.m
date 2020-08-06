@@ -21,6 +21,8 @@ makeparameters
 
 load config
 
+SAVERESULTS = false;
+
 %% Load Data
 % patientNums = [1 3 4];
 % source = "Detemir";
@@ -43,7 +45,9 @@ for ii = 1:length(patients)
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
         'load');  % (nL, xL) by search
     
-%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
+    nL = patients{ii}.results.nL;
+    xL = patients{ii}.results.xL;    
+    patients{ii} = FitHepaticClearance(patients{ii}, [nL xL]);  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 
@@ -79,8 +83,10 @@ for ii = 1:length(patients)
     T = TabulateResults(T, P);
 end
 
-% saveopenfigures;
 PanelDebugPlots(1);
-
 disp(T);
-writetable(T, fullfile(RESULTPATH, 'table.txt'));
+
+if (SAVERESULTS)
+    saveopenfigures;
+    writetable(T, fullfile(RESULTPATH, 'table.txt'));
+end

@@ -1,7 +1,8 @@
-function P = FitHepaticClearance(P)
+function P = FitHepaticClearance(P, forcenLxL)
 % Fits data using MLR to find nL and xL.
 % INPUT:
 %   P   - patient struct
+%   forcenLxL - [nL, xL] to force (for plots)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 global GC
@@ -54,6 +55,12 @@ end
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
 % Fit nL/xL over segments.
 [nL, xL, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray);
+
+if exist('forcenLxL', 'var')
+    nL = forcenLxL(1);
+    xL = forcenLxL(2);
+end
+
 P.results.nL = nL*ones(size(P.results.tArray));
 P.results.xL = xL*ones(size(P.results.tArray));
 
@@ -165,6 +172,7 @@ if DP.ForwardSim
     plot(tArray, Q)
     title("Q (analytical)")
 end
+
 % Equation Terms
 if DP.EquationTerms
     ITerm = CParts(:, 1);
@@ -175,42 +183,23 @@ if DP.EquationTerms
     MakeDebugPlot(P, DP);
     hold on
     
-    plt = plot(tArray, MeanNormalise(LHS), 'b');
+    plt = plot(tArray, LHS, 'b');
     plt.DisplayName = "A*x";
     
-    plt = plot(tArray, MeanNormalise(intITerm), 'r');
+    plt = plot(tArray, intITerm, 'r');
     plt.DisplayName = "nK * integral(I)";
     
-    plt = plot(tArray, MeanNormalise(intIQTerm), 'g');
+    plt = plot(tArray, intIQTerm, 'g');
     plt.DisplayName = "nI/vI * integral(I-Q)";
     
-    plt = plot(tArray, MeanNormalise(intUenTerm), 'm');
+    plt = plot(tArray, intUenTerm, 'm');
     plt.DisplayName = "-integral((Uen+IBolus)/vI)";
     
-    plt = plot(tArray, MeanNormalise(ITerm), 'c');
+    plt = plot(tArray, ITerm, 'c');
     plt.DisplayName = "I - I0";
     
     xlabel("Time [min]")
     ylabel("Mean-normalised value of term [mU/L]")
-    legend()
-end
-
-% MLR Terms
-if DP.MLRTerms
-    MakeDebugPlot(P, DP);
-    hold on
-    
-    plt = plot(tArray,  MeanNormalise(CN));
-    plt.DisplayName = "A(column 1) = integral(I / (1 + alphaI*I))";
-    
-    plt = plot(tArray, MeanNormalise(CX));
-    plt.DisplayName = "A(column 2) = integral(Uen/VI)";
-    
-    plt = plot(tArray, MeanNormalise(b));
-    plt.DisplayName = "b = I0 - I...";
-    
-    xlabel("Time [min]")
-    ylabel("Mean-normalised integral of term [mU/L]")
     legend()
 end
 

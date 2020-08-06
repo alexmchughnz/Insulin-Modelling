@@ -4,7 +4,7 @@ function patientSet = makedata(dataset, patientNums)
 
 load config
 
-global C GC
+global C
 global DEBUGPLOTS
 
 if dataset == "Detemir"
@@ -129,36 +129,49 @@ elseif dataset == "DISST"
     
     % Load table.
     opts = spreadsheetImportOptions(...
+        'NumVariables', 7, ...
+        'DataRange', 'C3:I53', ...
+        'VariableNamesRange', 'C2:I2', ...
+        'RowNamesRange', 'B3:B53');   
+    opts = setvartype(opts, 'double');   
+    TB = readtable(fullfile(DATAPATH, dataset, "database recent.xls"), opts, ...
+        'ReadRowNames', true, ...
+        'ReadVariableNames', true);
+    
+    opts = spreadsheetImportOptions(...
         'NumVariables', 25, ...
         'DataRange', 'A3:Y52', ...
         'VariableNamesRange', '2:2');
-    opts = setvartype(opts, 'double');
-    
-    T = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"), opts, ...
+    opts = setvartype(opts, 'double');    
+    TD = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
     N = 5;  % Number of measurements.
     pp = 1; % Index for patients saved.
     for ii = patientNums
-        code = T.Properties.RowNames{ii};
+        code = TD.Properties.RowNames{ii};
         P.source = "DISST";
         P.patientCode = code;
         P.patientNum = ii;
         
-        % Data
-        P.data.G.value = T{code, repmat("G", 1, N) + (1:N)}';     % Plasma glucose [mmol/L]
-        P.data.I.value = T{code, repmat("I", 1, N) + (1:N)}';     % Plasma insulin [mU/L]
-        P.data.CPep.value = T{code, repmat("C", 1, N) + (1:N)}';  % C-peptide readings [pmol/L]
+        % Patient Info
+        P.data.age = TB{code, "age_years_"};
+        P.data.BMI = TB{code, "bmi"};
         
-        times = T{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
+        % Data
+        P.data.G.value = TD{code, repmat("G", 1, N) + (1:N)}';     % Plasma glucose [mmol/L]
+        P.data.I.value = TD{code, repmat("I", 1, N) + (1:N)}';     % Plasma insulin [mU/L]
+        P.data.CPep.value = TD{code, repmat("C", 1, N) + (1:N)}';  % C-peptide readings [pmol/L]
+        
+        times = TD{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
         P.data.G.time = times;
         P.data.I.time = times;
         P.data.CPep.time = times;
         
         %  > Bolus        
-        vIBolus = T{code, "IB"} * 1e+3;       % Insulin bolus [mU]
-        tIBolus = T{code, "timeIB"}/60;       % Time of bolus delivery [min]
+        vIBolus = TD{code, "IB"} * 1e+3;       % Insulin bolus [mU]
+        tIBolus = TD{code, "timeIB"}/60;       % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
@@ -166,9 +179,9 @@ elseif dataset == "DISST"
         P.data.tIBolus = tIBolus;
         P.data.vIBolus = vIBolus;
         
-        vGBolus = T{code, "GB"};                % Glucose bolus [g]
+        vGBolus = TD{code, "GB"};                % Glucose bolus [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
-        tGBolus = T{code, "timeGB"}/60;         % Time of bolus delivery [min]
+        tGBolus = TD{code, "timeGB"}/60;         % Time of bolus delivery [min]
         TGBolus = 1;                            % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.

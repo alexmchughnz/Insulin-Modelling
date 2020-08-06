@@ -84,11 +84,11 @@ P = SolveSystem(P);
 
 % Determine error.
 if isfield(P, 'ITotal')
-    [tI, vI] = GetSimTime(P, P.data.ITotal);
-    simI = C.mU2pmol(P.results.I + P.results.IDF);  % Sim [mU/L] -> [pmol/L]
+    [tI, vI] = GetSimTime(P, P.data.ITotal);  % Data [mU/L]
+    simI = P.results.I + P.results.IDF;       % Sim [mU/L]
 else
-    [tI, vI] = GetSimTime(P, P.data.I);
-    simI = C.mU2pmol(P.results.I);  % Sim [mU/L] -> [pmol/L]
+    [tI, vI] = GetSimTime(P, P.data.I);  % Data [mU/L]
+    simI = P.results.I;                  % Sim [mU/L]
 end
 
 iiI = GetTimeIndex(tI, P.results.tArray);

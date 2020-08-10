@@ -21,7 +21,7 @@ makeparameters
 
 load config
 
-SAVERESULTS = false;
+SAVERESULTS = true;
 
 %% Load Data
 % patientNums = [1 3 4];
@@ -45,9 +45,10 @@ for ii = 1:length(patients)
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
         'load');  % (nL, xL) by search
     
-    nL = patients{ii}.results.nL(1);
-    xL = patients{ii}.results.xL(1);    
-    patients{ii} = FitHepaticClearance(patients{ii}, [nL xL]);  % (nL, xL) by MLR
+    % Include this parameter to force best grid search result.
+    forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
+    
+    patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 
@@ -64,12 +65,6 @@ for ii = 1:length(patients)
     
 end
 
-[~, I] = sort(patientNums);
-for ii = 1:length(patientNums)
-   idx = find(I == ii);
-   P = patients{idx};
-   fprintf("%s\t %.2f/%.2f\n", P.patientCode, P.results.nL(1), P.results.xL(1));
-end
 
 %% Plot Results
 clear PlotResults PanelFigures

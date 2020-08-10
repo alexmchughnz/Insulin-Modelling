@@ -52,7 +52,7 @@ if P.source == "Detemir"
     
     datetick('x')
     
-elseif P.source == "DISST"
+else
     [tI, vI] = GetSimTime(P, P.data.I);  % [mU/L]
     I = P.results.I;  % [mU/L]
     

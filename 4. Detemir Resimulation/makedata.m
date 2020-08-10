@@ -230,7 +230,62 @@ elseif dataset == "DISST"
         
     end
     
+elseif dataset == "CREBRF"
+    % Load table.
+    opts = spreadsheetImportOptions(...
+        'NumVariables', 43, ...
+        'DataRange', 'C4:AS47', ...
+        'VariableNamesRange', 'C3:AS3', ...
+        'RowNamesRange', 'A4:A47');   
+    opts = setvartype(opts, 'double');   
+    T = readtable(fullfile(DATAPATH, dataset, "CREBRFImport.xlsx"), opts, ...
+        'ReadRowNames', true, ...
+        'ReadVariableNames', true);
     
+    for ii = 1:length(patientNums)
+        num = patientNums(ii);
+        
+        code = T.Properties.RowNames{ii};
+        P.source = "CREBRF";
+        P.patientCode = code;
+        P.patientNum = num;
+        
+        % Patient Info
+        P.data.age = T{code, "Age"};
+        P.data.BMI = T{code, "BMI"};
+        
+        % Time         
+        times = [0 2 4 6 8 10 30 60]';  % Time of measurement [min]
+        N = length(times);        
+        P.data.simTime = [floor(min(times)), ceil(max(times))];
+        P.data.simDuration =  @() floor(diff(P.data.simTime));
+        P.results.tArray = P.data.simTime(1) : 1 : P.data.simTime(end)-1;
+        
+        P.data.G.time = times;
+        P.data.I.time = times;
+        P.data.CPep.time = times;        
+        
+        % Data
+        [P.data.k1, P.data.k2, P.data.k3] = SC.k(P); 
+        
+        P.data.G.value = T{code, repmat("G", 1, N) + times}';     % Plasma glucose [mmol/L]
+        P.data.I.value = T{code, repmat("I", 1, N) + times}';     % Plasma insulin [mU/L]
+        P.data.CPep.value = T{code, repmat("C", 1, N) + times}';  % C-peptide readings [pmol/L]           
+        
+        P.data.IBolus = @(~) 0;  % No fast-I bolus here!
+        P.data.GBolus = @(~) 0;  % No G bolus either.
+        P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
+        P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
+        
+        % Save patient structs.
+        filename = sprintf("patient%s.mat", P.patientCode);
+        save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
+        fprintf('%s: Saved patient data.\n', P.patientCode);
+        
+        % Generate patient data structs.
+        loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
+        patientSet{ii} = loadpatient(P.patientCode);
+    end
 end
 
 %% --------------------------------------------------

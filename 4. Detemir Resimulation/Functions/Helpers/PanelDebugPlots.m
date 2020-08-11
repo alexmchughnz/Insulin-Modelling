@@ -31,13 +31,13 @@ if ~isempty(figData)
         % Position figure.   
         F.Units = 'pixels';     
         screensize = num2cell(get(groot, 'MonitorPositions'));
-        [x, y, w, h] = screensize{monitor, :};
+        [x, ~, w, h] = screensize{monitor, :};
         
         position = num2cell(F.Position);
         [~, ~, ~, h0] = position{1, :};
         
-        F.Position = [x + w*(pIndex-1)/3, ...
-            (h-1.2*h0) - h*(nIndex/(maxFigs+1)), ...
+        F.Position = [x + w*(pIndex-1)/numPatients, ...
+            (h-1.3*h0) - (h-h0)*nIndex/maxFigs, ...
             w/numPatients, ...
             h0];
         

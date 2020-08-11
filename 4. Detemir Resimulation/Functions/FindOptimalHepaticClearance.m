@@ -17,13 +17,23 @@ global FILEFORMAT
 
 GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
 FILEFORMAT = '%s_%s.mat';
+
+GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.025};
+
 %% Setup
 if isequal(method, 'grid')
-    % Set up search bounds.
-    nLBounds = varargin{1};
-    xLBounds = varargin{2};
-    delta = varargin{3};
+    % Load grid settings.
+    if isempty(varargin)
+        settings = GRIDDEFAULTS;
+    else
+        settings = varargin;
+    end
     
+    nLBounds = settings{1};
+    xLBounds = settings{2};
+    delta = settings{3};
+    
+    % Set up grid.
     nLDelta = delta(1);
     nLRange = nLBounds(1) : nLDelta : nLBounds(end);
     

@@ -132,8 +132,8 @@ elseif dataset == "DISST"
         'NumVariables', 7, ...
         'DataRange', 'C3:I53', ...
         'VariableNamesRange', 'C2:I2', ...
-        'RowNamesRange', 'B3:B53');   
-    opts = setvartype(opts, 'double');   
+        'RowNamesRange', 'B3:B53');
+    opts = setvartype(opts, 'double');
     TB = readtable(fullfile(DATAPATH, dataset, "database recent.xls"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
@@ -142,7 +142,7 @@ elseif dataset == "DISST"
         'NumVariables', 25, ...
         'DataRange', 'A3:Y52', ...
         'VariableNamesRange', '2:2');
-    opts = setvartype(opts, 'double');    
+    opts = setvartype(opts, 'double');
     TD = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
@@ -172,7 +172,7 @@ elseif dataset == "DISST"
         P.data.I.time = times;
         P.data.CPep.time = times;
         
-        %  > Bolus        
+        %  > Bolus
         vIBolus = TD{code, "IB"} * 1e+3;       % Insulin bolus [mU]
         tIBolus = TD{code, "timeIB"}/60;       % Time of bolus delivery [min]
         TIBolus = 1;                          % Period of bolus action [min]
@@ -196,8 +196,8 @@ elseif dataset == "DISST"
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         
         P.results.tArray = (P.data.simTime(1) : 1/60 : P.data.simTime(end))';
-        P.results.tArray = P.results.tArray(1:end-1); 
-                
+        P.results.tArray = P.results.tArray(1:end-1);
+        
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
@@ -206,9 +206,9 @@ elseif dataset == "DISST"
             stddev = 5/100;
             nTrials = 1000;
             try
-            load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
-                'stddevError')
-            P.data.stddevMSE = stddevError;
+                load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
+                    'stddevError')
+                P.data.stddevMSE = stddevError;
             catch
                 fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
             end
@@ -227,7 +227,7 @@ elseif dataset == "DISST"
             pp = pp + 1;
         end
         
-        
+        clear P
     end
     
 elseif dataset == "CREBRF"
@@ -236,16 +236,26 @@ elseif dataset == "CREBRF"
         'NumVariables', 43, ...
         'DataRange', 'C4:AS47', ...
         'VariableNamesRange', 'C3:AS3', ...
-        'RowNamesRange', 'A4:A47');   
-    opts = setvartype(opts, 'double');   
+        'RowNamesRange', 'A4:A47');
+    opts = setvartype(opts, 'double');
     T = readtable(fullfile(DATAPATH, dataset, "CREBRFImport.xlsx"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
+    % Generate array of patient numbers.
+    codes = T.Properties.RowNames;
+    nums = zeros(size(codes));
+    for pp = 1:length(codes)
+        code = codes{pp};
+        parts = sscanf(code, "%c%d_");
+        nums(pp) = parts(2);
+    end
+    
     for ii = 1:length(patientNums)
         num = patientNums(ii);
+        pp = find(nums == num);
+        code = codes{pp};
         
-        code = T.Properties.RowNames{ii};
         P.source = "CREBRF";
         P.patientCode = code;
         P.patientNum = num;
@@ -254,28 +264,51 @@ elseif dataset == "CREBRF"
         P.data.age = T{code, "Age"};
         P.data.BMI = T{code, "BMI"};
         
-        % Time         
-        times = [0 2 4 6 8 10 30 60]';  % Time of measurement [min]
-        N = length(times);        
+        % Time
+        times = [0 2 4 6 8 10 30 60];  % Time of measurement [min]
+        N = length(times);
         P.data.simTime = [floor(min(times)), ceil(max(times))];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
-        P.results.tArray = P.data.simTime(1) : 1 : P.data.simTime(end)-1;
+        P.results.tArray = (P.data.simTime(1) : 1 : P.data.simTime(end)-1)';
         
-        P.data.G.time = times;
-        P.data.I.time = times;
-        P.data.CPep.time = times;        
+        P.data.G.time = times';
+        P.data.I.time = times';
+        P.data.CPep.time = times';
         
         % Data
-        [P.data.k1, P.data.k2, P.data.k3] = SC.k(P); 
+        [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
         
         P.data.G.value = T{code, repmat("G", 1, N) + times}';     % Plasma glucose [mmol/L]
         P.data.I.value = T{code, repmat("I", 1, N) + times}';     % Plasma insulin [mU/L]
-        P.data.CPep.value = T{code, repmat("C", 1, N) + times}';  % C-peptide readings [pmol/L]           
+        P.data.CPep.value = T{code, repmat("C", 1, N) + times}';  % C-peptide readings [pmol/L]
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
         P.data.GBolus = @(~) 0;  % No G bolus either.
         P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
         P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
+        
+        % Clear NaNs
+        GNaN = isnan(P.data.G.value);
+        INaN = isnan(P.data.I.value);
+        CNaN = isnan(P.data.CPep.value);
+        
+        P.data.G.value = P.data.G.value(~GNaN);
+        P.data.I.value = P.data.I.value(~INaN);
+        P.data.CPep.value = P.data.CPep.value(~CNaN);
+        P.data.G.time = P.data.G.time(~GNaN);
+        P.data.I.time = P.data.I.time(~INaN);
+        P.data.CPep.time = P.data.CPep.time(~CNaN);
+        
+        %Other Fields
+        stddev = 5/100;
+        nTrials = 1000;
+        try
+            load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
+                'stddevError')
+            P.data.stddevMSE = stddevError;
+        catch
+            fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
+        end
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
@@ -285,6 +318,8 @@ elseif dataset == "CREBRF"
         % Generate patient data structs.
         loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
         patientSet{ii} = loadpatient(P.patientCode);
+        
+        clear P
     end
 end
 

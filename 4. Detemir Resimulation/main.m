@@ -30,8 +30,8 @@ SAVERESULTS = false;
 % patientNums = [1 8 5 7 2 3 13 9 10 24];
 % source = "DISST";
 
-% patientNums = [33 79 115 153 169 186 194 196 216 251];
-patientNums = [33];
+patientNums = [33 79 115 153 169 186 194 196 216 251];
+% patientNums = [33];
 source = "CREBRF";
 
 patients = makedata(source, patientNums);
@@ -48,7 +48,7 @@ for ii = 1:length(patients)
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
         'grid');  % (nL, xL) by search
     
-%     Include this parameter to force best grid search result.
+% %     Include this parameter to force best grid search result.
 %     forcenLxL = [0.05 0.67];
     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
     patients{ii} = FitHepaticClearance(patients{ii}, forcenLxL);  % (nL, xL) by MLR

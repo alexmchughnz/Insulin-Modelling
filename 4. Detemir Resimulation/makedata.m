@@ -278,9 +278,11 @@ elseif dataset == "CREBRF"
         % Data
         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
         
-        P.data.G.value = T{code, repmat("G", 1, N) + times}';     % Plasma glucose [mmol/L]
-        P.data.I.value = T{code, repmat("I", 1, N) + times}';     % Plasma insulin [mU/L]
-        P.data.CPep.value = T{code, repmat("C", 1, N) + times}';  % C-peptide readings [pmol/L]
+        P.data.G.value = T{code, repmat("G", 1, N) + times}';         % Plasma glucose [mmol/L]
+        P.data.I.value = T{code, repmat("I", 1, N) + times}';         % Plasma insulin [uU/mL == mU/L]
+        P.data.CPep.value = T{code, repmat("C", 1, N) + times}';      % C-peptide readings [ng/mL]
+        P.data.CPep.value = P.data.CPep.value * 1e-9 / 1e-3;          % ''                 [g/L]
+        P.data.CPep.value = P.data.CPep.value / C.MCPeptide / 1e-12;  % ''                 [pmol/L]
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
         P.data.GBolus = @(~) 0;  % No G bolus either.

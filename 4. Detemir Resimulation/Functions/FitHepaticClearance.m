@@ -238,7 +238,7 @@ cQ = GC.nC(P) + GC.nI(P)/GC.VQ(P); % Constant term coefficent of Q - easier to u
 cI = GC.nI(P)/GC.VQ(P);  % Constant term coefficent of I - easier to use
 
 % Perform iterative integral method.
-for II = 1:5
+for II = 1:20
     % Integrating I equation:
     % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
     % Renaming CN = int{c1} and CX = int{c2}

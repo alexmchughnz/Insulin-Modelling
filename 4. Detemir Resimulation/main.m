@@ -21,7 +21,7 @@ makeparameters
 
 load config
 
-SAVERESULTS = false;
+SAVERESULTS = true;
 
 %% Load Data
 % patientNums = [1 3 4];
@@ -30,8 +30,9 @@ SAVERESULTS = false;
 % patientNums = [1 8 5 7 2 3 13 9 10 24];
 % source = "DISST";
 
-patientNums = [33 79 115 153 169 186 194 196 216 251];
-% patientNums = [33];
+patientNums = [33 79 115 153 169 186 194 196 216 251]; %Jen O's chosen 10
+% patientNums = [33 79 169 186 194 196 216 251 147 160];
+% % patientNums = [169 186 194 196 216 251 147 160];
 source = "CREBRF";
 
 patients = makedata(source, patientNums);

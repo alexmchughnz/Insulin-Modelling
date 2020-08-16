@@ -54,13 +54,20 @@ end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
 % Fit nL/xL over segments.
-[nL, xL, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray);
+[nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray);
+nL = nLArray(end);
+xL = xLArray(end);
+
+lb = 1e-7;  % Lower bound on nL/xL.
+nL = max(nL, lb);  % [1/min]
+xL = max(xL, lb);  % [1]
 
 if exist('forcenLxL', 'var')
     nL = forcenLxL(1);
     xL = forcenLxL(2);
 end
 
+% Save results.
 P.results.nL = nL*ones(size(P.results.tArray));
 P.results.xL = xL*ones(size(P.results.tArray));
 
@@ -211,9 +218,20 @@ if DP.InsulinTerms
     plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
     legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
 end
+
+% Convergence
+if DP.Convergence
+    MakeDebugPlot(P, DP);
+    hold on
+    plot(nLArray, 'b')
+    plot(xLArray, 'r')
+    
+    title(sprintf("%s: Convergence", P.patientCode))
+    legend("nL", "xL")
+end
 end
 
-function [nL, xL, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray)
+function [nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray)
 global GC
 
 % Retrieve data.
@@ -238,7 +256,11 @@ cQ = GC.nC(P) + GC.nI(P)/GC.VQ(P); % Constant term coefficent of Q - easier to u
 cI = GC.nI(P)/GC.VQ(P);  % Constant term coefficent of I - easier to use
 
 % Perform iterative integral method.
-for II = 1:20
+nLArray = [0];
+xLArray = [1];
+relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
+tolerance = 0.1/100; % Relative tolerance for convergence.
+while any(relativeChange >= tolerance)
     % Integrating I equation:
     % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
     % Renaming CN = int{c1} and CX = int{c2}
@@ -268,6 +290,13 @@ for II = 1:20
     nL = x(1);
     xL = 1 - x(2);
     
+    nLChange = (nL-nLArray(end))/nLArray(end);
+    xLChange = (xL-xLArray(end))/xLArray(end);
+    relativeChange = [nLChange xLChange];
+    
+    nLArray = [nLArray nL];
+    xLArray = [xLArray xL];
+    
     % Forward simulate to improve I and Q prediction.
     for ii = 1:100
         % I(t) = I(t0) + kI*int{I} + kIQ*int{I-Q} + int{k} + CN*nL + CX*(1-xL)
@@ -278,10 +307,5 @@ for II = 1:20
         Q = Q0 - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
     end
 end
-
-% Save values.
-lb = 1e-7;  % Lower bound on nL/xL.
-nL = max(nL, lb);  % [1/min]
-xL = max(xL, lb);  % [1]
 
 end

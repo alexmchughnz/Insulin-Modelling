@@ -31,7 +31,7 @@ SAVERESULTS = true;
 % source = "DISST";
 
 % patientNums = [33 79 115 153 169 186 194 196 216 251];  %Jen O's chosen 10
-patientNums = [33 79 169 186 194 196 216 251 147 160];  % My chosen 10
+patientNums = [33 79 147 160 169 186 194 196 216 251];  % My chosen 10
 source = "CREBRF";
 
 patients = makedata(source, patientNums);
@@ -45,13 +45,13 @@ for ii = 1:length(patients)
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
     %% Determine nL/xL.
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load');  % (nL, xL) by search
+%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+%         'load');  % (nL, xL) by search
     
 % %     Include this parameter to force best grid search result.
 %     forcenLxL = [0.05 0.67];
 %     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
-%     patients{ii} = FitHepaticClearance(patients{ii}, forcenLxL);  % (nL, xL) by MLR
+    patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 
@@ -81,10 +81,10 @@ for ii = 1:length(patients)
     T = TabulateResults(T, P);
 end
 
-PanelDebugPlots(2);
-disp(T);
-
 if (SAVERESULTS)
     saveopenfigures;
     writetable(T, fullfile(RESULTPATH, 'table.txt'));
 end
+
+PanelDebugPlots(2);
+disp(T);

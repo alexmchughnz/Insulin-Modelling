@@ -21,7 +21,7 @@ FILEFORMAT = '%s_%s.mat';
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.025};
 
 %% Setup
-if isequal(method, 'grid')
+if method == "grid"
     % Load grid settings.
     if isempty(varargin)
         settings = GRIDDEFAULTS;
@@ -48,7 +48,7 @@ if isequal(method, 'grid')
     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
     
     
-elseif isequal(method, 'load')
+else
     if ~isempty(varargin)
         % Load by name.
         filename = varargin{1};
@@ -66,9 +66,33 @@ elseif isequal(method, 'load')
         
         [~, iiBest] = min(resolutions);
         file = files(iiBest);
-        load(fullfile(file.folder, file.name), ...
+        filename = file.name;
+        load(fullfile(file.folder, filename), ...
             'nLGrid', 'xLGrid', 'IResiduals');
     end
+end
+
+if method == "refine"
+    bounds = 0.05;
+    delta = 0.005;
+    
+    % Find range surrounding 1SD area.
+    gridMin = min(IResiduals(:));
+    deltaMSE = abs(IResiduals - gridMin);
+    isWithin1SD = (deltaMSE <= P.data.stddevMSE);
+    
+    nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), bounds, -1);
+    nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), bounds, +1);
+    xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), bounds, -1);
+    xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), bounds, +1);
+    
+    % Set up grid.
+    nLRange = nLMin : delta : nLMax;
+    xLRange = xLMin : delta : xLMax;
+    
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
+    
+    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
 end
 
 %% Find Optimal nL/xL

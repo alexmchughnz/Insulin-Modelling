@@ -45,13 +45,13 @@ for ii = 1:length(patients)
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
     %% Determine nL/xL.
-%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-%         'load');  % (nL, xL) by search
+    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+        'refine');  % (nL, xL) by search
     
 % %     Include this parameter to force best grid search result.
 %     forcenLxL = [0.05 0.67];
 %     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
-    patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
+%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 

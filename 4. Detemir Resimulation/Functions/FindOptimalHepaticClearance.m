@@ -81,10 +81,10 @@ if method == "refine"
     deltaMSE = abs(IResiduals - gridMin);
     isWithin1SD = (deltaMSE <= P.data.stddevMSE);
     
-    nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), bounds, -1);
-    nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), bounds, +1);
-    xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), bounds, -1);
-    xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), bounds, +1);
+    nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), bounds) - bounds;
+    nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), bounds) + bounds;
+    xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), bounds) - bounds;
+    xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), bounds) + bounds;
     
     % Set up grid.
     nLRange = nLMin : delta : nLMax;

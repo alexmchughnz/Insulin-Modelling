@@ -1,7 +1,7 @@
 function output = RoundToMultiple(input, factor, direction)
     % Rounds input to the nearest multiple of factor.
     
-    if isempty(direction)
+    if ~exist('direction', 'var')
         direction = 0;
     end
     

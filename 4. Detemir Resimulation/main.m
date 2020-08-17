@@ -46,7 +46,7 @@ for ii = 1:length(patients)
     
     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'refine');  % (nL, xL) by search
+        'load');  % (nL, xL) by search
     
 % %     Include this parameter to force best grid search result.
 %     forcenLxL = [0.05 0.67];

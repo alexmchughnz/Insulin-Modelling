@@ -92,10 +92,13 @@ if method == "refine"
     
     [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     
+    filename = sprintf(GRIDFORMAT, ...
+        [nLMin nLMax], delta, [xLMin xLMax], delta);
     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
 end
 
 %% Find Optimal nL/xL
+% Get minimum.
 [minIResidual, iiOptimal] = min(IResiduals(:));
 bestnL = nLGrid(iiOptimal);
 bestxL = xLGrid(iiOptimal);
@@ -103,6 +106,13 @@ bestxL = xLGrid(iiOptimal);
 P.results.nL = bestnL * ones(size(P.results.tArray));
 P.results.xL = bestxL * ones(size(P.results.tArray));
 P.results.minGridMSE = minIResidual;
+
+% Get size of minimal error region.
+gridMin = min(IResiduals(:));
+deltaMSE = abs(IResiduals - gridMin);
+isWithin1SD = (deltaMSE <= P.data.stddevMSE);
+
+P.results.minimalErrorRegionSize = sum(isWithin1SD(:));
 
 %% ------------------------------------------------------------------------
 

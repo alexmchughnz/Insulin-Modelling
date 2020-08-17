@@ -24,6 +24,9 @@ if isfield(P.data, "stddevMSE")
         T{code, "SD min error %"} = 100 * P.data.stddevMSE / P.results.minGridMSE;
     end
 end
+if isfield(P.results, "minimalErrorRegionSize")    
+    T{code, "MERSize"} = P.results.minimalErrorRegionSize;
+end
 
 end
 

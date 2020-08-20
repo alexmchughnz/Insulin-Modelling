@@ -13,27 +13,28 @@ global DEBUGPLOTS
 %% Setup
 [tData, ~] = GetIFromITotal(P);
 MSE = zeros(1, N);
-scaleFactors = cell(1, N);
 
 %% Simulate
 for ii = 1:N
     % Randomly vary data according to normal distribution.
-    randNums = randn(size(tData));
+    isFakeData = (tData <= 0);
+    randNums = Inf;
     while any(abs(randNums) > 3)  % Limit to within 3 SDs.
         randNums = randn(size(tData));
     end
-    scaleFactors{ii} = 1 + stddev*randNums;
+    randNums(isFakeData) = randNums(1); % Apply same variance to fake data.
+    noiseFactors = 1 + stddev*randNums;
     
     % Vary correct data based on trial.
     copyP = P;
     
     if isfield(P, 'ITotal')
         [~, vITotal] = GetSimTime(P, P.data.ITotal);
-        trialITotal = scaleFactors{ii} .* vITotal;
+        trialITotal = noiseFactors .* vITotal;
         copyP.data.ITotal.value = trialITotal;
     else
         [~, vI] = GetSimTime(P, P.data.I);
-        trialI = scaleFactors{ii} .* vI;
+        trialI = noiseFactors .* vI;
         copyP.data.I.value = trialI;
     end
     
@@ -95,7 +96,8 @@ iiI = GetTimeIndex(tI, P.results.tArray);
 simI = simI(iiI);
 
 error = simI - vI;
-MSE = sum(error.^2)/length(vI);
+error = error(tI >= 0);  % Only evaluate error at true points.
+MSE = mean(error.^2);
 end
 
 

@@ -38,8 +38,10 @@ for ii = 1:N
     % Find average error G(t, d2) to measured data.
     iiG = GetTimeIndex(tG, P.results.tArray);
     simG = copyP.results.G(iiG);
-    GError = abs(simG - vG)./vG;
-    GErrorGrid(ii) = mean(GError);    
+    
+    error = simG - vG;
+    error = error(tG >= 0);  % Only evaluate error at true points.
+    GErrorGrid(ii) = mean(error.^2); 
 end
 
 %% Solving

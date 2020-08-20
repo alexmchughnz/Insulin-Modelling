@@ -147,7 +147,7 @@ elseif dataset == "DISST"
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
-    N = 5;  % Number of measurements.
+    nMeas = 5;  % Number of measurements.
     pp = 1; % Index for patients saved.
     for ii = patientNums
         code = TD.Properties.RowNames{ii};
@@ -163,14 +163,14 @@ elseif dataset == "DISST"
         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
         
         
-        P.data.G.value = TD{code, repmat("G", 1, N) + (1:N)}';     % Plasma glucose [mmol/L]
-        P.data.I.value = TD{code, repmat("I", 1, N) + (1:N)}';     % Plasma insulin [mU/L]
-        P.data.CPep.value = TD{code, repmat("C", 1, N) + (1:N)}';  % C-peptide readings [pmol/L]
+        P.data.G.value = TD{code, repmat("G", 1, nMeas) + (1:nMeas)}';     % Plasma glucose [mmol/L]
+        P.data.I.value = TD{code, repmat("I", 1, nMeas) + (1:nMeas)}';     % Plasma insulin [mU/L]
+        P.data.CPep.value = TD{code, repmat("C", 1, nMeas) + (1:nMeas)}';  % C-peptide readings [pmol/L]
         
-        times = TD{code, repmat("time", 1, N) + (1:N)}'/60;  % Time of measurement [min]
-        P.data.G.time = times;
-        P.data.I.time = times;
-        P.data.CPep.time = times;
+        measTimes = TD{code, repmat("time", 1, nMeas) + (1:nMeas)}'/60;  % Time of measurement [min]
+        P.data.G.time = measTimes;
+        P.data.I.time = measTimes;
+        P.data.CPep.time = measTimes;
         
         %  > Bolus
         vIBolus = TD{code, "IB"} * 1e+3;       % Insulin bolus [mU]
@@ -265,24 +265,28 @@ elseif dataset == "CREBRF"
         P.data.BMI = T{code, "BMI"};
         
         % Time
-        times = [0 2 4 6 8 10 30 60];  % Time of measurement [min]
-        N = length(times);
-        P.data.simTime = [floor(min(times)), ceil(max(times))];
+        measTimes = [0 2 4 6 8 10 30];  % Time of measurement [min]
+        nMeas = length(measTimes);
+        allTimes = [-15 -5 measTimes]';   % Add fake times.
+        
+        P.data.simTime = [floor(min(allTimes)), ceil(max(allTimes))];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         P.results.tArray = (P.data.simTime(1) : 1 : P.data.simTime(end)-1)';
         
-        P.data.G.time = times';
-        P.data.I.time = times';
-        P.data.CPep.time = times';
+        P.data.G.time = allTimes;
+        P.data.I.time = allTimes;
+        P.data.CPep.time = allTimes;
         
         % Data
         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
-        
-        P.data.G.value = T{code, repmat("G", 1, N) + times}';         % Plasma glucose [mmol/L]
-        P.data.I.value = T{code, repmat("I", 1, N) + times}';         % Plasma insulin [uU/mL == mU/L]
-        P.data.CPep.value = T{code, repmat("C", 1, N) + times}';      % C-peptide readings [ng/mL]
-        P.data.CPep.value = P.data.CPep.value * 1e-9 / 1e-3;          % ''                 [g/L]
-        P.data.CPep.value = P.data.CPep.value / C.MCPeptide / 1e-12;  % ''                 [pmol/L]
+        measG = T{code, repmat("G", 1, nMeas) + measTimes}'; % Plasma glucose [mmol/L]
+        P.data.G.value = measG([1 1 1:end]);
+        measI = T{code, repmat("I", 1, nMeas) + measTimes}';  % Plasma insulin [uU/mL == mU/L]
+        P.data.I.value = measI([1 1 1:end]);
+        measC = T{code, repmat("C", 1, nMeas) + measTimes}';  % C-peptide [ng/mL]
+        measC = measC * 1e-9 / 1e-3;                          % ''        [g/L]
+        measC = measC / C.MCPeptide / 1e-12;                  % ''        [pmol/L]
+        P.data.CPep.value = measC([1 1 1:end]);
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
         P.data.GBolus = @(~) 0;  % No G bolus either.

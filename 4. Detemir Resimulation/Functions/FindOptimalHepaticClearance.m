@@ -73,7 +73,7 @@ else
 end
 
 if method == "refine"
-    bounds = 0.05;
+    bounds = 0.1;
     delta = 0.005;
     
     % Find range surrounding 1SD area.

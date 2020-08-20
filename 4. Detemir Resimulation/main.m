@@ -9,7 +9,7 @@ tic
 clc
 close all
 fprintf("Running main - press key to start.\n")
-pause 
+% pause 
 
 clear
 clear FitHepaticClearance  % to clear persistents in nL/xL plots...
@@ -21,7 +21,7 @@ makeparameters
 
 load config
 
-SAVERESULTS = false;
+SAVERESULTS = true;
 
 %% Load Data
 % patientNums = [1 3 4];
@@ -32,7 +32,7 @@ SAVERESULTS = false;
 
 patientNums = [33 79 115 153 169 186 194 196 216 251];  %Jen O's chosen 10
 % patientNums = [33 79 147 160 169 186 194 196 216 251];  % My chosen 10
-patientNums = [115 153];
+patientNums = [153];
 source = "CREBRF";
 
 patients = makedata(source, patientNums);
@@ -46,13 +46,12 @@ for ii = 1:length(patients)
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
     %% Determine nL/xL.
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'grid');  % (nL, xL) by search
+%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+%         'refine', "grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025");  % (nL, xL) by search
     
-% %     Include this parameter to force best grid search result.
-%     forcenLxL = [0.05 0.67];
+% %     Include this parameter to force fit a specific nL xL value.
 %     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
-%     patients{ii} = FitHepaticClearance(patients{ii}, forcenLxL);  % (nL, xL) by MLR
+%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 

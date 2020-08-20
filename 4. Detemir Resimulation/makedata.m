@@ -257,7 +257,7 @@ elseif dataset == "CREBRF"
         code = codes{pp};
         
         P.source = "CREBRF";
-        P.patientCode = code;
+        P.patientCode = strrep(code, '_', '');
         P.patientNum = num;
         
         % Patient Info

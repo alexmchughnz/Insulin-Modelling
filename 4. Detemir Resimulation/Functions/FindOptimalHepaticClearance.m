@@ -8,7 +8,7 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 %   varargin - with 'grid', {1} nL bounds, and
 %                           {2} xL bounds to search over
 %                           {3} desired [nL, xL] grid precision
-%            - with 'load', the filename to load (optional)
+%            - otherwise, the filename to load (optional)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 

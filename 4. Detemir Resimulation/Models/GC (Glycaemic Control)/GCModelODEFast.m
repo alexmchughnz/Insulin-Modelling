@@ -1,4 +1,4 @@
-function [dY] = GCModelODE(t, Y, P, Y0)
+function [dY] = GCModelODEFast(t, Y, P, Y0)
 % ODE for GC model. Use with ode45.
 % Requires P1(t) and P2(t) - must be run AFTER GI model.
 % Requires QDF(t) - must be run AFTER ID model.

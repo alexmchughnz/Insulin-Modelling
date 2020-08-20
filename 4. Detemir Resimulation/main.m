@@ -27,12 +27,13 @@ SAVERESULTS = false;
 % patientNums = [1 3 4];
 % source = "Detemir";
 
-patientNums = [1 8 5 7 2 3 13 9 10 24];
-source = "DISST";
+% patientNums = [1 8 5 7 2 3 13 9 10 24];
+% source = "DISST";
 
-% patientNums = [33 79 115 153 169 186 194 196 216 251];  %Jen O's chosen 10
+patientNums = [33 79 115 153 169 186 194 196 216 251];  %Jen O's chosen 10
 % patientNums = [33 79 147 160 169 186 194 196 216 251];  % My chosen 10
-% source = "CREBRF";
+patientNums = [115 153];
+source = "CREBRF";
 
 patients = makedata(source, patientNums);
 
@@ -46,12 +47,12 @@ for ii = 1:length(patients)
     
     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load');  % (nL, xL) by search
+        'grid');  % (nL, xL) by search
     
 % %     Include this parameter to force best grid search result.
 %     forcenLxL = [0.05 0.67];
 %     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
-%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
+%     patients{ii} = FitHepaticClearance(patients{ii}, forcenLxL);  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 
@@ -86,5 +87,5 @@ if (SAVERESULTS)
     writetable(T, fullfile(RESULTPATH, 'table.txt'));
 end
 
-PanelDebugPlots(2);
+PanelDebugPlots(1);
 disp(T);

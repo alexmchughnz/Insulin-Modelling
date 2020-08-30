@@ -63,22 +63,23 @@ if DP.Insulin
         pltylabel = 'Plasma Insulin, I [mU/L]';
     end
     
+    plt = plot(tArray, I, 'k');
+    plt.DisplayName = 'Model Prediction';
+    
     plt = plot(tI, vI, 'r.');
     plt.DisplayName = 'Blood Test';
     
     % ppI = griddedInterpolant(tI, vI);
     % plt = plot(pltxarray, ppI(tArray), 'b');
     % plt.LineWidth = 1;
-    % plt.DisplayName = 'Interpolation';
-    
-    plt = plot(tArray, I, 'k');
-    plt.DisplayName = 'Model Prediction';
-    
+    % plt.DisplayName = 'Interpolation';    
     
     title(plttitle)
     xlabel('Time [min]')
     ylabel(pltylabel)
     legend()
+    
+    ylim([0 Inf])
 end
 
 

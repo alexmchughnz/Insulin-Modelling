@@ -27,10 +27,9 @@ if dataset == "Detemir"
         P.data.trialDuration = @() minutes(diff(P.trialTime));
         
         P.data.simTime     =  [sys.sim_start_t, sys.sim_end_t];
-        P.data.simDuration =  @() minutes(diff(P.data.simTime)) + 1;
+        P.data.simDuration =  @() minutes(diff(P.data.simTime));
         
         P.results.tArray = (0 : P.data.simDuration())';
-        P.results.tArray = P.results.tArray(1:end-1);
         
         
         P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
@@ -196,7 +195,6 @@ elseif dataset == "DISST"
         P.data.simDuration =  @() floor(diff(P.data.simTime));
         
         P.results.tArray = (P.data.simTime(1) : 1/60 : P.data.simTime(end))';
-        P.results.tArray = P.results.tArray(1:end-1);
         
         % Other Fields
         P.data.GFast = @(~) P.data.G.value(1);
@@ -271,7 +269,7 @@ elseif dataset == "CREBRF"
         
         P.data.simTime = [floor(min(allTimes)), ceil(max(allTimes))];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
-        P.results.tArray = (P.data.simTime(1) : 1 : P.data.simTime(end)-1)';
+        P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
         
         P.data.G.time = allTimes;
         P.data.I.time = allTimes;

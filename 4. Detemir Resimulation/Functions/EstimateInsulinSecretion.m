@@ -26,7 +26,7 @@ k3 = P.data.k3;
 ppCPep = griddedInterpolant(tCPep, vCPep);
 
 % Make 1-minute spaced time vector, and interpolate CPep values.
-tArray = [P.data.simTime(1) : P.data.simTime(end)-1]';  % Minute-wise time range [min]
+tArray = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
 dt = tArray(2) - tArray(1);
 CPepArray = ppCPep(tArray);
 
@@ -51,7 +51,7 @@ Uen = C.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 
 % Expand to original time, and write value to patient struct.
 dt = P.results.tArray(2) - P.results.tArray(1);
-P.results.Uen = repelem(Uen, 1/dt, 1);
+P.results.Uen = repelem(Uen, round(1/dt), 1);
 fprintf('P%d: Estimated Uen.\n', P.patientNum); 
 
 %% Debug Plots

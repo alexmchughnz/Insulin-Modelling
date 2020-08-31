@@ -12,7 +12,7 @@ MeanNormalise = @(data) data ./ mean(data);
 
 %% Setup
 % Time and data arrays.
-tArray = [P.data.simTime(1) : P.data.simTime(end)-1]';  % Minute-wise time range [min]
+tArray = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
 [tI, vI] = GetIFromITotal(P); % [mU/L]
 
 if P.source == "DISST"

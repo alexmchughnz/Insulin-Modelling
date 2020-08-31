@@ -6,7 +6,7 @@ function [time, value] = GetSimTime(P, datastruct)
         time = datastruct.time;
     end
     
-    inSimTime = (P.data.simTime(1) <= time) & (time < P.data.simTime(end)); % [logical]
+    inSimTime = (P.data.simTime(1) <= time) & (time <= P.data.simTime(end)); % [logical]
     
     time = time(inSimTime);    
     value = datastruct.value(inSimTime);    

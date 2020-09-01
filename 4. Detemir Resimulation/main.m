@@ -43,9 +43,11 @@ for ii = 1:length(patients)
     %% Determine Uen.
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
-    %% Determine nL/xL.
+%     %% Determine nL/xL.
+%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+%         'refine', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'refine', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
+        'load');
     
 %     Include this parameter to force fit a specific nL xL value.
     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
@@ -80,7 +82,7 @@ for ii = 1:length(patients)
 end
 
 if (SAVERESULTS)
-    saveopenfigures;
+    SaveOpenFigures(source);
     writetable(T, fullfile(RESULTPATH, source+"table.txt"));
 end
 

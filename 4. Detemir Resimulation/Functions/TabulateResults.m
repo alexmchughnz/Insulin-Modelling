@@ -27,6 +27,10 @@ end
 if isfield(P.results, "minimalErrorRegionSize")    
     T{code, "MERSize"} = P.results.minimalErrorRegionSize;
 end
+if isfield(P.results, "optimalnLRange")    
+    T{code, "optnLRange"} = diff(P.results.optimalnLRange);
+    T{code, "optxLRange"} = diff(P.results.optimalxLRange);
+end
 
 end
 

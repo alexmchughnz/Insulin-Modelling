@@ -5,8 +5,8 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 %   P        - patient struct
 %   method   - 'grid' to perform grid search
 %              'load' to load previously-generated residuals data
-%   varargin - with 'grid', {1} nL bounds, and
-%                           {2} xL bounds to search over
+%   varargin - with 'grid', {1} nL boundary, and
+%                           {2} xL boundary to search over
 %                           {3} desired [nL, xL] grid precision
 %            - otherwise, the filename to load (optional)
 % OUTPUT:
@@ -73,7 +73,7 @@ else
 end
 
 if method == "refine"
-    bounds = 0.1;
+    boundary = 0.1;
     delta = 0.005;
     
     % Find range surrounding 1SD area.
@@ -81,10 +81,10 @@ if method == "refine"
     deltaMSE = abs(IResiduals - gridMin);
     isWithin1SD = (deltaMSE <= P.data.stddevMSE);
     
-    nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), bounds) - bounds;
-    nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), bounds) + bounds;
-    xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), bounds) - bounds;
-    xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), bounds) + bounds;
+    nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), boundary) - boundary;
+    nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), boundary) + boundary;
+    xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), boundary) - boundary;
+    xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), boundary) + boundary;
     
     % Set up grid.
     nLRange = nLMin : delta : nLMax;
@@ -111,6 +111,15 @@ P.results.minGridMSE = minIResidual;
 gridMin = min(IResiduals(:));
 deltaMSE = abs(IResiduals - gridMin);
 isWithin1SD = (deltaMSE <= P.data.stddevMSE);
+
+
+optimalnL = nLGrid(isWithin1SD);
+optimalxL = xLGrid(isWithin1SD);
+
+[L, H] = bounds(optimalnL);
+P.results.optimalnLRange = [L H];
+[L, H] = bounds(optimalxL);
+P.results.optimalxLRange = [L H];
 
 P.results.minimalErrorRegionSize = sum(isWithin1SD(:));
 

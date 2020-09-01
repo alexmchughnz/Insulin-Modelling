@@ -28,11 +28,9 @@ SAVERESULTS = true;
 % source = "Detemir";
 
 % patientNums = [1 8 5 7 2 3 13 9 10 24];
-% patientNums = [1];
 % source = "DISST";
 
 patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
-patientNums = [79 115 160 169 186 194 196 216 251];  % My chosen 10
 source = "CREBRF";
 
 patients = makedata(source, patientNums);
@@ -47,16 +45,16 @@ for ii = 1:length(patients)
     
     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'grid');
+        'refine');
     
 %     Include this parameter to force fit a specific nL xL value.
     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
     patients{ii} = FitHepaticClearance(patients{ii}, forcenLxL);  % (nL, xL) by MLR
 
     %% Analyse data variance.
-    stddev = 5/100; 
-    N = 1000;    
-    AnalyseInsulinVariance(patients{ii}, stddev, N);    
+%     stddev = 5/100; 
+%     N = 1000;    
+%     AnalyseInsulinVariance(patients{ii}, stddev, N);    
     
     %% Find other dependent parameters. 
     patients{ii} = FindGutEmptyingRate(patients{ii});  % (d2)

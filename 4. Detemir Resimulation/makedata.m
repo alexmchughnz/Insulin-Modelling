@@ -7,14 +7,15 @@ load config
 global C SC
 global DEBUGPLOTS
 
-if dataset == "Detemir"
+if contains(dataset, "Detemir")
+    source = "Detemir";
     patientSet = cell(size(patientNums));
     
     % STUB: grab data from previous code structs
     for ii = 1:length(patientNums)
         patientNum = patientNums(ii);
         filename = sprintf("sys%d.mat", patientNum);
-        load(fullfile(DATAPATH, dataset, filename));
+        load(fullfile(DATAPATH, source, filename));
         data = sys.Data;
         
         clear P
@@ -112,19 +113,20 @@ if dataset == "Detemir"
         
         % Save patient structs.
         filename = sprintf("patient%d.mat", P.patientNum);
-        save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
+        save(fullfile(DATAPATH, source, filename), '-struct', 'P');
         fprintf('%s: Saved patient data.\n', P.patientCode);
         
     end
     
     % Generate patient data structs.
-    loadpatient = @(n) load(fullfile(DATAPATH, dataset, sprintf("patient%d.mat", n)));
+    loadpatient = @(n) load(fullfile(DATAPATH, source, sprintf("patient%d.mat", n)));
     for pp = 1 : length(patientNums)
         n = patientNums(pp);
         patientSet{pp} = loadpatient(n);
     end
     
-elseif dataset == "DISST"
+elseif contains(dataset, "DISST")
+    source = "DISST";
     
     % Load table.
     opts = spreadsheetImportOptions(...
@@ -133,7 +135,7 @@ elseif dataset == "DISST"
         'VariableNamesRange', 'C2:I2', ...
         'RowNamesRange', 'B3:B53');
     opts = setvartype(opts, 'double');
-    TB = readtable(fullfile(DATAPATH, dataset, "database recent.xls"), opts, ...
+    TB = readtable(fullfile(DATAPATH, source, "database recent.xls"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
@@ -142,7 +144,7 @@ elseif dataset == "DISST"
         'DataRange', 'A3:Y52', ...
         'VariableNamesRange', '2:2');
     opts = setvartype(opts, 'double');
-    TD = readtable(fullfile(DATAPATH, dataset, "DIST recent.xls"), opts, ...
+    TD = readtable(fullfile(DATAPATH, source, "DIST recent.xls"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
@@ -214,12 +216,12 @@ elseif dataset == "DISST"
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
-        save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
+        save(fullfile(DATAPATH, source, filename), '-struct', 'P');
         fprintf('%s: Saved patient data.\n', P.patientCode);
         
         
         % Generate patient data structs.
-        loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
+        loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));
         if ismember(ii, patientNums)
             patientSet{pp} = loadpatient(P.patientCode);
             pp = pp + 1;
@@ -228,7 +230,9 @@ elseif dataset == "DISST"
         clear P
     end
     
-elseif dataset == "CREBRF"
+elseif contains(dataset, "CREBRF")
+    source = "CREBRF";
+    
     % Load table.
     opts = spreadsheetImportOptions(...
         'NumVariables', 43, ...
@@ -236,7 +240,7 @@ elseif dataset == "CREBRF"
         'VariableNamesRange', 'C3:AS3', ...
         'RowNamesRange', 'A4:A47');
     opts = setvartype(opts, 'double');
-    T = readtable(fullfile(DATAPATH, dataset, "CREBRFImport.xlsx"), opts, ...
+    T = readtable(fullfile(DATAPATH, source, "CREBRFImport.xlsx"), opts, ...
         'ReadRowNames', true, ...
         'ReadVariableNames', true);
     
@@ -265,7 +269,7 @@ elseif dataset == "CREBRF"
         % Time
         measTimes = [0 2 4 6 8 10 30];  % Time of measurement [min]
         nMeas = length(measTimes);
-        allTimes = [-15 -5 measTimes]';   % Add fake times.
+        allTimes = [measTimes]';   % Add fake times.
         
         P.data.simTime = [floor(min(allTimes)), ceil(max(allTimes))];
         P.data.simDuration =  @() floor(diff(P.data.simTime));
@@ -278,13 +282,13 @@ elseif dataset == "CREBRF"
         % Data
         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
         measG = T{code, repmat("G", 1, nMeas) + measTimes}'; % Plasma glucose [mmol/L]
-        P.data.G.value = measG([1 1 1:end]);
+        P.data.G.value = measG([1:end]);
         measI = T{code, repmat("I", 1, nMeas) + measTimes}';  % Plasma insulin [uU/mL == mU/L]
-        P.data.I.value = measI([1 1 1:end]);
+        P.data.I.value = measI([1:end]);
         measC = T{code, repmat("C", 1, nMeas) + measTimes}';  % C-peptide [ng/mL]
         measC = measC * 1e-9 / 1e-3;                          % ''        [g/L]
         measC = measC / C.MCPeptide / 1e-12;                  % ''        [pmol/L]
-        P.data.CPep.value = measC([1 1 1:end]);
+        P.data.CPep.value = measC([1:end]);
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
         P.data.GBolus = @(~) 0;  % No G bolus either.
@@ -316,11 +320,11 @@ elseif dataset == "CREBRF"
         
         % Save patient structs.
         filename = sprintf("patient%s.mat", P.patientCode);
-        save(fullfile(DATAPATH, dataset, filename), '-struct', 'P');
+        save(fullfile(DATAPATH, source, filename), '-struct', 'P');
         fprintf('%s: Saved patient data.\n', P.patientCode);
         
         % Generate patient data structs.
-        loadpatient = @(code) load(fullfile(DATAPATH, dataset, sprintf("patient%s.mat", code)));
+        loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));
         patientSet{ii} = loadpatient(P.patientCode);
         
         clear P

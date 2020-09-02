@@ -27,11 +27,11 @@ SAVERESULTS = true;
 % patientNums = [1 3 4];
 % source = "Detemir";
 
-patientNums = [1 8 5 7 2 3 13 9 10 24];
-source = "DISST";
+% patientNums = [1 8 5 7 2 3 13 9 10 24];
+% source = "DISST";
 
-% patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
-% source = "CREBRF";
+patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
+source = "CREBRFNoSS";
 
 patients = makedata(source, patientNums);
 
@@ -44,8 +44,6 @@ for ii = 1:length(patients)
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
     
 %     %% Determine nL/xL.
-%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-%         'refine', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
         'load');
     

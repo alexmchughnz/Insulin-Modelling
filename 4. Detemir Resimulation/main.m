@@ -27,11 +27,11 @@ SAVERESULTS = true;
 % patientNums = [1 3 4];
 % source = "Detemir";
 
-% patientNums = [1 8 5 7 2 3 13 9 10 24];
-% source = "DISST";
+patientNums = [1 8 5 7 2 3 13 9 10 24];
+source = "DISST";
 
-patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
-source = "CREBRF";
+% patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
+% source = "CREBRF";
 
 patients = makedata(source, patientNums);
 

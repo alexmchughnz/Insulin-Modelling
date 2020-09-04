@@ -3,7 +3,7 @@ if isempty(subfolder)
     subfolder = "";
 end
 
-FolderName = "C:\Users\adm181\Google Drive\Work\PhD\Insulin Modelling\4. Detemir Resimulation\Plots";   % Your destination folder
+FolderName = fullfile(pwd, "Plots");   % Your destination folder
 FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
 for iFig = 1:length(FigList)
     FigHandle = FigList(iFig);

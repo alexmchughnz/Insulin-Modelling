@@ -23,6 +23,9 @@ load config
 
 SAVERESULTS = true;
 
+%% Additional Scripts
+plotprotocols;
+
 %% Load Data
 % patientNums = [1 3 4];
 % source = "Detemir";
@@ -31,7 +34,7 @@ SAVERESULTS = true;
 % source = "DISST";
 
 patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
-source = "CREBRFNoSS";
+source = "CREBRF";
 
 patients = makedata(source, patientNums);
 

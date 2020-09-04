@@ -190,6 +190,8 @@ elseif contains(dataset, "DISST")
         % Bolus as function of time, value spread over period.
         % Active if time within period.
         P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
+        P.data.tGBolus = tGBolus;
+        P.data.vGBolus = vGBolus;
         
         % Time
         allTimes = [P.data.CPep.time; P.data.G.time; P.data.I.time];
@@ -291,7 +293,11 @@ elseif contains(dataset, "CREBRF")
         P.data.CPep.value = measC([1:end]);
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
+        P.data.tIBolus = 0;
+        P.data.vIBolus = 0;
         P.data.GBolus = @(~) 0;  % No G bolus either.
+        P.data.tGBolus = 0;
+        P.data.vGBolus = 0;
         P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
         P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
         

@@ -10,7 +10,7 @@ function P = FitInsulinSensitivity(P, allowPlots)
 global DEBUGPLOTS
 
 if ~exist('allowPlots', 'var')
-    allowPlots = false;
+    allowPlots = true;
 end
 
 %% Setup

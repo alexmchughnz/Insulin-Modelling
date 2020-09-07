@@ -1,12 +1,16 @@
 % Adapted from "PtDataRead.m".
 
-function patientSet = makedata(dataset, patientNums)
+function patientSet = makedata(dataset, patientNums, allowPlots)
 
 load config
 
 global C SC
 global DEBUGPLOTS
+if ~exist('allowPlots', 'var')
+    allowPlots = true;
+end
 
+%% Detemir
 if contains(dataset, "Detemir")
     source = "Detemir";
     patientSet = cell(size(patientNums));
@@ -267,6 +271,7 @@ elseif contains(dataset, "CREBRF")
         % Patient Info
         P.data.age = T{code, "Age"};
         P.data.BMI = T{code, "BMI"};
+        P.data.mass = T{code, "Weight"};
         
         % Time
         measTimes = [0 2 4 6 8 10 30];  % Time of measurement [min]
@@ -288,16 +293,26 @@ elseif contains(dataset, "CREBRF")
         measI = T{code, repmat("I", 1, nMeas) + measTimes}';  % Plasma insulin [uU/mL == mU/L]
         P.data.I.value = measI([1:end]);
         measC = T{code, repmat("C", 1, nMeas) + measTimes}';  % C-peptide [ng/mL]
-        measC = measC * 1e-9 / 1e-3;                          % ''        [g/L]
-        measC = measC / C.MCPeptide / 1e-12;                  % ''        [pmol/L]
+        measC = measC * 1e+3 / 1e-3;                          % ''        [pg/L]
+        measC = measC / C.MCPeptide;                          % ''        [pmol/L]
         P.data.CPep.value = measC([1:end]);
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
         P.data.tIBolus = 0;
         P.data.vIBolus = 0;
-        P.data.GBolus = @(~) 0;  % No G bolus either.
-        P.data.tGBolus = 0;
-        P.data.vGBolus = 0;
+        
+        
+        vGBolus = min(0.3*P.data.mass, 30);     % Glucose bolus [g]
+        vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
+        tGBolus = 0;                            % Time of bolus delivery [min]
+        TGBolus = 1;                            % Period of bolus action [min]
+        % Bolus as function of time, value spread over period.
+        % Active if time within period.
+        P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
+        P.data.tGBolus = tGBolus;
+        P.data.vGBolus = vGBolus;
+        
+        
         P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
         P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
         
@@ -340,27 +355,37 @@ end
 %% --------------------------------------------------
 
 %% Debug Plots
-DP = DEBUGPLOTS.makedata;
-if DP.GlucoseInput
-    loadpatient = @(n) load(fullfile(DATAPATH, sprintf("patient%d.mat", n)));
-    patientSet = {loadpatient(1), loadpatient(3), loadpatient(4)};
-    for ii = 1:length(patientSet)
-        P = patientSet{ii};
-        MakeDebugPlot(P, DP);
-        
-        for tt = 1:P.data.simDuration()
-            G(tt) = GetGlucoseDelivery(tt, P);
+if allowPlots
+    DP = DEBUGPLOTS.makedata;
+    if DP.GlucoseInput
+        for ii = 1:length(patientSet)
+            P = patientSet{ii};
+            MakeDebugPlot(P, DP);
+            
+            
+            GI = zeros(size(P.results.tArray));
+            GB = zeros(size(P.results.tArray));
+            for tt = 1:length(P.results.tArray)
+                time = P.results.tArray(tt);
+                GI(tt) = GetGlucoseDelivery(time, P);
+                GB(tt) = P.data.GBolus(time);
+            end
+            
+            subplot(3,1,1)
+            plot(P.results.tArray, GI)
+            title(sprintf("P%s: G Input", P.patientCode))
+            ylabel("[mmol/min]")
+            
+            subplot(3,1,2)
+            plot(P.results.tArray, GB)
+            title(sprintf("P%s: G Bolus", P.patientCode))
+            ylabel("[mmol/min]")
+            
+            subplot(3,1,3)
+            plot(P.results.tArray, P.data.GInfusion)
+            title(sprintf("P%s: G Infusion", P.patientCode))
+            ylabel("[mmol/min]")
         end
-        
-        subplot(2,1,1)
-        plot(P.results.tArray, G)
-        title(sprintf("P%d: G Input", P.patientNum))
-        ylabel("[mmol/min]")
-        
-        subplot(2,1,2)
-        plot(P.results.tArray, P.data.GInfusion)
-        title(sprintf("P%d: G Infusion", P.patientNum))
-        ylabel("[mmol/min]")
     end
 end
 

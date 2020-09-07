@@ -21,7 +21,7 @@ makeparameters
 
 load config
 
-SAVERESULTS = true;
+SAVERESULTS = false;
 
 %% Additional Scripts
 plotprotocols;
@@ -34,6 +34,7 @@ plotprotocols;
 % source = "DISST";
 
 patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
+patientNums = 33;
 source = "CREBRF";
 
 patients = makedata(source, patientNums);

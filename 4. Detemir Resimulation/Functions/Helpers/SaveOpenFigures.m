@@ -11,8 +11,11 @@ for iFig = 1:length(FigList)
     %   set(gcf, 'Position', [0 0 800 600])
     
     AxisHandle = FigHandle.Children(end);
+    
     FigName   = get(AxisHandle.Title, 'String');
-    FigName = matlab.lang.makeValidName(FigName);
+    FigName = matlab.lang.makeValidName(FigName);    
+    
+    title('')
     
     figDir = fullfile(FolderName, 'fig', subfolder);
     if ~isfolder(figDir)

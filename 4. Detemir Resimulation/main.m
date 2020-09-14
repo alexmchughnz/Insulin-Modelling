@@ -21,7 +21,7 @@ makeparameters
 
 load config
 
-SAVERESULTS = false;
+SAVERESULTS = true;
 
 %% Additional Scripts
 plotprotocols;
@@ -30,11 +30,10 @@ plotprotocols;
 % patientNums = [1 3 4];
 % source = "Detemir";
 
-% patientNums = [1 8 5 7 2 3 13 9 10 24];
+% patientNums = [14 8 5 7 2 3 13 9 10 24];
 % source = "DISST";
 
-patientNums = [33 79 115 160 169 186 194 196 216 251];  % My chosen 10
-patientNums = 33;
+patientNums = [12 128 146 160 166 169 171 196 198 216];  % My chosen 10
 source = "CREBRF";
 
 patients = makedata(source, patientNums);
@@ -49,11 +48,11 @@ for ii = 1:length(patients)
     
 %     %% Determine nL/xL.
     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load');
+        'load', 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
     
 %     Include this parameter to force fit a specific nL xL value.
-    forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
-    patients{ii} = FitHepaticClearance(patients{ii}, forcenLxL);  % (nL, xL) by MLR
+%     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
+%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 
@@ -85,7 +84,7 @@ end
 
 if (SAVERESULTS)
     SaveOpenFigures(source);
-    writetable(T, fullfile(RESULTPATH, source+"table.txt"));
+    writetable(T, fullfile(RESULTPATH, source+"table.csv"));
 end
 
 PanelDebugPlots(1);

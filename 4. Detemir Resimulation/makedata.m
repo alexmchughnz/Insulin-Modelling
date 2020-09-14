@@ -208,16 +208,16 @@ elseif contains(dataset, "DISST")
         P.data.GFast = @(~) P.data.G.value(1);
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
         
-        if ismember(ii, patientNums)
-            stddev = 5/100;
-            nTrials = 1000;
-            try
-                load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
-                    'stddevError')
-                P.data.stddevMSE = stddevError;
-            catch
-                fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
-            end
+        %Other Fields
+        stddev = 5/100;
+        nTrials = 1000;
+        try
+            load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
+                'stddevError')
+            P.data.stddevMSE = stddevError;
+        catch
+            fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
+            P.data.stddevMSE = 0;
         end
         
         % Save patient structs.
@@ -272,6 +272,7 @@ elseif contains(dataset, "CREBRF")
         P.data.age = T{code, "Age"};
         P.data.BMI = T{code, "BMI"};
         P.data.mass = T{code, "Weight"};
+        P.data.BSA = T{code, "BSA"};
         
         % Time
         measTimes = [0 2 4 6 8 10 30];  % Time of measurement [min]
@@ -288,7 +289,7 @@ elseif contains(dataset, "CREBRF")
         
         % Data
         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
-        measG = T{code, repmat("G", 1, nMeas) + measTimes}'; % Plasma glucose [mmol/L]
+        measG = T{code, repmat("G", 1, nMeas) + measTimes}';  % Plasma glucose [mmol/L]
         P.data.G.value = measG([1:end]);
         measI = T{code, repmat("I", 1, nMeas) + measTimes}';  % Plasma insulin [uU/mL == mU/L]
         P.data.I.value = measI([1:end]);
@@ -337,6 +338,7 @@ elseif contains(dataset, "CREBRF")
             P.data.stddevMSE = stddevError;
         catch
             fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
+            P.data.stddevMSE = 0;
         end
         
         % Save patient structs.

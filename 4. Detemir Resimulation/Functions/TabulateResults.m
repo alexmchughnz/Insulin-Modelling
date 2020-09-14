@@ -4,33 +4,35 @@ function T = TabulateResults(T, P)
 %   T      - existing table of results
 %   P      - patient struct
 
+
 code = P.patientCode;
+T{code, "code"} = string(code);
 
-T{code, "nL"} = P.results.nL(1);
-T{code, "xL"} = P.results.xL(1);
-if isfield(P.results, "delta2Norm")
-    T{code, "delta2Norm"} = P.results.delta2Norm;
+T = AddField(T, code, P.results, "nL", @(x) x(1));
+T = AddField(T, code, P.results, "xL", @(x) x(1));
+
+T = AddField(T, code, P.results, "delta2Norm");
+T = AddField(T, code, P.results, "delta2NormnL");
+T = AddField(T, code, P.results, "delta2NormxL");
+
+T = AddField(T, code, P.data, "stddevMSE");
+T = AddField(T, code, P.results, "minGridMSE");
+T = AddField(T, code, P.results, "minimalErrorRegionSize");
+
+T = AddField(T, code, P.results, "optimalnLRange", @diff);
+T = AddField(T, code, P.results, "optimalxLRange", @diff);
+
 end
-if isfield(P.results, "delta2NormnL")
-    T{code, "delta2NormnL"} = P.results.delta2NormnL;
-end
-if isfield(P.results, "delta2NormxL")
-    T{code, "delta2NormxL"} = P.results.delta2NormxL;
-end
-if isfield(P.data, "stddevMSE")
-    T{code, "stddevMSE"} = P.data.stddevMSE;
-    if isfield(P.results, "minGridMSE")
-        T{code, "minGridMSE"} = P.results.minGridMSE;
-        T{code, "SD min error %"} = 100 * P.data.stddevMSE / P.results.minGridMSE;
+
+
+
+function T = AddField(T, code, structP, fieldName, func)
+    if ~exist('func', 'var')
+        func = @(x) x;
     end
-end
-if isfield(P.results, "minimalErrorRegionSize")    
-    T{code, "MERSize"} = P.results.minimalErrorRegionSize;
-end
-if isfield(P.results, "optimalnLRange")    
-    T{code, "optnLRange"} = diff(P.results.optimalnLRange);
-    T{code, "optxLRange"} = diff(P.results.optimalxLRange);
-end
 
+    if isfield(structP, fieldName)    
+        T{code, fieldName} = func(structP.(fieldName));
+    end
 end
 

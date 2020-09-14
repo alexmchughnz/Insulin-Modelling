@@ -173,7 +173,8 @@ if DP.ErrorSurface
         'Color', 'r', ...
         'HandleVisibility', 'off');
     
-    title(sprintf("%s: Error Surface", P.patientCode))
+    delta = nLRange(2) - nLRange(1);
+    title(sprintf("%s: Error Surface @ %.3f", P.patientCode, delta))
     
     xlabel("$x_L$ [1/min]")
     ylabel("$n_L$ [-]")

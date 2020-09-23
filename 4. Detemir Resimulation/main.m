@@ -23,18 +23,15 @@ load config
 
 SAVERESULTS = true;
 
-%% Additional Scripts
-plotprotocols;
-
 %% Load Data
 % patientNums = [1 3 4];
 % source = "Detemir";
 
-patientNums = [14 8 5 7 2 3 13 9 10 24];
-source = "DISST";
+% patientNums = [14 8 5 7 2 3 13 9 10 24];
+% source = "DISST";
 
-% patientNums = [12 128 146 160 166 169 171 196 198 216];  % My chosen 10
-% source = "CREBRF";
+patientNums = [12 128 146 160 166 169 171 196 198 216];  % My chosen 10
+source = "CREBRF";
 
 patients = makedata(source, patientNums);
 

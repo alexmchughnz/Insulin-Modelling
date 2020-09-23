@@ -22,6 +22,12 @@ T = AddField(T, code, P.results, "minimalErrorRegionSize");
 T = AddField(T, code, P.results, "optimalnLRange", @diff);
 T = AddField(T, code, P.results, "optimalxLRange", @diff);
 
+T = AddField(T, code, P.data, "age");
+T = AddField(T, code, P.data, "BMI");
+T = AddField(T, code, P.data, "mass");
+T = AddField(T, code, P.data, "height");
+T = AddField(T, code, P.data, "BSA");
+
 end
 
 

@@ -134,9 +134,9 @@ elseif contains(dataset, "DISST")
     
     % Load table.
     opts = spreadsheetImportOptions(...
-        'NumVariables', 7, ...
-        'DataRange', 'C3:I53', ...
-        'VariableNamesRange', 'C2:I2', ...
+        'NumVariables', 9, ...
+        'DataRange', 'C3:K53', ...
+        'VariableNamesRange', 'C2:K2', ...
         'RowNamesRange', 'B3:B53');
     opts = setvartype(opts, 'double');
     TB = readtable(fullfile(DATAPATH, source, "database recent.xls"), opts, ...
@@ -163,6 +163,8 @@ elseif contains(dataset, "DISST")
         % Patient Info
         P.data.age = TB{code, "age_years_"};
         P.data.BMI = TB{code, "bmi"};
+        P.data.mass = TB{code, "weight_kg_"};
+        P.data.height = TB{code, "height_cm_"};
         
         % Data
         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
@@ -273,6 +275,7 @@ elseif contains(dataset, "CREBRF")
         P.data.BMI = T{code, "BMI"};
         P.data.mass = T{code, "Weight"};
         P.data.BSA = T{code, "BSA"};
+        P.data.height = T{code, "Height_cm_"};
         
         % Time
         measTimes = [0 2 4 6 8 10 30];  % Time of measurement [min]

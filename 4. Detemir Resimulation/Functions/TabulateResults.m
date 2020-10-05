@@ -20,7 +20,11 @@ T = AddField(T, code, P.results, "minGridMSE");
 T = AddField(T, code, P.results, "minimalErrorRegionSize");
 
 T = AddField(T, code, P.results, "optimalnLRange", @diff);
+T = AddField(T, code, P.results, "optimalnLRange", @(x) x(1), "nLRangeLower");
+T = AddField(T, code, P.results, "optimalnLRange", @(x) x(end), "nLRangeUpper");
 T = AddField(T, code, P.results, "optimalxLRange", @diff);
+T = AddField(T, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
+T = AddField(T, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
 
 T = AddField(T, code, P.data, "age");
 T = AddField(T, code, P.data, "BMI");
@@ -32,13 +36,17 @@ end
 
 
 
-function T = AddField(T, code, structP, fieldName, func)
+function T = AddField(T, code, PStruct, fieldName, func, newName)
     if ~exist('func', 'var')
         func = @(x) x;
     end
 
-    if isfield(structP, fieldName)    
-        T{code, fieldName} = func(structP.(fieldName));
+    if isfield(PStruct, fieldName)
+        if exist('newName', 'var')
+            T{code, newName} = func(PStruct.(fieldName));
+        else
+            T{code, fieldName} = func(PStruct.(fieldName));
+        end
     end
 end
 

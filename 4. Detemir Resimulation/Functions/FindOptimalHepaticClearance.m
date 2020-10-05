@@ -182,8 +182,8 @@ if DP.ErrorSurface
     xlim([0.1 0.9])
     ylim([0 0.7])
     
-    xlabel("$x_L$ [1/min]")
-    ylabel("$n_L$ [-]")
+    xlabel("$x_L$ [min$^{-1}$]")
+    ylabel("$n_L$")
     zlabel("Mean of squared errors [(mU/min)^2]") 
     
     % Redraw grid lines.
@@ -209,8 +209,7 @@ if DP.ErrorSurface
     patch(x, y, z, 'r',...
           'FaceColor', '#D95319', ...
           'FaceAlpha', 0.2, ...
-          'EdgeColor', 'none')
-    
+          'EdgeColor', 'none')    
 end
 
 end

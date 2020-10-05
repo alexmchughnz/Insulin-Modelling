@@ -152,13 +152,14 @@ if DP.ErrorSurface
     isWithin1SD = (deltaMSE <= stddevMSE);
     isWithin3SD = (deltaMSE <= 3*stddevMSE);
     
-    CO(:,:,1) = (isWithin3SD & ~isWithin1SD) * 0.5; %  red
-    CO(:,:,2) = (isWithin3SD) * 0.5; % green
-    CO(:,:,3) = ~(isWithin3SD) .* (gridMax-IResiduals)/gridMax; % blue
+    CO(:,:,1) = ~isWithin1SD * 1; %  red
+    CO(:,:,2) = ones(size(deltaMSE)) * 1; % green
+    CO(:,:,3) = ~isWithin3SD * 1; % blue
     
     % Plot surface.
     surf(xLRange, nLRange, IResiduals, CO,...
         'HandleVisibility', 'off', ...
+        'EdgeColor', 'none', ...
         'FaceColor', 'interp');
     
     % > Contour
@@ -173,12 +174,43 @@ if DP.ErrorSurface
         'Color', 'r', ...
         'HandleVisibility', 'off');
     
+    
+    % > Prettying
     delta = nLRange(2) - nLRange(1);
     title(sprintf("%s: Error Surface @ %.3f", P.patientCode, delta))
     
+    xlim([0.1 0.9])
+    ylim([0 0.7])
+    
     xlabel("$x_L$ [1/min]")
     ylabel("$n_L$ [-]")
-    zlabel("Mean of squared errors [(mU/min)^2]")
+    zlabel("Mean of squared errors [(mU/min)^2]") 
+    
+    % Redraw grid lines.
+    hold on
+    spacing = 0.05;
+    for ii = 1 : round(spacing/delta) : length(nLRange)
+        plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), IResiduals(ii,:));
+        plt.Color = [0 0 0 0.1];
+        plt.LineWidth = 0.2;
+    end
+    for ii = 1 : round(spacing/delta) : length(xLRange)
+        plt = plot3(ones(size(nLRange)) * xLRange(ii), nLRange, IResiduals(:,ii));
+        plt.Color = [0 0 0 0.1];
+        plt.LineWidth = 0.2;
+    end
+    
+    % Add physiological region.
+    xLPhys = [0.5 0.9];
+    nLPhys = [0.1 0.3];
+    x = xLPhys([1 1 end end]);
+    y = nLPhys([1 end end 1]);
+    z = 1e+6 * ones(1, 4);
+    patch(x, y, z, 'r',...
+          'FaceColor', '#D95319', ...
+          'FaceAlpha', 0.2, ...
+          'EdgeColor', 'none')
+    
 end
 
 end

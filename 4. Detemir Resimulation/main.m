@@ -46,8 +46,8 @@ for ii = 1:length(patients)
     patients{ii} = AdjustInsulinSecretion(patients{ii}, 'alternate');
     
     %% Determine nL/xL.
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load');%, 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
+%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+%         'load');%, 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
     
 %     Include this parameter to force fit a specific nL xL value.
 %     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];

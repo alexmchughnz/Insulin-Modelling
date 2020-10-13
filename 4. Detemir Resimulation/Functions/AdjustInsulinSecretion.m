@@ -58,11 +58,13 @@ for ii = 2 : length(Uen)
     end    
 end
 
-
 AUC = cumtrapz(Uen);
 newAUC = cumtrapz(newUen);
 AUCTotal = AUC(end);
 newAUCTotal = newAUC(end);
+
+%% Save Result
+P.results.Uen = newUen;
 
     
 %% Debug Plots

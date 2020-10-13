@@ -29,33 +29,40 @@ end
 
 
 for ii = 2 : length(Uen)    
-    AUC = trapz(tArray(1:ii), Uen(1:ii));
-    newAUC = trapz(tArray(1:ii), newUen(1:ii));
+    AUCCum = trapz(tArray(1:ii), Uen(1:ii));
+    newAUCCum = trapz(tArray(1:ii), newUen(1:ii));
     
-    while relError(AUC, newAUC) > 1/100
+    while relError(AUCCum, newAUCCum) > 1/100
         % Pick target to move towards.
-        if newAUC > AUC                 % Need to reduce area!
-            if newUen(ii) > Uen(ii)
-                target = Uen(ii);
-            else
-                target = (1-variation)*Uen(ii);
-            end
-        else                            % Need to increase area!            
-            if newUen(ii) > Uen(ii)
-                target = (1+variation)*Uen(ii);
-            else
-                target = Uen(ii);
-            end
+        if newAUCCum > AUCCum                 % Need to reduce area!
+            sgn = -1;
+        else                                  % Need to increase area!
+            sgn = +1;
         end
         
         % Move towards target.
-        newUen(ii) = mean([newUen(ii) target]);
+        jump = sgn * abs(newAUCCum - AUCCum);
+        newUen(ii) = newUen(ii) + jump;        
+        
+        if newUen(ii) > (1+variation)*Uen(ii)
+            newUen(ii) = (1+variation)*Uen(ii);
+            break
+        elseif newUen(ii) < (1-variation)*Uen(ii)
+            newUen(ii) = (1-variation)*Uen(ii);
+            break
+        end
         
         % Recalculate AUCs.
-        AUC = trapz(tArray(1:ii), Uen(1:ii));
-        newAUC = trapz(tArray(1:ii), newUen(1:ii));   
+        AUCCum = trapz(tArray(1:ii), Uen(1:ii));
+        newAUCCum = trapz(tArray(1:ii), newUen(1:ii));   
     end    
 end
+
+
+AUC = cumtrapz(Uen);
+newAUC = cumtrapz(newUen);
+AUCTotal = AUC(end);
+newAUCTotal = newAUC(end);
 
     
 %% Debug Plots

@@ -21,7 +21,7 @@ makeparameters
 
 load config
 
-SAVERESULTS = true;
+SAVERESULTS = false;
 
 %% Load Data
 % patientNums = [1 3 4];
@@ -51,7 +51,7 @@ for ii = 1:length(patients)
     
 %     Include this parameter to force fit a specific nL xL value.
 %     forcenLxL = [patients{ii}.results.nL(1) patients{ii}.results.xL(1)];
-%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
+    patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 

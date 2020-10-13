@@ -164,8 +164,10 @@ if DP.ErrorSurface
     
     % > Contour
     % Define contour.
-    numLevels = 15;
-    levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels); % non-linear spacing
+    numLevels = 10;
+    minError = min(IResiduals(:));
+%     levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels); % non-linear spacing
+    levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
     %             levels = linspace(min(IResiduals(:)), max(IResiduals(:)), numLevels); % linear spacing
     
     % Plot contour.

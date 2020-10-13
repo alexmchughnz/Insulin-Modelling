@@ -1,4 +1,7 @@
-patientNums = [2 3 5 7 8 9 13 14 24 25];
+clear
+close all
+
+patientNums = [3 5 7 8 9 13 14 16 24 25];
 source = "DISST";
 DISSTPatients = GetData(source, patientNums);
 
@@ -34,6 +37,7 @@ end
 labels = [repmat("B", 1, 10) + (10:-1:1), "", repmat("A", 1, 10) + (10:-1:1)];
 
 subplot(1,2,1)
+title("First-pass hepatic insulin clearance")
 xlabel("$x_L$ [min$^{-1}$]")
 yticks(1:21)
 yticklabels(labels)
@@ -50,6 +54,7 @@ patch(x, y, 'r', ...
     'EdgeColor', 'none')
 
 subplot(1,2,2)
+title("Hepatic insulin clearance")
 xlabel("$n_L$")
 yticks(1:21)
 yticklabels(labels)
@@ -82,5 +87,7 @@ yneg = 0;
 ypos = 0;
 xneg = abs(x - xrange(1));
 xpos = abs(x - xrange(2));
-errorbar(x,y,yneg,ypos,xneg,xpos, 'k')
+errorbar(x,y,yneg,ypos,xneg,xpos,...
+    'Color', [0 1 0],...
+    'LineWidth', 1)
 end

@@ -22,7 +22,7 @@ if DP.Glucose
     hold on
     
     [tG, vG] = GetSimTime(P, P.data.G);
-    plt = plot(tG, vG, 'r.');
+    plt = plot(tG, vG, 'r*');
     plt.DisplayName = 'Blood Test';
     
     ppG = griddedInterpolant(tG, vG);
@@ -66,7 +66,7 @@ if DP.Insulin
     plt = plot(tArray, I, 'k');
     plt.DisplayName = 'Model Prediction';
     
-    plt = plot(tI, vI, 'r.');
+    plt = plot(tI, vI, 'r*');
     plt.DisplayName = 'Blood Test';
     
     % ppI = griddedInterpolant(tI, vI);

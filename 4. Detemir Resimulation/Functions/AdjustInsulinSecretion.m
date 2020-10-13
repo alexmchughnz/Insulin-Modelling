@@ -11,6 +11,8 @@ function P = AdjustInsulinSecretion(P, method)
 global DEBUGPLOTS
 
 %% Setup
+relError = @(a, b) abs(a-b)/a;
+
 variation = 15/100;
 
 tArray = P.results.tArray;  
@@ -24,11 +26,37 @@ if method == "alternate"
     
     newUen = P.results.Uen .* factors;    
 end
-    
 
-AUC = cumtrapz(tArray, Uen);
-newAUC = cumtrapz(tArray, newUen);
+
+for ii = 2 : length(Uen)    
+    AUC = trapz(tArray(1:ii), Uen(1:ii));
+    newAUC = trapz(tArray(1:ii), newUen(1:ii));
     
+    while relError(AUC, newAUC) > 1/100
+        % Pick target to move towards.
+        if newAUC > AUC                 % Need to reduce area!
+            if newUen(ii) > Uen(ii)
+                target = Uen(ii);
+            else
+                target = (1-variation)*Uen(ii);
+            end
+        else                            % Need to increase area!            
+            if newUen(ii) > Uen(ii)
+                target = (1+variation)*Uen(ii);
+            else
+                target = Uen(ii);
+            end
+        end
+        
+        % Move towards target.
+        newUen(ii) = mean([newUen(ii) target]);
+        
+        % Recalculate AUCs.
+        AUC = trapz(tArray(1:ii), Uen(1:ii));
+        newAUC = trapz(tArray(1:ii), newUen(1:ii));   
+    end    
+end
+
     
 %% Debug Plots
 DP = DEBUGPLOTS.AdjustInsulinSecretion;
@@ -39,16 +67,16 @@ if DP.Uen
    plt = area(tArray, Uen, ...
        'EdgeColor', 'b', ...
        'FaceAlpha', 0.2);
-   plt.DisplayName = sprintf("Measured $U_{en}$ (AUC = %.3g)", AUC(end));
+   plt.DisplayName = sprintf("Measured $U_{en}$ (AUC = %.3g)", AUCTotal);
    
    plt = area(tArray, newUen, ...
        'EdgeColor', 'r', ...
        'FaceAlpha', 0.2);
-   plt.DisplayName = sprintf("Adjusted $U_{en}$ (AUC = %.3g)", newAUC(end));
+   plt.DisplayName = sprintf("Adjusted $U_{en}$ (AUC = %.3g)", newAUCTotal);
    
-   plt = plot(tArray, Uen*(1+variation), 'k--', 'LineWidth', 1);
+   plt = plot(tArray, (1+variation)*Uen, 'k--', 'LineWidth', 1);
    plt.HandleVisibility = 'off';   
-   plt = plot(tArray, Uen*(1-variation), 'k--', 'LineWidth', 1);
+   plt = plot(tArray, (1-variation)*Uen, 'k--', 'LineWidth', 1);
    plt.HandleVisibility = 'off';
    
    title(sprintf("%s: Adjusted Uen", P.patientCode))   
@@ -63,10 +91,10 @@ if DP.AUC
    
    
    plt = plot(tArray, AUC, 'b');
-   plt.DisplayName = sprintf("Measured $U_{en}$ (AUC = %.3g)", AUC(end));
+   plt.DisplayName = sprintf("Measured $U_{en}$ (AUC = %.3g)", AUCTotal);
    
    plt = plot(tArray, newAUC, 'r');
-   plt.DisplayName = sprintf("Adjusted $U_{en}$ (AUC = %.3g)", newAUC(end));
+   plt.DisplayName = sprintf("Adjusted $U_{en}$ (AUC = %.3g)", newAUCTotal);
    
    
    title(sprintf("%s: Uen AUC", P.patientCode))   

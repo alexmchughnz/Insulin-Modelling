@@ -1,4 +1,4 @@
-function P = AdjustInsulinSecretion(P, method)
+function P = AdjustInsulinSecretion(P, method, time)
 % Adjusts pancreatic insulin secretion rate (Uen) within reasonable range
 % to provide a more dynamic profile.
 % Ranges based on Ormsbee et al. (2020).
@@ -21,13 +21,28 @@ Uen = P.results.Uen;
 
 %% Generate New Uen Profile    
 if method == "alternate"
-    factors = repmat([1-variation; 1+variation], ceil(length(Uen)/2), 1);
-    factors = factors(1:length(Uen));
-    
-    newUen = P.results.Uen .* factors;    
+    factors = 1 + variation*repmat([-1; +1], ceil(length(Uen)/2), 1);
+elseif method == "sawtooth"
+    factors = 1 + variation*repmat([-1; 0; +1], ceil(length(Uen)/2), 1);
+elseif method == "square"
+    factors = 1 + variation*repmat([-1; -1; +1; +1], ceil(length(Uen)/2), 1);
+elseif method == "slowalternate"
+    factors = 1 + variation*repmat([-1; -0.5; 0; +0.5; +1; +0.5; 0; -0.5], ceil(length(Uen)/2), 1);
+else
+    iiAdjust = GetTimeIndex(time, P.results.tArray);    
+    if method == "onetooth"
+        factors = ones(size(Uen));
+        
+        factors(iiAdjust) = 1 + variation;
+        factors(iiAdjust+1) = 1 - variation;
+    end
 end
 
+factors = factors(1:length(Uen));
+newUen = P.results.Uen .* factors;    
 
+
+%% Adjust points to conserve AUC.
 for ii = 2 : length(Uen)    
     AUCCum = trapz(tArray(1:ii), Uen(1:ii));
     newAUCCum = trapz(tArray(1:ii), newUen(1:ii));

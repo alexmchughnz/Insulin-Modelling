@@ -60,14 +60,14 @@ if DP.Insulin
         I = P.results.I;  % [mU/L]
         
         plttitle = patientLabel + "Plasma Insulin";
-        pltylabel = 'Plasma Insulin, I [mU/L]';
+        pltylabel = 'Plasma Insulin, I [mU/l]';
     end
     
     plt = plot(tArray, I, 'k');
     plt.DisplayName = 'Model Prediction';
     
     plt = plot(tI, vI, 'r*');
-    plt.DisplayName = 'Blood Test';
+    plt.DisplayName = 'Plasma Sample';
     
     % ppI = griddedInterpolant(tI, vI);
     % plt = plot(pltxarray, ppI(tArray), 'b');
@@ -78,8 +78,6 @@ if DP.Insulin
     xlabel('Time [min]')
     ylabel(pltylabel)
     legend()
-    
-    ylim([0 Inf])
 end
 
 

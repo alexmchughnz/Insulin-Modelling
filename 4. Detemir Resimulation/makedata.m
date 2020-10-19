@@ -265,7 +265,9 @@ elseif contains(dataset, "CREBRF")
         num = patientNums(ii);
         
         if num == 999
-            P.patientCode = "K999ZZ";
+            P.patientCode = "K999ZZ";            
+            loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));
+            P = loadpatient(P.patientCode);
         else
             pp = find(nums == num);
             code = codes{pp};
@@ -336,24 +338,25 @@ elseif contains(dataset, "CREBRF")
             P.data.I.time = P.data.I.time(~INaN);
             P.data.CPep.time = P.data.CPep.time(~CNaN);
             
-            %Other Fields
-            stddev = 5/100;
-            nTrials = 1000;
-            try
-                load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
-                    'stddevError')
-                P.data.stddevMSE = stddevError;
-            catch
-                fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
-                P.data.stddevMSE = 0;
-            end
-            
-            % Save patient structs.
-            filename = sprintf("patient%s.mat", P.patientCode);
-            save(fullfile(DATAPATH, source, filename), '-struct', 'P');
-            fprintf('%s: Saved patient data.\n', P.patientCode);
             
         end
+        
+        %Other Fields
+        stddev = 5/100;
+        nTrials = 1000;
+        try
+            load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
+                'stddevError')
+            P.data.stddevMSE = stddevError;
+        catch
+            fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
+            P.data.stddevMSE = 0;
+        end
+        
+        % Save patient structs.
+        filename = sprintf("patient%s.mat", P.patientCode);
+        save(fullfile(DATAPATH, source, filename), '-struct', 'P');
+        fprintf('%s: Saved patient data.\n', P.patientCode);
         
         % Generate patient data structs.
         loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));

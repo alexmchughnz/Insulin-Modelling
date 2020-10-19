@@ -277,13 +277,12 @@ while any(relativeChange >= tolerance)
     
     % Assembling MLR system, evaluating only at sample points:
     % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    sampleTimes = P.data.I.time;
-    ppCN = griddedInterpolant(tArray, CN);
-    ppCX = griddedInterpolant(tArray, CX);
-    ppC  = griddedInterpolant(tArray, C);
+    firstIndices = 1 : length(tArray)-1;
+    secondIndices = 2 : length(tArray);    
     
-    A = [ppCN(sampleTimes) ppCX(sampleTimes)];
-    b = ppC(sampleTimes);
+    A(:, 1) = CN(secondIndices) - CN(firstIndices);
+    A(:, 2) = CX(secondIndices) - CX(firstIndices);
+    b = C(secondIndices) - C(firstIndices);
     
     % Solve.
     x = A\b;
@@ -295,7 +294,7 @@ while any(relativeChange >= tolerance)
     relativeChange = [nLChange xLChange];
     
     nLArray = [nLArray nL];
-    xLArray = [xLArray xL];
+    xLArray = [xLArray xL];    
     
     % Forward simulate to improve I and Q prediction.
     for ii = 1:100

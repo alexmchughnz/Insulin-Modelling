@@ -277,15 +277,15 @@ while any(relativeChange >= tolerance)
     
     % Assembling MLR system, evaluating only at sample points:
     % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    firstIndices = [1 3 5 7 9 11];
-    secondIndices = [3 5 7 9 11 31];    
+    firstIndices = 1 : length(tArray)-1;
+    secondIndices = 2 : length(tArray);    
     
     A(:, 1) = CN(secondIndices) - CN(firstIndices);
     A(:, 2) = CX(secondIndices) - CX(firstIndices);
     b = C(secondIndices) - C(firstIndices);
     
-    weightedIndices = [1];
-    weight = 1;
+    weightedIndices = [6:10 30];
+    weight = 10;
     
     A(weightedIndices, :) = weight * A(weightedIndices, :);
     b(weightedIndices) = weight * b(weightedIndices);

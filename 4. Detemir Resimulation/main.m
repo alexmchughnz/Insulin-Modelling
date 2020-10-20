@@ -31,7 +31,7 @@ SAVERESULTS = false;
 % source = "DISST";
 
 % patientNums = [12 128 146 160 166 169 171 196 198 216];  % My chosen 10
-patientNums = 999;
+patientNums = 128;
 source = "CREBRF";
 
 patients = makedata(source, patientNums);

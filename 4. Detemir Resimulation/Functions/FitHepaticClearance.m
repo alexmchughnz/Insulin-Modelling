@@ -284,6 +284,12 @@ while any(relativeChange >= tolerance)
     A(:, 2) = CX(secondIndices) - CX(firstIndices);
     b = C(secondIndices) - C(firstIndices);
     
+    weightedIndices = [6:10 30];
+    weight = 10;
+    
+    A(weightedIndices, :) = weight * A(weightedIndices, :);
+    b(weightedIndices) = weight * b(weightedIndices);
+    
     % Solve.
     x = A\b;
     nL = x(1);

@@ -46,12 +46,12 @@ for ii = 1:length(patients)
 %     patients{ii} = AdjustInsulinSecretion(patients{ii}, 'onetooth', 20);
     
     %% Determine nL/xL.
-    patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
-        'load');%, 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
+%     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 
+%         'load');%, 'grid nL[-0.1 0.775]@0.025 xL[0.075 0.95]@0.025');
 %     
 %     Include this parameter to force fit a specific nL xL value.
 %     forcenLxL = [0.26 0.57];
-%     patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
+    patients{ii} = FitHepaticClearance(patients{ii});  % (nL, xL) by MLR
 
     %% Analyse data variance.
 %     stddev = 5/100; 

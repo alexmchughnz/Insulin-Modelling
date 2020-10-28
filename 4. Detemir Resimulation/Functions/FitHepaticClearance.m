@@ -275,15 +275,20 @@ while any(relativeChange >= tolerance)
         - cumtrapz(tArray, k)]; % For analysing each term later.
     C = sum(CParts, 2); % Sum along rows to get column vector.
     
-    % Assembling MLR system, evaluating only at sample points:
+    % Assembling MLR system, integrating between sample points, and
+    % normalising by integral width (dt):
     % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    sampleTimes = P.data.I.time;
+    t1 = P.data.I.time(1:end-1);
+    t2 = P.data.I.time(2:end);
+    dt = t2 - t1;
+    
     ppCN = griddedInterpolant(tArray, CN);
     ppCX = griddedInterpolant(tArray, CX);
     ppC  = griddedInterpolant(tArray, C);
     
-    A = [ppCN(sampleTimes) ppCX(sampleTimes)];
-    b = ppC(sampleTimes);
+    A(:,1) = (ppCN(t2) - ppCN(t1)) ./ dt;
+    A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
+    b = (ppC(t2) - ppC(t1)) ./ dt;
     
     % Solve.
     x = A\b;

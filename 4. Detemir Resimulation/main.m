@@ -43,6 +43,7 @@ for ii = 1:length(patients)
     
     %% Determine Uen.
     patients{ii} = EstimateInsulinSecretion(patients{ii});  % (Uen)
+%     patients{ii} = AdjustInsulinSecretion(patients{ii}, 'onetooth', 20);
     
 %     %% Determine nL/xL.
 %     patients{ii} = FindOptimalHepaticClearance(patients{ii}, ... 

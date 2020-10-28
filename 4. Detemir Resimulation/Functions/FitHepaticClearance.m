@@ -300,7 +300,7 @@ while any(relativeChange >= tolerance)
     relativeChange = [nLChange xLChange];
     
     nLArray = [nLArray nL];
-    xLArray = [xLArray xL];
+    xLArray = [xLArray xL];    
     
     % Forward simulate to improve I and Q prediction.
     for ii = 1:100

@@ -15,6 +15,7 @@ T = AddField(T, code, P.results, "delta2Norm");
 T = AddField(T, code, P.results, "delta2NormnL");
 T = AddField(T, code, P.results, "delta2NormxL");
 
+T = AddField(T, code, P.results, "insulinMAPE");
 T = AddField(T, code, P.data, "stddevMSE");
 T = AddField(T, code, P.results, "minGridMSE");
 T = AddField(T, code, P.results, "minimalErrorRegionSize");

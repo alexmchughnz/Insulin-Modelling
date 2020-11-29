@@ -22,16 +22,16 @@ if DP.Glucose
     hold on
     
     [tG, vG] = GetSimTime(P, P.data.G);
-    plt = plot(tG, vG, 'r*');
-    plt.DisplayName = 'Blood Test';
+    plt = plot(tG, vG, 'g*');
+    plt.DisplayName = 'Plasma Sample';
     
-    ppG = griddedInterpolant(tG, vG);
-    plt = plot(tArray, ppG(tArray), 'b');
-    plt.LineWidth = 1;
-    plt.DisplayName = 'Interpolation';
-    
-    plt = plot(tArray, P.results.G, 'k');
-    plt.DisplayName = 'Model Prediction';
+%     ppG = griddedInterpolant(tG, vG);
+%     plt = plot(tArray, ppG(tArray), 'b');
+%     plt.LineWidth = 1;
+%     plt.DisplayName = 'Interpolation';
+%     
+%     plt = plot(tArray, P.results.G, 'k');
+%     plt.DisplayName = 'Model Prediction';
     
     title(patientLabel + "Plasma Glucose")
     xlabel('Time')

@@ -60,15 +60,15 @@ if DP.CPep
    MakeDebugPlot(P, DP);
    hold on
    
-   plt = plot(tCPep, vCPep, 'r*');
-   plt.DisplayName = "Data";
-   plt = plot(tArray, CPepArray, 'b-');
-   plt.DisplayName = "Interpolation";
+   plt = plot(tCPep, vCPep, 'b*');
+   plt.DisplayName = "Plasma Sample";
+%    plt = plot(tArray, CPepArray, 'b-');
+%    plt.DisplayName = "Interpolation";
    
    title(sprintf("%s: C-peptide samples", P.patientCode))
    
    xlabel("Time [min]")
-   ylabel("C-peptide [pmol/L]")
+   ylabel("Plasma C-Peptide, C [pmol/L]")
    
    legend
 end

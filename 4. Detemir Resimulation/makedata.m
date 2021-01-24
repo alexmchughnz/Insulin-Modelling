@@ -376,17 +376,17 @@ elseif contains(dataset, "OGTT")
     %% OGTT
     source = "OGTTLui";
     patientSet = cell(size(patientNums));
+    allPatientCodes = [];
     
     for ii = 1:length(patientNums)
         %% Load data from CSVs.
         patientNum = patientNums(ii);
         patientCode = sprintf("pt%d", patientNum);
         patientFolder = fullfile(DATAPATH, source, patientCode);
-        allPatientCodes = [];
         
         % Pull out each unique subpatient letter.
         filenames = ls(fullfile(patientFolder, patientCode+"*"));
-        index = strfind(filenames(1,:), '-') - 1;        
+        index = strfind(filenames(1,:), '-') - 1;
         subpatientLetters = unique(filenames(:, index));
         
         for ll = 1:length(subpatientLetters)
@@ -448,15 +448,15 @@ elseif contains(dataset, "OGTT")
             
             P.data.simTime = [0, minutes(endTime-startTime)];
             P.data.simDuration =  @() floor(diff(P.data.simTime));
-            P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';            
-           
+            P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
+            
             P.data.I.time = btTable.time;
             P.data.CPep.time = btTable.time;
             
             % Data
             [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
             if isnumeric(btTable.glucose(1)) % Small workaround for some missing BT data for some subjects.
-                P.data.G.value = btTable.glucose;
+                P.data.G.value = btTable.glucose(~isnan(btTable.glucose));
                 P.data.G.time = btTable.time(~isnan(btTable.glucose));
             else
                 P.data.G.value = pocTable.glucose;
@@ -498,18 +498,15 @@ elseif contains(dataset, "OGTT")
             save(fullfile(DATAPATH, source, filename), '-struct', 'P');
             fprintf('%s: Saved patient data.\n', P.patientCode);
             
-            allPatientCodes = [allPatientCodes, P.patientCode];
-            
-        end
-        
-        % Generate patient data structs.
-        loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));
-        for pp = 1 : length(allPatientCodes)
-            code = allPatientCodes(pp);
-            patientSet{pp} = loadpatient(code);
-        end
-        % Load table.
-        
+            allPatientCodes = [allPatientCodes, P.patientCode];            
+        end        
+    end
+    
+    % Generate patient data structs.
+    loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));
+    for pp = 1 : length(allPatientCodes)
+        code = allPatientCodes(pp);
+        patientSet{pp} = loadpatient(code);
     end
 end
 

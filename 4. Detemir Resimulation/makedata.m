@@ -15,7 +15,7 @@ end
 
 
 if contains(dataset, "Detemir")
-%% Detemir
+    %% Detemir
     source = "Detemir";
     patientSet = cell(size(patientNums));
     
@@ -132,9 +132,9 @@ if contains(dataset, "Detemir")
         n = patientNums(pp);
         patientSet{pp} = loadpatient(n);
     end
-
+    
 elseif contains(dataset, "DISST")
-%% DISST
+    %% DISST
     source = "DISST";
     
     % Load table.
@@ -187,7 +187,7 @@ elseif contains(dataset, "DISST")
         %  > Bolus
         vIBolus = TD{code, "IB"} * 1e+3;       % Insulin bolus [mU]
         tIBolus = TD{code, "timeIB"}/60;       % Time of bolus delivery [min]
-        TIBolus = 1;                          % Period of bolus action [min]
+        TIBolus = 1;                           % Period of bolus action [min]
         % Bolus as function of time, value spread over period.
         % Active if time within period.
         P.data.IBolus = @(t) ((tIBolus <= t) & (t < tIBolus+TIBolus)).*vIBolus/TIBolus;  % [mU/min]
@@ -242,10 +242,10 @@ elseif contains(dataset, "DISST")
         
         clear P
     end
-
-
+    
+    
 elseif contains(dataset, "CREBRF")
-%% CREBRF
+    %% CREBRF
     source = "CREBRF";
     
     % Load table.
@@ -272,7 +272,7 @@ elseif contains(dataset, "CREBRF")
         num = patientNums(ii);
         
         if num == 999
-            P.patientCode = "K999ZZ";            
+            P.patientCode = "K999ZZ";
             loadpatient = @(code) load(fullfile(DATAPATH, source, sprintf("patient%s.mat", code)));
             P = loadpatient(P.patientCode);
         else
@@ -371,108 +371,130 @@ elseif contains(dataset, "CREBRF")
         
         clear P
     end
-
+    
 elseif contains(dataset, "OGTT")
-%% OGTT
+    %% OGTT
     source = "OGTTLui";
     patientSet = cell(size(patientNums));
     
-    % Load data from CSVs.
     for ii = 1:length(patientNums)
+        %% Load data from CSVs.
         patientNum = patientNums(ii);
-        patientLabel = sprintf("pt%d", patientNum);
-        patientFolder = fullfile(DATAPATH, source, patientLabel);
+        patientCode = sprintf("pt%d", patientNum);
+        patientFolder = fullfile(DATAPATH, source, patientCode);
         
-        subpatientLabel = patientLabel + "b";
-        metaFile = fullfile(patientFolder, subpatientLabel+"-meta.csv");
-        btFile = fullfile(patientFolder, subpatientLabel+"-bt.csv");
-        pocFile = fullfile(patientFolder, subpatientLabel+"-poc.csv");
+        % Pull out each unique subpatient letter.
+        subpatientLetters = ls(fullfile(patientFolder, "pt*"));
+        subpatientLetters = unique(subpatientLetters(:, 4));
         
-        % Load tables.
-        opts = detectImportOptions(metaFile,...
-            'NumHeaderLines', 1);
-        metaTable = readtable(metaFile, opts, ...
-            'ReadVariableNames', true);
+        for ll = 1:length(subpatientLetters)
+            subpatientLabel = patientCode + subpatientLetters(ii);
+            
+            metaFile = fullfile(patientFolder, subpatientLabel+"-meta.csv");
+            btFile = fullfile(patientFolder, subpatientLabel+"-bt.csv");
+            pocFile = fullfile(patientFolder, subpatientLabel+"-poc.csv");
+            
+            % Load tables.
+            opts = detectImportOptions(metaFile,...
+                'NumHeaderLines', 1);
+            metaTable = readtable(metaFile, opts, ...
+                'ReadVariableNames', true);
+            
+            opts = detectImportOptions(btFile,...
+                'NumHeaderLines', 1);
+            btTable = readtable(btFile, opts, ...
+                'ReadVariableNames', true);
+            
+            opts = detectImportOptions(pocFile,...
+                'NumHeaderLines', 1);
+            pocTable = readtable(pocFile, opts, ...
+                'ReadVariableNames', true);
+            
+            %% Assemble patient data.
+            P.source = source;
+            P.patientCode = patientCode;
+            P.patientNum = patientNum;
+            
+            % Patient Info
+            %         P.data.age = T{code, "Age"};
+            %         P.data.BMI = T{code, "BMI"};
+            %         P.data.mass = T{code, "Weight"};
+            %         P.data.BSA = T{code, "BSA"};
+            %         P.data.height = T{code, "Height_cm_"};
+            
+            % Time
+            % Times here need to be converted from integers representing time
+            % of day to an integer representing minutes passed since trial
+            % start (e.g. if a trial starts at 1200h, the integer 1315 should
+            % be converted to 75 [minutes]).
+            allTimes = time2dur([metaTable.time; btTable.time; pocTable.time]);
+            startTime = min(allTimes);
+            endTime = max(allTimes);
+            
+            time2mins = @(times) minutes(time2dur(times) - startTime);
+            metaTable.time = time2mins(metaTable.time);
+            btTable.time = time2mins(btTable.time);
+            pocTable.time = time2mins(pocTable.time);
+            
+            P.data.simTime = [0, minutes(endTime-startTime)];
+            P.data.simDuration =  @() floor(diff(P.data.simTime));
+            P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
+            
+            P.data.G.time = btTable.time;
+            P.data.I.time = btTable.time;
+            P.data.CPep.time = btTable.time;
+            
+            % Data
+            %         [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
+            P.data.G.value = btTable.glucose; % Plasma glucose [mmol/L]
+            P.data.I.value = btTable.insulin; % Plasma insulin [mU/L]
+            P.data.CPep.value = btTable.cpep; % C-peptide [pmol/L]
+            
+            % Insulin Bolus
+            valid = ~isnan(metaTable.insulin);
+            vIBolus = metaTable.insulin(valid) * 1e+3;  % Insulin bolus [mU]
+            tIBolus = metaTable.time(valid);            % Time of bolus delivery [min]
+            TIBolus = 1;                         % Period of bolus action [min]
+            % Bolus as function of time, value spread over period.
+            % Active if time within period.
+            P.data.IBolus = @(t) dot(vIBolus, ((tIBolus <= t) & (t < tIBolus+TIBolus))) / TIBolus;  % [mU/min]
+            P.data.tIBolus = tIBolus;
+            P.data.vIBolus = vIBolus;
+            
+            % Glucose Bolus
+            vGBolus = 30;     % Glucose bolus [g]
+            vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
+            tGBolus = 0;                            % Time of bolus delivery [min]
+            TGBolus = 1;                            % Period of bolus action [min]
+            % Bolus as function of time, value spread over period.
+            % Active if time within period.
+            P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
+            P.data.tGBolus = tGBolus;
+            P.data.vGBolus = vGBolus;
+            
+            P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
+            P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
+            
+            P.results.nLxLFitBounds = [];
+            
+            
+            
+            % Save patient structs.
+            filename = sprintf("patient%d.mat", P.patientNum);
+            save(fullfile(DATAPATH, source, filename), '-struct', 'P');
+            fprintf('%s: Saved patient data.\n', P.patientCode);
+            
+        end
         
-        opts = detectImportOptions(btFile,...
-            'NumHeaderLines', 1);
-        btTable = readtable(btFile, opts, ...
-            'ReadVariableNames', true);
-        
-        opts = detectImportOptions(pocFile,...
-            'NumHeaderLines', 1);
-        pocTable = readtable(pocFile, opts, ...
-            'ReadVariableNames', true);
-        
-        % Assemble patient data.
-        P.source = source;
-        P.patientNum = patientNums(ii);
-        P.patientCode = sprintf("P%d", P.patientNum);
-        P.data.mass = data.pt_mass;
-        
-        P.data.trialTime     = [sys.trial_start_t, sys.trial_end_t];
-        P.data.trialDuration = @() minutes(diff(P.trialTime));
-        
-        P.data.simTime     =  [sys.sim_start_t, sys.sim_end_t];
-        P.data.simDuration =  @() minutes(diff(P.data.simTime));
-        
-        P.results.tArray = (0 : P.data.simDuration())';
-        
-        
-        P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
-        P.data.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
-        
-        P.data.GOther{1}.value = data.bg1;         % Blood glucose reading [mmol/L]
-        P.data.GOther{1}.time = data.bg1_time;     % Time of blood glucose reading [datetime]
-        P.data.GOther{2}.value = data.bg2;
-        P.data.GOther{2}.time = data.bg2_time;
-        P.data.G.value = data.bg3;
-        P.data.G.time = data.bg3_time;
-        
-        P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [pmol/L]
-        P.data.ITotal.time  = data.PlasmaI_time;
-        
-        P.data.IBolus = @(~) 0;  % No fast-I bolus here!
-        
-        vIDBolus = sys.SC.Ibolus;  % Insulin bolus [mU]
-        tIDBolus = sys.SC.T;       % Time of bolus delivery [min]
-        TIDBolus = 5;              % Period of bolus action [min]
-        % Bolus as function of time, value spread over period.
-        % Active if time within period.
-        P.data.IDBolus = @(t) ((tIDBolus <= t) && (t < tIDBolus+TIDBolus)).*vIDBolus/TIDBolus;
-        
-        P.data.meal.durations = data.meal_durations;  %[min]
-        P.data.meal.startTimes = data.meal_start;     %[datetime]
-        P.data.meal.carbs = data.carbs;               %[g]
-        P.data.meal.sugar = data.sugar;               %[g]
-        
-        day1 = sys.sim_start_t;    % Day 1 start, at sim start time [datetime]
-        [Y, M, D] = ymd(day1 + 1);
-        day2 = datetime(Y, M, D);  % Day 2 start, at midnight [datetime]
-        tFast = minutes(day2 - day1); % Time when reading 2 replaces reading 1 [min]
-        GFast1 = sys.GC.fasting_bg1;
-        GFast2 = sys.GC.fasting_bg2;
-        P.data.GFast = @(t) (t < tFast)*GFast1 + (t >= tFast)*GFast2;
-        
-        P.results.nLxLFitBounds = [];
-        
-        
-        
-        % Save patient structs.
-        filename = sprintf("patient%d.mat", P.patientNum);
-        save(fullfile(DATAPATH, source, filename), '-struct', 'P');
-        fprintf('%s: Saved patient data.\n', P.patientCode);
+        % Generate patient data structs.
+        loadpatient = @(n) load(fullfile(DATAPATH, source, sprintf("patient%d.mat", n)));
+        for pp = 1 : length(patientNums)
+            n = patientNums(pp);
+            patientSet{pp} = loadpatient(n);
+        end
+        % Load table.
         
     end
-    
-    % Generate patient data structs.
-    loadpatient = @(n) load(fullfile(DATAPATH, source, sprintf("patient%d.mat", n)));
-    for pp = 1 : length(patientNums)
-        n = patientNums(pp);
-        patientSet{pp} = loadpatient(n);
-    end
-    % Load table.
-     
 end
 
 
@@ -513,4 +535,16 @@ if allowPlots
     end
 end
 
+end
+
+
+function durs = time2dur(times)
+strs = char(string(times));
+
+addCol = repmat(':', numel(times), 1);
+strs = [strs(:, 1:2), addCol, strs(:, 3:4)];
+
+for ii = 1:length(times)
+    durs(ii, 1) = duration(strs(ii, :), 'InputFormat', 'hh:mm');
+end
 end

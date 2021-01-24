@@ -519,8 +519,7 @@ if allowPlots
     if DP.GlucoseInput
         for ii = 1:length(patientSet)
             P = patientSet{ii};
-            MakeDebugPlot(P, DP);
-            
+            MakeDebugPlot(P, DP);            
             
             GI = zeros(size(P.results.tArray));
             GB = zeros(size(P.results.tArray));
@@ -552,12 +551,18 @@ end
 
 
 function durs = time2dur(times)
-strs = char(string(times));
+strs = string(times);
+for ii = 1:length(strs)
+    if strlength(strs(ii)) < 4
+        strs(ii) = "0"+strs(ii);
+    end
+end
+chararray = char(strs);
 
 addCol = repmat(':', numel(times), 1);
-strs = [strs(:, 1:2), addCol, strs(:, 3:4)];
+chararray = [chararray(:, 1:2), addCol, chararray(:, 3:4)];
 
 for ii = 1:length(times)
-    durs(ii, 1) = duration(strs(ii, :), 'InputFormat', 'hh:mm');
+    durs(ii, 1) = duration(chararray(ii, :), 'InputFormat', 'hh:mm');
 end
 end

@@ -33,7 +33,7 @@ SAVERESULTS = true;
 % patientNums = [12 128 146 160 166 169 171 196 198 216];  % My chosen 10
 % source = "CREBRF";
 
-patientNums = [1];
+patientNums = [1 2 4 5 16 22 25];
 source = "OGTTLui";
 
 patients = makedata(source, patientNums);

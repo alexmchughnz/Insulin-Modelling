@@ -385,8 +385,9 @@ elseif contains(dataset, "OGTT")
         allPatientCodes = [];
         
         % Pull out each unique subpatient letter.
-        subpatientLetters = ls(fullfile(patientFolder, "pt*"));
-        subpatientLetters = unique(subpatientLetters(:, 4));
+        filenames = ls(fullfile(patientFolder, patientCode+"*"));
+        index = strfind(filenames(1,:), '-') - 1;        
+        subpatientLetters = unique(filenames(:, index));
         
         for ll = 1:length(subpatientLetters)
             subpatientLabel = patientCode + subpatientLetters(ll);
@@ -411,9 +412,9 @@ elseif contains(dataset, "OGTT")
             pocTable = readtable(pocFile, opts, ...
                 'ReadVariableNames', true);
             
-            %% Assemble patient data.            
+            %% Assemble patient data.
             if length(subpatientLetters) > 1
-            % Workaround subpatients by adding a suffix "00x" to their num.
+                % Workaround subpatients by adding a suffix "00x" to their num.
                 P.patientNum = 1000*patientNum + ll;
                 P.patientCode = subpatientLabel;
             else
@@ -428,7 +429,7 @@ elseif contains(dataset, "OGTT")
             P.data.age = 25;
             P.data.BMI = 23;
             P.data.mass = 85;
-%             P.data.BSA = T{code, "BSA"};
+            %             P.data.BSA = T{code, "BSA"};
             P.data.height = 185;
             
             % Time
@@ -447,15 +448,20 @@ elseif contains(dataset, "OGTT")
             
             P.data.simTime = [0, minutes(endTime-startTime)];
             P.data.simDuration =  @() floor(diff(P.data.simTime));
-            P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
-            
-            P.data.G.time = btTable.time;
+            P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';            
+           
             P.data.I.time = btTable.time;
             P.data.CPep.time = btTable.time;
             
             % Data
             [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
-            P.data.G.value = btTable.glucose; % Plasma glucose [mmol/L]
+            if isnumeric(btTable.glucose(1)) % Small workaround for some missing BT data for some subjects.
+                P.data.G.value = btTable.glucose;
+                P.data.G.time = btTable.time(~isnan(btTable.glucose));
+            else
+                P.data.G.value = pocTable.glucose;
+                P.data.G.time = pocTable.time;
+            end
             P.data.I.value = btTable.insulin; % Plasma insulin [mU/L]
             P.data.CPep.value = btTable.cpep; % C-peptide [pmol/L]
             
@@ -484,7 +490,7 @@ elseif contains(dataset, "OGTT")
             P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
             P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
             
-            P.results.nLxLFitBounds = [];          
+            P.results.nLxLFitBounds = [];
             
             
             % Save patient structs.

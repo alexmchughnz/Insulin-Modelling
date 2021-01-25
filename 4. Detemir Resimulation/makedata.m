@@ -477,7 +477,7 @@ elseif contains(dataset, "OGTT")
             P.data.vIBolus = vIBolus;
             
             % Glucose Bolus
-            vGBolus = 30;     % Glucose bolus [g]
+            vGBolus = 35;     % Glucose bolus [g]
             vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
             tGBolus = 0;                            % Time of bolus delivery [min]
             TGBolus = 1;                            % Period of bolus action [min]

@@ -54,7 +54,7 @@ end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
 % Fit nL/xL over segments.
-[nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray);
+[nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray, tI);
 nL = nLArray(end);
 xL = xLArray(end);
 
@@ -231,7 +231,7 @@ if DP.Convergence
 end
 end
 
-function [nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray)
+function [nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray, tI)
 global GC
 
 % Retrieve data.
@@ -278,8 +278,8 @@ while any(relativeChange >= tolerance)
     % Assembling MLR system, integrating between sample points, and
     % normalising by integral width (dt):
     % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    t1 = P.data.I.time(1:end-1);
-    t2 = P.data.I.time(2:end);
+    t1 = tI(1:end-1);
+    t2 = tI(2:end);
     dt = t2 - t1;
     
     ppCN = griddedInterpolant(tArray, CN);

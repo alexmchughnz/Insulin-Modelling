@@ -21,11 +21,11 @@ end
 P = GCModel(P, options);
 
 %% Fit Evaluation
-iiData = GetTimeIndex(P.data.I.time, P.results.tArray);
+[tI, vI] = GetIFromITotal(P); % [mU/L]
+iiData = GetTimeIndex(tI, P.results.tArray);
 fitI = P.results.I(iiData);
 dataI = P.data.I.value;
-N = length(dataI);
 
-MAPE = mean(abs(dataI - fitI)./dataI);
+MAPE = mean(abs(vI - fitI)./vI);
 P.results.insulinMAPE = MAPE;
 end

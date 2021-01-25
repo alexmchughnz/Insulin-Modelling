@@ -28,27 +28,38 @@ if contains(dataset, "Detemir")
         P.patientCode = sprintf("P%d", P.patientNum);
         P.data.mass = data.pt_mass;           % Patient mass [kg]
         
-        P.data.trialTime     = [sys.trial_start_t, sys.trial_end_t];
-        P.data.trialDuration = @() minutes(diff(P.trialTime));
+        BMIValues = [27.2 000 27.1 29.1]; %HARDCODED        
+        P.data.BMI = BMIValues(ii);
         
-        P.data.simTime     =  [sys.sim_start_t, sys.sim_end_t];
-        P.data.simDuration =  @() minutes(diff(P.data.simTime));
+        ageValues = [73 000 74 75]; %HARDCODED
+        P.data.age = ageValues(ii);
+        
+        [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
+        
+        %% Data       
+        GetMins = @(dt) minutes(dt - sys.sim_start_t);
+        
+        P.data.trialTime     = [GetMins(sys.trial_start_t), GetMins(sys.trial_end_t)];
+        P.data.trialDuration = @() diff(P.data.trialTime);
+        
+        P.data.simTime     =  [GetMins(sys.sim_start_t), GetMins(sys.sim_end_t)];
+        P.data.simDuration =  @() diff(P.data.simTime);
         
         P.results.tArray = (0 : P.data.simDuration())';
         
         
         P.data.CPep.value = data.Cpep;        % C-peptide reading [pmol/L]
-        P.data.CPep.time = data.Cpep_time;    % Time of C-peptide reading [datetime]
+        P.data.CPep.time = GetMins(data.Cpep_time);    % Time of C-peptide reading [mins]
         
         P.data.GOther{1}.value = data.bg1;         % Blood glucose reading [mmol/L]
-        P.data.GOther{1}.time = data.bg1_time;     % Time of blood glucose reading [datetime]
+        P.data.GOther{1}.time = data.bg1_time;     % Time of blood glucose reading [mins]
         P.data.GOther{2}.value = data.bg2;
         P.data.GOther{2}.time = data.bg2_time;
         P.data.G.value = data.bg3;
-        P.data.G.time = data.bg3_time;
+        P.data.G.time = GetMins(data.bg3_time);
         
         P.data.ITotal.value = data.PlasmaI;        % Plasma insulin [pmol/L]
-        P.data.ITotal.time  = data.PlasmaI_time;
+        P.data.ITotal.time  = GetMins(data.PlasmaI_time);
         
         P.data.IBolus = @(~) 0;  % No fast-I bolus here!
         
@@ -86,9 +97,9 @@ if contains(dataset, "Detemir")
             duration = duration*60; % ''                   [min]
             
             startTime  = datetime('31/03/2017 05:15');
-            preSimTime = minutes(P.data.simTime(1) - startTime); % How long infusion ran before sim [min]
+            preSimTime = abs(GetMins(startTime)); % How long infusion ran before sim [min]
             
-            startTime = 0 - preSimTime;         % Start of infusion [min]
+            startTime = P.data.simTime(1) - preSimTime;         % Start of infusion [min]
             endTime   = duration - preSimTime;  % End of infusion [min]
             
             % Return infusion data.

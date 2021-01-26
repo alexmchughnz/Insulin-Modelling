@@ -91,18 +91,6 @@ for ii = 1:length(patientSet)
     P.data.GFast = @(~) P.data.G.value(1);
     P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
     
-    %Other Fields
-    stddev = 5/100;
-    nTrials = 1000;
-    try
-        load(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, nTrials)), ...
-            'stddevError')
-        P.data.stddevMSE = stddevError;
-    catch
-        fprintf("No stddevMSE - run AnalyseInsulinVariance!\n")
-        P.data.stddevMSE = 0;
-    end
-    
     %% Save
     patientSet{ii} = P;
     clear P

@@ -1,6 +1,6 @@
 modelNames = {'GI', 'ID', 'SC', 'GC'};
 
-%% Constants / Conversions (C)
+%% Constants and Conversions (C)
 global C
 C.MGlucose = 180.156;  % Glucose molar mass [g/mol]
 C.MCPeptide = 3020.29;  % C-peptide molar mass [g/mol]
@@ -12,10 +12,7 @@ C.IU18Factor = 18;  % TODO: Not sure what this yet! Something involving dL?
 for ii = 1 : length(modelNames)
    model = modelNames{ii};
    run(model+"Parameters");
-   save('parameters.mat', model)
 end
 
 %% Save
-save('parameters.mat', 'C', 'GC', 'GI', 'ID', 'SC')
 disp('Parameters updated.')
-clear

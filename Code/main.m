@@ -26,7 +26,7 @@ parameters
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [1];
+patientNums = [1 5];
 source = "OGTTLui";
 
 %% Load Data

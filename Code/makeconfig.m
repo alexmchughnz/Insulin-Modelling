@@ -7,12 +7,14 @@ set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 8 
 global CONFIG
 CONFIG.FUNCPATH  = fullfile(pwd, 'Functions');
 CONFIG.MODELPATH = fullfile(pwd, 'Models');
+CONFIG.RECIPEPATH = fullfile(pwd, 'Recipes');
 CONFIG.DATAPATH  = fullfile(pwd, '..', 'Data');
 CONFIG.RESULTPATH = fullfile(pwd, '..', 'Results');
 CONFIG.PLOTPATH = fullfile(pwd, '..', 'Plots');
 
 addpath(genpath(CONFIG.FUNCPATH));
 addpath(genpath(CONFIG.MODELPATH));
+addpath(genpath(CONFIG.RECIPEPATH));
 addpath(genpath(CONFIG.DATAPATH));
 addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.PLOTPATH));

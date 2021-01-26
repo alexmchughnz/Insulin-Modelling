@@ -1,8 +1,16 @@
-function F = PanelDebugPlots(monitor)
-GetFigNum = @(figrow) dot([100 10 1], figrow);
+function PanelDebugPlots(monitor)
+% Takes all created debug plot objects and displays them in a grid.
+% INPUTS:
+%   monitor - integer representing which monitor to display plots on
 
 global DEBUGPLOTS
 figData = DEBUGPLOTS.FIGURES;
+
+if ~exist('monitor', 'var')
+    monitor = 1;
+end
+
+GetFigNum = @(figrow) dot([100 10 1], figrow);
 
 if ~isempty(figData)
     patientCounts = figData(:, 1);

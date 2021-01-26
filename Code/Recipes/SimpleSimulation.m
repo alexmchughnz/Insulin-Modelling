@@ -9,15 +9,15 @@ function P = SimpleSimulation(P)
 global DEBUGPLOTS
 DEBUGPLOTS.EstimateInsulinSecretion.Uen = 1;
 DEBUGPLOTS.FitInsulinSensitivity.SI = 1;
-DEBUGPLOTS.PlotModelResults.Glucose = 1;
-DEBUGPLOTS.PlotModelResults.Insulin = 1;
+DEBUGPLOTS.SolveSystem.Glucose = 1;
+DEBUGPLOTS.SolveSystem.Insulin = 1;
 
 %% Functions
 P = EstimateInsulinSecretion(P);
 P = FitHepaticClearance(P);
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
-P = SolveSystem(P);
+P = SolveSystem(P, true);
 
 end
 

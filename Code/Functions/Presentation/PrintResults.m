@@ -9,8 +9,6 @@ global CONFIG
 T = table;
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    
-    PlotModelResults(P);
     T = TabulateResults(T, P);
 end
 
@@ -19,5 +17,5 @@ if (save)
     writetable(T, fullfile(CONFIG.RESULTPATH, P.source+"table.csv"));
 end
 
-PanelDebugPlots(1);
+PanelDebugPlots();
 disp(T);

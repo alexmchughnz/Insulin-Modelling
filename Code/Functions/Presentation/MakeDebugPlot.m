@@ -1,4 +1,10 @@
 function F = MakeDebugPlot(P, DP)
+% Generates a debug plot object.
+% INPUTS:
+%   P  - patient struct
+%   DP - debug plot group
+% OUTPUT:
+%   F  - figure handle for debug plot
 
 global DEBUGPLOTS
 

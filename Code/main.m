@@ -23,7 +23,7 @@ makeparameters
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [5];
+patientNums = [5 25];
 source = "OGTTLui";
 
 %% Load Data

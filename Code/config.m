@@ -17,7 +17,7 @@ addpath(genpath(CONFIG.MODELPATH));
 addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.SCRIPTPATH));
 
-CONFIG.PATIENTFORMAT = @(source, num) sprintf("p%s%d.mat", source, num);
+CONFIG.PATIENTFORMAT = @(source, num) sprintf("P%s%d.mat", source, num);
 
 disp('Config updated.')
 clear

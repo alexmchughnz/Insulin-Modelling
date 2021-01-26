@@ -4,7 +4,7 @@ global CONFIG
 
 %% Load data.
 if source == "Detemir"
-    patientSet = LoadDetemir(patientNums);
+    patientSet = MakeDetemir(patientNums);
 end
 
 

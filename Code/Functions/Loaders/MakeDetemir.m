@@ -1,4 +1,9 @@
-function patientSet = LoadDetemir(patientNums)
+function patientSet = MakeDetemir(patientNums)
+% Function for loading Detemir data.
+% INPUTS:
+%   patientNums - array of patients numbers to load
+% OUTPUT:
+%   patientSet  - cell array of patient structs 
 
 global CONFIG 
 global C SC
@@ -10,8 +15,7 @@ end
 patientSet = cell(size(patientNums));
 source = "Detemir";
 
-for ii = 1:length(patientNums)
-    
+for ii = 1:length(patientNums)    
     %% Meta
     patientNum = patientNums(ii);
     filename = sprintf("sys%d.mat", patientNum);
@@ -29,7 +33,7 @@ for ii = 1:length(patientNums)
     ageValues = [73 000 74 75]; %HARDCODED
     P.data.age = ageValues(ii);
     
-    [P.data.k1, P.data.k2, P.data.k3] = SC.k(P);
+    P = GetCPeptideParameters(P);
     
 
     GetMins = @(dt) minutes(dt - sys.sim_start_t);

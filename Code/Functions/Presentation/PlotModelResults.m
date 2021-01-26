@@ -9,7 +9,7 @@ global DEBUGPLOTS
 
 % Set up figure.
 patientLabel = sprintf("%s: ", P.patientCode);
-DP = DEBUGPLOTS.PlotResults;
+DP = DEBUGPLOTS.PlotModelResults;
 
 tArray = P.results.tArray;     % Time of results [min]
 

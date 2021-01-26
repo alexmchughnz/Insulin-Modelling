@@ -5,6 +5,14 @@ function P = SimpleSimulation(P)
 % OUTPUT:
 %   P  - updated patient struct
 
+%% Plots
+global DEBUGPLOTS
+DEBUGPLOTS.EstimateInsulinSecretion.Uen = 1;
+DEBUGPLOTS.FitInsulinSensitivity.SI = 1;
+DEBUGPLOTS.PlotModelResults.Glucose = 1;
+DEBUGPLOTS.PlotModelResults.Insulin = 1;
+
+%% Functions
 P = EstimateInsulinSecretion(P);
 P = FitHepaticClearance(P);
 P = FindGutEmptyingRate(P);

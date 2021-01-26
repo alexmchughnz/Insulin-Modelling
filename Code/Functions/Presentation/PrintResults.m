@@ -1,5 +1,5 @@
 function PrintResults(patientSet, save)
-% Recipe to print (and optionally save) results of simulation.
+% Prints (and optionally saves) results of simulation.
 % INPUTS:
 %   patientSet - existing table of results
 %   save - logical, saves plots and table if true

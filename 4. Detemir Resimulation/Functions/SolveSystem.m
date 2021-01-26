@@ -17,14 +17,17 @@ P = GIModel(P, options);
 if P.source == "Detemir"
     P = IDModel(P, options);
 end
+if P.source == "OGTTLui"
+    P = SCModel(P, options);
+end
 
 P = GCModel(P, options);
+
 
 %% Fit Evaluation
 iiData = GetTimeIndex(P.data.I.time, P.results.tArray);
 fitI = P.results.I(iiData);
 dataI = P.data.I.value;
-N = length(dataI);
 
 MAPE = mean(abs(dataI - fitI)./dataI);
 P.results.insulinMAPE = MAPE;

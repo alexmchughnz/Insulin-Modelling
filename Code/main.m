@@ -20,10 +20,6 @@ parameters
 patientNums = [1 3 4];
 source = "Detemir";
 
-
 patientSet = LoadData(source, patientNums);
 
 
-
-
-pause

@@ -1,9 +1,9 @@
-function patientSet = MakeDetemir(patientNums)
+function patientSet = MakeDetemir(patientSet)
 % Function for loading Detemir data.
 % INPUTS:
-%   patientNums - array of patients numbers to load
-% OUTPUT:
 %   patientSet  - cell array of patient structs 
+% OUTPUT:
+%   patientSet  - updated cell array of patient structs 
 
 global CONFIG 
 global C SC
@@ -12,19 +12,15 @@ if ~exist('allowPlots', 'var')
     allowPlots = true;
 end
 
-patientSet = cell(size(patientNums));
 source = "Detemir";
 
-for ii = 1:length(patientNums)    
-    %% Meta
-    patientNum = patientNums(ii);
-    filename = sprintf("sys%d.mat", patientNum);
-    load(fullfile(CONFIG.DATAPATH, source, filename));
-    data = sys.Data;
+for ii = 1:length(patientSet)    
+    P = patientSet{ii};
     
-    P.source = source;
-    P.patientNum = data.PtNo;
-    P.patientCode = sprintf("P%d", P.patientNum);
+    filename = sprintf("sys%d.mat", P.patientNum);
+    load(fullfile(CONFIG.DATAPATH, source, filename));
+    data = sys.Data;    
+   
     P.data.mass = data.pt_mass; % Patient mass [kg]
     
     BMIValues = [27.2 000 27.1 29.1]; %HARDCODED

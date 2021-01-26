@@ -1,11 +1,11 @@
 function patientSet = MakeDetemir(patientSet)
 % Function for loading Detemir data.
 % INPUTS:
-%   patientSet  - cell array of patient structs 
+%   patientSet  - cell array of patient structs
 % OUTPUT:
-%   patientSet  - updated cell array of patient structs 
+%   patientSet  - updated cell array of patient structs
 
-global CONFIG 
+global CONFIG
 global C SC
 global DEBUGPLOTS
 if ~exist('allowPlots', 'var')
@@ -14,13 +14,17 @@ end
 
 source = "Detemir";
 
-for ii = 1:length(patientSet)    
+for ii = 1:length(patientSet)
     P = patientSet{ii};
     
     filename = sprintf("sys%d.mat", P.patientNum);
-    load(fullfile(CONFIG.DATAPATH, source, filename));
-    data = sys.Data;    
-   
+    try
+        load(fullfile(CONFIG.DATAPATH, source, filename));
+    catch
+        assert(false, "Invalid patient number.")  
+    end
+    data = sys.Data;
+    
     P.data.mass = data.pt_mass; % Patient mass [kg]
     
     BMIValues = [27.2 000 27.1 29.1]; %HARDCODED
@@ -31,7 +35,7 @@ for ii = 1:length(patientSet)
     
     P = GetCPeptideParameters(P);
     
-
+    
     GetMins = @(dt) minutes(dt - sys.sim_start_t);
     
     P.data.trialTime     = [GetMins(sys.trial_start_t), GetMins(sys.trial_end_t)];
@@ -100,11 +104,12 @@ for ii = 1:length(patientSet)
         % Return infusion data.
         iiInfusion = (startTime <= P.results.tArray) & (P.results.tArray < endTime); % 1 if infusion active [logical]
         P.data.GInfusion = iiInfusion .* MAGIC_DEXTROSE_NUMBER/C.MGlucose/60;  % Glucose infusion over sim time [mmol/min]
-    end    
+    end
     
     
     %% Save
     patientSet{ii} = P;
     clear P
+end
 end
 

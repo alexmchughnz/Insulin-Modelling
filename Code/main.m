@@ -16,10 +16,20 @@ debugplots
 config
 parameters
 
-%% Load Data
-patientNums = [1 3 4];
-source = "Detemir";
+%% Select Data
+% patientNums = [1];
+% source = "Detemir";
 
+% patientNums = [114];
+% source = "DISST";
+
+% patientNums = [146];
+% source = "CREBRF";
+
+patientNums = [1];
+source = "OGTTLui";
+
+%% Load Data
 patientSet = LoadData(source, patientNums);
 
 

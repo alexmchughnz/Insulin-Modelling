@@ -1,8 +1,7 @@
 % Adapted from "PtDataRead.m".
 
 
-    
-elseif contains(dataset, "DISST")
+
     
     
 elseif contains(dataset, "CREBRF")

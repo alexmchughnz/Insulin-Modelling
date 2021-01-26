@@ -25,6 +25,8 @@ Y0 = [G0;
 
 if P.source == "Detemir"
     GCModelODE = @GCModelODESlow;
+elseif P.source == "OGTTLui"    
+    GCModelODE = @GCModelODESubcut;
 else
     GCModelODE = @GCModelODEFast;
 end

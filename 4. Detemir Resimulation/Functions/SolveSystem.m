@@ -17,8 +17,12 @@ P = GIModel(P, options);
 if P.source == "Detemir"
     P = IDModel(P, options);
 end
+if P.source == "OGTTLui"
+    P = SCModel(P, options);
+end
 
 P = GCModel(P, options);
+
 
 %% Fit Evaluation
 [tI, vI] = GetIFromITotal(P); % [mU/L]

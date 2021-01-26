@@ -1,6 +1,7 @@
-function [dY] = GCModelODEFast(t, Y, P, Y0)
+function [dY] = GCModelODESubcut(t, Y, P, Y0)
 % ODE for GC model. Use with ode45.
 % Requires P1(t) and P2(t) - must be run AFTER GI model.
+% Requires QLocal(t) - must be run AFTER SC model.
 % INPUTS:
 %   t   - time at which to evaluate ODE
 %   Y   - states [G; I; Q] at time == t
@@ -9,7 +10,7 @@ function [dY] = GCModelODEFast(t, Y, P, Y0)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GC
+global GC SC
 
 %% Input
 G  = Y(1);  % [mmol/L]
@@ -25,10 +26,10 @@ Uen       = P.results.Uen(n);       % [mU/min]
 P2        = P.results.P2(n);        % [mmol]
 nL        = P.results.nL(n);        % [1/min]
 xL        = P.results.xL(n);        % [1]
+QLocal    = P.results.QLocal(n);    % [mU]
 GInfusion = P.data.GInfusion(n);    % Glucose infusion rate [mmol/min]
 GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
 GBolus    = P.data.GBolus(t);       % Glucose bolus [mmol/min]
-IBolus    = P.data.IBolus(t);       % Insulin bolus [mU/min]
 
 % Patient dependent.
 d2 = P.results.d2;
@@ -43,7 +44,7 @@ dG  = -GC.pg*(G-GFast) ...
           - SI*(G*Q - GFast*Q0)/(1 + GC.alphaG*Q) ...
           + d2/VG*P2 + (GInfusion + GBolus)/VG;      
 dI  = -nK*I - nL*I/(1 + GC.alphaI*I) - nI/GC.VI*(I-Q) ...
-          + Uen*(1 - xL)/GC.VI + IBolus/GC.VI;
+          + Uen*(1 - xL)/GC.VI + SC.k3*QLocal/GC.VI;
 dQ  = nI/VQ*(I-Q) - nC*Q;
 
 %% Output

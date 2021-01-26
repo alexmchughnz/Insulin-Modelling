@@ -26,10 +26,17 @@ parameters
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [1 5];
+patientNums = [5];
 source = "OGTTLui";
 
 %% Load Data
 patientSet = LoadData(source, patientNums);
 
+%% Run
+for ii = 1:length(patientSet)
+    patientSet{ii} = SimpleSimulation(patientSet{ii});
+end
 
+%% Results
+save = true;
+PrintResults(patientSet, save);

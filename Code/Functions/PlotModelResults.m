@@ -1,9 +1,7 @@
-function [] = PlotResults(P)
+function PlotModelResults(P)
 % Plots patient data:
 %     - blood glucose, G
 %     - plasma insulin, I
-%     - insulin sensitivity, SI
-%     - estimated endogenous insulin secretion, Uen
 % INPUTS:
 %   P      - patient struct
 

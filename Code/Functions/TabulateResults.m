@@ -1,9 +1,10 @@
 function T = TabulateResults(T, P)
 % Tabulates patient data.
 % INPUTS:
-%   T      - existing table of results
-%   P      - patient struct
-
+%   T - existing table of results
+%   P - patient struct
+% OUTPUT:
+%   T - updated table
 
 code = P.patientCode;
 T{code, "code"} = string(code);

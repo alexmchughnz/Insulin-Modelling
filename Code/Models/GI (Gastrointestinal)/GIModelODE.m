@@ -15,7 +15,7 @@ P2     = Y(2);
 
 %% Variables
 % Patient dependent.
-if (P.data.GDelivery == "enteral")
+if P.data.GDelivery == "enteral"
     D = P.data.GBolus(t);  % [mmol/min]
 else
     D = 0;

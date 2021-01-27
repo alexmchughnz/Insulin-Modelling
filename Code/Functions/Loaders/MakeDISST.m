@@ -35,8 +35,8 @@ nMeas = 5;  % Number of measurements.
 %% Generate Patients
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    code = dataTable.Properties.RowNames{ii};
     assert(P.patientNum <= 50, "Invalid patient number.")
+    code = dataTable.Properties.RowNames{P.patientNum};
     
     %% Patient Info
     P.data.age = infoTable{code, "age_years_"};  % [years]

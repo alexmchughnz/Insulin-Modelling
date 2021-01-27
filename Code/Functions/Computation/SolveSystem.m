@@ -21,7 +21,7 @@ P = GIModel(P, options);
 
 if P.data.IType == "detemir"
     P = IDModel(P, options);
-elseif P.data.IDelivery == "intravenous"
+elseif P.data.IDelivery == "subcutaneous"
     P = SCModel(P, options);
 end
 

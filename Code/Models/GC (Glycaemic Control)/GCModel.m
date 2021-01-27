@@ -21,18 +21,10 @@ Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
 
 Y0 = [G0;   
       I0; 
-      Q0];
-
-if P.source == "Detemir"
-    GCModelODE = @GCModelODESlow;
-elseif P.source == "OGTTLui"    
-    GCModelODE = @GCModelODESubcut;
-else
-    GCModelODE = @GCModelODEFast;
-end
-    
+      Q0];  
+   
 % Forward simulate.
-[~, Y] = ode45(GCModelODE, P.results.tArray, Y0, options, P, Y0);  
+[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  
 
 % Store results.
 P.results.G = Y(:,1);

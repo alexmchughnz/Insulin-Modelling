@@ -14,8 +14,8 @@ makedebugplots
 makeparameters
 
 %% Select Data
-patientNums = [1];
-source = "Detemir";
+% patientNums = [1];
+% source = "Detemir";
 
 % patientNums = [24];
 % source = "DISST";
@@ -23,8 +23,8 @@ source = "Detemir";
 % patientNums = [146];
 % source = "CREBRF";
 
-% patientNums = [5 25];
-% source = "OGTTLui";
+patientNums = [5 25];
+source = "OGTTLui";
 
 %% Load Data
 patientSet = LoadData(source, patientNums);

@@ -64,13 +64,13 @@ for ii = 1:length(patientSet)
     MakeBolusFunction = @(value, time, period) (@(t) dot(value/period, (time<=t & t<(time+period))));
     
     % Insulin Bolus
-    P.data.IBolus = @(~) 0;    
+    P.data.IType = "detemir";
+    P.data.IDelivery = "subcutaneous";
     
-    % Insulin Detemir Bolus
-    vIDBolus = sys.SC.Ibolus;  % [mU]
-    tIDBolus = sys.SC.T;       % [min]
-    TIDBolus = 5;              % [min]    
-    P.data.IDBolus = MakeBolusFunction(vIDBolus, tIDBolus, TIDBolus);  % [mU/min]
+    vIBolus = sys.SC.Ibolus;  % [mU]
+    tIBolus = sys.SC.T;       % [min]
+    TIBolus = 5;              % [min]    
+    P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
     
     % 
     P.data.meal.durations = data.meal_durations;  %[min]

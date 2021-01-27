@@ -68,12 +68,17 @@ for ii = 1:length(patientSet)
     MakeBolusFunction = @(value, time, period) (@(tArray) arrayfun(@(t) dot(value/period, (time<=t & t<(time+period))), tArray));
     
     % Insulin Bolus
+    P.data.IType = "human";
+    P.data.IDelivery = "intravenous";
+    
     vIBolus = dataTable{code, "IB"} * 1e+3;  % [mU]
     tIBolus = dataTable{code, "timeIB"}/60;  %  [min]
     TIBolus = 1;  % [min]
     P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
 
     % Glucose Bolus
+    P.data.GDelivery = "intravenous";
+    
     vGBolus = dataTable{code, "GB"} / C.MGlucose * 1e+3;  % [mmol]
     tGBolus = dataTable{code, "timeGB"}/60;  % [min]
     TGBolus = 1;  % [min]

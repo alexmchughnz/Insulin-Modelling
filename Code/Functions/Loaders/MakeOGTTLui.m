@@ -102,6 +102,9 @@ for ii = 1:length(patientSet)
         MakeBolusFunction = @(value, time, period) (@(tArray) arrayfun(@(t) dot(value/period, (time<=t & t<(time+period))), tArray));
     
         % Insulin Bolus
+        P.data.IType = "human";
+        P.data.IDelivery = "subcutaneous";
+        
         valid = ~isnan(metaTable.insulin);
         vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
         tIBolus = metaTable.time(valid);  % [min]
@@ -109,6 +112,8 @@ for ii = 1:length(patientSet)
         P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
         
         % Glucose Bolus
+        P.data.GDelivery = "enteral";
+        
         vGBolus = 35;  % [g]
         vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
         tGBolus = 0;  % [min]
@@ -116,8 +121,8 @@ for ii = 1:length(patientSet)
         P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min]
         
         % Glucose Infusion
-        P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
-
+        P.data.GInfusion = zeros(size(P.results.tArray));
+        
         %% Other
         P = GetCPeptideParameters(P);    
     

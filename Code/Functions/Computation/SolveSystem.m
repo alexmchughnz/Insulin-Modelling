@@ -49,15 +49,10 @@ if allowPlots
         
         [tG, vG] = GetSimTime(P, P.data.G);
         plt = plot(tG, vG, 'g*');
-        plt.DisplayName = 'Plasma Sample';
-        
-        %     ppG = griddedInterpolant(tG, vG);
-        %     plt = plot(tArray, ppG(tArray), 'b');
-        %     plt.LineWidth = 1;
-        %     plt.DisplayName = 'Interpolation';
-        %
-        %     plt = plot(tArray, P.results.G, 'k');
-        %     plt.DisplayName = 'Model Prediction';
+        plt.DisplayName = 'Plasma Sample';        
+       
+        plt = plot(tArray, P.results.G, 'k');
+        plt.DisplayName = 'Model Prediction';
         
         xlabel('Time')
         ylabel('Plasma Glucose, G [mmol/L]')
@@ -74,10 +69,7 @@ if allowPlots
             [tI, vI] = GetSimTime(P, P.data.ITotal);  % [mU/L]
             I = P.results.I + P.results.IDF;  % [mU/L]
             
-            pltylabel = 'Plasma Insulins, I + IDF [mU/L]';
-            
-            datetick('x')
-            
+            pltylabel = 'Plasma Insulins, I + IDF [mU/L]';            
         else
             [tI, vI] = GetSimTime(P, P.data.I);  % [mU/L]
             I = P.results.I;  % [mU/L]
@@ -89,12 +81,7 @@ if allowPlots
         plt.DisplayName = 'Model Prediction';
         
         plt = plot(tI, vI, 'r*');
-        plt.DisplayName = 'Plasma Sample';
-        
-        % ppI = griddedInterpolant(tI, vI);
-        % plt = plot(pltxarray, ppI(tArray), 'b');
-        % plt.LineWidth = 1;
-        % plt.DisplayName = 'Interpolation';
+        plt.DisplayName = 'Plasma Sample';        
         
         xlabel('Time [min]')
         ylabel(pltylabel)

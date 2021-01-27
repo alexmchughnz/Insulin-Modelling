@@ -142,6 +142,8 @@ if allowPlots
         xlabel('Time')
         ylabel('$S_I$ [L/mU/min]')
         title(sprintf("P%d: Insulin Sensitivity", P.patientNum))
+        
+        ylim([0 2e-3])
     end
 end
 end

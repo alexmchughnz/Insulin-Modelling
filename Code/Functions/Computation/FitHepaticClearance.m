@@ -17,10 +17,12 @@ tArray = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time ran
 
 if P.source == "DISST"
     % Need to add 'false' point for improved fitting.
-    [tI, order] = sort([tI; P.data.tIBolus]);
+    [vIBolus, iiBolus] = max(P.data.IBolus(tArray));
+    tIBolus = tArray(iiBolus);
+    [tI, order] = sort([tI; tIBolus]);
     iiBeforeFakePoint = find(order == length(order)) - 1;
     
-    fakeI = P.data.vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
+    fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
     
     fakeData = [vI; fakeI];
     vI = fakeData(order);

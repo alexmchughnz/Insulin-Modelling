@@ -53,7 +53,7 @@ for ii = 1:length(patientSet)
     P.data.GFast = @(t) (t < tFast)*GFast1 + (t >= tFast)*GFast2;
     
     % Insulin Assay    
-    P.data.ITotal.value = data.PlasmaI;  % [pmol/L]
+    P.data.ITotal.value = C.pmol2mU(data.PlasmaI);  % [mU/L]
     P.data.ITotal.time  = GetMins(data.PlasmaI_time);  % [min]
     
     % C-peptide Assay

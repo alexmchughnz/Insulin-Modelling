@@ -38,7 +38,7 @@ for ii = 1:length(patientSet)
     P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
     
     % Insulin Assay
-    P.data.I.value = [];  % [pmol/L]
+    P.data.I.value = [];  % [mU/L]
     P.data.I.time = [];  % [min]
     
     % C-peptide Assay
@@ -47,8 +47,8 @@ for ii = 1:length(patientSet)
     
     %% Trial Inputs  
     % Insulin Bolus
-    P.data.IType = "human | detemir";
-    P.data.IDelivery = "intravenous | subcutaneous";
+    P.data.IType = "human | detemir | none";
+    P.data.IDelivery = "intravenous | subcutaneous | none";
     
     vIBolus = 1000;  % [mU]
     tIBolus = 0;  % [min]
@@ -61,8 +61,7 @@ for ii = 1:length(patientSet)
     vGBolus = 100;  % [mmol]
     tGBolus = 0;  % [min]
     TGBolus = 1;  % [min]
-    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min] 
-    
+    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min]     
     
     % Glucose Infusion
     P.data.GInfusion = []; % [mmol/min]

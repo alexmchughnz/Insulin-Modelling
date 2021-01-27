@@ -11,7 +11,7 @@ global C
 
 source = "CREBRF";
 
-% Load table.
+%% Load Data
 opts = spreadsheetImportOptions(...
     'NumVariables', 43, ...
     'DataRange', 'C4:AS47', ...
@@ -30,6 +30,7 @@ for pp = 1:length(codes)
     nums(pp) = parts(2);
 end
 
+%% Generate Patients
 for ii = 1:length(patientSet)
     P = patientSet{ii};
     
@@ -38,57 +39,38 @@ for ii = 1:length(patientSet)
    
     code = codes{pp};
     
-    % Patient Info
+    %% Patient Info
     P.data.age = T{code, "Age"};
-    P.data.BMI = T{code, "BMI"};
     P.data.mass = T{code, "Weight"};
-    P.data.BSA = T{code, "BSA"};
     P.data.height = T{code, "Height_cm_"};
+    P.data.BMI = T{code, "BMI"};
     
-    % Time
-    measTimes = [0 2 4 6 8 10 30];  % Time of measurement [min]
+    %% Trial Times
+    measTimes = [0 2 4 6 8 10 30]';  % [min]
     nMeas = length(measTimes);
-    allTimes = [measTimes]';   % Add fake times.
     
-    P.data.simTime = [floor(min(allTimes)), ceil(max(allTimes))];
+    P.data.simTime = [floor(min(measTimes)), ceil(max(measTimes))];
     P.data.simDuration =  @() floor(diff(P.data.simTime));
-    P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
+    P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
     
-    P.data.G.time = allTimes;
-    P.data.I.time = allTimes;
-    P.data.CPep.time = allTimes;
+    %% Assay Data
+    % Glucose Assay
+    measG = T{code, repmat("G", 1, nMeas) + measTimes'}';  % [mmol/L]
+    P.data.G.value = measG([1:end]);  % [mmol/L]
+    P.data.G.time = measTimes;  % [min]
+    P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
     
-    % Data
+    % Insulin Assay
+    measI = T{code, repmat("I", 1, nMeas) + measTimes'}';  % [uU/mL == mU/L]
+    P.data.I.value = measI([1:end]);  % [mU/L]
+    P.data.I.time = measTimes;  % [min]
     
-    P = GetCPeptideParameters(P);
-    
-    measG = T{code, repmat("G", 1, nMeas) + measTimes}';  % Plasma glucose [mmol/L]
-    P.data.G.value = measG([1:end]);
-    measI = T{code, repmat("I", 1, nMeas) + measTimes}';  % Plasma insulin [uU/mL == mU/L]
-    P.data.I.value = measI([1:end]);
-    measC = T{code, repmat("C", 1, nMeas) + measTimes}';  % C-peptide [ng/mL]
-    measC = measC * 1e+3 / 1e-3;                          % ''        [pg/L]
-    measC = measC / C.MCPeptide;                          % ''        [pmol/L]
+    % C-peptide Assay
+    measC = T{code, repmat("C", 1, nMeas) + measTimes'}';  % [ng/mL]
+    measC = measC * 1e+3 / 1e-3;                          % [pg/L]
+    measC = measC / C.MCPeptide;                          % [pmol/L]
     P.data.CPep.value = measC([1:end]);
-    
-    P.data.IBolus = @(~) 0;  % No fast-I bolus here!
-    P.data.tIBolus = 0;
-    P.data.vIBolus = 0;
-    
-    
-    vGBolus = min(0.3*P.data.mass, 30);     % Glucose bolus [g]
-    vGBolus = vGBolus / C.MGlucose * 1e+3;  % ''            [mmol]
-    tGBolus = 0;                            % Time of bolus delivery [min]
-    TGBolus = 1;                            % Period of bolus action [min]
-    % Bolus as function of time, value spread over period.
-    % Active if time within period.
-    P.data.GBolus = @(t) ((tGBolus <= t) && (t < tGBolus+TGBolus)).*vGBolus/TGBolus;  % [mmol/min]
-    P.data.tGBolus = tGBolus;
-    P.data.vGBolus = vGBolus;
-    
-    
-    P.data.GInfusion = zeros(size(P.results.tArray));  % No glucose infusion in this time range.
-    P.data.GFast = @(t) P.data.G.value(1); % Assume starting at fasting.
+    P.data.CPep.time = measTimes;  % [min]   
     
     % Clear NaNs
     GNaN = isnan(P.data.G.value);
@@ -100,8 +82,29 @@ for ii = 1:length(patientSet)
     P.data.CPep.value = P.data.CPep.value(~CNaN);
     P.data.G.time = P.data.G.time(~GNaN);
     P.data.I.time = P.data.I.time(~INaN);
-    P.data.CPep.time = P.data.CPep.time(~CNaN);
+    P.data.CPep.time = P.data.CPep.time(~CNaN);     
     
+    %% Trial Inputs  
+    % Insulin Bolus
+    P.data.IType = "none";
+    P.data.IDelivery = "none";  
+
+    P.data.IBolus = @(~) 0;  % [mU/min]   
+    
+    % Glucose Bolus
+    P.data.GDelivery = "intravenous";
+    
+    vGBolus = min(0.3*P.data.mass, 30);     % [g]
+    vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
+    tGBolus = 0;                            % [min]
+    TGBolus = 1;                            % [min]
+    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min] 
+    
+    % Glucose Infusion
+    P.data.GInfusion = zeros(size(P.results.tArray));
+    
+    %% Other
+    P = GetCPeptideParameters(P);
     
     %% Save
     patientSet{ii} = P;

@@ -57,7 +57,7 @@ else
         IInput = SC.k3*P.results.QLocal(n);  % [mU/min]      
         
     else
-        assert(false)
+        IInput = 0;
     end    
 end
 

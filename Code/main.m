@@ -20,11 +20,11 @@ makeparameters
 % patientNums = [24];
 % source = "DISST";
 
-% patientNums = [146];
-% source = "CREBRF";
+patientNums = [146];
+source = "CREBRF";
 
-patientNums = [5 25];
-source = "OGTTLui";
+% patientNums = [5 25];
+% source = "OGTTLui";
 
 %% Load Data
 patientSet = LoadData(source, patientNums);

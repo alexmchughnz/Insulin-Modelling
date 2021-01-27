@@ -90,7 +90,7 @@ DP = DEBUGPLOTS.FitHepaticClearance;
 
 % nL/xL Values per Patient
 if DP.nLxL
-    MakeDebugPlot(P, DP);
+    MakeDebugPlot("nL/xL", P, DP);
     
     subplot (2, 1, 1)
     plot(tArray, P.results.nL, 'b')
@@ -101,14 +101,12 @@ if DP.nLxL
         L.Color = 'k';
     end
     
-    title(sprintf("P%d: nL", P.patientNum))
     ylabel("$n_L$ [1/min]")
     
     
     subplot(2, 1, 2)
     plot(tArray, P.results.xL, 'r')
     
-    title(sprintf("P%d: xL", P.patientNum))
     xlabel("Time [min]")
     ylabel("$x_L$ [-]")
     
@@ -122,8 +120,7 @@ b = sum(CParts, 2);
 if DP.GraphicalID
     [sampleTimes, ~] = GetIFromITotal(P); % Abuse function to get sample times for any patient.
     
-    MakeDebugPlot(P, DP);
-    hold on
+    MakeDebugPlot("Graphical Identifiability", P, DP);
     
     plt = plot(tArray, CNNorm);
     plt.DisplayName = "$n_L$ coeff.";
@@ -146,7 +143,6 @@ if DP.GraphicalID
     plt.HandleVisibility = 'on';
     plt.DisplayName = "Samples";
     
-    title(sprintf("%s: Graphical Identifiability", P.patientCode))
     xlabel("Time [min]")
     ylabel("Mean-normalised integral value")
     legend('Location', 'northwest')
@@ -160,7 +156,7 @@ if DP.ForwardSim
     kIQ = GC.nI(P)./GC.VI;
     k = P.results.Uen/GC.VI + P.data.IBolus(tArray)/GC.VI;
     
-    MakeDebugPlot(P, DP);
+    MakeDebugPlot("Insulin Simulation", P, DP);
     
     subplot(2,1,1)
     hold on
@@ -174,13 +170,12 @@ if DP.ForwardSim
     
     xlabel("Time [min]")
     ylabel("Plasma insulin, I [mU/L]")
-    title(sprintf("P%d: I", P.patientNum))
     legend("interpolated", "simulated")
     
     subplot(2,1,2)
     hold on
     plot(tArray, Q)
-    title("Q (analytical)")
+    ylabel("Interstitial insulin, Q [mU/L]")
 end
 
 % Equation Terms
@@ -190,8 +185,7 @@ if DP.EquationTerms
     intIQTerm = CParts(:, 3);
     intUenTerm = CParts(:, 4);
     
-    MakeDebugPlot(P, DP);
-    hold on
+    MakeDebugPlot("Equation Terms", P, DP);
     
     plt = plot(tArray, LHS, 'b');
     plt.DisplayName = "A*x";
@@ -215,8 +209,7 @@ end
 
 % Insulin Terms
 if DP.InsulinTerms
-    MakeDebugPlot(P, DP);
-    hold on
+    MakeDebugPlot("Insulin Terms", P, DP);
     plot(tArray,  cumtrapz(tArray, cI*I), 'g')
     plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
     legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
@@ -224,12 +217,10 @@ end
 
 % Convergence
 if DP.Convergence
-    MakeDebugPlot(P, DP);
-    hold on
+    MakeDebugPlot("Convergence Plot", P, DP);
     plot(nLArray, 'b')
     plot(xLArray, 'r')
     
-    title(sprintf("%s: Convergence", P.patientCode))
     legend("nL", "xL")
 end
 end

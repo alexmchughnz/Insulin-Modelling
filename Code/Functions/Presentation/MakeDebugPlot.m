@@ -1,8 +1,9 @@
-function F = MakeDebugPlot(P, DP)
+function F = MakeDebugPlot(figTitle, P, DP)
 % Generates a debug plot object.
 % INPUTS:
-%   P  - patient struct
-%   DP - debug plot group
+%   figTitle - title of figure
+%   P        - patient struct
+%   DP       - debug plot group
 % OUTPUT:
 %   F  - figure handle for debug plot
 
@@ -40,6 +41,9 @@ end
 % Make figure.
 fignum = GetFigNum(P.patientNum, set, num);
 F = figure(fignum);
+axes
+hold on
+title(F.Children(1), P.patientCode + ": " + figTitle);
 DEBUGPLOTS.FIGURES = vertcat(DEBUGPLOTS.FIGURES, [P.patientNum, set, num]);
 
 % Update pointers.

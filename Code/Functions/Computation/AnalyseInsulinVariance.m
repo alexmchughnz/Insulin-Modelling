@@ -52,7 +52,7 @@ DP = DEBUGPLOTS.AnalyseInsulinVariance;
 
 % Error
 if DP.Error
-    MakeDebugPlot(P, DP);
+    MakeDebugPlot("Insulin Error", P, DP);
     
     histogram(MSE, 50, ...
         'Normalization', 'probability');
@@ -60,8 +60,8 @@ if DP.Error
     xlabel("Mean Squared Error")
     ylabel("Probability")
     
-    title(sprintf("P%d: Distribution of Model MSEs with Noise SD = %g*data (N = %d)", ...
-        P.patientNum, stddev, N))
+%     title(sprintf("P%d: Distribution of Model MSEs with Noise SD = %g*data (N = %d)", ...
+%         P.patientNum, stddev, N))
     
     txt = sprintf("SD = %g", stddevError);
     xlimits = xlim;

@@ -130,8 +130,8 @@ DP = DEBUGPLOTS.FindOptimalHepaticClearance;
 
 % Error Surface
 if DP.ErrorSurface
-    MakeDebugPlot(P, DP);
-    hold on
+    figTitle = sprintf("Error Surface @ %.3f", delta);
+    MakeDebugPlot(figTitle, P, DP);
     
     % > Surface
     % Define surface parameters.
@@ -179,7 +179,6 @@ if DP.ErrorSurface
     
     % > Prettying
     delta = nLRange(2) - nLRange(1);
-    title(sprintf("%s: Error Surface @ %.3f", P.patientCode, delta))
     
     xlim([0.1 0.9])
     ylim([0 0.7])
@@ -189,7 +188,6 @@ if DP.ErrorSurface
     zlabel("Mean of squared errors [(mU/min)^2]") 
     
     % Redraw grid lines.
-    hold on
     spacing = 0.05;
     for ii = 1 : round(spacing/delta) : length(nLRange)
         plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), IResiduals(ii,:));

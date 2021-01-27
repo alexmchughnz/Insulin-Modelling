@@ -12,8 +12,9 @@ if ~exist('allowPlots', 'var')
 end
 
 %% Setup
-options = odeset('RelTol',1e-5, ...
-    'AbsTol',1e-4);
+options = odeset('RelTol', 1e-5, ...
+    'AbsTol', 1e-4, ...
+    'MaxStep', 0.1);
 
 
 %% Models
@@ -43,8 +44,7 @@ if allowPlots
     tArray = P.results.tArray;
     
     if DP.Glucose
-        MakeDebugPlot(P, DP);
-        hold on
+        MakeDebugPlot("Plasma Glucose", P, DP);
         
         [tG, vG] = GetSimTime(P, P.data.G);
         plt = plot(tG, vG, 'g*');
@@ -61,8 +61,7 @@ if allowPlots
     end
     
     if DP.Insulin
-        MakeDebugPlot(P, DP);
-        hold on
+        MakeDebugPlot("Plasma Insulin", P, DP);
         
         if P.source == "Detemir"
             [tI, vI] = GetSimTime(P, P.data.ITotal);  % [mU/L]

@@ -85,8 +85,7 @@ P.results.Uen = newUen;
 %% Debug Plots
 DP = DEBUGPLOTS.AdjustInsulinSecretion;
 if DP.Uen
-   MakeDebugPlot(P, DP);
-   hold on
+   MakeDebugPlot('Adjusted Uen', P, DP);
    
    plt = area(tArray, Uen, ...
        'EdgeColor', 'b', ...
@@ -103,25 +102,21 @@ if DP.Uen
    plt = plot(tArray, (1-variation)*Uen, 'k--', 'LineWidth', 1);
    plt.HandleVisibility = 'off';
    
-   title(sprintf("%s: Adjusted Uen", P.patientCode))   
+ 
    xlabel("Time [min]")
    ylabel("Uen [mU/min]")
    legend
 end
 
 if DP.AUC    
-   MakeDebugPlot(P, DP);
-   hold on
-   
+   MakeDebugPlot('Uen AUC', P, DP);
    
    plt = plot(tArray, AUC, 'b');
    plt.DisplayName = sprintf("Measured $U_{en}$ (AUC = %.3g)", AUCTotal);
    
    plt = plot(tArray, newAUC, 'r');
    plt.DisplayName = sprintf("Adjusted $U_{en}$ (AUC = %.3g)", newAUCTotal);
-   
-   
-   title(sprintf("%s: Uen AUC", P.patientCode))   
+    
    xlabel("Time [min]")
    ylabel("AUC [mU]")
    legend

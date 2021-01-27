@@ -136,12 +136,11 @@ P.results.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 if allowPlots
     DP = DEBUGPLOTS.FitInsulinSensitivity;
     if DP.SI
-        MakeDebugPlot(P, DP);
+        MakeDebugPlot("SI", P, DP);
         plot(P.results.tArray, P.results.SI, 'k')
         
         xlabel('Time')
         ylabel('$S_I$ [L/mU/min]')
-        title(sprintf("P%d: Insulin Sensitivity", P.patientNum))
         
         ylim([0 2e-3])
     end

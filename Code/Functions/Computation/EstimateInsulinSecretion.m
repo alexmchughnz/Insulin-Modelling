@@ -57,15 +57,10 @@ fprintf('P%d: Estimated Uen.\n', P.patientNum);
 %% Debug Plots
 DP = DEBUGPLOTS.EstimateInsulinSecretion;
 if DP.CPep
-   MakeDebugPlot(P, DP);
-   hold on
+   MakeDebugPlot("C-peptide", P, DP);
    
    plt = plot(tCPep, vCPep, 'b*');
    plt.DisplayName = "Plasma Sample";
-%    plt = plot(tArray, CPepArray, 'b-');
-%    plt.DisplayName = "Interpolation";
-   
-   title(sprintf("%s: C-peptide samples", P.patientCode))
    
    xlabel("Time [min]")
    ylabel("Plasma C-Peptide, C [pmol/L]")
@@ -73,9 +68,8 @@ if DP.CPep
    legend
 end
 if DP.Uen
-   MakeDebugPlot(P, DP);
+   MakeDebugPlot("Uen", P, DP);
    plot(tArray, Uen)
-   title(sprintf("%s: Uen", P.patientCode))
    
    xlabel("Time [min]")
    ylabel("Uen [mU/min]")

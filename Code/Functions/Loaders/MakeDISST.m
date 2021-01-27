@@ -5,7 +5,6 @@ function patientSet = MakeDISST(patientSet)
 % OUTPUT:
 %   patientSet  - updated cell array of patient structs
 
-
 global CONFIG
 global C
 

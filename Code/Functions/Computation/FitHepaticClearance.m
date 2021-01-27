@@ -5,6 +5,7 @@ function P = FitHepaticClearance(P, forcenLxL)
 %   forcenLxL - [nL, xL] to force (for plots)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
+
 global GC
 global DEBUGPLOTS
 

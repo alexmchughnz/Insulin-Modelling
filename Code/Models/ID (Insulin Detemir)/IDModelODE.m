@@ -20,10 +20,10 @@ QDB       = Y(7); %NOTE: Re-removed the factor of 18...?
 
 %% Variables
 % Time dependent.
-IDBolus = P.data.IDBolus(t); % [mU/min]
+IBolus = P.data.IBolus(t); % [mU/min]
 
 %% Computation
-dIDH = -ID.ka*IDH + IDBolus;
+dIDH = -ID.ka*IDH + IBolus;
 dQDFLocal = ID.ka*IDH - QDFLocal*(ID.kb + ID.kdi) ...
                 - (ID.kd1*QDFLocal - ID.kd2*QDBLocal);
 dQDBLocal = ID.kd1*QDFLocal - ID.kd2*QDBLocal;

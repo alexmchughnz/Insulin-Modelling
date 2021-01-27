@@ -91,16 +91,14 @@ for ii = 1:length(patientSet)
         P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay    
-        P.data.I.value = btTable.insulin;  % [mU/L]
+        P.data.I.value = btTable.insulin;  % [pmol/L]
         P.data.I.time = btTable.time;  % [min]
         
         % C-peptide Assay        
         P.data.CPep.value = btTable.cpep;  % [pmol/L]
         P.data.CPep.time = btTable.time;  % [min]
         
-        %% Trial Inputs        
-        MakeBolusFunction = @(value, time, period) (@(tArray) arrayfun(@(t) dot(value/period, (time<=t & t<(time+period))), tArray));
-    
+        %% Trial Inputs
         % Insulin Bolus
         P.data.IType = "human";
         P.data.IDelivery = "subcutaneous";

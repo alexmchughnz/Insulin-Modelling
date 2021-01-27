@@ -65,8 +65,6 @@ for ii = 1:length(patientSet)
     P.data.CPep.time = measTimes;  % [min]
     
     %% Trial Inputs
-    MakeBolusFunction = @(value, time, period) (@(tArray) arrayfun(@(t) dot(value/period, (time<=t & t<(time+period))), tArray));
-    
     % Insulin Bolus
     P.data.IType = "human";
     P.data.IDelivery = "intravenous";

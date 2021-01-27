@@ -45,9 +45,7 @@ for ii = 1:length(patientSet)
     P.data.CPep.value = [];  % [pmol/L]
     P.data.CPep.time = [];  % [min]   
     
-    %% Trial Inputs   
-    MakeBolusFunction = @(value, time, period) (@(t) dot(value/period, (time<=t & t<(time+period))));
-    
+    %% Trial Inputs  
     % Insulin Bolus
     P.data.IType = "human | detemir";
     P.data.IDelivery = "intravenous | subcutaneous";

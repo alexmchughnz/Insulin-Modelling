@@ -60,9 +60,7 @@ for ii = 1:length(patientSet)
     P.data.CPep.value = data.Cpep;  % [pmol/L]
     P.data.CPep.time = GetMins(data.Cpep_time);  % [min]
     
-    %% Trial Inputs   
-    MakeBolusFunction = @(value, time, period) (@(t) dot(value/period, (time<=t & t<(time+period))));
-    
+    %% Trial Inputs
     % Insulin Bolus
     P.data.IType = "detemir";
     P.data.IDelivery = "subcutaneous";
@@ -72,15 +70,16 @@ for ii = 1:length(patientSet)
     TIBolus = 5;              % [min]    
     P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
     
-    % 
-    P.data.meal.durations = data.meal_durations;  %[min]
-    P.data.meal.startTimes = data.meal_start;     %[datetime]
-    P.data.meal.carbs = data.carbs;               %[g]
-    P.data.meal.sugar = data.sugar;               %[g]
+    % Glucose Bolus
+    P.data.GDelivery = "enteral";
+    
+    vGBolus = (data.carbs) / C.MGlucose * 1000;  % [mmol]
+    tGBolus = data.meal_start;
+    TGBolus = data.meal_durations;
+    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min] 
     
     % Glucose Infusion
     if (P.patientNum == 1)
-        % Information about infusion.
         MAGIC_DEXTROSE_NUMBER = 1.54;  % Assume "how much glucose from 5% dextrose" factor.
         
         duration = 12;          % Duration of infusion [hrs]
@@ -107,4 +106,3 @@ for ii = 1:length(patientSet)
     clear P
 end
 end
-

@@ -15,7 +15,11 @@ P2     = Y(2);
 
 %% Variables
 % Patient dependent.
-D = GetGlucoseDelivery(t, P);  % [mmol/min]
+if (P.data.GDelivery == "enteral")
+    D = P.data.GBolus(t);  % [mmol/min]
+else
+    D = 0;
+end
 d2 = P.results.d2;
 
 %% Computation

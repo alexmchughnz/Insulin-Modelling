@@ -19,10 +19,9 @@ options = odeset('RelTol',1e-5, ...
 %% Models
 P = GIModel(P, options);
 
-if P.source == "Detemir"
+if P.data.IType == "detemir"
     P = IDModel(P, options);
-end
-if P.source == "OGTTLui"
+elseif P.data.IDelivery == "intravenous"
     P = SCModel(P, options);
 end
 

@@ -1,9 +1,11 @@
 function [dY] = GCModelODE(t, Y, P, Y0)
 % ODE for GC model. Use with ode45.
+% Note that G terms are split into those multiplying SI (GA) and those
+% added to it (Gb). This allows fitting SI from forward sim.
 % Requires P1(t) and P2(t) - must be run AFTER GI model.
 % INPUTS:
 %   t   - time at which to evaluate ODE
-%   Y   - states [G; I; Q] at time == t
+%   Y   - states [G; I; Q; GA; Gb] at time == t
 %   P   - patient struct
 %   Y0  - initial conditions of states
 % OUTPUT:
@@ -49,23 +51,26 @@ if P.data.IType == "detemir"
     
     IInput = 0;
     
-else    
+else
     if P.data.IDelivery == "intravenous"
-        IInput = P.data.IBolus(t);  % [mU/min]        
+        IInput = P.data.IBolus(t);  % [mU/min]
         
     elseif P.data.IDelivery == "subcutaneous"
-        IInput = SC.k3*P.results.QLocal(n);  % [mU/min]      
+        IInput = SC.k3*P.results.QLocal(n);  % [mU/min]
         
     else
         IInput = 0;
-    end    
+    end
 end
 
 %% Computation
-dG  = - GC.pg*(G-GFast) ...                       % Non-insulin-mediated uptake.
-    - SI*(G*Q - GFast*Q0)/(1 + GC.alphaG*Q) ...   % Insulin-mediated uptake.
-    + d2*P2/VG ...                                % Endogenous input from gut.
-    + GInput/VG;                                  % Exogenous IV glucose input.
+dGA = -(G*Q - GFast*Q0)/(1 + GC.alphaG*Q);   % Insulin-mediated uptake.
+
+dGb = - GC.pg*(G-GFast) ...                  % Non-insulin-mediated uptake.
+    + d2*P2/VG ...                           % Endogenous input from gut.
+    + GInput/VG;                             % Exogenous IV glucose input.
+
+dG = SI*dGA + dGb;
 
 dI  = - nK*I ...                  % Renal clearance.
     - nL*I/(1 + GC.alphaI*I) ...  % Liver clearance.
@@ -76,9 +81,13 @@ dI  = - nK*I ...                  % Renal clearance.
 dQ  = nI/VQ*(I-Q) ...  % Transfer from I compartment.
     - nC*Q;            % Peripheral degradation.
 
+
+
 %% Output
 dY = [dG;
     dI;
-    dQ];
+    dQ;
+    dGA;
+    dGb];
 
 end

@@ -45,50 +45,32 @@ optionsLong = odeset('RelTol',1e-5, ...   % Options for other minutes.
     'AbsTol',1e-4, ...
     'InitialStep',0.1);
 
-% Initial conditions.
-YGI0 = [0.001;  % P1(t=0)        GI Model [mmol]
-    0]; 	% P2(t=0)
-
-YID0 = [0;   % ISC(t=0)          ID Model [mU/L]
-    0;   % QDFLocal(t=0)
-    0;   % QDBLocal(t=0)
-    0;   % IDF(t=0)
-    0;   % IDB(t=0)
-    0;   % QDF(t=0)
-    0];  % QDB(t=0)
-
-YGC0 = [9;   % Q(t=0)            GC Model [mU/L]
-    0;   % GA(t=0)                    [mmol/L]
-    0];  % Gb(t=0)
-
-
 % Set up for different model types.
-if P.source == "Detemir"
-    SIModelODE = @SIModelODESlow;
-    
-    Y0 = [YGI0;
-        YID0;
-        YGC0];
-    
-    ccGA = 11;  % Column index of GA in Y.
-    ccGb = 12;  % Column index of Gb in Y.
-    
-else
-    SIModelODE = @SIModelODEFast;
-    
-    Y0 = [YGI0;
-        YGC0];
+P = SolveSystem(P);
 
-    ccGA = 4;  % Column index of GA in Y.
-    ccGb = 5;  % Column index of Gb in Y.
-end
+[~, vG] = GetSimTime(P, P.data.G);
+[~, vI] = GetIFromITotal(P);  % [mU/L]
 
+G0 = vG(1);
+I0 = vI(1);
+Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
+GA0 = 0;
+Gb0 = 0;
+
+Y0 = [G0;   
+      I0; 
+      Q0;
+      GA0;
+      Gb0];  
+
+ccGA = 4;  % Column index of GA in Y.
+ccGb = 5;  % Column index of Gb in Y.
 
 % For each interval, integrate the collection of ODEs,
 % then solve the dG equation for SI.
 for ii = 1 : numIntervals
     % First minute: finer solving.
-    [t1, Y1] = ode45(SIModelODE, ...
+    [t1, Y1] = ode45(@GCModelODE, ...
         ta : ta+1, ...
         Y0, ...
         optionsShort, ...
@@ -96,7 +78,7 @@ for ii = 1 : numIntervals
     Y0 = Y1(end, :)';  % Update ICs, picking up where we left off.
     
     % Remaining minutes: coarser solving.
-    [t2, Y2] = ode45(SIModelODE, ...
+    [t2, Y2] = ode45(@GCModelODE, ...
         (ta+1 : ta+intervalDuration-1)', ...
         Y0, ...
         optionsLong, ...
@@ -107,14 +89,17 @@ for ii = 1 : numIntervals
     Y    = [Y1(1, :); Y2];
     
     % Solve linear system to find SI.
-    % deltaG = -int{dGA}*SI + int{dGb}, therefore SI = GA\(Gb-deltaG).
+    %       deltaG = int{dGA}*SI + int{dGb}
+    %        GA*SI = deltaG - Gb
+    % therefore:
+    %           SI = GA\(deltaG - Gb)
     GA = Y(:, ccGA);         % Coefficient of SI in equation.
     Gb = Y(:, ccGb);         % Added terms in equation.
     
     deltaG  = ppG(tb) - ppG(ta);  % Change in G over interval.
     
     A = GA;
-    b = Gb-deltaG;
+    b = deltaG - Gb;
     intervalSI(ii) = A\b;
     
     % Set SI value over current interval to computed value.
@@ -145,129 +130,4 @@ if allowPlots
         ylim([0 2e-3])
     end
 end
-end
-
-
-% Adapted from fit_SI/FAERIES_integrals.
-function [dY] = SIModelODESlow(t, Y, ppG, ppI, P, Y0)
-% Collection of full system ODEs used to compute SI. Use with ode45.
-% INPUTS:
-%   t   - time at which to evaluate ODE
-%   Y   - states at time == t
-%   ppG - piecewise polynomial interpolant of G over time
-%   ppI - piecewise polynomial interpolant of I over time
-%   P   - patient struct
-%   Y0  - initial conditions of states
-% OUTPUT:
-%   dY  - derivatives of states at time == t
-global GC
-
-%% Input
-% Split up states.
-YGI = Y(1:2);
-YID = Y(3:9);
-YGC = Y(10:12);
-
-P2  = YGI(2);
-QDF = YID(6);
-Q   = YGC(1);
-
-G   = ppG(t);   % Current blood glucose (interpolated)  [mmol/L]
-I   = ppI(t);   % Current plasma insulin (interpolated) [mU/L]
-
-% Split up initial conditions.
-YID0 = Y0(3:9);
-YGC0 = Y0(10:12);
-
-QDF0 = YID0(6);
-Q0   = YGC0(1);
-
-%% Variables
-% Time dependent.
-n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
-GFast = P.data.GFast(t);    % Fasting glucose [mmol/L]
-GInfusion = P.data.GInfusion(n); % Glucose infusion rate [mmol/min]
-
-% Patient dependent.
-d2 = P.results.d2;
-
-% Derived values.
-QTFast  = Q0 + QDF0;
-QT = Q + QDF;
-
-%% Computation
-% GC Model (reconstructed)
-% dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI(P)/GC.VQ(P)*(I-Q) - GC.nC(P)*Q;
-dGA    = (G*QT - GFast*QTFast)/(1 + GC.alphaG*QT);
-dGb    = -GC.pg*(G-GFast) + d2/GC.VG(P)*P2 + GInfusion/GC.VG(P);
-dYGC   = [dQ; dGA; dGb];
-
-% GI Model
-dYGI = GIModelODE(t, YGI, P);
-
-% ID Model
-dYID = IDModelODE(t, YID, P);
-
-%% Output
-dY = [dYGI;
-    dYID;
-    dYGC];
-
-end
-
-
-function [dY] = SIModelODEFast(t, Y, ppG, ppI, P, Y0)
-% Collection of full system ODEs used to compute SI. Use with ode45.
-% INPUTS:
-%   t   - time at which to evaluate ODE
-%   Y   - states at time == t
-%   ppG - piecewise polynomial interpolant of G over time
-%   ppI - piecewise polynomial interpolant of I over time
-%   P   - patient struct
-%   Y0  - initial conditions of states
-% OUTPUT:
-%   dY  - derivatives of states at time == t
-global GC
-
-%% Input
-% Split up states.
-YGI = Y(1:2);
-YGC = Y(3:5);
-
-P2  = YGI(2);
-Q   = YGC(1);
-
-G   = ppG(t);   % Current blood glucose (interpolated)  [mmol/L]
-I   = ppI(t);   % Current plasma insulin (interpolated) [mU/L]
-
-% Split up initial conditions.
-YGC0 = Y0(3:5);
-Q0   = YGC0(1);
-
-%% Variables
-% Time dependent.
-n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
-GFast     = P.data.GFast(t);      % Fasting glucose [mmol/L]
-GBolus    = P.data.GBolus(t);     % Glucose bolus [mmol/min]
-GInfusion = P.data.GInfusion(n);  % Glucose infusion rate [mmol/min]
-
-% Patient dependent.
-d2 = P.results.d2;
-
-%% Computation
-% GC Model (reconstructed)
-% dG = -dGA*SI + dGb. SI is found with dGA\dGb (linear system).
-dQ     = GC.nI(P)/GC.VQ(P)*(I-Q) - GC.nC(P)*Q;
-dGA    = (G*Q - GFast*Q0)/(1 + GC.alphaG*Q);
-dGb    = -GC.pg*(G-GFast) + d2/GC.VG(P)*P2 + (GInfusion + GBolus)/GC.VG(P);
-dYGC   = [dQ; dGA; dGb];
-
-% GI Model
-dYGI = GIModelODE(t, YGI, P);
-
-%% Output
-dY = [dYGI;
-    dYGC];
-
 end

@@ -1,4 +1,4 @@
-function [P] = GCModel(P, options)
+function [P, Y] = GCModel(P, options)
 % Function for GC model forward simulation.
 % Pequires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
@@ -18,10 +18,14 @@ end
 G0 = vG(1);
 I0 = vI(1);
 Q0 = I0/2;  % Subcut Q assumed to be half of plasma I at t=0.
+GA0 = 0;
+Gb0 = 0;
 
 Y0 = [G0;   
       I0; 
-      Q0];  
+      Q0;
+      GA0;
+      Gb0];  
    
 % Forward simulate.
 [~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  

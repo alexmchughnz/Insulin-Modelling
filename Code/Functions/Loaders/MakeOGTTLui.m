@@ -5,7 +5,7 @@ function newPatientSet = MakeOGTTLui(patientSet)
 % OUTPUT:
 %   newPatientSet - updated cell array of patient structs
 
-global CONFIG
+global CONFIG DEBUGPLOTS
 global C
 
 source = "OGTTLui";
@@ -81,13 +81,20 @@ for ii = 1:length(patientSet)
         
         %% Assay Data
         % Glucose Assay
-        if isnumeric(btTable.glucose(1)) % Small workaround for some missing BT data for some subjects.
-            P.data.G.value = btTable.glucose(~isnan(btTable.glucose));  % [mmol/L]
-            P.data.G.time = btTable.time(~isnan(btTable.glucose));  % [min]
-        else
-            P.data.G.value = pocTable.glucose;  % [mmol/L]
-            P.data.G.time = pocTable.time;  % [min]
-        end
+        isValid = ~isnan(btTable.glucose);        
+        vBT = btTable.glucose(isValid);  % [mmol/L]
+        tBT = btTable.time(isValid);  % [min]
+        vPOC = pocTable.glucose;  % [mmol/L]
+        tPOC = pocTable.time;  % [min]     
+        
+        % If duplicated, times, choose blood test.
+        isDuplicate = ismember(tPOC, tBT);
+        [tG, order] = sort([tBT; tPOC(~isDuplicate)]);
+        vG = [vBT; vPOC(~isDuplicate)];
+        
+        P.data.G.value = vG(order);
+        P.data.G.time = tG;
+        
         P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay    
@@ -123,10 +130,25 @@ for ii = 1:length(patientSet)
         
         %% Other
         P = GetCPeptideParameters(P);    
+        
+        %% Debug Plots
+        DEBUGPLOTS.MakeOGTTLui = struct();
+        DP = DEBUGPLOTS.MakeOGTTLui;
+        MakeDebugPlot("OGTTLui Input", P, DP);
+        
+        plt = plot(tBT, vBT, 'r*');
+        plt.DisplayName = "Blood Test";
+        
+        plt = plot(tPOC, vPOC, 'b*');
+        plt.DisplayName = "Point of Care Strip";
+        
+        ylabel("Plasma Glucose [mmol/L]")
+        legend()
     
         %% Save
         newPatientSet = [newPatientSet P];
         clear P
+        
     end
 end
 end

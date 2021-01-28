@@ -229,7 +229,7 @@ for ii = 1:numel(nLGrid)
     end
     
     message = sprintf('Searching at nL/xL = %g/%g...\n', nLGrid(ii), xLGrid(ii));
-    PrintStatusUpdate(mfilename, P, message);
+    PrintStatusUpdate(P, message);
     
     % Apply nL/xL for iteration.
     copyP.results.nL = nLGrid(ii) * ones(size(copyP.results.tArray));

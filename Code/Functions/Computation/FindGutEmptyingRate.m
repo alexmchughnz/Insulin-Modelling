@@ -23,8 +23,8 @@ GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 for ii = 1:N   
     d2 = d2Grid(ii);
         
-    message = "Searching at d2 = " + string(d2);
-    PrintStatusUpdate(mfilename, P, message);     
+    message = "Searching at d2 = " + string(d2) + "...";
+    PrintStatusUpdate(P, message);     
     
     % Retrieve d2 value to simulate.
     copyP = P;

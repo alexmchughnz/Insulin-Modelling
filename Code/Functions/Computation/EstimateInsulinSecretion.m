@@ -12,6 +12,8 @@ function P = EstimateInsulinSecretion(P)
 global C GC
 global DEBUGPLOTS
 
+PrintStatusUpdate(P, "Estimating Uen..."); 
+
 %% Setup
 % Time of reading in sim [min]
 % Concentraton of C-peptide [pmol/L]
@@ -52,7 +54,6 @@ Uen = C.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 % Expand to original time, and write value to patient struct.
 dt = P.results.tArray(2) - P.results.tArray(1);
 P.results.Uen = repelem(Uen, round(1/dt), 1);
-PrintStatusUpdate(mfilename, P, "Estimated Uen."); 
 
 %% Debug Plots
 DP = DEBUGPLOTS.EstimateInsulinSecretion;

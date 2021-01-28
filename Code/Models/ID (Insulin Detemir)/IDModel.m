@@ -12,7 +12,7 @@ if ~exist('options', 'var')
     options = odeset;
 end
 
-PrintStatusUpdate(mfilename, P, "Begin solving...")
+PrintStatusUpdate(P, "Begin solving...")
 
 
 % Set up initial conditions.

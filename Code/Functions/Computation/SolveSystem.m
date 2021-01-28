@@ -11,7 +11,7 @@ if ~exist('allowPlots', 'var')
     allowPlots = false;
 end
 
-PrintStatusUpdate(mfilename, P, "Solving entire system!")
+PrintStatusUpdate(P, "Solving entire system!")
 
 %% Setup
 options = odeset('RelTol', 1e-5, ...

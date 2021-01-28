@@ -9,6 +9,8 @@ function P = FitHepaticClearance(P, forcenLxL)
 global GC
 global DEBUGPLOTS
 
+PrintStatusUpdate(P, "Fitting nL/xL...")
+
 MeanNormalise = @(data) data ./ mean(data);
 
 %% Setup

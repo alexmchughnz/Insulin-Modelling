@@ -13,7 +13,7 @@ if ~exist('allowPlots', 'var')
     allowPlots = true;
 end
 
-PrintStatusUpdate(mfilename, P, "Fitting SI...")
+PrintStatusUpdate(P, "Fitting SI...")
 
 %% Setup
 % Define time range.

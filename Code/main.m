@@ -17,11 +17,11 @@ makeparameters
 % patientNums = [1];
 % source = "Detemir";
 
-% patientNums = [24];
-% source = "DISST";
+patientNums = [24];
+source = "DISST";
 
-patientNums = [146];
-source = "CREBRF";
+% patientNums = [146];
+% source = "CREBRF";
 
 % patientNums = [5 25];
 % source = "OGTTLui";

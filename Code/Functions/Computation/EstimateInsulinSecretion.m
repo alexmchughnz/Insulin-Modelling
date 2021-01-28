@@ -52,7 +52,7 @@ Uen = C.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 % Expand to original time, and write value to patient struct.
 dt = P.results.tArray(2) - P.results.tArray(1);
 P.results.Uen = repelem(Uen, round(1/dt), 1);
-fprintf('P%d: Estimated Uen.\n', P.patientNum); 
+PrintStatusUpdate(mfilename, P, "Estimated Uen."); 
 
 %% Debug Plots
 DP = DEBUGPLOTS.EstimateInsulinSecretion;

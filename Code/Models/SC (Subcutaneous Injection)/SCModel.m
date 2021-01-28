@@ -12,6 +12,9 @@ if ~exist('options', 'var')
     options = odeset;
 end
 
+PrintStatusUpdate(mfilename, P, "Begin solving...")
+
+
 % Set up initial conditions.
 Y0 = [SC.ISC0;
       SC.QLocal0];

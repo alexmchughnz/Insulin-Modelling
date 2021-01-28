@@ -25,7 +25,7 @@ end
 for ii = 1:length(patientSet)
     P = patientSet{ii};
     save(fullfile(CONFIG.DATAPATH, P.source, P.patientCode), '-struct', 'P');
-    fprintf('%s: Saved patient data.\n', P.patientCode);
+    PrintStatusUpdate(mfilename, P, "Saved patient.")
 end
 
 %% Debug Plots

@@ -20,14 +20,16 @@ GErrorGrid = zeros(1, N); % Average relative error for each d2 value trialled.
 [tG, vG] = GetSimTime(P, P.data.G);
 
 %% Search
-fprintf('P%d: Searching for best d2...\n', ...
-        P.patientNum);
-for ii = 1:N 
-    copyP = P;
+for ii = 1:N   
+    d2 = d2Grid(ii);
+        
+    message = "Searching at d2 = " + string(d2);
+    PrintStatusUpdate(mfilename, P, message);     
     
     % Retrieve d2 value to simulate.
-    copyP.results.d2 = d2Grid(ii);  % [1/min]
-    
+    copyP = P;
+    copyP.results.d2 = d2;  % [1/min]
+
     % Fit SI at this d2 value.
     copyP = FitInsulinSensitivity(copyP, false);
     SIGrid(:, ii) = copyP.results.SI;

@@ -228,8 +228,8 @@ for ii = 1:numel(nLGrid)
         copyP = PArray(ii);
     end
     
-    fprintf('\nP%d: Searching at nL/xL = %g/%g...\n', ...
-        copyP.patientNum, nLGrid(ii), xLGrid(ii))
+    message = sprintf('Searching at nL/xL = %g/%g...\n', nLGrid(ii), xLGrid(ii));
+    PrintStatusUpdate(mfilename, P, message);
     
     % Apply nL/xL for iteration.
     copyP.results.nL = nLGrid(ii) * ones(size(copyP.results.tArray));

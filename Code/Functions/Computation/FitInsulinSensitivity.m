@@ -13,6 +13,8 @@ if ~exist('allowPlots', 'var')
     allowPlots = true;
 end
 
+PrintStatusUpdate(mfilename, P, "Fitting SI...")
+
 %% Setup
 % Define time range.
 intervalDuration = 360;  % Time per interval [min]

@@ -11,6 +11,8 @@ if ~exist('allowPlots', 'var')
     allowPlots = false;
 end
 
+PrintStatusUpdate(mfilename, P, "Solving entire system!")
+
 %% Setup
 options = odeset('RelTol', 1e-5, ...
     'AbsTol', 1e-4, ...
@@ -75,11 +77,11 @@ if allowPlots
             pltylabel = 'Plasma Insulin, I [mU/l]';
         end
         
-        plt = plot(tArray, I, 'k');
-        plt.DisplayName = 'Model Prediction';
-        
         plt = plot(tI, vI, 'r*');
-        plt.DisplayName = 'Plasma Sample';        
+        plt.DisplayName = 'Plasma Sample';    
+        
+        plt = plot(tArray, I, 'k');
+        plt.DisplayName = 'Model Prediction';            
         
         xlabel('Time [min]')
         ylabel(pltylabel)

@@ -1,4 +1,4 @@
-global ID
+function ID = IDParameters(~)
 
 % Initial Values
 ID.ISC0 = 0;
@@ -20,3 +20,5 @@ ID.nK   = 0.06;     % Detemir renal clearance [1/min]
 ID.nDL  = 0.147;    % Detamir hepatic insulin clearance rate [1/min]
 ID.nDI  = 0.06;     % Detemir trans-endothelial diffusion rate [1/min]
 ID.nDC  = 0.032;    % Detemir insulin degredation rate [1/min]
+
+end

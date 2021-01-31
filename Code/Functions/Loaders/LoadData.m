@@ -21,6 +21,9 @@ elseif source == "OGTTLui"
     patientSet = MakeOGTTLui(patientSet);
 end
 
+%% Apply parameters to patient structs.
+patientSet = LoadParameters(patientSet);
+
 %% Save patient structs.
 for ii = 1:length(patientSet)
     P = patientSet{ii};

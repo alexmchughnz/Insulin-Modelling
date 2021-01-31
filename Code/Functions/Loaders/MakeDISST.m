@@ -6,7 +6,7 @@ function patientSet = MakeDISST(patientSet)
 %   patientSet  - updated cell array of patient structs
 
 global CONFIG
-global C
+C = LoadConstants();
 
 source = "DISST";
 

@@ -11,7 +11,6 @@ tic
 
 makeconfig
 makedebugplots
-makeparameters
 
 %% Select Data
 % patientNums = [1];
@@ -23,7 +22,7 @@ makeparameters
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [5];
+patientNums = [2 5 14 16];
 source = "OGTTLui";
 
 %% Load Data
@@ -31,7 +30,8 @@ patientSet = LoadData(source, patientNums);
 
 %% Run
 for ii = 1:length(patientSet)
-    patientSet{ii} = SimpleSimulation(patientSet{ii});
+    forcenLxL = [0.1 0.67];
+    patientSet{ii} = SimpleSimulationForced(patientSet{ii}, forcenLxL);
 end
 
 %% Results

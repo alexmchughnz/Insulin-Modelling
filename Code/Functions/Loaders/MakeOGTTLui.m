@@ -6,7 +6,7 @@ function newPatientSet = MakeOGTTLui(patientSet)
 %   newPatientSet - updated cell array of patient structs
 
 global CONFIG DEBUGPLOTS
-global C
+C = LoadConstants();
 
 source = "OGTTLui";
 
@@ -129,7 +129,7 @@ for ii = 1:length(patientSet)
         P.data.GInfusion = zeros(size(P.results.tArray));
         
         %% Other
-        P = GetCPeptideParameters(P);    
+%         P = GetCPeptideParameters(P);    
         
         %% Debug Plots
         DEBUGPLOTS.MakeOGTTLui = struct();

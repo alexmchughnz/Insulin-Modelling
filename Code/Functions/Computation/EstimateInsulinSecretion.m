@@ -9,8 +9,10 @@ function P = EstimateInsulinSecretion(P)
 %   P   - modified patient struct with Uen
 
 
-global C GC
 global DEBUGPLOTS
+CP = P.params.CP;
+GC = P.params.GC;
+C = LoadConstants();
 
 PrintStatusUpdate(P, "Estimating Uen..."); 
 
@@ -18,11 +20,6 @@ PrintStatusUpdate(P, "Estimating Uen...");
 % Time of reading in sim [min]
 % Concentraton of C-peptide [pmol/L]
 [tCPep, vCPep] = GetSimTime(P, P.data.CPep);
-
-% Rate constants.
-k1 = P.data.k1;   
-k2 = P.data.k2;   
-k3 = P.data.k3;
 
 %% Interpolation
 ppCPep = griddedInterpolant(tCPep, vCPep);
@@ -35,7 +32,7 @@ CPepArray = ppCPep(tArray);
 %% Solving
 % Initial conditions.
 Y = zeros(size(tArray));
-Y0 = k1/k2*CPepArray(1);
+Y0 = CP.k1/CP.k2*CPepArray(1);
 Y(1:2) = Y0;
 
 % Calculate Y over time. Assumes dY/dt == 0(?)
@@ -43,12 +40,12 @@ for ii = 3:length(tArray)
     tSeg = tArray(1:ii-1);
     CPepSeg = CPepArray(1:ii-1);
     YSeg = Y(1:ii-1);
-    Y(ii) = Y(1) + trapz(tSeg, k1*CPepSeg - k2*YSeg);
+    Y(ii) = Y(1) + trapz(tSeg, CP.k1*CPepSeg - CP.k2*YSeg);
 end
 
 % Calculate endogenous secretion rate (Uen).
 dvCPep = [diff(CPepArray)/dt; 0];
-S = (dvCPep + (k1+k3).*CPepArray - k2*Y);  % C-peptide secretion [(pmol/L)/min]
+S = (dvCPep + (CP.k1+CP.k3).*CPepArray - CP.k2*Y);  % C-peptide secretion [(pmol/L)/min]
 Uen = C.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 
 % Expand to original time, and write value to patient struct.

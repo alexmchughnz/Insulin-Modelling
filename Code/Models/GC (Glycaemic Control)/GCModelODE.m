@@ -11,7 +11,8 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-global GC SC
+GC = P.params.GC;
+SC = P.params.SC;
 
 %% Input
 G  = Y(1);  % [mmol/L]
@@ -31,11 +32,6 @@ GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
 
 % Patient dependent.
 d2 = P.results.d2;
-VG = GC.VG(P);
-VQ = GC.VQ(P);
-nI = GC.nI(P);
-nC = GC.nC(P);
-nK = GC.nK(P);
 
 % Trial dependent.
 if P.data.GDelivery == "intravenous"
@@ -67,19 +63,19 @@ end
 dGA = -(G*Q - GFast*Q0)/(1 + GC.alphaG*Q);   % Insulin-mediated uptake.
 
 dGb = - GC.pg*(G-GFast) ...                  % Non-insulin-mediated uptake.
-    + d2*P2/VG ...                           % Endogenous input from gut.
-    + GInput/VG;                             % Exogenous IV glucose input.
+    + d2*P2/GC.VG ...                           % Endogenous input from gut.
+    + GInput/GC.VG;                             % Exogenous IV glucose input.
 
 dG = SI*dGA + dGb;
 
-dI  = - nK*I ...                  % Renal clearance.
+dI  = - GC.nK*I ...                  % Renal clearance.
     - nL*I/(1 + GC.alphaI*I) ...  % Liver clearance.
-    - nI/GC.VI*(I-Q) ...          % Transfer to Q compartment.
+    - GC.nI/GC.VI*(I-Q) ...          % Transfer to Q compartment.
     + Uen*(1 - xL)/GC.VI ...      % Endogenous input.
     + IInput/GC.VI;               % Exogenous input (IV or subcut).
 
-dQ  = nI/VQ*(I-Q) ...  % Transfer from I compartment.
-    - nC*Q;            % Peripheral degradation.
+dQ  = GC.nI/GC.VQ*(I-Q) ...  % Transfer from I compartment.
+    - GC.nC*Q;            % Peripheral degradation.
 
 
 

@@ -76,7 +76,7 @@ end
 
 %% Functions
 function MSE = GetSimError(P)
-global C
+C = LoadConstants();
 
 % Get other parameters and forward simulate models.
 P = FindGutEmptyingRate(P);

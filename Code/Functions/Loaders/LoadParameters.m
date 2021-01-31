@@ -5,11 +5,11 @@ function patientSet = LoadParameters(patientSet)
         P.params.CP = CPParameters(P);       
         
         P.params.GC = GCParameters(P);
-        P.params.GI = GIParameters();
+        P.params.GI = GIParameters(P);
         if P.data.IType == "detemir"
-            P.params.ID = IDParameters();
+            P.params.ID = IDParameters(P);
         elseif P.data.IDelivery == "subcutaneous"
-            P.params.SC = SCParameters();
+            P.params.SC = SCParameters(P);
         end
         
         patientSet{ii} = P;
@@ -32,7 +32,11 @@ a = log(2)/CHalfLife1;
 b = log(2)/CHalfLife2;
 
 % Rate constants.
-CP.k2 = F*(b-a) + a;
-CP.k3 = a*b/(k2); % NOTE: Original code had no factor of 1/2; PDD's thesis does.
-CP.k1 = a + b - k2 - k3;
+k2 = F*(b-a) + a;
+k3 = a*b/(k2); % NOTE: Original code had no factor of 1/2; PDD's thesis does.
+k1 = a + b - k2 - k3;
+
+CP.k1 = k1;
+CP.k2 = k2;
+CP.k3 = k3;
 end

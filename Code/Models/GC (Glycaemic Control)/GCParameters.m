@@ -9,14 +9,15 @@ GC.alphaG = 0.0154;                   % Saturation of insulin binding to cells [
 
 
 % Dependent Parameters
+CP = P.params.CP;
 GC.VI = 4;                    % Insulin volume of distribution [L]
-GC.VQ = (P.data.k1/P.data.k2)*GC.VI;  % Interstitial volume of distribution [L]
+GC.VQ = (CP.k1/CP.k2)*GC.VI;  % Interstitial volume of distribution [L]
 GC.VG = 1.2*(GC.VI + GC.VQ);  % Glucose volume of distribution [L]
 
-GC.nI = GC.VQ * P.data.k2;                 % Trans-endothelial insulin diffusion [1/min]
+GC.nI = GC.VQ * CP.k2;                 % Trans-endothelial insulin diffusion [1/min]
 gamma = 0.5;
 GC.nC = (GC.nI/GC.VQ) * (1/gamma - 1); % Peripheral insulin degradation [1/min]
 
-GC.nK = P.data.k3;                       % Renal insulin clearance [1/min]
+GC.nK = CP.k3;                       % Renal insulin clearance [1/min]
 
 end

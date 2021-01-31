@@ -6,8 +6,8 @@ function P = FitHepaticClearance(P, forcenLxL)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-global GC
 global DEBUGPLOTS
+GC = P.params.GC;
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
@@ -38,8 +38,8 @@ ppI = griddedInterpolant(tI, vI);  % [mU/L]
 Q = zeros(length(tArray), 1); %analytical solution for Q
 
 % Consider form of dQ/dt = -cQ*Q + cI*I.
-cQ = GC.nC(P) + GC.nI(P)/GC.VQ(P); % Constant term coefficent of Q - easier to use
-cI = GC.nI(P)/GC.VQ(P);  % Constant term coefficent of I - easier to use
+cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
+cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
 t0 = tArray(1);
 I0 = ppI(t0);   % [mU/L]
@@ -228,7 +228,7 @@ end
 end
 
 function [nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray, tI)
-global GC
+GC = P.params.GC;
 
 % Retrieve data.
 iiMinutes = GetTimeIndex(tArray, P.results.tArray);
@@ -244,12 +244,12 @@ end
 
 % Set coefficients for MLR.
 % Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
-kI = -GC.nK(P);
-kIQ = -GC.nI(P)./GC.VI;
+kI = -GC.nK;
+kIQ = -GC.nI./GC.VI;
 k = IBolus/GC.VI;
 % Also consider dQ/dt = -cQ*Q + cI*I:
-cQ = GC.nC(P) + GC.nI(P)/GC.VQ(P); % Constant term coefficent of Q - easier to use
-cI = GC.nI(P)/GC.VQ(P);  % Constant term coefficent of I - easier to use
+cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
+cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
 % Perform iterative integral method.
 nLArray = [0];

@@ -3,8 +3,7 @@ function PanelDebugPlots(monitor)
 % INPUTS:
 %   monitor - integer representing which monitor to display plots on
 
-global DEBUGPLOTS
-figData = DEBUGPLOTS.FIGURES;
+figData = DebugPlots().FIGURES;
 
 if ~exist('monitor', 'var')
     monitor = 1;

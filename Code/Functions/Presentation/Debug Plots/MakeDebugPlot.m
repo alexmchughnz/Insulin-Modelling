@@ -7,7 +7,7 @@ function F = MakeDebugPlot(figTitle, P, DP)
 % OUTPUT:
 %   F  - figure handle for debug plot
 
-global DEBUGPLOTS
+DEBUGPLOTS = DebugPlots();
 
 GetFigNum = @(p, s, n) 100*p + 10*s + n;
 
@@ -50,4 +50,6 @@ DEBUGPLOTS.FIGURES = vertcat(DEBUGPLOTS.FIGURES, [P.patientNum, set, num]);
 stateData{P.patientNum}.prevDP = DP;
 stateData{P.patientNum}.prevset = set;
 stateData{P.patientNum}.prevNum = num;
+
+DebugPlots(DEBUGPLOTS);
 end

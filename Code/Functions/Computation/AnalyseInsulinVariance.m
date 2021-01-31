@@ -8,7 +8,7 @@ function P = AnalyseInsulinVariance(P, stddev, N)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-global DEBUGPLOTS
+DP = DebugPlots().AnalyseInsulinVariance;
 
 %% Setup
 [tData, ~] = GetIFromITotal(P);
@@ -48,8 +48,6 @@ save(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, N)))
 
 %% ==================================================
 %% Debug Plots
-DP = DEBUGPLOTS.AnalyseInsulinVariance;
-
 % Error
 if DP.Error
     MakeDebugPlot("Insulin Error", P, DP);
@@ -76,8 +74,6 @@ end
 
 %% Functions
 function MSE = GetSimError(P)
-C = LoadConstants();
-
 % Get other parameters and forward simulate models.
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P, true);

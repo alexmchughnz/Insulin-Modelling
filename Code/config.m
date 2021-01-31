@@ -4,6 +4,9 @@ set(groot, 'defaultLegendInterpreter','latex');
 set(groot, 'DefaultLineLineWidth', 2.0);
 set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 8 6]);
 
+
+clear MakeDebugPlot  % Needed to reset persistents in this function.
+
 global CONFIG
 CONFIG.FUNCPATH  = fullfile(pwd, 'Functions');
 CONFIG.MODELPATH = fullfile(pwd, 'Models');

@@ -5,7 +5,7 @@ function P = SolveSystem(P, allowPlots)
 % OUTPUT:
 %   P   - modified patient struct with SI
 
-global DEBUGPLOTS
+DP = DebugPlots().SolveSystem;
 
 if ~exist('allowPlots', 'var')
     allowPlots = false;
@@ -42,7 +42,6 @@ P.results.insulinMAPE = MAPE;
 
 %% Debug Plots
 if allowPlots
-    DP = DEBUGPLOTS.SolveSystem;
     tArray = P.results.tArray;
     
     if DP.Glucose

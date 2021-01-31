@@ -12,7 +12,8 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-global DEBUGPLOTS
+DP = DebugPlots().FindOptimalHepaticClearance;
+
 global FILEFORMAT
 
 GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
@@ -126,8 +127,6 @@ P.results.minimalErrorRegionSize = sum(isWithin1SD(:));
 %% ------------------------------------------------------------------------
 
 %% Debug Plots
-DP = DEBUGPLOTS.FindOptimalHepaticClearance;
-
 % Error Surface
 if DP.ErrorSurface
     figTitle = sprintf("Error Surface @ %.3f", delta);

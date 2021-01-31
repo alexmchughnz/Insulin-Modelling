@@ -9,8 +9,7 @@ fprintf("Running main - press key to start.\n")
 % pause
 tic
 
-makeconfig
-makedebugplots
+config
 
 %% Select Data
 % patientNums = [1];

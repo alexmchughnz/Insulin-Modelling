@@ -7,7 +7,7 @@ function P = FitInsulinSensitivity(P, allowPlots)
 %   allowPlots - flag for whether debug plots should appear (allows
 %                suppression)
 
-global DEBUGPLOTS
+DP = DebugPlots().FitInsulinSensitivity;
 
 if ~exist('allowPlots', 'var')
     allowPlots = true;
@@ -121,7 +121,6 @@ P.results.SI(1:length(minuteSI)) = minuteSI;  % [L/mU/min]
 
 %% Debug Plots
 if allowPlots
-    DP = DEBUGPLOTS.FitInsulinSensitivity;
     if DP.SI
         MakeDebugPlot("SI", P, DP);
         plot(P.results.tArray, P.results.SI, 'k')

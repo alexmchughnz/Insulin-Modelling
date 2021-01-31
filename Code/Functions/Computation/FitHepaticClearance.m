@@ -6,7 +6,7 @@ function P = FitHepaticClearance(P, forcenLxL)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-global DEBUGPLOTS
+DP = DebugPlots().FitHepaticClearance;
 GC = P.params.GC;
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
@@ -88,8 +88,6 @@ P.results.delta2NormnL = norm(CNNorm - bNorm) / length(CN);
 P.results.delta2NormxL = norm(CXNorm - bNorm) / length(CN);
 
 %% Debug Plots
-DP = DEBUGPLOTS.FitHepaticClearance;
-
 % nL/xL Values per Patient
 if DP.nLxL
     MakeDebugPlot("nL/xL", P, DP);

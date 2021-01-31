@@ -8,8 +8,8 @@ function P = EstimateInsulinSecretion(P)
 % OUTPUT:
 %   P   - modified patient struct with Uen
 
+DP = DebugPlots().EstimateInsulinSecretion;
 
-global DEBUGPLOTS
 CP = P.params.CP;
 GC = P.params.GC;
 C = LoadConstants();
@@ -53,7 +53,6 @@ dt = P.results.tArray(2) - P.results.tArray(1);
 P.results.Uen = repelem(Uen, round(1/dt), 1);
 
 %% Debug Plots
-DP = DEBUGPLOTS.EstimateInsulinSecretion;
 if DP.CPep
    MakeDebugPlot("C-peptide", P, DP);
    

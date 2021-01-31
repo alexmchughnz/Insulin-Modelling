@@ -7,8 +7,7 @@ function P = AdjustInsulinSecretion(P, method, time)
 % OUTPUT:
 %   P   - modified patient struct with Uen
 
-
-global DEBUGPLOTS
+DP = DebugPlots().AdjustInsulinSecretion;
 
 %% Setup
 relError = @(a, b) abs(a-b)/a;
@@ -83,7 +82,6 @@ P.results.Uen = newUen;
 
     
 %% Debug Plots
-DP = DEBUGPLOTS.AdjustInsulinSecretion;
 if DP.Uen
    MakeDebugPlot('Adjusted Uen', P, DP);
    

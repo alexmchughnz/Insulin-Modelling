@@ -7,11 +7,14 @@ function P = SimpleSimulationForced(P, forcenLxL)
 %   P  - updated patient struct
 
 %% Plots
-global DEBUGPLOTS
-DEBUGPLOTS.EstimateInsulinSecretion.Uen = 1;
-DEBUGPLOTS.FitInsulinSensitivity.SI = 1;
-DEBUGPLOTS.SolveSystem.Glucose = 1;
-DEBUGPLOTS.SolveSystem.Insulin = 1;
+plots = DebugPlots();
+
+plots.EstimateInsulinSecretion.Uen = 1;
+plots.FitInsulinSensitivity.SI = 1;
+plots.SolveSystem.Glucose = 1;
+plots.SolveSystem.Insulin = 1;
+
+DebugPlots(plots);
 
 %% Functions
 P = EstimateInsulinSecretion(P);

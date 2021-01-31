@@ -21,7 +21,7 @@ config
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [2 5 14 16];
+patientNums = [2] %5 14 16];
 source = "OGTTLui";
 
 %% Load Data
@@ -30,7 +30,7 @@ patientSet = LoadData(source, patientNums);
 %% Run
 for ii = 1:length(patientSet)
     forcenLxL = [0.1 0.67];
-    patientSet{ii} = SimpleSimulationForced(patientSet{ii}, forcenLxL);
+    patientSet{ii} = GridSearchSim(patientSet{ii});
 end
 
 %% Results

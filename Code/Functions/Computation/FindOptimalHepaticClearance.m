@@ -14,12 +14,9 @@ function P = FindOptimalHepaticClearance(P, method, varargin)
 
 DP = DebugPlots().FindOptimalHepaticClearance;
 
-global FILEFORMAT
-
-GRIDFORMAT = "grid nL[%g %g]@%g xL[%g %g]@%g";
-FILEFORMAT = '%s_%s.mat';
-
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.025};
+GRIDFORMAT = @(nLBounds, nLDelta, xLBounds, xLDelta) ...
+            sprintf("grid nL[%g %g]@%g xL[%g %g]@%g", nLBounds, nLDelta, xLBounds, xLDelta);
 
 %% Setup
 if method == "grid"
@@ -44,10 +41,8 @@ if method == "grid"
     [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     
     
-    filename = sprintf(GRIDFORMAT, ...
-        nLBounds, nLDelta, xLBounds, xLDelta);
-    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
-    
+    filename = GRIDFORMAT(nLBounds, nLDelta, xLBounds, xLDelta);
+    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);    
     
 else
     if ~isempty(varargin)
@@ -73,30 +68,30 @@ else
     end
 end
 
-if method == "refine"
-    boundary = 0.1;
-    delta = 0.005;
-    
-    % Find range surrounding 1SD area.
-    gridMin = min(IResiduals(:));
-    deltaMSE = abs(IResiduals - gridMin);
-    isWithin1SD = (deltaMSE <= P.data.stddevMSE);
-    
-    nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), boundary) - boundary;
-    nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), boundary) + boundary;
-    xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), boundary) - boundary;
-    xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), boundary) + boundary;
-    
-    % Set up grid.
-    nLRange = nLMin : delta : nLMax;
-    xLRange = xLMin : delta : xLMax;
-    
-    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
-    
-    filename = sprintf(GRIDFORMAT, ...
-        [nLMin nLMax], delta, [xLMin xLMax], delta);
-    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
-end
+% if method == "refine"
+%     boundary = 0.1;
+%     delta = 0.005;
+%     
+%     % Find range surrounding 1SD area.
+%     gridMin = min(IResiduals(:));
+%     deltaMSE = abs(IResiduals - gridMin);
+%     isWithin1SD = (deltaMSE <= P.data.stddevMSE);
+%     
+%     nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), boundary) - boundary;
+%     nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), boundary) + boundary;
+%     xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), boundary) - boundary;
+%     xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), boundary) + boundary;
+%     
+%     % Set up grid.
+%     nLRange = nLMin : delta : nLMax;
+%     xLRange = xLMin : delta : xLMax;
+%     
+%     [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
+%     
+%     filename = sprintf(GRIDFORMAT, ...
+%         [nLMin nLMax], delta, [xLMin xLMax], delta);
+%     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
+% end
 
 %% Find Optimal nL/xL
 % Get minimum.
@@ -214,51 +209,48 @@ end
 end
 
 %% Functions
-function [IResiduals, simI] = EvaluateGrid(PArray, nLGrid, xLGrid, savename)
+function [IResiduals, simI] = EvaluateGrid(P, nLGrid, xLGrid, savename)
 
-global FILEFORMAT
-
-ISimulated = cell(size(nLGrid));
+ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
 IResiduals = zeros(size(nLGrid));
-for ii = 1:numel(nLGrid)
-    if length(PArray) == 1
-        copyP = PArray(1);
-    else
-        copyP = PArray(ii);
-    end
-    
-    message = sprintf('Searching at nL/xL = %g/%g...\n', nLGrid(ii), xLGrid(ii));
-    PrintStatusUpdate(P, message);
+for ii = 1:numel(nLGrid)    
+    message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
+    PrintStatusUpdate(P, message, true);
     
     % Apply nL/xL for iteration.
-    copyP.results.nL = nLGrid(ii) * ones(size(copyP.results.tArray));
-    copyP.results.xL = xLGrid(ii) * ones(size(copyP.results.tArray));
+    P.results.nL = nLGrid(ii) * ones(size(P.results.tArray));
+    P.results.xL = xLGrid(ii) * ones(size(P.results.tArray));
     
     % Get other parameters and forward simulate models.
-    copyP = FindGutEmptyingRate(copyP);
-    copyP = FitInsulinSensitivity(copyP, false);
-    copyP = SolveSystem(copyP);
+    P = FindGutEmptyingRate(P);
+    P = FitInsulinSensitivity(P, false);
+    P = SolveSystem(P);
     
     % Determine error at raw data points only.
-    if (copyP.source == "Detemir")
-        [tI, vI] = GetSimTime(copyP, copyP.data.ITotal);  % Data [mU/L]
-        simI = copyP.results.I + copyP.results.IDF;       % Sim [mU/L]
+    if (P.source == "Detemir")
+        [tI, vI] = GetSimTime(P, P.data.ITotal);  % Data [mU/L]
+        simI = P.results.I + P.results.IDF;       % Sim [mU/L]
     else
-        [tI, vI] = GetSimTime(copyP, copyP.data.I);  % Data [mU/L]
-        simI = copyP.results.I;                      % Sim [mU/L]
+        [tI, vI] = GetSimTime(P, P.data.I);  % Data [mU/L]
+        simI = P.results.I;                      % Sim [mU/L]
     end  
-    inSimTime = GetTimeIndex(tI, copyP.results.tArray);
+    inSimTime = GetTimeIndex(tI, P.results.tArray);
     IErrors = simI(inSimTime) - vI;
     
     % Save residuals.
     IResiduals(ii) = sum(IErrors.^2)/numel(vI);  % Mean Squared Errors
-    ISimulated{ii} = simI;
+    [row, col] = ind2sub(size(ISimulated), ii);
+    ISimulated(row, col, :) = simI(:);
     
-    EstimateTimeRemaining(ii, numel(nLGrid))
+    PrintTimeRemaining(ii, numel(nLGrid), P)
 end
 
 % Export results.
-save(ResultsPath(sprintf(FILEFORMAT, PArray.patientCode, savename)), ...
-    'nLGrid', 'xLGrid', 'IResiduals', 'ISimulated')
+saveStruct = struct(...
+    'nLGrid', nLGrid, ...
+    'xLGrid', xLGrid, ...
+    'IResiduals', IResiduals, ...
+    'ISimulated', ISimulated);
+SaveResults(P, savename, saveStruct)
 
 end

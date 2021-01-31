@@ -24,6 +24,11 @@ end
 %% Apply parameters to patient structs.
 patientSet = LoadParameters(patientSet);
 
+% TODO: fix this stub
+for ii = 1:length(patientSet)
+    patientSet{ii}.data.stddevMSE = 10;
+end
+
 %% Save patient structs.
 for ii = 1:length(patientSet)
     P = patientSet{ii};

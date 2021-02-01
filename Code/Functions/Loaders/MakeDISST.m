@@ -69,18 +69,19 @@ for ii = 1:length(patientSet)
     P.data.IType = "human";
     P.data.IDelivery = "intravenous";
     
-    vIBolus = dataTable{code, "IB"} * 1e+3;  % [mU]
-    tIBolus = dataTable{code, "timeIB"}/60;  %  [min]
-    TIBolus = 1;  % [min]
-    P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
-
+    P.data.vIBolus = dataTable{code, "IB"} * 1e+3;  % [mU]
+    P.data.tIBolus = dataTable{code, "timeIB"}/60;  %  [min]
+    P.data.TIBolus = 1;  % [min]
+    
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
     
-    vGBolus = dataTable{code, "GB"} / C.MGlucose * 1e+3;  % [mmol]
-    tGBolus = dataTable{code, "timeGB"}/60;  % [min]
-    TGBolus = 1;  % [min]
-    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min]
+    P.data.vGBolus = dataTable{code, "GB"} / C.MGlucose * 1e+3;  % [mmol]
+    P.data.tGBolus = dataTable{code, "timeGB"}/60;  % [min]
+    P.data.TGBolus = 1;  % [min]
+    
+    
+    P = MakeBolusFunctions(P);
     
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]    

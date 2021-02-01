@@ -64,6 +64,13 @@ if allowPlots
         plt = plot(tArray, P.results.G, 'k');
         plt.DisplayName = 'Model Prediction';
         
+        if isfield(P.data, 'tGBolus')
+            plt = line([P.data.tGBolus P.data.tGBolus], ylim, ...
+                       'Color', 'g', ...
+                       'LineStyle', '--');
+            plt.DisplayName = 'Bolus Input';
+        end
+        
         xlabel('Time')
         ylabel('Plasma Glucose, G [mmol/L]')
         legend()
@@ -90,7 +97,17 @@ if allowPlots
         plt.DisplayName = 'Plasma Sample';    
         
         plt = plot(tArray, I, 'k');
-        plt.DisplayName = 'Model Prediction';            
+        plt.DisplayName = 'Model Prediction';   
+        
+        if isfield(P.data, 'tIBolus')
+            plt = line([P.data.tIBolus'; P.data.tIBolus'], ylim, ...
+                       'Color', 'r', ...
+                       'LineStyle', '--');
+            plt(1).DisplayName = 'Bolus Input';
+            for pp = 2:length(plt)
+               plt(pp).HandleVisibility = 'off'; 
+            end
+        end
         
         xlabel('Time [min]')
         ylabel(pltylabel)

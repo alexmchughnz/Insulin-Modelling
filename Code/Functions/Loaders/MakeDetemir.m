@@ -65,18 +65,19 @@ for ii = 1:length(patientSet)
     P.data.IType = "detemir";
     P.data.IDelivery = "subcutaneous";
     
-    vIBolus = sys.SC.Ibolus;  % [mU]
-    tIBolus = sys.SC.T;       % [min]
-    TIBolus = 5;              % [min]    
-    P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
+    P.data.vIBolus = sys.SC.Ibolus;  % [mU]
+    P.data.tIBolus = sys.SC.T;       % [min]
+    P.data.TIBolus = 5;              % [min]    
     
     % Glucose Bolus
     P.data.GDelivery = "enteral";
     
-    vGBolus = (data.carbs) / C.MGlucose * 1000;  % [mmol]
-    tGBolus = data.meal_start;
-    TGBolus = data.meal_durations;
-    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min] 
+    P.data.vGBolus = (data.carbs) / C.MGlucose * 1000;  % [mmol]
+    P.data.tGBolus = data.meal_start;
+    P.data.TGBolus = data.meal_durations;
+    
+    
+    P = MakeBolusFunctions(P);
     
     % Glucose Infusion
     if (P.patientNum == 1)

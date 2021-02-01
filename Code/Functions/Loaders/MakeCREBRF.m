@@ -88,17 +88,17 @@ for ii = 1:length(patientSet)
     % Insulin Bolus
     P.data.IType = "none";
     P.data.IDelivery = "none";  
-
-    P.data.IBolus = @(~) 0;  % [mU/min]   
     
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
     
     vGBolus = min(0.3*P.data.mass, 30);     % [g]
-    vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
-    tGBolus = 0;                            % [min]
-    TGBolus = 1;                            % [min]
-    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min] 
+    P.data.vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
+    P.data.tGBolus = 0;                            % [min]
+    P.data.TGBolus = 1;                            % [min]
+    
+    
+    P = MakeBolusFunctions(P);
     
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray));

@@ -56,9 +56,10 @@ for ii = 1:length(patientSet)
             'ReadVariableNames', true);
         
         if length(subpatientLetters) > 1
-            % Workaround subpatients by adding a suffix "00x" to their num.
+            % Work around subpatients by adding a suffix "00x" to their num.
             P.patientNum = 1000*P.patientNum + ll;
-            P.patientCode = P.patientCode + "00"+string(ll);
+            letters = 'abcdefg';
+            P.patientCode = P.patientCode + letters(ll);
         end
         
         %% Trial Times
@@ -120,19 +121,20 @@ for ii = 1:length(patientSet)
         P.data.IDelivery = "subcutaneous";
         
         valid = ~isnan(metaTable.insulin);
-        vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
-        tIBolus = metaTable.time(valid);  % [min]
-        TIBolus = 1;  % [min]
-        P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]
+        P.data.vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
+        P.data.tIBolus = metaTable.time(valid);  % [min]
+        P.data.TIBolus = 1;  % [min]
         
         % Glucose Bolus
         P.data.GDelivery = "enteral";
         
         vGBolus = 35;  % [g]
-        vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
-        tGBolus = 0;  % [min]
-        TGBolus = 1;  % [min]
-        P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min]
+        P.data.vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
+        P.data.tGBolus = 0;  % [min]
+        P.data.TGBolus = 1;  % [min]
+        
+        
+        P = MakeBolusFunctions(P);
         
         % Glucose Infusion
         P.data.GInfusion = zeros(size(P.results.tArray));

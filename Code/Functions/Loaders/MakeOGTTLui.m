@@ -19,7 +19,7 @@ for ii = 1:length(patientSet)
     
     % Pull out each unique subpatient letter.
     filenames = ls(fullfile(patientFolder, code+"*"));
-    assert(numel(filenames) > 0, "Invalid patient number.");    
+    assert(numel(filenames) > 0, "Invalid patient number.");
     index = strfind(filenames(1,:), '-') - 1;
     subpatientLetters = unique(filenames(:, index));
     
@@ -31,10 +31,10 @@ for ii = 1:length(patientSet)
     baseP.data.BMI = 23;  % [kg/m^2]
     
     for ll = 1:length(subpatientLetters)
-        P = baseP;   
+        P = baseP;
         
         %% Load Data
-        subpatientLabel = code + subpatientLetters(ll);        
+        subpatientLabel = code + subpatientLetters(ll);
         metaFile = fullfile(patientFolder, subpatientLabel+"-meta.csv");
         btFile = fullfile(patientFolder, subpatientLabel+"-bt.csv");
         pocFile = fullfile(patientFolder, subpatientLabel+"-poc.csv");
@@ -59,7 +59,7 @@ for ii = 1:length(patientSet)
             % Workaround subpatients by adding a suffix "00x" to their num.
             P.patientNum = 1000*P.patientNum + ll;
             P.patientCode = P.patientCode + "00"+string(ll);
-        end        
+        end
         
         %% Trial Times
         % Times here need to be converted from integers representing time
@@ -81,27 +81,36 @@ for ii = 1:length(patientSet)
         
         %% Assay Data
         % Glucose Assay
-        isValid = ~isnan(btTable.glucose);        
-        vBT = btTable.glucose(isValid);  % [mmol/L]
-        tBT = btTable.time(isValid);  % [min]
-        vPOC = pocTable.glucose;  % [mmol/L]
-        tPOC = pocTable.time;  % [min]     
+        isVenous = logical(pocTable.venous);
+        vPOCV = pocTable.glucose(isVenous);  % Venous + Test Strip
+        tPOCV = pocTable.time(isVenous);  % [min]
         
-        % If duplicated, times, choose blood test.
-        isDuplicate = ismember(tPOC, tBT);
-        [tG, order] = sort([tBT; tPOC(~isDuplicate)]);
-        vG = [vBT; vPOC(~isDuplicate)];
+        vPOCF = pocTable.glucose(~isVenous);  % Finger Prick + Test Strip
+        tPOCF = pocTable.time(~isVenous);  % [min]
         
-        P.data.G.value = vG(order);
+        vBT = [];  % Blood Test
+        tBT = [];
+        if isnumeric(btTable.glucose(1)) % Small workaround for some missing BT data for some subjects.
+            isValid = ~isnan(btTable.glucose);
+            vBT = btTable.glucose(isValid);  % [mmol/L]
+            tBT = btTable.time(isValid);  % [min]
+            
+            vG = vBT;
+            tG = tBT;
+        else
+            vG = vPOCV;
+            tG = tPOCV;
+        end
+        
+        P.data.G.value = vG;
         P.data.G.time = tG;
-        
         P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
         
-        % Insulin Assay    
+        % Insulin Assay
         P.data.I.value = C.pmol2mU(btTable.insulin);  % [mU/L]
         P.data.I.time = btTable.time;  % [min]
         
-        % C-peptide Assay        
+        % C-peptide Assay
         P.data.CPep.value = btTable.cpep;  % [pmol/L]
         P.data.CPep.time = btTable.time;  % [min]
         
@@ -129,22 +138,29 @@ for ii = 1:length(patientSet)
         P.data.GInfusion = zeros(size(P.results.tArray));
         
         %% Other
-%         P = GetCPeptideParameters(P);    
+        %         P = GetCPeptideParameters(P);
         
         %% Debug Plots
         DEBUGPLOTS.MakeOGTTLui = struct();
         DP = DEBUGPLOTS.MakeOGTTLui;
         MakeDebugPlot("OGTTLui Input", P, DP);
         
-        plt = plot(tBT, vBT, 'r*');
-        plt.DisplayName = "Blood Test";
+        if ~isempty(vBT)
+            plt = plot(tBT, vBT, 'g*');
+            plt.DisplayName = "Blood Test";
+        end
         
-        plt = plot(tPOC, vPOC, 'b*');
-        plt.DisplayName = "Point of Care Strip";
+        plt = plot(tPOCV, vPOCV, 'b*');
+        plt.DisplayName = "Venous Test Strip";
+        
+        plt = plot(tPOCF, vPOCF, 'b+');
+        plt.DisplayName = "Finger Prick Test Strip";
+        
+        xlim([0 inf])
         
         ylabel("Plasma Glucose [mmol/L]")
         legend()
-    
+        
         %% Save
         newPatientSet = [newPatientSet P];
         clear P

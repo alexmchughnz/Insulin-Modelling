@@ -3,8 +3,12 @@ function P = FindGutEmptyingRate(P)
 % INPUTS:
 %   P      - patient struct
 % OUTPUT:
-%   P   - modified patient struct with best found d2
-    
+%   P   - modified patient struct with best found d2    
+
+if HasPersistent(P, "optimald2")
+    P.results.d2 = P.persistents.optimald2;
+    return
+end
     
 %% Setup
 % Input grid.
@@ -49,6 +53,7 @@ end
 %% Solving
 isBest = GErrorGrid == min(GErrorGrid);
 P.results.d2 = d2Grid(isBest);  % [1/min]
+P.persistents.optimald2 = P.results.d2;
 
 
 end

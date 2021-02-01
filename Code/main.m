@@ -34,5 +34,7 @@ for ii = 1:length(patientSet)
 end
 
 %% Results
-save = true;
-PrintResults(patientSet, save);
+SavePatients(patientSet);
+
+saveResults = true;
+PrintResults(patientSet, saveResults);

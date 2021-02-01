@@ -1,19 +1,12 @@
-function patientSet = LoadParameters(patientSet)  
-    for ii = 1:length(patientSet)
-        P = patientSet{ii};        
-        
-        P.params.CP = CPParameters(P);       
-        
-        P.params.GC = GCParameters(P);
-        P.params.GI = GIParameters(P);
-        if P.data.IType == "detemir"
-            P.params.ID = IDParameters(P);
-        elseif P.data.IDelivery == "subcutaneous"
-            P.params.SC = SCParameters(P);
-        end
-        
-        patientSet{ii} = P;
-    end
+function P = LoadParameters(P)
+P.params.CP = CPParameters(P);
+P.params.GC = GCParameters(P);
+P.params.GI = GIParameters(P);
+if P.data.IType == "detemir"
+    P.params.ID = IDParameters(P);
+elseif P.data.IDelivery == "subcutaneous"
+    P.params.SC = SCParameters(P);
+end
 end
 
 

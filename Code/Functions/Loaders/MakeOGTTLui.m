@@ -33,7 +33,7 @@ for ii = 1:length(patientSet)
     for ll = 1:length(subpatientLetters)
         P = baseP;
         
-        %% Load Data
+        %% Load Data 
         subpatientLabel = code + subpatientLetters(ll);
         metaFile = fullfile(patientFolder, subpatientLabel+"-meta.csv");
         btFile = fullfile(patientFolder, subpatientLabel+"-bt.csv");

@@ -7,7 +7,7 @@ function P = FitHepaticClearance(P, forcenLxL)
 %   P   - modified patient struct with nL and xL
 
 DP = DebugPlots().FitHepaticClearance;
-GC = P.params.GC;
+GC = P.parameters.GC;
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
@@ -226,7 +226,7 @@ end
 end
 
 function [nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray, tI)
-GC = P.params.GC;
+GC = P.parameters.GC;
 
 % Retrieve data.
 iiMinutes = GetTimeIndex(tArray, P.results.tArray);

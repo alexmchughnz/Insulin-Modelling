@@ -6,7 +6,7 @@ function [P] = GIModel(P, options)
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
-GI = P.params.GI;
+GI = P.parameters.GI;
 
 if ~exist('options', 'var')
     options = odeset;

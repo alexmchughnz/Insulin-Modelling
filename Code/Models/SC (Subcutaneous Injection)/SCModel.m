@@ -6,7 +6,7 @@ function [P] = SCModel(P, options)
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
-SC = P.params.SC;
+SC = P.parameters.SC;
 
 if ~exist('options', 'var')
     options = odeset;

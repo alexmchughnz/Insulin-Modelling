@@ -7,8 +7,8 @@ function [dY] = IDModelODE(t, Y, P)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-ID = P.params.ID;
-GC = P.params.GC;
+ID = P.parameters.ID;
+GC = P.parameters.GC;
 
 %% Input
 IDH       = Y(1);

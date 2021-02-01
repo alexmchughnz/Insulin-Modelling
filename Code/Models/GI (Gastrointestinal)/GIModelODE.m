@@ -7,7 +7,7 @@ function [dY] = GIModelODE(t, Y, P)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-GI = P.params.GI;
+GI = P.parameters.GI;
 
 %% Input
 P1     = Y(1);

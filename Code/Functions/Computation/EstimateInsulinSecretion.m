@@ -10,8 +10,8 @@ function P = EstimateInsulinSecretion(P)
 
 DP = DebugPlots().EstimateInsulinSecretion;
 
-CP = P.params.CP;
-GC = P.params.GC;
+CP = P.parameters.CP;
+GC = P.parameters.GC;
 C = LoadConstants();
 
 PrintStatusUpdate(P, "Estimating Uen..."); 

@@ -9,7 +9,7 @@ GC.alphaG = 0.0154;                   % Saturation of insulin binding to cells [
 
 
 % Dependent Parameters
-CP = P.params.CP;
+CP = P.parameters.CP;
 GC.VI = 4;                    % Insulin volume of distribution [L]
 GC.VQ = (CP.k1/CP.k2)*GC.VI;  % Interstitial volume of distribution [L]
 GC.VG = 1.2*(GC.VI + GC.VQ);  % Glucose volume of distribution [L]

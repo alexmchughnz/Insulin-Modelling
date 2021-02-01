@@ -1,11 +1,11 @@
 function P = LoadParameters(P)
-P.params.CP = CPParameters(P);
-P.params.GC = GCParameters(P);
-P.params.GI = GIParameters(P);
+P.parameters.CP = CPParameters(P);
+P.parameters.GC = GCParameters(P);
+P.parameters.GI = GIParameters(P);
 if P.data.IType == "detemir"
-    P.params.ID = IDParameters(P);
+    P.parameters.ID = IDParameters(P);
 elseif P.data.IDelivery == "subcutaneous"
-    P.params.SC = SCParameters(P);
+    P.parameters.SC = SCParameters(P);
 end
 end
 

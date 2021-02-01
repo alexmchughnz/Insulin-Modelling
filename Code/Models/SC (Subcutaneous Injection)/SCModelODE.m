@@ -7,7 +7,7 @@ function [dY] = SCModelODE(t, Y, P)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-SC = P.params.SC;
+SC = P.parameters.SC;
 
 %% Input
 ISC    = Y(1);

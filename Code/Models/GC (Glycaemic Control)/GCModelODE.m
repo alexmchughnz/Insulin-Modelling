@@ -11,8 +11,8 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
-GC = P.params.GC;
-SC = P.params.SC;
+GC = P.parameters.GC;
+SC = P.parameters.SC;
 
 %% Input
 G  = Y(1);  % [mmol/L]

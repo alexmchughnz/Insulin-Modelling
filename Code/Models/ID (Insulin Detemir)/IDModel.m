@@ -6,7 +6,7 @@ function [P] = IDModel(P, options)
 % OUTPUT:
 %   P  - patient struct updated with model results
 
-ID = P.params.ID;
+ID = P.parameters.ID;
 
 if ~exist('options', 'var')
     options = odeset;

@@ -32,12 +32,22 @@ P = GCModel(P, options);
 
 
 %% Fit Evaluation
+% Insulin
 [tI, vI] = GetIFromITotal(P); % [mU/L]
 iiData = GetTimeIndex(tI, P.results.tArray);
 fitI = P.results.I(iiData);
 
-MAPE = mean(abs(vI - fitI)./vI);
-P.results.insulinMAPE = MAPE;
+IMAPE = mean(abs(vI - fitI)./vI);
+P.results.insulinMAPE = IMAPE;
+
+% Glucose
+vG = P.data.G.value;
+tG = P.data.G.time;
+iiData = GetTimeIndex(tG, P.results.tArray);
+fitG = P.results.G(iiData);
+
+GMAPE = mean(abs(vG - fitG)./vG);
+P.results.glucoseMAPE = GMAPE;
 
 
 %% Debug Plots

@@ -145,18 +145,19 @@ for ii = 1:length(patientSet)
         DP = DEBUGPLOTS.MakeOGTTLui;
         MakeDebugPlot("OGTTLui Input", P, DP);
         
-        if ~isempty(vBT)
-            plt = plot(tBT, vBT, 'g*');
-            plt.DisplayName = "Blood Test";
-        end
-        
         plt = plot(tPOCV, vPOCV, 'b*');
         plt.DisplayName = "Venous Test Strip";
         
         plt = plot(tPOCF, vPOCF, 'b+');
         plt.DisplayName = "Finger Prick Test Strip";
         
+        if ~isempty(vBT)
+            plt = plot(tBT, vBT, 'g*');
+            plt.DisplayName = "Blood Test";
+        end
+        
         xlim([0 inf])
+        ylim([4 14])
         
         ylabel("Plasma Glucose [mmol/L]")
         legend()

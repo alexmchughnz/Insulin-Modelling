@@ -234,17 +234,13 @@ Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
 I = ppI(tArray); % [mU/L]
 I0 = I(1);
 Q0 = I0/2;
-IBolus = zeros(size(tArray));
-for ii = 1:length(tArray)
-    t = tArray(ii);
-    IBolus(ii) = P.data.IBolus(t);
-end
+IInput = GetPlasmaInsulinInput(tArray, P);  % [mU/min]
 
 % Set coefficients for MLR.
 % Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
 kI = -GC.nK;
 kIQ = -GC.nI./GC.VI;
-k = IBolus/GC.VI;
+k = IInput/GC.VI;
 % Also consider dQ/dt = -cQ*Q + cI*I:
 cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
 cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use

@@ -30,7 +30,7 @@ patientSet = LoadData(source, patientNums);
 %% Run
 for ii = 1:length(patientSet)
     forcenLxL = [0.1 0.67];
-    patientSet{ii} = SimpleSimulationForced(patientSet{ii}, forcenLxL);
+    patientSet{ii} = SimpleSimulation(patientSet{ii});
 end
 
 %% Results

@@ -11,6 +11,7 @@ function [dY] = GCModelODE(t, Y, P, Y0)
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
+
 GC = P.parameters.GC;
 SC = P.parameters.SC;
 
@@ -44,20 +45,9 @@ if P.data.IType == "detemir"
     % Include interstitial Detemir.
     Q0 = Q0 + P.results.QDF(1);  % [mU/L]
     Q = Q + P.results.QDF(n);   % [mU/L]
-    
-    IInput = 0;
-    
-else
-    if P.data.IDelivery == "intravenous"
-        IInput = P.data.IBolus(t);  % [mU/min]
-        
-    elseif P.data.IDelivery == "subcutaneous"
-        IInput = SC.k3*P.results.QLocal(n);  % [mU/min]
-        
-    else
-        IInput = 0;
-    end
 end
+
+IInput = GetPlasmaInsulinInput(t, P);
 
 %% Computation
 dGA = -(G*Q - GFast*Q0)/(1 + GC.alphaG*Q);   % Insulin-mediated uptake.

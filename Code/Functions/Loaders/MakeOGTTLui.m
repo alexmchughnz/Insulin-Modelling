@@ -5,7 +5,8 @@ function newPatientSet = MakeOGTTLui(patientSet)
 % OUTPUT:
 %   newPatientSet - updated cell array of patient structs
 
-global CONFIG DEBUGPLOTS
+global CONFIG
+DEBUGPLOTS = DebugPlots();
 C = LoadConstants();
 
 source = "OGTTLui";

@@ -1,6 +1,7 @@
 function patientSet = LoadData(source, patientNums)
 
-global CONFIG DEBUGPLOTS
+global CONFIG
+DP = DebugPlots().LoadData;
 
 %% Set up patient set.
 for ii = 1:length(patientNums)    
@@ -28,7 +29,6 @@ for ii = 1:length(patientSet)
 end
 
 %% Debug Plots
-DP = DEBUGPLOTS.LoadData;
 if DP.GlucoseInput
     for ii = 1:length(patientSet)
         P = patientSet{ii};

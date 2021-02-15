@@ -9,16 +9,16 @@ function T = TabulateResults(T, P)
 code = P.patientCode;
 T{code, "code"} = string(code);
 
-T = AddField(T, code, P.results, "nL", @(x) x(1));
-T = AddField(T, code, P.results, "xL", @(x) x(1));
-T = AddField(T, code, P.results, "SI", @(x) x(1));
+T = AddField(T, code, P.results, "nL", @(x) x(1), "nL [1/min]");
+T = AddField(T, code, P.results, "xL", @(x) x(1), "xL [1]");
+T = AddField(T, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
 
 T = AddField(T, code, P.results, "delta2Norm");
 T = AddField(T, code, P.results, "delta2NormnL");
 T = AddField(T, code, P.results, "delta2NormxL");
 
-T = AddField(T, code, P.results, "insulinMAPE", @(x) string(100*x)+"%");
-T = AddField(T, code, P.results, "glucoseMAPE", @(x) string(100*x)+"%");
+T = AddField(T, code, P.results, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
+T = AddField(T, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
 T = AddField(T, code, P.data, "stddevMSE");
 T = AddField(T, code, P.results, "minGridMSE");
 T = AddField(T, code, P.results, "minimalErrorRegionSize");

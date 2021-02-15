@@ -21,7 +21,7 @@ config
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [1 4 5];
+patientNums = [5];
 source = "OGTTLui";
 
 %% Load Data
@@ -29,8 +29,7 @@ patientSet = LoadData(source, patientNums);
 
 %% Run
 for ii = 1:length(patientSet)
-    forcenLxL = [0.1 0.67];
-    patientSet{ii} = SimpleSimulation(patientSet{ii});
+    patientSet{ii} = AdjustRangeSimulation(patientSet{ii});
 end
 
 %% Results

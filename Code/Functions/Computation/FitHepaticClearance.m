@@ -11,7 +11,6 @@ GC = P.parameters.GC;
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
-MeanNormalise = @(data) data ./ mean(data);
 
 %% Setup
 % Time and data arrays.
@@ -58,8 +57,84 @@ for ii = 2:length(tArray)
 end
 
 %% Parameter ID of I Equation to find nL/xL (pg. 16)
-% Fit nL/xL over segments.
-[nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray, tI);
+
+% Retrieve minutewise data.
+iiMinutes = GetTimeIndex(tArray, P.results.tArray);
+Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
+
+I = ppI(tArray); % [mU/L]
+IInput = GetPlasmaInsulinInput(tArray, P);  % [mU/min]
+I0 = I(1);
+Q0 = I0/2;
+
+% Set coefficients for MLR.
+% Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
+kI = -GC.nK;
+kIQ = -GC.nI./GC.VI;
+k = IInput/GC.VI;
+% Also consider dQ/dt = -cQ*Q + cI*I:
+cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
+cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
+
+% Perform iterative integral method.
+nLArray = [0];
+xLArray = [1];
+relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
+tolerance = 0.1/100; % Relative tolerance for convergence.
+while any(relativeChange >= tolerance)
+    % Integrating I equation:
+    % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
+    % Renaming CN = int{c1} and CX = int{c2}
+    % CN*nL + CX*(1-xL) = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k} := C
+    CN = cumtrapz(tArray, ...
+        -I./(1 + GC.alphaI*I));
+    CX = cumtrapz(tArray, ...
+        Uen/GC.VI);
+    CParts = [I - I0, ...
+        - kI*cumtrapz(tArray, I), ...
+        - kIQ*cumtrapz(tArray, I-Q), ...
+        - cumtrapz(tArray, k)]; % For analysing each term later.
+    C = sum(CParts, 2); % Sum along rows to get column vector.
+    
+    % Assembling MLR system, integrating between sample points, and
+    % normalising by integral width (dt):
+    % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
+    t1 = tI(1:end-1);
+    t2 = tI(2:end);
+    dt = t2 - t1;
+    
+    ppCN = griddedInterpolant(tArray, CN);
+    ppCX = griddedInterpolant(tArray, CX);
+    ppC  = griddedInterpolant(tArray, C);
+    
+    A(:,1) = (ppCN(t2) - ppCN(t1)) ./ dt;
+    A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
+    b = (ppC(t2) - ppC(t1)) ./ dt;
+    
+    % Solve.
+    x = A\b;
+    nL = x(1);
+    xL = 1 - x(2);
+    
+    nLChange = (nL-nLArray(end))/nLArray(end);
+    xLChange = (xL-xLArray(end))/xLArray(end);
+    relativeChange = [nLChange xLChange];
+    
+    nLArray = [nLArray nL];
+    xLArray = [xLArray xL];    
+    
+    % Forward simulate to improve I and Q prediction.
+    for ii = 1:100
+        % I(t) = I(t0) + kI*int{I} + kIQ*int{I-Q} + int{k} + CN*nL + CX*(1-xL)
+        I = I0 + kI*cumtrapz(tArray, I) + kIQ*cumtrapz(tArray, I-Q) + cumtrapz(tArray, k) ...
+            + CN*nL + CX*(1-xL);
+        
+        % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
+        Q = Q0 - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
+    end
+end
+
+
 nL = nLArray(end);
 xL = xLArray(end);
 
@@ -72,11 +147,14 @@ if exist('forcenLxL', 'var')
     xL = forcenLxL(2);
 end
 
-% Save results.
-P.results.nL = nL*ones(size(P.results.tArray));
-P.results.xL = xL*ones(size(P.results.tArray));
 
-% Save graphical ID statistics.
+%% Save Results
+P.results.nL = nL;
+P.results.xL = xL;
+
+% Calculate stats.
+MeanNormalise = @(data) data ./ mean(data);
+
 CNNorm = MeanNormalise(CN);
 CXNorm = MeanNormalise(CX);
 delta2Norm = norm(CNNorm - CXNorm) / length(CN);
@@ -228,79 +306,5 @@ end
 function [nLArray, xLArray, CN, CX, CParts] = FitSegment(P, ppI, Q, tArray, tI)
 GC = P.parameters.GC;
 
-% Retrieve data.
-iiMinutes = GetTimeIndex(tArray, P.results.tArray);
-Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
-I = ppI(tArray); % [mU/L]
-I0 = I(1);
-Q0 = I0/2;
-IInput = GetPlasmaInsulinInput(tArray, P);  % [mU/min]
-
-% Set coefficients for MLR.
-% Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
-kI = -GC.nK;
-kIQ = -GC.nI./GC.VI;
-k = IInput/GC.VI;
-% Also consider dQ/dt = -cQ*Q + cI*I:
-cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
-cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
-
-% Perform iterative integral method.
-nLArray = [0];
-xLArray = [1];
-relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
-tolerance = 0.1/100; % Relative tolerance for convergence.
-while any(relativeChange >= tolerance)
-    % Integrating I equation:
-    % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
-    % Renaming CN = int{c1} and CX = int{c2}
-    % CN*nL + CX*(1-xL) = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k} := C
-    CN = cumtrapz(tArray, ...
-        -I./(1 + GC.alphaI*I));
-    CX = cumtrapz(tArray, ...
-        Uen/GC.VI);
-    CParts = [I - I0, ...
-        - kI*cumtrapz(tArray, I), ...
-        - kIQ*cumtrapz(tArray, I-Q), ...
-        - cumtrapz(tArray, k)]; % For analysing each term later.
-    C = sum(CParts, 2); % Sum along rows to get column vector.
-    
-    % Assembling MLR system, integrating between sample points, and
-    % normalising by integral width (dt):
-    % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    t1 = tI(1:end-1);
-    t2 = tI(2:end);
-    dt = t2 - t1;
-    
-    ppCN = griddedInterpolant(tArray, CN);
-    ppCX = griddedInterpolant(tArray, CX);
-    ppC  = griddedInterpolant(tArray, C);
-    
-    A(:,1) = (ppCN(t2) - ppCN(t1)) ./ dt;
-    A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
-    b = (ppC(t2) - ppC(t1)) ./ dt;
-    
-    % Solve.
-    x = A\b;
-    nL = x(1);
-    xL = 1 - x(2);
-    
-    nLChange = (nL-nLArray(end))/nLArray(end);
-    xLChange = (xL-xLArray(end))/xLArray(end);
-    relativeChange = [nLChange xLChange];
-    
-    nLArray = [nLArray nL];
-    xLArray = [xLArray xL];    
-    
-    % Forward simulate to improve I and Q prediction.
-    for ii = 1:100
-        % I(t) = I(t0) + kI*int{I} + kIQ*int{I-Q} + int{k} + CN*nL + CX*(1-xL)
-        I = I0 + kI*cumtrapz(tArray, I) + kIQ*cumtrapz(tArray, I-Q) + cumtrapz(tArray, k) ...
-            + CN*nL + CX*(1-xL);
-        
-        % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
-        Q = Q0 - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
-    end
-end
 
 end

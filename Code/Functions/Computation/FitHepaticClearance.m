@@ -14,13 +14,13 @@ PrintStatusUpdate(P, "Fitting nL/xL...")
 
 %% Setup
 % Time and data arrays.
-tArray = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
+tMinutes = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
 [tI, vI] = GetIFromITotal(P); % [mU/L]
 
 if P.source == "DISST"
     % Need to add 'false' point for improved fitting.
-    [vIBolus, iiBolus] = max(P.data.IBolus(tArray));
-    tIBolus = tArray(iiBolus);
+    [vIBolus, iiBolus] = max(P.data.IBolus(tMinutes));
+    tIBolus = tMinutes(iiBolus);
     [tI, order] = sort([tI; tIBolus]);
     iiBeforeFakePoint = find(order == length(order)) - 1;
     
@@ -33,39 +33,20 @@ end
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
 
 
-%% Analytical Forward Simulation for Q
-Q = zeros(length(tArray), 1); %analytical solution for Q
-
-% Consider form of dQ/dt = -cQ*Q + cI*I.
-cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
-cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
-
-t0 = tArray(1);
-I0 = ppI(t0);   % [mU/L]
-Q0 = I0/2;      % [mU/L]
-Q(1) = Q0;
-
-for ii = 2:length(tArray)
-    t = tArray(ii);         % Current time value.
-    tSpan = tArray(1:ii);   % Array of time values from t0 to t.
-    ISpan = ppI(tSpan);     % Array of I values from t0 to t.
-    
-    % Analytical solution for the Q equation at time==t.
-    % Standard soln. for non-homogenous 1st order ODE (page 17).
-    Q(ii) = Q0*exp(-cQ*(t-t0)) ...
-        + trapz(tSpan, cI*ISpan.*exp(-cQ*(t - tSpan)));
-end
-
-%% Parameter ID of I Equation to find nL/xL (pg. 16)
-
-% Retrieve minutewise data.
-iiMinutes = GetTimeIndex(tArray, P.results.tArray);
+%% Data
+% Uen
+iiMinutes = GetTimeIndex(tMinutes, P.results.tArray);
 Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
 
-I = ppI(tArray); % [mU/L]
-IInput = GetPlasmaInsulinInput(tArray, P);  % [mU/min]
+%Q
+ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
+Q = ppQ(tMinutes);
+Q0 = Q(1);
+
+% I
+IInput = GetPlasmaInsulinInput(tMinutes, P);  % [mU/min]
+I = ppI(tMinutes); % [mU/L]
 I0 = I(1);
-Q0 = I0/2;
 
 % Set coefficients for MLR.
 % Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
@@ -76,7 +57,8 @@ k = IInput/GC.VI;
 cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
 cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
-% Perform iterative integral method.
+
+%% Iterative Integral Method (pg. 16)
 nLArray = [0];
 xLArray = [1];
 relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
@@ -86,14 +68,14 @@ while any(relativeChange >= tolerance)
     % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
     % Renaming CN = int{c1} and CX = int{c2}
     % CN*nL + CX*(1-xL) = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k} := C
-    CN = cumtrapz(tArray, ...
+    CN = cumtrapz(tMinutes, ...
         -I./(1 + GC.alphaI*I));
-    CX = cumtrapz(tArray, ...
+    CX = cumtrapz(tMinutes, ...
         Uen/GC.VI);
     CParts = [I - I0, ...
-        - kI*cumtrapz(tArray, I), ...
-        - kIQ*cumtrapz(tArray, I-Q), ...
-        - cumtrapz(tArray, k)]; % For analysing each term later.
+        - kI*cumtrapz(tMinutes, I), ...
+        - kIQ*cumtrapz(tMinutes, I-Q), ...
+        - cumtrapz(tMinutes, k)]; % For analysing each term later.
     C = sum(CParts, 2); % Sum along rows to get column vector.
     
     % Assembling MLR system, integrating between sample points, and
@@ -103,9 +85,9 @@ while any(relativeChange >= tolerance)
     t2 = tI(2:end);
     dt = t2 - t1;
     
-    ppCN = griddedInterpolant(tArray, CN);
-    ppCX = griddedInterpolant(tArray, CX);
-    ppC  = griddedInterpolant(tArray, C);
+    ppCN = griddedInterpolant(tMinutes, CN);
+    ppCX = griddedInterpolant(tMinutes, CX);
+    ppC  = griddedInterpolant(tMinutes, C);
     
     A(:,1) = (ppCN(t2) - ppCN(t1)) ./ dt;
     A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
@@ -121,34 +103,30 @@ while any(relativeChange >= tolerance)
     relativeChange = [nLChange xLChange];
     
     nLArray = [nLArray nL];
-    xLArray = [xLArray xL];    
+    xLArray = [xLArray xL];
     
     % Forward simulate to improve I and Q prediction.
     for ii = 1:100
         % I(t) = I(t0) + kI*int{I} + kIQ*int{I-Q} + int{k} + CN*nL + CX*(1-xL)
-        I = I0 + kI*cumtrapz(tArray, I) + kIQ*cumtrapz(tArray, I-Q) + cumtrapz(tArray, k) ...
+        I = I0 + kI*cumtrapz(tMinutes, I) + kIQ*cumtrapz(tMinutes, I-Q) + cumtrapz(tMinutes, k) ...
             + CN*nL + CX*(1-xL);
         
         % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
-        Q = Q0 - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
+        Q = Q0 - cQ*cumtrapz(tMinutes, Q) + cI*cumtrapz(tMinutes, I);
     end
 end
 
-
-nL = nLArray(end);
-xL = xLArray(end);
-
-lb = 1e-7;  % Lower bound on nL/xL.
-nL = max(nL, lb);  % [1/min]
-xL = max(xL, lb);  % [1]
-
+%% Results
+% Extract final result.
 if exist('forcenLxL', 'var')
     nL = forcenLxL(1);
     xL = forcenLxL(2);
+else    
+    lb = 1e-7;  % Lower bound on nL/xL.
+    nL = max(nLArray(end), lb);  % [1/min]
+    xL = max(xLArray(end), lb);  % [1]    
 end
 
-
-%% Save Results
 P.results.nL = nL;
 P.results.xL = xL;
 
@@ -171,7 +149,7 @@ if DP.nLxL
     MakeDebugPlot("nL/xL", P, DP);
     
     subplot (2, 1, 1)
-    plot(tArray, P.results.nL, 'b')
+    plot(tMinutes, P.results.nL, 'b')
     for ii = 1:length(iiBounds)
         split = iiBounds(ii);
         L = line([split split], ylim);
@@ -183,7 +161,7 @@ if DP.nLxL
     
     
     subplot(2, 1, 2)
-    plot(tArray, P.results.xL, 'r')
+    plot(tMinutes, P.results.xL, 'r')
     
     xlabel("Time [min]")
     ylabel("$x_L$ [-]")
@@ -200,18 +178,18 @@ if DP.GraphicalID
     
     MakeDebugPlot("Graphical Identifiability", P, DP);
     
-    plt = plot(tArray, CNNorm);
+    plt = plot(tMinutes, CNNorm);
     plt.DisplayName = "$n_L$ coeff.";
     
-    plt = plot(tArray, CXNorm);
+    plt = plot(tMinutes, CXNorm);
     plt.DisplayName = "$x_L$ coeff.";
     
-    plt = plot(tArray, bNorm);
+    plt = plot(tMinutes, bNorm);
     plt.DisplayName = "$b$";
     
     for ss = 1:length(sampleTimes)
         t = sampleTimes(ss);
-        ii = GetTimeIndex(t, tArray);
+        ii = GetTimeIndex(t, tMinutes);
         
         plt = plot([t t], [CNNorm(ii) CXNorm(ii)], 'k');
         plt.Marker = 'o';
@@ -229,22 +207,22 @@ end
 
 % Forward Simulation of Insulin
 if DP.ForwardSim
-    I = ppI(tArray);
+    I = ppI(tMinutes);
     kI = GC.nK(P);
     kIQ = GC.nI(P)./GC.VI;
-    k = P.results.Uen/GC.VI + P.data.IBolus(tArray)/GC.VI;
+    k = P.results.Uen/GC.VI + P.data.IBolus(tMinutes)/GC.VI;
     
     MakeDebugPlot("Insulin Simulation", P, DP);
     
     subplot(2,1,1)
     hold on
-    plot(tArray, I)
+    plot(tMinutes, I)
     
     simI = LHS + I0 ...
-        + kI * cumtrapz(tArray, kI*I) ...
-        + kIQ * cumtrapz(tArray, I-Q) ...
-        + cumtrapz(tArray, k);
-    plot(tArray, simI)
+        + kI * cumtrapz(tMinutes, kI*I) ...
+        + kIQ * cumtrapz(tMinutes, I-Q) ...
+        + cumtrapz(tMinutes, k);
+    plot(tMinutes, simI)
     
     xlabel("Time [min]")
     ylabel("Plasma insulin, I [mU/L]")
@@ -252,7 +230,7 @@ if DP.ForwardSim
     
     subplot(2,1,2)
     hold on
-    plot(tArray, Q)
+    plot(tMinutes, Q)
     ylabel("Interstitial insulin, Q [mU/L]")
 end
 
@@ -265,19 +243,19 @@ if DP.EquationTerms
     
     MakeDebugPlot("Equation Terms", P, DP);
     
-    plt = plot(tArray, LHS, 'b');
+    plt = plot(tMinutes, LHS, 'b');
     plt.DisplayName = "A*x";
     
-    plt = plot(tArray, intITerm, 'r');
+    plt = plot(tMinutes, intITerm, 'r');
     plt.DisplayName = "nK * integral(I)";
     
-    plt = plot(tArray, intIQTerm, 'g');
+    plt = plot(tMinutes, intIQTerm, 'g');
     plt.DisplayName = "nI/vI * integral(I-Q)";
     
-    plt = plot(tArray, intUenTerm, 'm');
+    plt = plot(tMinutes, intUenTerm, 'm');
     plt.DisplayName = "-integral((Uen+IBolus)/vI)";
     
-    plt = plot(tArray, ITerm, 'c');
+    plt = plot(tMinutes, ITerm, 'c');
     plt.DisplayName = "I - I0";
     
     xlabel("Time [min]")
@@ -288,8 +266,8 @@ end
 % Insulin Terms
 if DP.InsulinTerms
     MakeDebugPlot("Insulin Terms", P, DP);
-    plot(tArray,  cumtrapz(tArray, cI*I), 'g')
-    plot(tArray, cumtrapz(tArray, I./(1 + GC.alphaI*I)))
+    plot(tMinutes,  cumtrapz(tMinutes, cI*I), 'g')
+    plot(tMinutes, cumtrapz(tMinutes, I./(1 + GC.alphaI*I)))
     legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
 end
 

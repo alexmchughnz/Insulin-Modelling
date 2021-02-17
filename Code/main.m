@@ -25,15 +25,21 @@ patientNums = [5];
 source = "OGTTLui";
 
 %% Load Data
-patientSet = LoadData(source, patientNums);
+patientSetIn = LoadData(source, patientNums);
+patientSetOut = {};
 
 %% Run
-for ii = 1:length(patientSet)
-    patientSet{ii} = AdjustRangeSimulation(patientSet{ii});
+% Select recipe to run on each patient.
+recipeFunction = @AdjustRangeSimulation;
+
+% Execute on each patient.
+for ii = 1:length(patientSetIn)    
+    patientsOut = recipeFunction(patientSetIn{ii});
+    patientSetOut = [patientSetOut patientsOut];
 end
 
 %% Results
-SavePatients(patientSet);
+SavePatients(patientSetOut);
 
 saveResults = true;
-PrintResults(patientSet, saveResults);
+PrintResults(patientSetOut, saveResults);

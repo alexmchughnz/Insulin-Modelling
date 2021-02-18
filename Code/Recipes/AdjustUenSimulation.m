@@ -55,6 +55,8 @@ while newDistance >= 1e-7
     % Fit SI and store results.    
     copyP = FitInsulinSensitivity(copyP, false);
     newSI = copyP.results.SI;
+    PlotSIChange(targetSI, prevSI, newSI);
+    pause
     
     % Adjust input based on how the newSI compares to the prev and target.
     newDistance = abs(targetSI-newSI);
@@ -71,7 +73,9 @@ while newDistance >= 1e-7
         % newSI has moved towards targetSI!
         % Decelerate our IInput, and move pointers.   
         deltaIInput = deltaIInput * relativeSize;
+        
         boundary = sort([targetSI newSI]);
+        prevSI = newSI;
         
     elseif wentWrongWay
         % Our IInput has moved SI *away* from the target...
@@ -129,4 +133,20 @@ DP = plots.AdjustUenSimulation;
 % 
 % legend()
 
+end
+
+
+
+function F = PlotSIChange(target, prev, new)
+    F = figure(11111);
+    clf(F, 'reset');
+    hold on
+
+    plot(target, 0, 'bx')
+    plot(prev, 0, 'kx')
+    plot(new, 0, 'rx')
+
+    legend("Target", "Prev", "New")
+
+    xlabel("SI")
 end

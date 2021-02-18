@@ -11,10 +11,11 @@ code = P.patientCode;
 T = AddField(T, code, P.results, "nL", @(x) x(1), "nL [1/min]");
 T = AddField(T, code, P.results, "xL", @(x) x(1), "xL [1]");
 T = AddField(T, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
+T = AddField(T, code, P.results, "IInputProportion", @(x) 100*x, "IInputProportion [%]");
 
-T = AddField(T, code, P.results, "delta2Norm");
-T = AddField(T, code, P.results, "delta2NormnL");
-T = AddField(T, code, P.results, "delta2NormxL");
+% T = AddField(T, code, P.results, "delta2Norm");
+% T = AddField(T, code, P.results, "delta2NormnL");
+% T = AddField(T, code, P.results, "delta2NormxL");
 
 T = AddField(T, code, P.results, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
 T = AddField(T, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
@@ -29,11 +30,11 @@ T = AddField(T, code, P.results, "optimalxLRange", @diff);
 T = AddField(T, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
 T = AddField(T, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
 
-T = AddField(T, code, P.data, "age");
-T = AddField(T, code, P.data, "BMI");
-T = AddField(T, code, P.data, "mass");
-T = AddField(T, code, P.data, "height");
-T = AddField(T, code, P.data, "BSA");
+% T = AddField(T, code, P.data, "age");
+% T = AddField(T, code, P.data, "BMI");
+% T = AddField(T, code, P.data, "mass");
+% T = AddField(T, code, P.data, "height");
+% T = AddField(T, code, P.data, "BSA");
 
 end
 

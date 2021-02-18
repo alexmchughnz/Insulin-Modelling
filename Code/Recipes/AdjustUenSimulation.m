@@ -15,11 +15,9 @@ DebugPlots(plots);
 
 
 %% Variables
-UenProportion = 1.50;
-IProportion = 1.00;
-deltaIProportion = 1/100;
-taper = 90/100;
-
+UenProportion = 0.85;
+deltaIProportion = 0.1;
+IProportion = 1.00 + deltaIProportion;
 
 %% Setup
 % Simulate patient as is.
@@ -38,33 +36,46 @@ for ii = 1:length(fieldsToKeep)
     adjP.results.(field) = P.results.(field);
 end
 
-
-
 %% Functions
-% Simulate orgP to get target SI.
-
-% Simulate adjP with adjusted Uen, and iterate to find the IInputProportion
-% that makes adjP's SI equal to orgP's.
+% Simulate adjP with adjusted Uen to get result SI.
 adjP.results.Uen = P.results.Uen .* UenProportion;
-resultSI = -Inf;
-while abs(targetSI - resultSI) > 1e-7   
+resultP = FitInsulinSensitivity(adjP, false);
+resultSI = resultP.results.SI;
+
+SIGap = abs(targetSI - resultSI);
+newGap = Inf;
+
+% Iterate to find the IInputProportion that makes adjP's SI equal to P's.
+while newGap > 1e-7   
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
-    copyP.data.vIBolus = P.data.vIBolus * IProportion;
+    copyP.data.vIBolus = P.data.vIBolus .* IProportion;
     copyP = MakeBolusFunctions(copyP);
     
-    % Fit SI and store results.
+    % Fit SI and store results.    
     copyP = FitInsulinSensitivity(copyP, false);
-    resultSI = copyP.results.SI;  
+    newSI = copyP.results.SI;
     
     % IInput needs to go down if SI is too low, or up if SI is too high.
-    deltaIDirection = sign(resultSI-targetSI); 
-    IProportion = IProportion + deltaIDirection*deltaIProportion;
-    deltaIProportion = deltaIProportion*taper; % Reduce change for next iteration.
+    newGap = abs(targetSI-newSI);
+    isSIImproving =  newGap < SIGap;
+    relativeGapSize = newGap / SIGap;
+    
+    if isSIImproving
+        deltaIProportion = deltaIProportion * relativeGapSize;
+    else        
+        deltaIProportion = -deltaIProportion * relativeGapSize;
+    end    
+    IProportion = 1 + deltaIProportion;
 end
 
-SolveSystem(P);
-SolveSystem(adjP);
+% Save IProportions.
+P.results.IInputProportion = 1.0;
+adjP.results.IInputProportion = IProportion;
+
+% Just finishing simulation for plots!
+P = SolveSystem(P);
+adjP = SolveSystem(adjP);
 
 PArray = {P adjP};
 

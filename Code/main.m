@@ -21,7 +21,8 @@ config
 % patientNums = [146];
 % source = "CREBRF";
 
-patientNums = [1 2 4 5 14 16 22 23 25 30];
+% patientNums = [1 2 4 5 14 16 22 23 25 30];
+patientNums = 5;
 source = "OGTTLui";
 
 %% Load Data

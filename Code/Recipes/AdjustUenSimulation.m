@@ -16,8 +16,8 @@ DebugPlots(plots);
 
 %% Variables
 UenProportion = 0.85;
-deltaIProportion = 0.1;
-IProportion = 1.00 + deltaIProportion;
+deltaIInput = 0.1;
+IProportion = 1.00 + deltaIInput;
 
 %% Setup
 % Simulate patient as is.
@@ -40,13 +40,13 @@ end
 % Simulate adjP with adjusted Uen to get result SI.
 adjP.results.Uen = P.results.Uen .* UenProportion;
 resultP = FitInsulinSensitivity(adjP, false);
-resultSI = resultP.results.SI;
+prevSI = resultP.results.SI;
 
-SIGap = abs(targetSI - resultSI);
-newGap = Inf;
+boundary = sort([targetSI prevSI]);
+newDistance = Inf;
 
 % Iterate to find the IInputProportion that makes adjP's SI equal to P's.
-while newGap > 1e-7   
+while newDistance >= 1e-7   
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
     copyP.data.vIBolus = P.data.vIBolus .* IProportion;
@@ -56,17 +56,38 @@ while newGap > 1e-7
     copyP = FitInsulinSensitivity(copyP, false);
     newSI = copyP.results.SI;
     
-    % IInput needs to go down if SI is too low, or up if SI is too high.
-    newGap = abs(targetSI-newSI);
-    isSIImproving =  newGap < SIGap;
-    relativeGapSize = newGap / SIGap;
+    % Adjust input based on how the newSI compares to the prev and target.
+    newDistance = abs(targetSI-newSI);
+    prevDistance = abs(targetSI-prevSI);
+    jumpDistance = abs(prevSI-newSI);
+    relativeSize = newDistance / prevDistance;
     
-    if isSIImproving
-        deltaIProportion = deltaIProportion * relativeGapSize;
-    else        
-        deltaIProportion = -deltaIProportion * relativeGapSize;
-    end    
-    IProportion = 1 + deltaIProportion;
+    
+    didProceed = (boundary(1) < newSI)  && (newSI < boundary(end));
+    wentWrongWay = (newDistance > prevDistance);
+    didOvershoot = (jumpDistance > prevDistance);
+    
+    if didProceed
+        % newSI has moved towards targetSI!
+        % Decelerate our IInput, and move pointers.   
+        deltaIInput = deltaIInput * relativeSize;
+        boundary = sort([targetSI newSI]);
+        
+    elseif wentWrongWay
+        % Our IInput has moved SI *away* from the target...
+        % Change sign of deltaIInput and try again.
+        deltaIInput = -deltaIInput;       
+     
+    elseif didOvershoot
+        % Our deltaIInput is definitely too big...        
+        % Reduce it by a factor of 'taper' and try again.
+        taper = 0.8;
+        deltaIInput = deltaIInput*taper;
+    else
+        assert(false, "Shouldn't get here!")
+    end
+    
+    IProportion = 1 + deltaIInput;
 end
 
 % Save IProportions.

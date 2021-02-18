@@ -7,7 +7,6 @@ function T = TabulateResults(T, P)
 %   T - updated table
 
 code = P.patientCode;
-T{code, "code"} = string(code);
 
 T = AddField(T, code, P.results, "nL", @(x) x(1), "nL [1/min]");
 T = AddField(T, code, P.results, "xL", @(x) x(1), "xL [1]");

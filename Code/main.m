@@ -30,7 +30,7 @@ patientSetOut = {};
 
 %% Run
 % Select recipe to run on each patient.
-recipeFunction = @AdjustRangeSimulation;
+recipeFunction = @AdjustUenSimulation;
 
 % Execute on each patient.
 for ii = 1:length(patientSetIn)    

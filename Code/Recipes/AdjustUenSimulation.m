@@ -16,7 +16,7 @@ DebugPlots(plots);
 
 %% Variables
 UenProportion = 0.85;
-deltaIInput = 0.1;
+deltaIInput = 0.05;
 IProportion = 1.00 + deltaIInput;
 
 %% Setup
@@ -46,24 +46,22 @@ boundary = sort([targetSI prevSI]);
 newDistance = Inf;
 
 % Iterate to find the IInputProportion that makes adjP's SI equal to P's.
-while newDistance >= 1e-7   
+while newDistance >= 1e-7
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
     copyP.data.vIBolus = P.data.vIBolus .* IProportion;
     copyP = MakeBolusFunctions(copyP);
     
-    % Fit SI and store results.    
+    % Fit SI and store results.
     copyP = FitInsulinSensitivity(copyP, false);
     newSI = copyP.results.SI;
     PlotSIChange(targetSI, prevSI, newSI);
-    pause
     
     % Adjust input based on how the newSI compares to the prev and target.
     newDistance = abs(targetSI-newSI);
     prevDistance = abs(targetSI-prevSI);
     jumpDistance = abs(prevSI-newSI);
-    relativeSize = newDistance / prevDistance;
-    
+    relativeSize = newDistance / prevDistance;    
     
     didProceed = (boundary(1) < newSI)  && (newSI < boundary(end));
     wentWrongWay = (newDistance > prevDistance);
@@ -71,27 +69,32 @@ while newDistance >= 1e-7
     
     if didProceed
         % newSI has moved towards targetSI!
-        % Decelerate our IInput, and move pointers.   
-        deltaIInput = deltaIInput * relativeSize;
+        % Decelerate our IInput, and move pointers.
+        PrintStatusUpdate(P, "Moving towards target...", true)
         
+        deltaIInput = deltaIInput * (1-relativeSize);        
         boundary = sort([targetSI newSI]);
         prevSI = newSI;
+        
+    elseif didOvershoot
+        % Our deltaIInput is definitely too big...
+        % Reduce it by a factor of 'taper' and try again.
+        PrintStatusUpdate(P, "Overshot target...", true)
+        
+        taper = 0.8;
+        deltaIInput = deltaIInput*taper;
         
     elseif wentWrongWay
         % Our IInput has moved SI *away* from the target...
         % Change sign of deltaIInput and try again.
-        deltaIInput = -deltaIInput;       
-     
-    elseif didOvershoot
-        % Our deltaIInput is definitely too big...        
-        % Reduce it by a factor of 'taper' and try again.
-        taper = 0.8;
-        deltaIInput = deltaIInput*taper;
+        PrintStatusUpdate(P, "Moving in wrong direction!", true)
+        deltaIInput = -deltaIInput;
+        
     else
         assert(false, "Shouldn't get here!")
     end
     
-    IProportion = 1 + deltaIInput;
+    IProportion = IProportion + deltaIInput;
 end
 
 % Save IProportions.
@@ -109,15 +112,15 @@ plots.AdjustUenSimulation = struct();
 DP = plots.AdjustUenSimulation;
 
 % MakeDebugPlot("SI Adjustments", P, DP);
-% 
+%
 % plt = plot(basalP.results.tArray, arrayify(basalP, basalSI), ':');
 % plt.DisplayName = 'Basal SI';
-% 
+%
 % for ii = 1:length(IProportion)
 %     plt = plot(P.results.tArray, arrayify(P, fullSI), ':');
-%     plt.DisplayName = sprintf("Full SI (%d%%)", IProportion(ii));    
+%     plt.DisplayName = sprintf("Full SI (%d%%)", IProportion(ii));
 % end
-% 
+%
 % if isfield(P.data, 'tIBolus')
 %     plt = line([P.data.tIBolus'; P.data.tIBolus'], ylim, ...
 %         'Color', 'r', ...
@@ -127,10 +130,10 @@ DP = plots.AdjustUenSimulation;
 %         plt(pp).HandleVisibility = 'off';
 %     end
 % end
-% 
+%
 % xlabel('Time')
 % ylabel('$S_I$ [L/mU/min]')
-% 
+%
 % legend()
 
 end
@@ -138,15 +141,22 @@ end
 
 
 function F = PlotSIChange(target, prev, new)
-    F = figure(11111);
-    clf(F, 'reset');
-    hold on
+F = figure(11111);
+if ~isempty(F.Children)
+    xx = xlim;
+end
 
-    plot(target, 0, 'bx')
-    plot(prev, 0, 'kx')
-    plot(new, 0, 'rx')
+clf(F, 'reset');
+hold on
 
-    legend("Target", "Prev", "New")
+plot(target, 0, 'bx')
+plot(prev, 0, 'kx')
+plot(new, 0, 'rx')
 
-    xlabel("SI")
+legend("Target", "Prev", "New")
+xlabel("SI")
+
+if exist('xx', 'var')
+    xlim(xx)
+end
 end

@@ -3,7 +3,8 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 set(groot, 'DefaultLineLineWidth', 2.0);
 set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 8 6]);
-format shorteng
+format shortG
+format compact
 warning('off', 'MATLAB:table:RowsAddedExistingVars');
 
 clear MakeDebugPlot  % Needed to reset persistents in this function.
@@ -25,7 +26,7 @@ addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.PLOTPATH));
 
 CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
-CONFIG.STATUSDEPTH = 2;
+CONFIG.STATUSDEPTH = 1;
 
 disp('Config updated.')
 clear

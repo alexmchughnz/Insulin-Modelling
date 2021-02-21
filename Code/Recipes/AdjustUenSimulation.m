@@ -41,13 +41,13 @@ resultP = FitInsulinSensitivity(adjP, false);
 prevSI = resultP.results.SI;
 
 % If targetSI is higher we need to lower IInput, and vice versa.
-errorSign = sign(prevSI - targetSI);
-deltaIInput = errorSign * 0.1;
+initialError = targetSI-prevSI;
+deltaIInput = -sign(initialError) * 0.1;
 IProportion = 1.00 + deltaIInput;
 
 % Iterate to find the IInputProportion that makes adjP's SI equal to P's.
-newDistance = Inf;
-while newDistance >= 1e-6
+error = Inf;
+while error >= 5e-6
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
     copyP.data.vIBolus = adjP.data.vIBolus .* IProportion;
@@ -60,11 +60,14 @@ while newDistance >= 1e-6
     
     % Adjust input based on how the newSI compares to the prev and target.
     jumpDist = abs(newSI - prevSI);
-    error = targetSI - newSI;
-    Kp = error/jumpDist;
+    error = targetSI - prevSI;
+    scale = error/jumpDist;
     
-    deltaIInput = Kp*deltaIInput;
-    IProportion = IProportion + deltaIInput;
+    deltaIInput = scale*deltaIInput
+    IProportion = 1 + deltaIInput
+    
+    % Update pointers.
+%     prevSI = newSI;
 end
 
 % Save IProportions.

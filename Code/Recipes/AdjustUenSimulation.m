@@ -47,7 +47,7 @@ IProportion = 1.00 + deltaIInput;
 
 % Iterate to find the IInputProportion that makes adjP's SI equal to P's.
 pcError = Inf;
-while pcError >= 0.5/100
+while pcError >= 1/100
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
     copyP.data.vIBolus = adjP.data.vIBolus .* IProportion;

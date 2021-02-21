@@ -22,7 +22,7 @@ config
 % source = "CREBRF";
 
 % patientNums = [1 2 4 5 14 16 22 23 25 30];
-patientNums = 5;
+patientNums = 25;
 source = "OGTTLui";
 
 %% Load Data

@@ -21,12 +21,12 @@ config
 % patientNums = [146];
 % source = "CREBRF";
 
-% patientNums = [1 2 4 5 14 16 22 23 25 30];
-patientNums = 25;
+patientNums = [1 2 4 5 14 16 22 23 25 30];
+% patientNums = 25;
 source = "OGTTLui";
 
 %% Load Data
-patientSetIn = LoadData(source, patientNums);
+patientSet = LoadData(source, patientNums);
 patientSetOut = {};
 
 %% Run
@@ -34,8 +34,8 @@ patientSetOut = {};
 recipeFunction = @AdjustUenSimulation;
 
 % Execute on each patient.
-for ii = 1:length(patientSetIn)    
-    patientsOut = recipeFunction(patientSetIn{ii});
+for ii = 1:length(patientSet)    
+    patientsOut = recipeFunction(patientSet{ii});
     patientSetOut = [patientSetOut patientsOut];
 end
 

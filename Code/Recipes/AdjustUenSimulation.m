@@ -46,8 +46,8 @@ deltaIInput = -sign(initialError) * 0.1;
 IProportion = 1.00 + deltaIInput;
 
 % Iterate to find the IInputProportion that makes adjP's SI equal to P's.
-error = Inf;
-while error >= 5e-6
+pcError = Inf;
+while pcError >= 0.5/100
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
     copyP.data.vIBolus = adjP.data.vIBolus .* IProportion;
@@ -60,14 +60,14 @@ while error >= 5e-6
     
     % Adjust input based on how the newSI compares to the prev and target.
     jumpDist = abs(newSI - prevSI);
-    error = targetSI - prevSI;
+    error = targetSI - newSI;
     scale = error/jumpDist;
     
-    deltaIInput = scale*deltaIInput
-    IProportion = 1 + deltaIInput
+    deltaIInput = (1+scale) * deltaIInput;
+    IProportion = 1 + deltaIInput;
     
-    % Update pointers.
-%     prevSI = newSI;
+    % Update percentage error.
+    pcError = abs(error/targetSI);
 end
 
 % Save IProportions.
@@ -75,8 +75,8 @@ P.results.IInputProportion = 1.0;
 adjP.results.IInputProportion = IProportion;
 
 % Just finishing simulation for plots!
-P = SolveSystem(P);
-adjP = SolveSystem(adjP);
+P = SolveSystem(P, true);
+adjP = SolveSystem(adjP, true);
 
 PArray = {P adjP};
 

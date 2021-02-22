@@ -7,9 +7,10 @@ clear
 close all
 fprintf("Running main - press key to start.\n")
 % pause
-tic
 
 config
+
+tStart = tic;
 
 %% Select Data
 % patientNums = [1];
@@ -40,7 +41,13 @@ for ii = 1:length(patientSet)
 end
 
 %% Results
-SavePatients(patientSetOut);
-
 saveResults = true;
+tResults = tic;
+
+PrintTimeTaken("Main", patientSet, tStart);
+
+SavePatients(patientSetOut);
 PrintResults(patientSetOut, saveResults);
+
+PrintTimeTaken("Results", patientSet, tResults);
+

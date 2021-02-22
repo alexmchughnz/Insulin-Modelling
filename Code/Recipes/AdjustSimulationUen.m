@@ -37,9 +37,8 @@ end
 %% Functions
 % Simulate adjP with adjusted Uen to get result SI.
 adjP.results.Uen = P.results.Uen .* UenProportion;
-resultP = FitInsulinSensitivity(adjP, false);
-prevSI = resultP.results.SI;
 
+% Find IInput value that minimises error in SI.
 function error = GetSIError(IProportion)
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
@@ -48,12 +47,11 @@ function error = GetSIError(IProportion)
     
     % Fit SI and store results.
     copyP = FitInsulinSensitivity(copyP, false);
-    newSI = copyP.results.SI;
-    
+    newSI = copyP.results.SI;    
     error = abs(newSI-targetSI);
 end
+IProportion = fminbnd(@GetSIError, 0.5, 1.5);
 
-IProportion = fminsearch(@GetSIError, 1.00)
 
 % Save IProportions.
 P.results.IInputProportion = 1.0;
@@ -65,28 +63,4 @@ adjP = SolveSystem(adjP, true);
 
 PArray = {P adjP};
 
-end
-
-
-
-
-function F = PlotSIChange(target, prev, new)
-F = figure(11111);
-if ~isempty(F.Children)
-    xx = xlim;
-end
-
-clf(F, 'reset');
-hold on
-
-plot(target, 0, 'bx')
-plot(prev, 0, 'kx')
-plot(new, 0, 'rx')
-
-legend("Target", "Prev", "New")
-xlabel("SI")
-
-if exist('xx', 'var')
-    xlim(xx)
-end
 end

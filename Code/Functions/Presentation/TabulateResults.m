@@ -12,6 +12,7 @@ T = AddField(T, code, P.results, "nL", @(x) x(1), "nL [1/min]");
 T = AddField(T, code, P.results, "xL", @(x) x(1), "xL [1]");
 T = AddField(T, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
 T = AddField(T, code, P.results, "IInputProportion", @(x) 100*x, "IInputProportion [%]");
+T = AddField(T, code, P.results, "nLProportion", @(x) 100*x, "nLProportion [%]");
 
 % T = AddField(T, code, P.results, "delta2Norm");
 % T = AddField(T, code, P.results, "delta2NormnL");

@@ -1,4 +1,4 @@
-function PArray = AdjustUenSimulation(P)
+function PArray = AdjustSimulationUen(P)
 % Recipe for adjusting Uen and counter balancing by changing inputs.
 % INPUTS:
 %   P  - patient struct
@@ -72,13 +72,13 @@ end
 
 % Save IProportions.
 P.results.IInputProportion = 1.0;
-adjP.results.IInputProportion = IProportion;
+copyP.results.IInputProportion = IProportion;
 
 % Just finishing simulation for plots!
 P = SolveSystem(P, true);
-adjP = SolveSystem(adjP, true);
+copyP = SolveSystem(copyP, true);
 
-PArray = {P adjP};
+PArray = {P copyP};
 
 %% Debug Plots
 plots.AdjustUenSimulation = struct();

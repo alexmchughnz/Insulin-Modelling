@@ -40,14 +40,7 @@ adjP.results.Uen = P.results.Uen .* UenProportion;
 resultP = FitInsulinSensitivity(adjP, false);
 prevSI = resultP.results.SI;
 
-% If targetSI is higher we need to lower IInput, and vice versa.
-initialError = targetSI-prevSI;
-deltaIInput = -sign(initialError) * 0.1;
-IProportion = 1.00 + deltaIInput;
-
-% Iterate to find the IInputProportion that makes adjP's SI equal to P's.
-pcError = Inf;
-while pcError >= 1/100
+function error = GetSIError(IProportion)
     % Make new copy of patient and adjust IInput and bolus functions.
     copyP = adjP;
     copyP.data.vIBolus = adjP.data.vIBolus .* IProportion;
@@ -56,60 +49,24 @@ while pcError >= 1/100
     % Fit SI and store results.
     copyP = FitInsulinSensitivity(copyP, false);
     newSI = copyP.results.SI;
-    PlotSIChange(targetSI, prevSI, newSI);
     
-    % Adjust input based on how the newSI compares to the prev and target.
-    jumpDist = abs(newSI - prevSI);
-    error = targetSI - newSI;
-    scale = error/jumpDist;
-    
-    deltaIInput = (1+scale) * deltaIInput;
-    IProportion = 1 + deltaIInput;
-    
-    % Update percentage error.
-    pcError = abs(error/targetSI);
+    error = abs(newSI-targetSI);
 end
+
+IProportion = fminsearch(@GetSIError, 1.00)
 
 % Save IProportions.
 P.results.IInputProportion = 1.0;
-copyP.results.IInputProportion = IProportion;
+adjP.results.IInputProportion = IProportion;
 
 % Just finishing simulation for plots!
 P = SolveSystem(P, true);
-copyP = SolveSystem(copyP, true);
+adjP = SolveSystem(adjP, true);
 
-PArray = {P copyP};
-
-%% Debug Plots
-plots.AdjustUenSimulation = struct();
-DP = plots.AdjustUenSimulation;
-
-% MakeDebugPlot("SI Adjustments", P, DP);
-%
-% plt = plot(basalP.results.tArray, arrayify(basalP, basalSI), ':');
-% plt.DisplayName = 'Basal SI';
-%
-% for ii = 1:length(IProportion)
-%     plt = plot(P.results.tArray, arrayify(P, fullSI), ':');
-%     plt.DisplayName = sprintf("Full SI (%d%%)", IProportion(ii));
-% end
-%
-% if isfield(P.data, 'tIBolus')
-%     plt = line([P.data.tIBolus'; P.data.tIBolus'], ylim, ...
-%         'Color', 'r', ...
-%         'LineStyle', '--');
-%     plt(1).DisplayName = 'Bolus Input';
-%     for pp = 2:length(plt)
-%         plt(pp).HandleVisibility = 'off';
-%     end
-% end
-%
-% xlabel('Time')
-% ylabel('$S_I$ [L/mU/min]')
-%
-% legend()
+PArray = {P adjP};
 
 end
+
 
 
 

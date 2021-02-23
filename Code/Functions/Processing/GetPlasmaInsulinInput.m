@@ -19,7 +19,7 @@ if P.data.IType == "human"
         end
         
         n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
-        IInput = SC.k3*P.results.QLocal(n);  % [mU/min]
+        IInput = SC.ks3*P.results.QLocal(n);  % [mU/min]
 
     else
         IInput = 0;

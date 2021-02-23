@@ -18,8 +18,8 @@ QLocal = Y(2);
 IBolus = P.data.IBolus(t);  % [mU/min]
 
 %% Computation
-dISC    = -SC.k2*ISC + IBolus;
-dQLocal = -SC.k2*QLocal + SC.k2*ISC - SC.kdi*QLocal;
+dISC    = -SC.ks2*ISC + IBolus;
+dQLocal = -SC.ks3*QLocal + SC.ks2*ISC - SC.kdi*QLocal;
 
 %% Output
 dY = [dISC;

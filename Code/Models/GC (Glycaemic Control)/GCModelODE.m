@@ -16,27 +16,17 @@ function [dY] = GCModelODE(t, Y, P, Y0, ppG, ppI)
 GC = P.parameters.GC;
 
 %% Input
-if exist("ppG", "var")
-    G = ppG(t);
-else
-    G  = Y(1);  % [mmol/L]
-end
-
-if exist("ppI", "var")
-    I = ppI(t);
-else
-    I  = Y(2);  % [mU]
-end
-
+G  = Y(1);  % [mmol/L]
+I  = Y(2);  % [mU]
 Q  = Y(3);  % [mU]
 Q0 = Y0(3); % [mU]
 
 %% Variables
 % Time dependent.
-n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
-Uen       = P.results.Uen(n);       % [mU/min]
-P2        = P.results.P2(n);        % [mmol]
-GFast     = P.data.GFast(t);        % Fasting glucose [mmol/L]
+n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
+Uen    = P.results.Uen(n);       % [mU/min]
+P2     = P.results.P2(n);        % [mmol]
+GFast  = P.data.GFast(t);        % Fasting glucose [mmol/L]
 
 % Patient dependent.
 SI = P.results.SI;        % [L/mU/min]
@@ -51,31 +41,37 @@ else
     GInput = P.data.GInfusion(n);  % [mmol/min]
 end
 
+
+Qtot = Q;
+Qtot0 = Q0;
 if P.data.IType == "detemir"
     % Include interstitial Detemir.
-    Q0 = Q0 + P.results.QDF(1);  % [mU/L]
-    Q = Q + P.results.QDF(n);   % [mU/L]
+    Qtot = Qtot + P.results.QDF(n);   % [mU/L]
+    Qtot0 = Qtot0 + P.results.QDF(1);  % [mU/L]
 end
 
 IInput = GetPlasmaInsulinInput(t, P);
 
 %% Computation
-dGA = -(G*Q - GFast*Q0)/(1 + GC.alphaG*Q);   % Insulin-mediated uptake.
+dGA = -(G*Qtot - GFast*Qtot0)/(1 + GC.alphaG*Qtot);   % Insulin-mediated uptake.
 
-dGb = - GC.pg*(G-GFast) ...                  % Non-insulin-mediated uptake.
-    + d2*P2/GC.VG ...                           % Endogenous input from gut.
-    + GInput/GC.VG;                             % Exogenous IV glucose input.
+dGb =GInput/GC.VG...          % Exogenous IV glucose input.
+    + d2/GC.VG * P2 ...       % Endogenous input from gut.
+    + GC.EGP/GC.VG ...        % Endogenous production.
+    - GC.pg * (G-GFast) ...   % Non insulin-mediated uptake.
+    - GC.CNS/GC.VG;           % Central nervous system uptake.
 
-dG = SI*dGA + dGb;
+dG = dGb + SI*dGA;
 
-dI  = - GC.nK*I ...                  % Renal clearance.
-    - nL*I/(1 + GC.alphaI*I) ...  % Liver clearance.
-    - GC.nI/GC.VI*(I-Q) ...          % Transfer to Q compartment.
-    + Uen*(1 - xL)/GC.VI ...      % Endogenous input.
-    + IInput/GC.VI;               % Exogenous input (IV or subcut).
+dI  = IInput/GC.VI ...              % Exogenous input (IV or subcut).
+    + Uen * (1 - xL)/GC.VI ...      % Endogenous input.
+    - GC.nK * I ...                 % Renal clearance.
+    - nL * I/(1 + GC.alphaI*I) ...  % Hepatic clearance.
+    - GC.nI/GC.VI * (I-Q);          % Transfer to Q compartment.
 
-dQ  = GC.nI/GC.VQ*(I-Q) ...  % Transfer from I compartment.
-    - GC.nC*Q;            % Peripheral degradation.
+
+dQ  = GC.nI/GC.VQ * (I-Q) ...  % Transfer from I compartment.
+    - GC.nC * Qtot;            % Peripheral degradation.
 
 
 

@@ -1,6 +1,5 @@
 function [P, Y] = GCModel(P, options)
 % Function for GC model forward simulation.
-% Pequires qGut(t) and QLocal(t) - must be run AFTER GI and ID models.
 % INPUTS:
 %   P        - patient struct, must have tArray, qGut(t) and QLocal(t)
 %   options  - ode45 options

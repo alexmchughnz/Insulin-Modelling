@@ -22,8 +22,8 @@ tStart = tic;
 % patientNums = [146];
 % source = "CREBRF";
 
-% patientNums = [1 2 5 14 16 22 23 25 30]; % [4]
-patientNums = 25;
+patientNums = [1 2 5 14 16 22 23 25 30]; % [4]
+% patientNums = 25;
 source = "OGTTLui";
 
 %% Load Data

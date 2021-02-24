@@ -20,11 +20,12 @@ if P.data.GDelivery == "enteral"
 else
     D = 0;
 end
+d1 = GI.d1;
 d2 = P.results.d2;
 
 %% Computation
-dP1 = -GI.d1*P1 + D;
-dP2 = -d2*P2 + GI.d1*P1 ;
+dP1 = D - d1*P1;
+dP2 = d1*P1 - d2*P2;
 
 %% Output
 dY = [dP1;

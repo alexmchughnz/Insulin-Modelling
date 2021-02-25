@@ -9,54 +9,53 @@ DIM3 = 3;
 
 
 %% Table Assembly
-tables = {};
+tables = {table table table};
+
 for ii = 1:length(patientSet)
+    tt = 0;
     P = patientSet{ii};
     code = P.patientCode;
     
     %% Main Results
+    tt = tt + 1;
     name = "MainResults";
-    T = table;
-    T.Properties.Description = name;
+    tables{tt} = table;
+    tables{tt}.Properties.Description = name;
     
-    T = AddField(T, code, P.results, "nL", @(x) x(1), "nL [1/min]");
-    T = AddField(T, code, P.results, "xL", @(x) x(1), "xL [1]");
-    T = AddField(T, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
+    tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
+    tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");
+    tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
     
-    T = AddField(T, code, P.results, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
-    T = AddField(T, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
-    
-    tables = AppendTable(tables, T);
-    clear T
+    tables{tt} = AddField(tables{tt}, code, P.results, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
+    tables{tt} = AddField(tables{tt}, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]"); 
     
     
     %% Find Optimal Hepatic Clearance
-    T = table;
-    T.Properties.Description = 'OptimalHepaticClearance';
+    tt = tt + 1;
+    tables{tt} = table;
+    tables{tt}.Properties.Description = 'OptimalHepaticClearance';
     
-    T = AddField(T, code, P.data, "stddevMSE");
-    T = AddField(T, code, P.results, "minGridMSE");
-    T = AddField(T, code, P.results, "minimalErrorRegionSize");
+    tables{tt} = AddField(tables{tt}, code, P.data, "stddevMSE");
+    tables{tt} = AddField(tables{tt}, code, P.results, "minGridMSE");
+    tables{tt} = AddField(tables{tt}, code, P.results, "minimalErrorRegionSize");
     
-    T = AddField(T, code, P.results, "optimalnLRange", @diff);
-    T = AddField(T, code, P.results, "optimalnLRange", @(x) x(1), "nLRangeLower");
-    T = AddField(T, code, P.results, "optimalnLRange", @(x) x(end), "nLRangeUpper");
-    T = AddField(T, code, P.results, "optimalxLRange", @diff);
-    T = AddField(T, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
-    T = AddField(T, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
-    
-    tables = AppendTable(tables, T);
-    clear T
+    tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @diff);
+    tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(1), "nLRangeLower");
+    tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(end), "nLRangeUpper");
+    tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @diff);
+    tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
+    tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
     
     
-    %% Match I Input
+    %% Match I Input    
+    tt = tt + 1;
     name = "MatchIInput";
-    if isfield(P.results, name)        
+    if isfield(P.results, name)
         if ~exist("IScales", "var")
             IScales = [];
         end
         
-        IScales = cat(DIM3, IScales, P.results.MatchIInput.IScales);        
+        IScales = cat(DIM3, IScales, P.results.MatchIInput.IScales);
         nLnKScales = P.results.MatchIInput.nLnKScales;
         UenScales = P.results.MatchIInput.UenScales;
     end
@@ -67,22 +66,22 @@ end
 
 % Match I Input
 name = "MeanMatchIInput";
-T = table;
-T.Properties.Description = name;
-
-variableNames = "Uen@"+string(100*UenScales)+"%";
-rowNames = "nLnK@"+string(100*nLnKScales)+"%";
-for nn = 1:length(nLnKScales)
-    T{rowNames(nn), :} = IScales(nn, :);
+if isfield(P.results, name)
+    tables{tt}.Properties.Description = name;
+    
+    variableNames = "Uen@"+string(100*UenScales)+"%";
+    rowNames = "nLnK@"+string(100*nLnKScales)+"%";
+    for nn = 1:length(nLnKScales)
+        tables{tt}{rowNames(nn), :} = IScales(nn, :);
+    end
+    tables{tt}.Properties.VariableNames = variableNames;
 end
-T.Properties.VariableNames = variableNames;
-
-tables = AppendTable(tables, T);
 
 end
 
 
 function T = AddField(T, code, PStruct, fieldName, func, newName)
+
 if ~exist('func', 'var')
     func = @(x) x;
 end
@@ -94,16 +93,5 @@ if isfield(PStruct, fieldName)
         T{code, fieldName} = func(PStruct.(fieldName));
     end
 end
-end
-
-function tables = AppendTable(tables, T)
-if ~isempty(T)    
-    if isempty(tables)
-        tables = T;
-    else    
-        tables = {tables T};
-    end    
-end
 
 end
-

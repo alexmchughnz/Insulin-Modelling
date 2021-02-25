@@ -32,6 +32,7 @@ numU = length(nLnKScales);
 
 numRuns = numN*numU;
 
+runtime = tic;
 for nn = 1:numN
     nP = P;
     
@@ -39,10 +40,7 @@ for nn = 1:numN
     nP.parameters.GC.nK = nP.parameters.GC.nK * nLnKScales(nn);
     nP.results.nL = nP.results.nL * nLnKScales(nn);
     
-    for uu = 1:numU
-        count = (nn-1)*numN + uu;
-        PrintTimeRemaining(count, numRuns, P)
-        
+    for uu = 1:numU        
         % Edit patient.
         uP = nP;
         uP.patientNum = 1000*uP.patientNum + 10*uu + nn;
@@ -55,7 +53,10 @@ for nn = 1:numN
         upperBound = 0.00;
         lowerBound = 2.00;
         IInputScale = fminbnd(GetInsulinError, upperBound, lowerBound); 
-        IScales(uu, nn) = IInputScale;
+        IScales(uu, nn) = IInputScale;        
+        
+        count = (nn-1)*numN + uu;  
+        runtime = PrintTimeRemaining("MatchIInputSim", runtime, count, numRuns, P);
     end
 end
 

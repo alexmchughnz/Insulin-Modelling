@@ -27,27 +27,30 @@ for ii = 1:length(patientSet)
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
     
     tables{tt} = AddField(tables{tt}, code, P.results, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
-    tables{tt} = AddField(tables{tt}, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]"); 
+    tables{tt} = AddField(tables{tt}, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
     
     
     %% Find Optimal Hepatic Clearance
     tt = tt + 1;
-    tables{tt} = table;
-    tables{tt}.Properties.Description = 'OptimalHepaticClearance';
+    name = "OptimalHepaticClearance";
+    if isfield(P.results, name)
+        tables{tt} = table;
+        tables{tt}.Properties.Description = name;
+        
+        tables{tt} = AddField(tables{tt}, code, P.data, "stddevMSE");
+        tables{tt} = AddField(tables{tt}, code, P.results, "minGridMSE");
+        tables{tt} = AddField(tables{tt}, code, P.results, "minimalErrorRegionSize");
+        
+        tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(1), "nLRangeLower");
+        tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(end), "nLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
+        tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
+    end
     
-    tables{tt} = AddField(tables{tt}, code, P.data, "stddevMSE");
-    tables{tt} = AddField(tables{tt}, code, P.results, "minGridMSE");
-    tables{tt} = AddField(tables{tt}, code, P.results, "minimalErrorRegionSize");
     
-    tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @diff);
-    tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(1), "nLRangeLower");
-    tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(end), "nLRangeUpper");
-    tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @diff);
-    tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
-    tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
-    
-    
-    %% Match I Input    
+    %% Match I Input
     tt = tt + 1;
     name = "MatchIInput";
     if isfield(P.results, name)
@@ -65,15 +68,18 @@ end
 %% Post Processing
 
 % Match I Input
-name = "MeanMatchIInput";
+name = "MatchIInput";
 if isfield(P.results, name)
     tables{tt}.Properties.Description = name;
     
     variableNames = "Uen@"+string(100*UenScales)+"%";
     rowNames = "nLnK@"+string(100*nLnKScales)+"%";
+    
+    meanIScales = mean(IScales, DIM3);
     for nn = 1:length(nLnKScales)
-        tables{tt}{rowNames(nn), :} = IScales(nn, :);
+        tables{tt}{rowNames(nn), :} = meanIScales(nn, :);
     end
+    
     tables{tt}.Properties.VariableNames = variableNames;
 end
 

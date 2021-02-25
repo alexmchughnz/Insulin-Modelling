@@ -11,7 +11,6 @@ close all
 
 config
 
-tic
 tStart = tic;
 
 %% Select Data
@@ -35,12 +34,16 @@ patientSetOut = {};
 
 %% Run
 % Select recipe to run on each patient.
-recipeFunction = @SimpleSimulation;
+recipeFunction = @MatchIInputSim;
 
 % Execute on each patient.
-for ii = 1:length(patientSet)
+numPatients = length(patientSet);
+runtime = tic;
+for ii = 1:numPatients
     patientsOut = recipeFunction(patientSet{ii});
     patientSetOut = [patientSetOut patientsOut];
+    
+    runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii});
 end
 
 %% Results

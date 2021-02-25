@@ -213,6 +213,8 @@ function [IResiduals, simI] = EvaluateGrid(P, nLGrid, xLGrid, savename)
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
 IResiduals = zeros(size(nLGrid));
+
+runtime = tic;
 for ii = 1:numel(nLGrid)    
     message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
     PrintStatusUpdate(P, message, true);
@@ -242,7 +244,8 @@ for ii = 1:numel(nLGrid)
     [row, col] = ind2sub(size(ISimulated), ii);
     ISimulated(row, col, :) = simI(:);
     
-    PrintTimeRemaining(ii, numel(nLGrid), P)
+    runtime = PrintTimeRemaining("FindOptimalHepaticClearance", ...
+        runtime, ii, numel(nLGrid), P);
 end
 
 % Export results.

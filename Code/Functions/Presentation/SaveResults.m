@@ -8,6 +8,5 @@ path = fullfile(CONFIG.RESULTPATH, filename);
 
 save(path, '-struct', 'saveStruct')
 
-CONFIG.RESULTPATH
 end
 

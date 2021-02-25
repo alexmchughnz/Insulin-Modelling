@@ -56,14 +56,11 @@ for nn = 1:numN
         lowerBound = 2.00;
         IInputScale = fminbnd(GetInsulinError, upperBound, lowerBound); 
         IScales(uu, nn) = IInputScale;
-        
-        % Adjust insulin input and plot.
-        uP.data.vIBolus = uP.data.vIBolus .* IInputScale;
-        uP = MakeBolusFunctions(uP);
-        SolveSystem(uP, true);
     end
 end
 
+% Plot patients and save results.
+SolveSystem(uP, false);
 P.results.MatchIInput.IScales = IScales;
 P.results.MatchIInput.nLnKScales = nLnKScales;
 P.results.MatchIInput.UenScales = UenScales;

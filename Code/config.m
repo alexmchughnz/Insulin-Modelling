@@ -26,7 +26,8 @@ addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.PLOTPATH));
 
 CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
-CONFIG.STATUSDEPTH = 2;
+CONFIG.STATUSDEPTH = 3;
+CONFIG.PUBLISHPLOTS = false;
 
 disp('Config updated.')
 clear

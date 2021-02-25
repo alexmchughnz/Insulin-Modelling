@@ -6,16 +6,28 @@ function PrintResults(patientSet, save)
 
 global CONFIG
 
-T = table;
-for ii = 1:length(patientSet)
-    P = patientSet{ii};
-    T = TabulateResults(T, P);
-end
+source = patientSet{end}.source;
+tables = TabulateResults(patientSet);
 
 if (save)
-    SaveOpenFigures(P.source);
-    writetable(T, fullfile(CONFIG.RESULTPATH, P.source+"table.csv"));
+    SaveOpenFigures(source);
+    
+    for tt = 1:length(tables)
+        T = tables{tt};
+        
+        title = T.Properties.Description;
+        filename = fullfile(CONFIG.RESULTPATH, source + title + ".csv");
+        
+        writetable(T, filename);
+    end
 end
 
 PanelDebugPlots();
-disp(T);
+
+for tt = 1:length(tables)
+    T = tables{tt};
+    
+    disp(T.Properties.Description);
+    disp(T);
+    disp(newline);
+end

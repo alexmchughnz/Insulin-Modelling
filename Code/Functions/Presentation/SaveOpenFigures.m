@@ -18,7 +18,9 @@ for iFig = 1:length(FigList)
     FigName   = get(AxisHandle.Title, 'String');
     FigName = matlab.lang.makeValidName(FigName);    
     
-    title('')
+    if (CONFIG.PUBLISHPLOTS)
+        title('')
+    end
     
     figDir = fullfile(FolderName, 'fig', subfolder);
     if ~isfolder(figDir)

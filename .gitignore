@@ -8,7 +8,7 @@
 *.xls
 *.xlsx
 *.tmp
-
+*.csv
 *.asv
 
 config.mat

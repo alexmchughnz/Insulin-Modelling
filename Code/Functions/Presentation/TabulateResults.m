@@ -9,7 +9,7 @@ DIM3 = 3;
 
 
 %% Table Assembly
-tables = {table table table};
+tables = {table table table table};
 
 for ii = 1:length(patientSet)
     tt = 0;
@@ -51,14 +51,18 @@ for ii = 1:length(patientSet)
     
     
     %% Match I Input
-    tt = tt + 1;
     name = "MatchIInput";
     if isfield(P.results, name)
         if ~exist("IScales", "var")
             IScales = [];
+        end        
+        if ~exist("IErrors", "var")
+            IErrors = [];
         end
         
         IScales = cat(DIM3, IScales, P.results.MatchIInput.IScales);
+        IErrors = cat(DIM3, IErrors, P.results.MatchIInput.IErrors);
+        
         nLnKScales = P.results.MatchIInput.nLnKScales;
         UenScales = P.results.MatchIInput.UenScales;
     end
@@ -67,17 +71,31 @@ end
 
 %% Post Processing
 
-% Match I Input
 name = "MatchIInput";
 if isfield(P.results, name)
-    tables{tt}.Properties.Description = name;
     
-    variableNames = "Uen@"+string(100*UenScales)+"%";
-    rowNames = "nLnK@"+string(100*nLnKScales)+"%";
+    variableNames = "nLnK@"+string(100*nLnKScales)+"%";
+    rowNames = "Uen@"+string(100*UenScales)+"%";
+    
+% Match I Input
+    tt = tt + 1;
+    tables{tt}.Properties.Description = name + "Proportion";
     
     meanIScales = mean(IScales, DIM3);
-    for nn = 1:length(nLnKScales)
-        tables{tt}{rowNames(nn), :} = meanIScales(nn, :);
+    for uu = 1:length(UenScales)
+        tables{tt}{rowNames(uu), :} = meanIScales(uu, :);
+    end
+    
+    tables{tt}.Properties.VariableNames = variableNames;
+    
+    
+    % I Model Errors    
+    tt = tt + 1;
+    tables{tt}.Properties.Description = name + "Error";    
+    
+    meanIErrors = mean(IErrors, DIM3);
+    for uu = 1:length(UenScales)
+        tables{tt}{rowNames(uu), :} = meanIErrors(uu, :);
     end
     
     tables{tt}.Properties.VariableNames = variableNames;

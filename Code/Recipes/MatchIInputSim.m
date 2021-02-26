@@ -20,6 +20,8 @@ P = EstimateInsulinSecretion(P);
 P = FitHepaticClearance(P);
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
+solvedP = SolveSystem(P, false);
+targetMAPE = solvedP.results.insulinMAPE;
 
 %% Functions
 
@@ -27,7 +29,7 @@ P = FitInsulinSensitivity(P);
 nLnKScales = 1.00 + [-0.10 0.0 +0.10];
 numN = length(nLnKScales);
 
-UenScales = 1.00 + [-0.20 0 +0.20];
+UenScales = 1.00 + [-0.15 0 +0.15];
 numU = length(nLnKScales);
 
 numRuns = numN*numU;
@@ -37,8 +39,8 @@ for nn = 1:numN
     nP = P;
     
     % Adjust clearance values.
-    nP.parameters.GC.nK = nP.parameters.GC.nK * nLnKScales(nn);
-    nP.results.nL = nP.results.nL * nLnKScales(nn);
+    nP.parameters.GC.nK = P.parameters.GC.nK * nLnKScales(nn);
+    nP.results.nL = P.results.nL * nLnKScales(nn);
     
     for uu = 1:numU        
         % Edit patient.
@@ -46,14 +48,15 @@ for nn = 1:numN
         uP.patientNum = 1000*uP.patientNum + 10*uu + nn;
         
         % Adjust Uen values.
-        uP.results.Uen = uP.results.Uen * UenScales(uu);
+        uP.results.Uen = P.results.Uen * UenScales(uu);
         
         % Simulate for optimal insulin error.       
-        GetInsulinError = MakeInsulinErrorFunc(uP);   
-        upperBound = 0.00;
-        lowerBound = 2.00;
-        IInputScale = fminbnd(GetInsulinError, upperBound, lowerBound); 
-        IScales(uu, nn) = IInputScale;        
+        GetInsulinError = MakeInsulinErrorFunc(uP, 0);   
+        lowerBound = 0.00;
+        upperBound = 2.00;
+        [IInputScale, IError] = fminbnd(GetInsulinError, lowerBound, upperBound); 
+        IScales(uu, nn) = IInputScale;    
+        IErrors(uu, nn) = IError;
         
         count = (nn-1)*numN + uu;  
         runtime = PrintTimeRemaining("MatchIInputSim", runtime, count, numRuns, P);
@@ -61,15 +64,16 @@ for nn = 1:numN
 end
 
 % Plot patients and save results.
-SolveSystem(uP, false);
+SolveSystem(P, true);
 P.results.MatchIInput.IScales = IScales;
+P.results.MatchIInput.IErrors = IErrors;
 P.results.MatchIInput.nLnKScales = nLnKScales;
 P.results.MatchIInput.UenScales = UenScales;
 
 end
 
 
-function insulinErrorFunc = MakeInsulinErrorFunc(P)
+function insulinErrorFunc = MakeInsulinErrorFunc(P, targetMAPE)
 
     function error = GetInsulinError(IInputScale)
         % Adjust insulin input.
@@ -78,7 +82,7 @@ function insulinErrorFunc = MakeInsulinErrorFunc(P)
         
         % Retrieve insulin fit error.
         P = SolveSystem(P, false);
-        error = P.results.insulinMAPE;
+        error = abs(targetMAPE - P.results.insulinMAPE);
     end
 
 insulinErrorFunc = @GetInsulinError;

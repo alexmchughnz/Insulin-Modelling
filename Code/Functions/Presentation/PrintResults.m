@@ -18,7 +18,8 @@ if (save)
         title = T.Properties.Description;
         filename = fullfile(CONFIG.RESULTPATH, source + title + ".csv");
         
-        writetable(T, filename);
+        writetable(T, filename, ...
+                "WriteRowNames", true);
     end
 end
 

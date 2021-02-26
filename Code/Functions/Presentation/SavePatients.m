@@ -4,7 +4,9 @@ global CONFIG
 
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    save(fullfile(CONFIG.DATAPATH, P.source, P.patientCode), '-struct', 'P');
+    code = matlab.lang.makeValidName(P.patientCode);     
+    
+    save(fullfile(CONFIG.DATAPATH, P.source, P.code), '-struct', 'P');
     PrintStatusUpdate(P, "Saved patient.")
 end
 

@@ -89,7 +89,7 @@ function insulinErrorFunc = MakeInsulinErrorFunc(P)
         
         % Retrieve insulin fit error.
         P = SolveSystem(P, false);
-        error = P.results.insulinMAPE;
+        error = P.results.fits.insulinSSE;
     end
 
 insulinErrorFunc = @GetInsulinError;

@@ -14,9 +14,3 @@ function PrintTimeTaken(label, patientSet, sinceTime)
     PrintLine();    
 end
 
-function PrintLine()
-for ii = 1:80    
-    fprintf("-")
-end
-fprintf("\n")
-end

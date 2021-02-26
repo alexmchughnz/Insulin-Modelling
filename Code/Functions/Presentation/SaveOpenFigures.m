@@ -9,18 +9,26 @@ end
 FolderName = CONFIG.PLOTPATH;   % Your destination folder
 FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
 for iFig = 1:length(FigList)
+    % Find
     FigHandle = FigList(iFig);
     set(0, 'CurrentFigure', FigHandle)
-    %   set(gcf, 'Position', [0 0 800 600])
+    FigHandle.Units = 'pixels';
+    FigHandle.Position = [0 0 400 300];
     
     AxisHandle = FigHandle.Children(end);
     
+    
+    % Edit    
     FigName   = get(AxisHandle.Title, 'String');
-    FigName = matlab.lang.makeValidName(FigName);    
+    FigName = matlab.lang.makeValidName(FigName);        
     
     if (CONFIG.PUBLISHPLOTS)
         title('')
     end
+    
+    legend('Location','southoutside')
+    
+    % Save
     
     figDir = fullfile(FolderName, 'fig', subfolder);
     if ~isfolder(figDir)

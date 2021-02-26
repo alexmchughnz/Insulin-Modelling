@@ -8,17 +8,18 @@ function tables = TabulateResults(patientSet)
 DIM3 = 3;
 
 
-%% Table Assembly
-tables = {table table table table};
+tables = {};
 
+%% With All Patients
 for ii = 1:length(patientSet)
     tt = 0;
     P = patientSet{ii};
     code = P.patientCode;
     
     %% Main Results
-    tt = tt + 1;
+    
     name = "MainResults";
+    tt = tt + 1;
     tables{tt} = table;
     tables{tt}.Properties.Description = name;
     
@@ -26,14 +27,19 @@ for ii = 1:length(patientSet)
     tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
     
-    tables{tt} = AddField(tables{tt}, code, P.results, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
-    tables{tt} = AddField(tables{tt}, code, P.results, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
-    
+    if isfield(P.results, 'fits')
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
+        
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinSSE", @(x) x, "insulinSSE [(mU/L)^2]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseSSE", @(x) x, "glucoseSSE [(mmol/L)^2]");
+    end
     
     %% Find Optimal Hepatic Clearance
-    tt = tt + 1;
+    
     name = "OptimalHepaticClearance";
     if isfield(P.results, name)
+        tt = tt + 1;
         tables{tt} = table;
         tables{tt}.Properties.Description = name;
         
@@ -50,55 +56,67 @@ for ii = 1:length(patientSet)
     end
     
     
-    %% Match I Input
+end
+
+%% Per Each Patient
+tt = 0;
+for ii = 1:length(patientSet)
+    P = patientSet{ii};
+    
+    %% Match I Input - Individual
     name = "MatchIInput";
     if isfield(P.results, name)
-        if ~exist("IScales", "var")
-            IScales = [];
-        end        
-        if ~exist("IErrors", "var")
-            IErrors = [];
-        end
         
-        IScales = cat(DIM3, IScales, P.results.MatchIInput.IScales);
-        IErrors = cat(DIM3, IErrors, P.results.MatchIInput.IErrors);
+        % Setup
+        if ~exist("allIScales", "var")
+            allIScales = [];
+        end
         
         nLnKScales = P.results.MatchIInput.nLnKScales;
         UenScales = P.results.MatchIInput.UenScales;
+        variableNames = "nLnK@"+string(100*nLnKScales)+"%";
+        rowNames = "Uen@"+string(100*UenScales)+"%";
+        
+        % I Scales
+        tt = tt + 1;
+        tables{tt} = table;
+        tables{tt}.Properties.Description = name +" - " + P.patientCode;
+        
+        IScales = P.results.MatchIInput.IScales;
+        allIScales = cat(DIM3, allIScales, IScales);
+        
+        for vv = 1:length(variableNames)
+            tables{tt}{rowNames(vv), :} = IScales(vv, :);
+        end
+        tables{tt}.Properties.VariableNames = variableNames;
+        
+        
+        % I Model Errors
+        tt = tt + 1;
+        tables{tt} = table;
+        tables{tt}.Properties.Description = name +" - " + P.patientCode + " - Error";
+        
+        IErrors = P.results.MatchIInput.IErrors;
+        
+        for vv = 1:length(variableNames)
+            tables{tt}{rowNames(vv), :} = IErrors(vv, :);
+        end
+        tables{tt}.Properties.VariableNames = variableNames;
     end
-    
 end
 
-%% Post Processing
-
+%% Match I Input - Averaged
 name = "MatchIInput";
 if isfield(P.results, name)
-    
-    variableNames = "nLnK@"+string(100*nLnKScales)+"%";
-    rowNames = "Uen@"+string(100*UenScales)+"%";
-    
-% Match I Input
     tt = tt + 1;
-    tables{tt}.Properties.Description = name + "Proportion";
+    tables{tt} = table;
+    tables{tt}.Properties.Description = name + " - Averaged";
     
-    meanIScales = mean(IScales, DIM3);
-    for uu = 1:length(UenScales)
-        tables{tt}{rowNames(uu), :} = meanIScales(uu, :);
+    meanIScales = mean(allIScales, DIM3);
+    for vv = 1:length(variableNames)
+        tables{tt}{rowNames(vv), :} = meanIScales(vv, :);
     end
-    
-    tables{tt}.Properties.VariableNames = variableNames;
-    
-    
-    % I Model Errors    
-    tt = tt + 1;
-    tables{tt}.Properties.Description = name + "Error";    
-    
-    meanIErrors = mean(IErrors, DIM3);
-    for uu = 1:length(UenScales)
-        tables{tt}{rowNames(uu), :} = meanIErrors(uu, :);
-    end
-    
-    tables{tt}.Properties.VariableNames = variableNames;
+    tables{tt}.Properties.VariableNames = variableNames;    
 end
 
 end

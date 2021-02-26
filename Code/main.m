@@ -43,7 +43,7 @@ for ii = 1:numPatients
     patientsOut = recipeFunction(patientSet{ii});
     patientSetOut = [patientSetOut patientsOut];
     
-    runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii});
+    runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii}, true);
 end
 
 %% Results

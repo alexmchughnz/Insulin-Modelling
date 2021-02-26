@@ -1,4 +1,4 @@
-function P = MatchIInputSim(P)
+function PArray = MatchIInputSim(P)
 % Recipe for adjusting Uen and counter balancing by changing inputs.
 % INPUTS:
 %   P  - patient struct
@@ -8,6 +8,7 @@ function P = MatchIInputSim(P)
 %% Plots
 plots = DebugPlots();
 
+plots.EstimateInsulinSecretion.Uen = 1;
 plots.SolveSystem.Glucose = 1;
 plots.SolveSystem.Insulin = 1;
 
@@ -20,8 +21,6 @@ P = EstimateInsulinSecretion(P);
 P = FitHepaticClearance(P);
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
-solvedP = SolveSystem(P, false);
-targetMAPE = solvedP.results.insulinMAPE;
 
 %% Functions
 
@@ -51,7 +50,7 @@ for nn = 1:numN
         uP.results.Uen = P.results.Uen * UenScales(uu);
         
         % Simulate for optimal insulin error.       
-        GetInsulinError = MakeInsulinErrorFunc(uP, 0);   
+        GetInsulinError = MakeInsulinErrorFunc(uP);   
         lowerBound = 0.00;
         upperBound = 2.00;
         [IInputScale, IError] = fminbnd(GetInsulinError, lowerBound, upperBound); 
@@ -63,27 +62,41 @@ for nn = 1:numN
     end
 end
 
-% Plot patients and save results.
+% Plot patient and save results.
 SolveSystem(P, true);
 P.results.MatchIInput.IScales = IScales;
 P.results.MatchIInput.IErrors = IErrors;
 P.results.MatchIInput.nLnKScales = nLnKScales;
 P.results.MatchIInput.UenScales = UenScales;
 
+% Plot optimal fit for unchanged parameters.
+uuOpt = find(UenScales == 1.0);
+nnOpt = find(nLnKScales == 1.0);
+optimalIScale = IScales(uuOpt, nnOpt);
+optimalP = ScaleInsulinInput(P, optimalIScale);
+SolveSystem(optimalP, true);
+
+PArray = {P optimalP};
+
 end
 
 
-function insulinErrorFunc = MakeInsulinErrorFunc(P, targetMAPE)
+function insulinErrorFunc = MakeInsulinErrorFunc(P)
 
     function error = GetInsulinError(IInputScale)
         % Adjust insulin input.
-        P.data.vIBolus = P.data.vIBolus .* IInputScale;
-        P = MakeBolusFunctions(P);
+        P = ScaleInsulinInput(P, IInputScale);
         
         % Retrieve insulin fit error.
         P = SolveSystem(P, false);
-        error = abs(targetMAPE - P.results.insulinMAPE);
+        error = P.results.insulinMAPE;
     end
 
 insulinErrorFunc = @GetInsulinError;
+end
+
+function P = ScaleInsulinInput(P, scale)
+    P.data.vIBolus = P.data.vIBolus .* scale;
+    P = MakeBolusFunctions(P);
+    P.patientCode = P.patientCode + sprintf(" (IInput x %.2g)", scale);
 end

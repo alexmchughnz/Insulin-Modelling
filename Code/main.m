@@ -47,6 +47,7 @@ for ii = 1:numPatients
 end
 
 %% Results
+clc
 saveResults = true;
 tResults = tic;
 

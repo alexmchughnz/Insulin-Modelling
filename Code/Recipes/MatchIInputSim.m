@@ -25,7 +25,9 @@ P = FitInsulinSensitivity(P);
 %% Functions
 
 % Find IInput value that minimises error in insulin.
-nLnKScales = 1.00 + [-0.10 0.0 +0.10];
+increments = [0.02  0.06  0.10];
+nLnKScales = 1.00 + [-flip(increments), 0, increments]./P.results.nL;
+nLnKScales = nLnKScales(nLnKScales > 0);
 numN = length(nLnKScales);
 
 UenScales = 1.00 + [-0.15 0 +0.15];
@@ -36,10 +38,10 @@ numRuns = numN*numU;
 runtime = tic;
 for nn = 1:numN
     nP = P;
-    
     % Adjust clearance values.
-    nP.parameters.GC.nK = P.parameters.GC.nK * nLnKScales(nn);
-    nP.results.nL = P.results.nL * nLnKScales(nn);
+%     nP.parameters.GC.nK = P.parameters.GC.nK * nLnKScales(nn);
+    
+    nP = ScalePatientField(nLnKScales(nn), nP, "results", "nL");
     
     for uu = 1:numU        
         % Edit patient.
@@ -47,7 +49,7 @@ for nn = 1:numN
         uP.patientNum = 1000*uP.patientNum + 10*uu + nn;
         
         % Adjust Uen values.
-        uP.results.Uen = P.results.Uen * UenScales(uu);
+        uP = ScalePatientField(UenScales(uu), uP, "results", "Uen");
         
         % Simulate for optimal insulin error.       
         GetInsulinError = MakeInsulinErrorFunc(uP);   
@@ -57,7 +59,7 @@ for nn = 1:numN
         IScales(uu, nn) = IInputScale;    
         IErrors(uu, nn) = IError;
         
-        count = (nn-1)*numN + uu;  
+        count = (nn-1)*(numU) + uu;  
         runtime = PrintTimeRemaining("MatchIInputSim", runtime, count, numRuns, P);
     end
 end

@@ -89,8 +89,8 @@ for ii = 1:length(patientSet)
         IScales = P.results.MatchIInput.IScales;
         allIScales = cat(DIM3, allIScales, IScales);
         
-        for vv = 1:length(variableNames)
-            tables{tt}{rowNames(vv), :} = IScales(vv, :);
+        for rr = 1:length(rowNames)
+            tables{tt}{rowNames(rr), :} = IScales(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
         
@@ -102,8 +102,8 @@ for ii = 1:length(patientSet)
         
         IErrors = P.results.MatchIInput.IErrors;
         
-        for vv = 1:length(variableNames)
-            tables{tt}{rowNames(vv), :} = IErrors(vv, :);
+        for rr = 1:length(rowNames)
+            tables{tt}{rowNames(rr), :} = IErrors(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
     end
@@ -132,8 +132,8 @@ for ii = 1:length(patientSet)
         IScales = P.results.MatchnL.IScales;
         allIScales = cat(DIM3, allIScales, IScales);
         
-        for vv = 1:length(variableNames)
-            tables{tt}{rowNames(vv), :} = IScales(vv, :);
+        for rr = 1:length(variableNames)
+            tables{tt}{rowNames(rr), :} = IScales(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
         
@@ -145,8 +145,8 @@ for ii = 1:length(patientSet)
         
         IErrors = P.results.MatchnL.IErrors;
         
-        for vv = 1:length(variableNames)
-            tables{tt}{rowNames(vv), :} = IErrors(vv, :);
+        for rr = 1:length(variableNames)
+            tables{tt}{rowNames(rr), :} = IErrors(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
     end
@@ -160,8 +160,8 @@ if isfield(P.results, name)
     tables{tt}.Properties.Description = name + " - Averaged";
     
     meanIScales = mean(allIScales, DIM3);
-    for vv = 1:length(variableNames)
-        tables{tt}{rowNames(vv), :} = meanIScales(vv, :);
+    for rr = 1:length(rowNames)
+        tables{tt}{rowNames(rr), :} = meanIScales(rr, :);
     end
     tables{tt}.Properties.VariableNames = variableNames;
 end
@@ -176,8 +176,8 @@ if isfield(P.results, name)
     tables{tt}.Properties.Description = name + " - Averaged";
     
     meanIScales = mean(allIScales, DIM3);
-    for vv = 1:length(variableNames)
-        tables{tt}{rowNames(vv), :} = meanIScales(vv, :);
+    for rr = 1:length(variableNames)
+        tables{tt}{rowNames(rr), :} = meanIScales(rr, :);
     end
     tables{tt}.Properties.VariableNames = variableNames;
 end

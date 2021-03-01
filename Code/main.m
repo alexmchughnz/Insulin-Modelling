@@ -25,7 +25,7 @@ tStart = tic;
 
 % patientNums = [1 2 4 5 14 16 22 23 25 30];
 % patientNums = 25;
-patientNums = [16 1];
+patientNums = [25];
 source = "OGTTLui";
 
 %% Load Data
@@ -34,7 +34,7 @@ patientSetOut = {};
 
 %% Run
 % Select recipe to run on each patient.
-recipeFunction = @SimpleSimulation;
+recipeFunction = @MatchIInputSim;
 
 % Execute on each patient.
 numPatients = length(patientSet);

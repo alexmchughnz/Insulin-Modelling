@@ -52,7 +52,7 @@ fitG = P.results.G(iiData);
 GMAPE = mean(abs(vG - fitG)./vG);
 P.results.fits.glucoseMAPE = GMAPE;
 
-GSSE = sum((vI - fitI).^2);
+GSSE = sum((vG - fitG).^2);
 P.results.fits.glucoseSSE = GSSE;
 
 

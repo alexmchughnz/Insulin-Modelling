@@ -20,7 +20,9 @@ for ii = 1:length(patientSet)
     
     name = "MainResults";
     tt = tt + 1;
-    tables{tt} = table;
+    if tt > length(tables)
+        tables{tt} = table;
+    end
     tables{tt}.Properties.Description = name;
     
     tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
@@ -40,7 +42,9 @@ for ii = 1:length(patientSet)
     name = "OptimalHepaticClearance";
     if isfield(P.results, name)
         tt = tt + 1;
-        tables{tt} = table;
+        if tt > length(tables)
+            tables{tt} = table;
+        end
         tables{tt}.Properties.Description = name;
         
         tables{tt} = AddField(tables{tt}, code, P.data, "stddevMSE");
@@ -59,7 +63,7 @@ for ii = 1:length(patientSet)
 end
 
 %% Per Each Patient
-tt = 0;
+tt = length(tables)+1;
 for ii = 1:length(patientSet)
     P = patientSet{ii};
     
@@ -116,7 +120,7 @@ if isfield(P.results, name)
     for vv = 1:length(variableNames)
         tables{tt}{rowNames(vv), :} = meanIScales(vv, :);
     end
-    tables{tt}.Properties.VariableNames = variableNames;    
+    tables{tt}.Properties.VariableNames = variableNames;
 end
 
 end

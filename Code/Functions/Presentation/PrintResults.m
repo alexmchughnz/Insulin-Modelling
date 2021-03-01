@@ -1,15 +1,14 @@
-function PrintResults(patientSet, save)
+function PrintResults(patientSet)
 % Prints (and optionally saves) results of simulation.
 % INPUTS:
 %   patientSet - existing table of results
-%   save - logical, saves plots and table if true
 
 global CONFIG
 
 source = patientSet{end}.source;
 tables = TabulateResults(patientSet);
 
-if (save)
+if (CONFIG.SAVERESULTS)
     SaveOpenFigures(source);
     
     for tt = 1:length(tables)

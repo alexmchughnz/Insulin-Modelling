@@ -12,5 +12,5 @@ function P = ScalePatientField(scale, P, varargin)
         fieldName, scale);
     
     message = sprintf("%s scaled by %.2f.", fieldName, scale);
-    PrintStatusUpdate(P, message, true);
+    PrintStatusUpdate(P, message);
 end

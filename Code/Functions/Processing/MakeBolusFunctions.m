@@ -11,6 +11,11 @@ end
 if isfield(P.data, "vGBolus")
     P.data.GBolus = MakeFunc(P.data.vGBolus, P.data.tGBolus, P.data.TGBolus);
 end
+
+
+message = "Bolus functions updated.";
+PrintStatusUpdate(P, message);
+
 end
 
 

@@ -29,7 +29,7 @@ nLnKScales = 1.00 + [-0.10 0.0 +0.10];
 numN = length(nLnKScales);
 
 UenScales = 1.00 + [-0.15 0 +0.15];
-numU = length(nLnKScales);
+numU = length(UenScales);
 
 numRuns = numN*numU;
 
@@ -73,7 +73,8 @@ P.results.MatchIInput.UenScales = UenScales;
 uuOpt = find(UenScales == 1.0);
 nnOpt = find(nLnKScales == 1.0);
 optimalIScale = IScales(uuOpt, nnOpt);
-optimalP = ScaleInsulinInput(P, optimalIScale);
+optimalP = ScalePatientField(optimalIScale, P, "data", "vIBolus");
+optimalP = MakeBolusFunctions(optimalP);       
 SolveSystem(optimalP, true);
 
 PArray = {P optimalP};
@@ -85,7 +86,8 @@ function insulinErrorFunc = MakeInsulinErrorFunc(P)
 
     function error = GetInsulinError(IInputScale)
         % Adjust insulin input.
-        P = ScaleInsulinInput(P, IInputScale);
+        P = ScalePatientField(IInputScale, P, "data", "vIBolus");
+        P = MakeBolusFunctions(P);
         
         % Retrieve insulin fit error.
         P = SolveSystem(P, false);
@@ -93,10 +95,4 @@ function insulinErrorFunc = MakeInsulinErrorFunc(P)
     end
 
 insulinErrorFunc = @GetInsulinError;
-end
-
-function P = ScaleInsulinInput(P, scale)
-    P.data.vIBolus = P.data.vIBolus .* scale;
-    P = MakeBolusFunctions(P);
-    P.patientCode = P.patientCode + sprintf(" (IInput x %.2g)", scale);
 end

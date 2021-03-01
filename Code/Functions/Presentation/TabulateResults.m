@@ -63,7 +63,7 @@ for ii = 1:length(patientSet)
 end
 
 %% Per Each Patient
-tt = length(tables)+1;
+tt = length(tables);
 for ii = 1:length(patientSet)
     P = patientSet{ii};
     
@@ -107,10 +107,69 @@ for ii = 1:length(patientSet)
         end
         tables{tt}.Properties.VariableNames = variableNames;
     end
+    
+    
+    
+    %% Match nL - Individual
+    name = "MatchnL";
+    if isfield(P.results, name)
+        
+        % Setup
+        if ~exist("allIScales", "var")
+            allIScales = [];
+        end
+        
+        IInputScales = P.results.MatchnL.IInputScales;
+        UenScales = P.results.MatchnL.UenScales;
+        variableNames = "IInput@"+string(100*IInputScales)+"%";
+        rowNames = "Uen@"+string(100*UenScales)+"%";
+        
+        % I Scales
+        tt = tt + 1;
+        tables{tt} = table;
+        tables{tt}.Properties.Description = name +" - " + P.patientCode;
+        
+        IScales = P.results.MatchnL.IScales;
+        allIScales = cat(DIM3, allIScales, IScales);
+        
+        for vv = 1:length(variableNames)
+            tables{tt}{rowNames(vv), :} = IScales(vv, :);
+        end
+        tables{tt}.Properties.VariableNames = variableNames;
+        
+        
+        % I Model Errors
+        tt = tt + 1;
+        tables{tt} = table;
+        tables{tt}.Properties.Description = name +" - " + P.patientCode + " - Error";
+        
+        IErrors = P.results.MatchnL.IErrors;
+        
+        for vv = 1:length(variableNames)
+            tables{tt}{rowNames(vv), :} = IErrors(vv, :);
+        end
+        tables{tt}.Properties.VariableNames = variableNames;
+    end
 end
 
 %% Match I Input - Averaged
 name = "MatchIInput";
+if isfield(P.results, name)
+    tt = tt + 1;
+    tables{tt} = table;
+    tables{tt}.Properties.Description = name + " - Averaged";
+    
+    meanIScales = mean(allIScales, DIM3);
+    for vv = 1:length(variableNames)
+        tables{tt}{rowNames(vv), :} = meanIScales(vv, :);
+    end
+    tables{tt}.Properties.VariableNames = variableNames;
+end
+
+
+
+%% Match nL - Averaged
+name = "MatchnL";
 if isfield(P.results, name)
     tt = tt + 1;
     tables{tt} = table;

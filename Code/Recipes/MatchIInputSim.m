@@ -25,9 +25,10 @@ P = FitInsulinSensitivity(P);
 %% Functions
 
 % Find IInput value that minimises error in insulin.
-increments = [0.02  0.06  0.10];
-nLnKScales = 1.00 + [-flip(increments), 0, increments]./P.results.nL;
-nLnKScales = nLnKScales(nLnKScales > 0);
+% increments = [0.02  0.06  0.10];
+% nLnKScales = 1.00 + [-flip(increments), 0, increments]./P.results.nL;
+% nLnKScales = nLnKScales(nLnKScales > 0);
+nLnKScales = 1.00 + [-0.2 0 +0.2];
 numN = length(nLnKScales);
 
 UenScales = 1.00 + [-0.15 0 +0.15];
@@ -56,6 +57,7 @@ for nn = 1:numN
         lowerBound = 0.00;
         upperBound = 2.00;
         [IInputScale, IError] = fminbnd(GetInsulinError, lowerBound, upperBound); 
+%         [IInputScale, IError] = fminsearch(GetInsulinError, 1.00); 
         IScales(uu, nn) = IInputScale;    
         IErrors(uu, nn) = IError;
         
@@ -88,12 +90,13 @@ function insulinErrorFunc = MakeInsulinErrorFunc(P)
 
     function error = GetInsulinError(IInputScale)
         % Adjust insulin input.
-        P = ScalePatientField(IInputScale, P, "data", "vIBolus");
-        P = MakeBolusFunctions(P);
+        optP = ScalePatientField(IInputScale, P, "data", "vIBolus");
+        optP = MakeBolusFunctions(optP);
         
         % Retrieve insulin fit error.
-        P = SolveSystem(P, false);
-        error = P.results.fits.insulinSSE;
+        optP = SolveSystem(optP, false);
+        IInputScale
+        error = optP.results.fits.insulinSSE
     end
 
 insulinErrorFunc = @GetInsulinError;

@@ -122,7 +122,8 @@ for ii = 1:length(patientSet)
         P.data.IDelivery = "subcutaneous";
         
         valid = ~isnan(metaTable.insulin);
-        P.data.vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
+%         P.data.vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
+        P.data.vIBolus = 2000;  % [mU] - MANUALLY setting to ensure consistency
         P.data.tIBolus = metaTable.time(valid);  % [min]
         P.data.TIBolus = 1;  % [min]
         

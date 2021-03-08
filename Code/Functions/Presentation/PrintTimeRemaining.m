@@ -7,7 +7,7 @@ message = sprintf('(%d/%d) %s remaining for %s.', ...
 
 % Display
 
-disp(newline)
+disp('')
 
 if exist('showLine', 'var')
     if(showLine)

@@ -99,26 +99,27 @@ end
 bestnL = nLGrid(iiOptimal);
 bestxL = xLGrid(iiOptimal);
 
-P.results.nL = bestnL * ones(size(P.results.tArray));
-P.results.xL = bestxL * ones(size(P.results.tArray));
+P.results.nL = bestnL;
+P.results.xL = bestxL;
 P.results.minGridMSE = minIResidual;
 
 % Get size of minimal error region.
 gridMin = min(IResiduals(:));
 deltaMSE = abs(IResiduals - gridMin);
-isWithin1SD = (deltaMSE <= P.data.stddevMSE);
+isWithin1SD = (deltaMSE <= P.persistents.stddevMSE);
 
 
 optimalnL = nLGrid(isWithin1SD);
 optimalxL = xLGrid(isWithin1SD);
 
 [L, H] = bounds(optimalnL);
-P.results.optimalnLRange = [L H];
+P.results.OptimalHepaticClearance.nLRange = [L H];
+
 [L, H] = bounds(optimalxL);
-P.results.optimalxLRange = [L H];
+P.results.OptimalHepaticClearance.xLRange = [L H];
 
-P.results.minimalErrorRegionSize = sum(isWithin1SD(:));
-
+P.results.OptimalHepaticClearance.minimalErrorRegionSize = sum(isWithin1SD(:));
+P.results.OptimalHepaticClearance.minGridMSE = gridMin;
 %% ------------------------------------------------------------------------
 
 %% Debug Plots
@@ -133,7 +134,6 @@ if DP.ErrorSurface
     xLRange = sort(unique(xLGrid));
     
     gridMin = min(IResiduals(:));
-    gridMax = max(IResiduals(:));
     
     if isfield(P.data, 'stddevMSE')
         stddevMSE = P.data.stddevMSE;
@@ -220,8 +220,8 @@ for ii = 1:numel(nLGrid)
     PrintStatusUpdate(P, message, true);
     
     % Apply nL/xL for iteration.
-    P.results.nL = nLGrid(ii) * ones(size(P.results.tArray));
-    P.results.xL = xLGrid(ii) * ones(size(P.results.tArray));
+    P.results.nL = nLGrid(ii);
+    P.results.xL = xLGrid(ii);
     
     % Get other parameters and forward simulate models.
     P = FindGutEmptyingRate(P);

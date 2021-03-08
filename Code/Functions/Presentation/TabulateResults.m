@@ -51,12 +51,12 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results, "minGridMSE");
         tables{tt} = AddField(tables{tt}, code, P.results, "minimalErrorRegionSize");
         
-        tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @diff);
-        tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(1), "nLRangeLower");
-        tables{tt} = AddField(tables{tt}, code, P.results, "optimalnLRange", @(x) x(end), "nLRangeUpper");
-        tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @diff);
-        tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(1), "xLRangeLower");
-        tables{tt} = AddField(tables{tt}, code, P.results, "optimalxLRange", @(x) x(end), "xLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results, "nLRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results, "nLRange", @(x) x(1), "nLRangeLower");
+        tables{tt} = AddField(tables{tt}, code, P.results, "nLRange", @(x) x(end), "nLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results, "xLRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results, "xLRange", @(x) x(1), "xLRangeLower");
+        tables{tt} = AddField(tables{tt}, code, P.results, "xLRange", @(x) x(end), "xLRangeUpper");
     end
     
     

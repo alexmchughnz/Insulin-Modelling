@@ -14,6 +14,8 @@ DP = DebugPlots().AnalyseInsulinVariance;
 [tData, ~] = GetIFromITotal(P);
 MSE = zeros(1, N);
 
+runtime = tic;
+
 %% Simulate
 for ii = 1:N
     % Randomly vary data according to normal distribution.
@@ -41,10 +43,15 @@ for ii = 1:N
     % Forward simulate with varied data.
     MSE(ii) = GetSimError(copyP);
     
-    EstimateTimeRemaining(ii, N);
+    % Print time.
+    runtime = PrintTimeRemaining("AnalyseInsulinVariance", runtime, ii, N, P);
 end
+
 stddevError = std(MSE);
-save(ResultsPath(sprintf("%s_montecarlo%gx%d.mat", P.patientCode, stddev, N)))
+P.persistents.stddevMSE = stddevError;
+
+message = sprintf("1 std. dev. of MSE is %g" ,stddevError);
+PrintStatusUpdate(P, message, true);
 
 %% ==================================================
 %% Debug Plots
@@ -67,8 +74,6 @@ if DP.Error
     text(0.9*xlimits(end), 0.9*ylimits(end), txt);
 end
 
-fprintf("P%d: 1 std. dev. of MSE is %g\n", P.patientNum, stddevError)
-
 end
 
 
@@ -76,8 +81,8 @@ end
 function MSE = GetSimError(P)
 % Get other parameters and forward simulate models.
 P = FindGutEmptyingRate(P);
-P = FitInsulinSensitivity(P, true);
-P = SolveSystem(P);
+P = FitInsulinSensitivity(P, false);
+P = SolveSystem(P, false);
 
 % Determine error.
 if isfield(P, 'ITotal')

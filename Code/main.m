@@ -26,7 +26,7 @@ tStart = tic;
 % patientNums = [1 2 4 5 14 16 22 23 25 30];
 % patientNums = 5;
 % patientNums = [5 25 30];
-patientNums = 25;
+patientNums = 23;
 source = "OGTTLui";
 
 %% Load Data
@@ -35,7 +35,7 @@ patientSetOut = {};
 
 %% Run
 % Select recipe to run on each patient.
-recipeFunction = @MatchIInputSim;
+recipeFunction = @GridSearchSim;
 
 % Execute on each patient.
 numPatients = length(patientSet);
@@ -44,8 +44,7 @@ for ii = 1:numPatients
     runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii}, true);
 
     patientsOut = recipeFunction(patientSet{ii});
-    patientSetOut = [patientSetOut patientsOut];
-    
+    patientSetOut = [patientSetOut patientsOut];    
 end
 
 %% Results

@@ -17,9 +17,21 @@ plots.SolveSystem.Insulin = 1;
 
 DebugPlots(plots);
 
-%% Functions
+%% Setup
 P = EstimateInsulinSecretion(P);
-P = FindOptimalHepaticClearance(P, "grid");
+
+if ~HasPersistent(P, "stddevMSE")
+    P = FitHepaticClearance(P);
+    
+    stddev = 5/100;
+    N = 1000;
+    
+    P = AnalyseInsulinVariance(P, stddev, N);
+end
+
+gridSettings = {[-0.1 0.775], [0.075 0.95], 0.05};
+P = FindOptimalHepaticClearance(P, "grid", gridSettings{:});
+
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
 P = SolveSystem(P, true);

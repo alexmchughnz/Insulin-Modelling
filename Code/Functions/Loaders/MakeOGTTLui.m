@@ -34,7 +34,7 @@ for ii = 1:length(patientSet)
     for ll = 1:length(subpatientLetters)
         P = baseP;
         
-        %% Load Data 
+        %% Load Data
         subpatientLabel = code + subpatientLetters(ll);
         metaFile = fullfile(patientFolder, subpatientLabel+"-meta.csv");
         btFile = fullfile(patientFolder, subpatientLabel+"-bt.csv");
@@ -122,8 +122,15 @@ for ii = 1:length(patientSet)
         P.data.IDelivery = "subcutaneous";
         
         valid = ~isnan(metaTable.insulin);
-%         P.data.vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
-        P.data.vIBolus = 2000;  % [mU] - MANUALLY setting to ensure consistency
+        
+        P.data.vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
+        if any(P.data.vIBolus < 2000)
+            P.data.hasPooling = true;
+            P.data.vIBolus = 2000;  % [mU] - MANUALLY setting to ensure consistency
+        else
+            P.data.hasPooling = false;
+        end
+        
         P.data.tIBolus = metaTable.time(valid);  % [min]
         P.data.TIBolus = 1;  % [min]
         

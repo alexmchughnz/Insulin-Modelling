@@ -10,10 +10,12 @@ function P = GridSearchSim(P)
 plots = DebugPlots();
 
 plots.EstimateInsulinSecretion.Uen = 1;
-plots.FindOptimalHepaticClearance.ErrorSurface = 1;
+plots.EstimateInsulinSecretion.CPep = 1;
 plots.FitInsulinSensitivity.SI = 1;
 plots.SolveSystem.Glucose = 1;
 plots.SolveSystem.Insulin = 1;
+
+plots.FindOptimalHepaticClearance.ErrorSurface = 1;
 
 DebugPlots(plots);
 
@@ -29,7 +31,7 @@ if ~HasPersistent(P, "stddevMSE")
     P = AnalyseInsulinVariance(P, stddev, N);
 end
 
-gridSettings = {[-0.1 0.775], [0.075 0.95], 0.05};
+gridSettings = {[-0.1 0.775], [0.075 0.95], 0.025};
 P = FindOptimalHepaticClearance(P, "grid", gridSettings{:});
 
 P = FindGutEmptyingRate(P);

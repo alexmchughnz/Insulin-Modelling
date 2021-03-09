@@ -13,6 +13,9 @@ config
 
 tStart = tic;
 
+%% Select Recipe
+recipeFunction = @SimpleSimulation;
+
 %% Select Data
 % patientNums = [1];
 % source = "Detemir";
@@ -25,8 +28,8 @@ tStart = tic;
 
 % patientNums = [1 2 4 5 14 16 22 23 25 30];
 % patientNums = 5;
-% patientNums = [5 25 30];
-patientNums = 23;
+patientNums = [5 23 25];
+% patientNums = 23;
 source = "OGTTLui";
 
 %% Load Data
@@ -34,9 +37,6 @@ patientSet = LoadData(source, patientNums);
 patientSetOut = {};
 
 %% Run
-% Select recipe to run on each patient.
-recipeFunction = @GridSearchSim;
-
 % Execute on each patient.
 numPatients = length(patientSet);
 runtime = tic;

@@ -41,8 +41,8 @@ if method == "grid"
     [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
     
     
-    filename = GRIDFORMAT(nLBounds, nLDelta, xLBounds, xLDelta);
-    IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);    
+    P = EvaluateGrid(P, nLGrid, xLGrid);
+    gridData = P.persistents.OptimalHepaticGrids{end};
     
 else
     if ~isempty(varargin)
@@ -95,6 +95,10 @@ end
 
 %% Find Optimal nL/xL
 % Get minimum.
+IResiduals = gridData.IResiduals;
+nLGrid = gridData.nLGrid;
+xLGrid = gridData.xLGrid;
+
 [minIResidual, iiOptimal] = min(IResiduals(:));
 bestnL = nLGrid(iiOptimal);
 bestxL = xLGrid(iiOptimal);
@@ -209,7 +213,7 @@ end
 end
 
 %% Functions
-function [IResiduals, simI] = EvaluateGrid(P, nLGrid, xLGrid, savename)
+function P = EvaluateGrid(P, nLGrid, xLGrid)
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
 IResiduals = zeros(size(nLGrid));
@@ -254,6 +258,12 @@ saveStruct = struct(...
     'xLGrid', xLGrid, ...
     'IResiduals', IResiduals, ...
     'ISimulated', ISimulated);
-SaveResults(P, savename, saveStruct)
+
+% SaveResults(P, savename, saveStruct)
+if ~HasPersistent(P, "OptimalHepaticGrids")
+    P.persistents.OptimalHepaticGrids = {};
+end
+
+P.persistents.OptimalHepaticGrids{end+1} = saveStruct;   
 
 end

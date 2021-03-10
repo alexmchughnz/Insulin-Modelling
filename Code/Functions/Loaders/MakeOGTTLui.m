@@ -11,18 +11,38 @@ C = LoadConstants();
 
 source = "OGTTLui";
 
-newPatientSet = {};
+%% Load Data
+filepath = fullfile(CONFIG.DATAPATH, source, "OGTTLuiMaster.xlsx");
+opts = detectImportOptions(filepath);
+
+btOpts = opts;
+btOpts.Sheet = 'Blood Test';
+btOpts.DataRange = 'A3:AY15';
+btOpts.VariableNamesRange = 'A2:AY2';
+btOpts.RowNamesRange = 'A3:A15';
+btOpts = setvartype(btOpts, 'double');
+btTable = readtable(filepath, btOpts);
+
+pocOpts = opts;
+pocOpts.Sheet = 'Point of Care';
+pocOpts.DataRange = 'A3:BX15';
+pocOpts.VariableNamesRange = 'A2:BX2';
+pocOpts.RowNamesRange = 'A3:A15';
+pocOpts = setvartype(pocOpts, 'double');
+pocTable = readtable(filepath, pocOpts);
+
+infoOpts = opts;
+infoOpts.Sheet = 'Subject Info';
+infoOpts.DataRange = 'A2:M14';
+infoOpts.VariableNamesRange = 'A1:M1';
+infoOpts.RowNamesRange = 'A2:A14';
+infoOpts = setvartype(infoOpts, 'double');
+infoTable = readtable(filepath, infoOpts);
+
+
+
+%% Generate Patients
 for ii = 1:length(patientSet)
-    baseP = patientSet{ii};
-    
-    code = sprintf("pt%d", baseP.patientNum);
-    patientFolder = fullfile(CONFIG.DATAPATH, source, code);
-    
-    % Pull out each unique subpatient letter.
-    filenames = ls(fullfile(patientFolder, code+"*"));
-    assert(numel(filenames) > 0, "Invalid patient number.");
-    index = strfind(filenames(1,:), '-') - 1;
-    subpatientLetters = unique(filenames(:, index));
     
     %% Patient Info
     %TODO: THIS IS DUMMY DATA - GET REAL DATA FROM LUI

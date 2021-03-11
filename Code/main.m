@@ -27,8 +27,7 @@ recipeFunction = @SimpleSimulation;
 % source = "CREBRF";
 
 % patientNums = [1 2 4 5 14 16 22 23 25 30];
-% patientNums = 5;
-patientNums = [5 23 25];
+patientNums = [23 25];
 % patientNums = 23;
 source = "OGTTLui";
 

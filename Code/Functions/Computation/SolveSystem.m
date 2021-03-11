@@ -106,7 +106,10 @@ if allowPlots
         plt.DisplayName = 'Model Prediction';   
         
         if isfield(P.data, 'tIBolus')
-            plt = line([P.data.tIBolus'; P.data.tIBolus'], ylim, ...
+            x = [P.data.tIBolus'; P.data.tIBolus'];
+            y = repmat(ylim', numel(P.data.tIBolus), 1);
+            
+            plt = line(x, y, ...
                        'Color', 'r', ...
                        'LineStyle', '--');
             plt(1).DisplayName = 'Bolus Input';

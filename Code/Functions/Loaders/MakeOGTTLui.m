@@ -9,30 +9,30 @@ global CONFIG
 DEBUGPLOTS = DebugPlots();
 C = LoadConstants();
 
+getrow = @(label, n) repmat(string(label), 1, n) + (0:n-1);
+
 source = "OGTTLui";
 
 %% Load Data
-filepath = fullfile(CONFIG.DATAPATH, source, "OGTTLuiMaster.xlsx");
-opts = detectImportOptions(filepath);
+filepath = fullfile(CONFIG.DATAPATH, source, "OGTTLuiMaster.xls");
 
-btOpts = opts;
-btOpts.Sheet = 'Blood Test';
+btOpts = detectImportOptions(filepath, 'Sheet', 'Blood Test');
 btOpts.DataRange = 'A3:AY15';
 btOpts.VariableNamesRange = 'A2:AY2';
 btOpts.RowNamesRange = 'A3:A15';
 btOpts = setvartype(btOpts, 'double');
 btTable = readtable(filepath, btOpts);
+nBtMeas = 9;
 
-pocOpts = opts;
-pocOpts.Sheet = 'Point of Care';
+pocOpts = detectImportOptions(filepath, 'Sheet', 'Point of Care');
 pocOpts.DataRange = 'A3:BX15';
 pocOpts.VariableNamesRange = 'A2:BX2';
 pocOpts.RowNamesRange = 'A3:A15';
 pocOpts = setvartype(pocOpts, 'double');
 pocTable = readtable(filepath, pocOpts);
+nPocMeas = 15;
 
-infoOpts = opts;
-infoOpts.Sheet = 'Subject Info';
+infoOpts = detectImportOptions(filepath, 'Sheet', 'Subject Info');
 infoOpts.DataRange = 'A2:M14';
 infoOpts.VariableNamesRange = 'A1:M1';
 infoOpts.RowNamesRange = 'A2:A14';
@@ -40,118 +40,90 @@ infoOpts = setvartype(infoOpts, 'double');
 infoTable = readtable(filepath, infoOpts);
 
 
-
 %% Generate Patients
+newPatientSet = {};
 for ii = 1:length(patientSet)
+    baseP = patientSet{ii};
+    assert(baseP.patientNum <= 30, "Invalid patient number.")
     
-    %% Patient Info
-    %TODO: THIS IS DUMMY DATA - GET REAL DATA FROM LUI
-    baseP.data.age = 25;  % [years]
-    baseP.data.mass = 90;  % [kg]
-    baseP.data.height = 185;  % [cm]
-    baseP.data.BMI = 23;  % [kg/m^2]
+    allCodes = string(infoTable.Properties.RowNames);
+    allNums = arrayfun(@(s) sscanf(s, "%d"), allCodes);
+    subpatientCodes = allCodes(allNums == baseP.patientNum);
+    hasSubpatients = length(subpatientCodes) > 1;
     
-    for ll = 1:length(subpatientLetters)
+    for ll = 1:length(subpatientCodes)
         P = baseP;
         
-        %% Load Data
-        subpatientLabel = code + subpatientLetters(ll);
-        metaFile = fullfile(patientFolder, subpatientLabel+"-meta.csv");
-        btFile = fullfile(patientFolder, subpatientLabel+"-bt.csv");
-        pocFile = fullfile(patientFolder, subpatientLabel+"-poc.csv");
-        
-        % Load tables.
-        opts = detectImportOptions(metaFile, ...
-            'NumHeaderLines', 1);
-        metaTable = readtable(metaFile, opts, ...
-            'ReadVariableNames', true);
-        
-        opts = detectImportOptions(btFile, ...
-            'NumHeaderLines', 1);
-        btTable = readtable(btFile, opts, ...
-            'ReadVariableNames', true);
-        
-        opts = detectImportOptions(pocFile, ...
-            'NumHeaderLines', 1);
-        pocTable = readtable(pocFile, opts, ...
-            'ReadVariableNames', true);
-        
-        if length(subpatientLetters) > 1
-            % Work around subpatients by adding a suffix "00x" to their num.
-            P.patientNum = 1000*P.patientNum + ll;
-            letters = 'abcdefg';
-            P.patientCode = P.patientCode + letters(ll);
+        code = subpatientCodes{ll};
+        if hasSubpatients
+            P.patientCode = P.patientCode + code(end);
+            P.patientNum = P.patientNum*100 + ll;
         end
         
+        
+        %% Patient Info
+        P.data.age = infoTable{code, "Age"};  % [years]
+        P.data.mass = infoTable{code, "Mass"};  % [kg]
+        P.data.height = infoTable{code, "Height"};  % [cm]
+        P.data.BMI = infoTable{code, "BMI"};  % [kg/m^2]
+        
         %% Trial Times
-        % Times here need to be converted from integers representing time
-        % of day to an integer representing minutes passed since trial
-        % start (e.g. if a trial starts at 1200h, the integer 1315 should
-        % be converted to 75 [minutes]).
-        allTimes = Time2Duration([metaTable.time; btTable.time; pocTable.time]);
-        startTime = min(allTimes);
-        endTime = max(allTimes);
+        btTimes = btTable{code, getrow("TP", nBtMeas)};  % Time of measurement [min]
+        pocTimes = pocTable{code, getrow("tG", nPocMeas)};  % Time of measurement [min]
         
-        time2mins = @(times) minutes(Time2Duration(times) - startTime);
-        metaTable.time = time2mins(metaTable.time);
-        btTable.time = time2mins(btTable.time);
-        pocTable.time = time2mins(pocTable.time);
+        allTimes = [btTimes pocTimes];
+        allTimes = allTimes(~isnan(allTimes));
         
-        P.data.simTime = [0, minutes(endTime-startTime)];  % [min]
-        P.data.simDuration =  @() floor(diff(P.data.simTime));  % [min]
-        P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
+        P.data.simTime = [min(allTimes) max(allTimes)];
+        P.data.simDuration =  @() floor(diff(P.data.simTime));
+        P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
+        
         
         %% Assay Data
         % Glucose Assay
-        isVenous = logical(pocTable.venous);
-        vPOCV = pocTable.glucose(isVenous);  % Venous + Test Strip
-        tPOCV = pocTable.time(isVenous);  % [min]
+        isVenous = logical(rmmissing(pocTable{code, getrow('v', nPocMeas)}));
+        GPOC = rmmissing(pocTable{code, getrow('G', nPocMeas)});
+        tPOC = rmmissing(pocTable{code, getrow('tG', nPocMeas)});
         
-        vPOCF = pocTable.glucose(~isVenous);  % Finger Prick + Test Strip
-        tPOCF = pocTable.time(~isVenous);  % [min]
+        vPOCV = GPOC(isVenous);  % Venous + Test Strip
+        tPOCV = tPOC(isVenous);  % [min]
         
-        vBT = [];  % Blood Test
-        tBT = [];
-        if isnumeric(btTable.glucose(1)) % Small workaround for some missing BT data for some subjects.
-            isValid = ~isnan(btTable.glucose);
-            vBT = btTable.glucose(isValid);  % [mmol/L]
-            tBT = btTable.time(isValid);  % [min]
-            
-            vG = vBT;
-            tG = tBT;
+        vPOCF = GPOC(~isVenous);  % Finger Prick + Test Strip
+        tPOCF = tPOC(~isVenous);  % [min]
+        
+        vGBT = btTable{code, getrow('G', nBtMeas)};  % Blood Test
+        tBT = btTable{code, getrow('TP', nBtMeas)};
+        
+        % Small workaround for some missing BT data for some subjects.
+        isValid = ~isnan(vGBT);
+        vGBT = vGBT(isValid);  % [mmol/L]
+        tGBT = tBT(isValid);  % [min]
+        
+        if any(isValid)
+            P.data.G.value = vGBT';
+            P.data.G.time = tGBT';
         else
-            vG = vPOCV;
-            tG = tPOCV;
+            P.data.G.value = GPOC';
+            P.data.G.time = tPOC';
         end
-        
-        P.data.G.value = vG;
-        P.data.G.time = tG;
         P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay
-        P.data.I.value = C.pmol2mU(btTable.insulin);  % [mU/L]
-        P.data.I.time = btTable.time;  % [min]
+        P.data.I.value = btTable{code, getrow('I', nBtMeas)}';  % [mU/L]
+        P.data.I.time = tBT';  % [min]
         
         % C-peptide Assay
-        P.data.CPep.value = btTable.cpep;  % [pmol/L]
-        P.data.CPep.time = btTable.time;  % [min]
+        P.data.CPep.value = btTable{code, getrow('C', nBtMeas)}';  % [pmol/L]
+        P.data.CPep.time = tBT';  % [min]
         
         %% Trial Inputs
         % Insulin Bolus
         P.data.IType = "human";
         P.data.IDelivery = "subcutaneous";
         
-        valid = ~isnan(metaTable.insulin);
-        
-        P.data.vIBolus = metaTable.insulin(valid) * 1e+3;  % [mU]
-        if any(P.data.vIBolus < 2000)
-            P.data.hasPooling = true;
-            P.data.vIBolus = 2000;  % [mU] - MANUALLY setting to ensure consistency
-        else
-            P.data.hasPooling = false;
-        end
-        
-        P.data.tIBolus = metaTable.time(valid);  % [min]
+        nIMeas = 2;
+        P.data.vIBolus = rmmissing(pocTable{code, getrow('I', nIMeas)});  % [mU]
+        P.data.tIBolus = rmmissing(pocTable{code, getrow('tI', nIMeas)});  %  [min]
         P.data.TIBolus = 1;  % [min]
         
         % Glucose Bolus
@@ -162,14 +134,11 @@ for ii = 1:length(patientSet)
         P.data.tGBolus = 0;  % [min]
         P.data.TGBolus = 1;  % [min]
         
-        
         P = MakeBolusFunctions(P);
         
         % Glucose Infusion
-        P.data.GInfusion = zeros(size(P.results.tArray));
+        P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]
         
-        %% Other
-        %         P = GetCPeptideParameters(P);
         
         %% Debug Plots
         DEBUGPLOTS.MakeOGTTLui = struct();
@@ -182,8 +151,8 @@ for ii = 1:length(patientSet)
         plt = plot(tPOCF, vPOCF, 'b+');
         plt.DisplayName = "Finger Prick Test Strip";
         
-        if ~isempty(vBT)
-            plt = plot(tBT, vBT, 'g*');
+        if ~isempty(vGBT)
+            plt = plot(tGBT, vGBT, 'g*');
             plt.DisplayName = "Blood Test";
         end
         
@@ -194,26 +163,10 @@ for ii = 1:length(patientSet)
         legend()
         
         %% Save
-        newPatientSet = [newPatientSet P];
+        newPatientSet{end+1} = P;
         clear P
         
     end
 end
-end
 
-function durs = Time2Duration(times)
-strs = string(times);
-for ii = 1:length(strs)
-    if strlength(strs(ii)) < 4  % e.g. "935" -> "0935"
-        strs(ii) = "0"+strs(ii);
-    end
-end
-chararray = char(strs);
-
-addCol = repmat(':', numel(times), 1);
-chararray = [chararray(:, 1:2), addCol, chararray(:, 3:4)];
-
-for ii = 1:length(times)
-    durs(ii, 1) = duration(chararray(ii, :), 'InputFormat', 'hh:mm');
-end
 end

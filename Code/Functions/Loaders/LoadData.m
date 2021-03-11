@@ -1,4 +1,4 @@
-function patientSet = LoadData(source, patientNums)
+function patientSet = LoadData(source, patientNums, showPlots)
 
 global CONFIG
 DP = DebugPlots().LoadData;
@@ -19,7 +19,7 @@ elseif source == "DISST"
 elseif source == "CREBRF"
     patientSet = MakeCREBRF(patientSet);
 elseif source == "OGTTLui"
-    patientSet = MakeOGTTLui(patientSet);
+    patientSet = MakeOGTTLui(patientSet, showPlots);
 end
 
 %% Apply parameters and persistents to patient structs.

@@ -1,4 +1,4 @@
-function newPatientSet = MakeOGTTLui(patientSet)
+function newPatientSet = MakeOGTTLui(patientSet, showPlots)
 % Function for loading OGTTLui data.
 % INPUTS:
 %   patientSet - cell array of patient structs
@@ -141,26 +141,28 @@ for ii = 1:length(patientSet)
         
         
         %% Debug Plots
-        DEBUGPLOTS.MakeOGTTLui = struct();
-        DP = DEBUGPLOTS.MakeOGTTLui;
-        MakeDebugPlot("OGTTLui Input", P, DP);
-        
-        plt = plot(tPOCV, vPOCV, 'b*');
-        plt.DisplayName = "Venous Test Strip";
-        
-        plt = plot(tPOCF, vPOCF, 'b+');
-        plt.DisplayName = "Finger Prick Test Strip";
-        
-        if ~isempty(vGBT)
-            plt = plot(tGBT, vGBT, 'g*');
-            plt.DisplayName = "Blood Test";
+        if showPlots
+            DEBUGPLOTS.MakeOGTTLui = struct();
+            DP = DEBUGPLOTS.MakeOGTTLui;
+            MakeDebugPlot("OGTTLui Input", P, DP);
+            
+            plt = plot(tPOCV, vPOCV, 'b*');
+            plt.DisplayName = "Venous Test Strip";
+            
+            plt = plot(tPOCF, vPOCF, 'b+');
+            plt.DisplayName = "Finger Prick Test Strip";
+            
+            if ~isempty(vGBT)
+                plt = plot(tGBT, vGBT, 'g*');
+                plt.DisplayName = "Blood Test";
+            end
+            
+            xlim([0 inf])
+            ylim([4 14])
+            
+            ylabel("Plasma Glucose [mmol/L]")
+            legend()
         end
-        
-        xlim([0 inf])
-        ylim([4 14])
-        
-        ylabel("Plasma Glucose [mmol/L]")
-        legend()
         
         %% Save
         newPatientSet{end+1} = P;

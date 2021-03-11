@@ -32,7 +32,7 @@ patientNums = [23];
 source = "OGTTLui";
 
 %% Load Data
-patientSet = LoadData(source, patientNums);
+patientSet = LoadData(source, patientNums, false);
 patientSetOut = {};
 
 %% Run

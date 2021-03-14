@@ -1,4 +1,4 @@
-function PrintResults(patientSet)
+function PrintResults(patientSet, recipeFunction)
 % Prints (and optionally saves) results of simulation.
 % INPUTS:
 %   patientSet - existing table of results
@@ -6,6 +6,10 @@ function PrintResults(patientSet)
 global CONFIG
 
 source = patientSet{end}.source;
+
+recipeStruct = functions(recipeFunction);
+recipe = recipeStruct.function;
+
 tables = TabulateResults(patientSet);
 
 if (CONFIG.SAVERESULTS)
@@ -15,7 +19,7 @@ if (CONFIG.SAVERESULTS)
         T = tables{tt};
         
         title = T.Properties.Description;
-        filename = fullfile(CONFIG.RESULTPATH, source + title + ".csv");
+        filename = fullfile(CONFIG.RESULTPATH, source + recipe + title + ".csv");
         
         writetable(T, filename, ...
                 "WriteRowNames", true);

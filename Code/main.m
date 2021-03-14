@@ -53,7 +53,7 @@ tResults = tic;
 PrintTimeTaken("Main", patientSet, tStart);
 
 SavePatients(patientSetOut);
-PrintResults(patientSetOut);
+PrintResults(patientSetOut, recipeFunction);
 
 PrintTimeTaken("Results", patientSet, tResults);
 

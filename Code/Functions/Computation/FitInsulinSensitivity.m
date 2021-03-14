@@ -104,7 +104,8 @@ P.results.SI = SI;  % [L/mU/min]
 if allowPlots
     if DP.SI
         MakeDebugPlot("SI", P, DP);
-        plot(P.results.tArray, P.results.SI, 'k')
+        SIArray = P.results.SI * ones(1, numel(P.results.tArray));
+        plot(P.results.tArray, SIArray, 'k')
         
         xlabel('Time')
         ylabel('$S_I$ [L/mU/min]')

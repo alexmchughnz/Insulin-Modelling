@@ -26,7 +26,9 @@ for iFig = 1:length(FigList)
         title('')
     end
     
-    legend('Location','southoutside')
+    if ~isempty(AxisHandle.Legend)
+        legend('Location','southoutside')
+    end
     
     % Save
     

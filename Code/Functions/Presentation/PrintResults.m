@@ -8,7 +8,7 @@ global CONFIG
 source = patientSet{end}.source;
 
 recipeStruct = functions(recipeFunction);
-recipe = recipeStruct.function;
+recipe = string(recipeStruct.function);
 
 tables = TabulateResults(patientSet);
 
@@ -22,7 +22,7 @@ PanelDebugPlots();
 %% Tables
 for tt = 1:length(tables)
     T = tables{tt};
-    title = T.Properties.Description;
+    title = string(T.Properties.Description);
     
     disp(title);
     disp(T);
@@ -41,7 +41,7 @@ for tt = 1:length(tables)
             mkdir(recipedir);
         end
         
-        filepath = fullfile(recipedir, title+".csv");
+        filepath = fullfile(recipedir, recipe+title+".csv");
         writetable(T, filepath, "WriteRowNames", true);
     end
 end

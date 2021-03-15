@@ -29,7 +29,8 @@ fieldPath = ["results", "Uen"];
 % length of data array.
 MakePattern = @(time, scale) struct('time', time, 'scale', scale);
 
-patterns{1} = MakePattern([1], [1]);
+patterns{1} = MakePattern([1 2], ...
+                          [1 1]);
 patterns{2} = MakePattern([1 2], ...
                            1 + [-0.15 +0.15]);
 patterns{3} = MakePattern([1 1.5 ], ...

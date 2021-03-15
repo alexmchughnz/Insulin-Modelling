@@ -31,7 +31,7 @@ if ~HasPersistent(P, "stddevMSE")
     P = AnalyseInsulinVariance(P, stddev, N);
 end
 
-gridSettings = {[-0.1 0.775], [0.075 0.95], 0.05};
+gridSettings = {[0 0.4], [0.3 0.95], 0.025};
 newGrid = true;
 P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});
 

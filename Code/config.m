@@ -30,5 +30,11 @@ CONFIG.STATUSDEPTH = 3;
 CONFIG.PUBLISHPLOTS = false;
 CONFIG.SAVERESULTS = true;
 
+defaultOptions = odeset('RelTol', 1e-5, ...
+    'AbsTol', 1e-4, ...
+    'MaxStep', 0.5, ...
+    'InitialStep', 0.1);
+CONFIG.DEFAULTODEOPTIONS = defaultOptions;
+
 disp('Config updated.')
 clear

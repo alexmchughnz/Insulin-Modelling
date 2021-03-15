@@ -8,8 +8,9 @@ function [P] = GIModel(P, options)
 
 GI = P.parameters.GI;
 
+global CONFIG
 if ~exist('options', 'var')
-    options = odeset;
+    options = CONFIG.DEFAULTODEOPTIONS;
 end
 
 PrintStatusUpdate(P, "Begin solving...")

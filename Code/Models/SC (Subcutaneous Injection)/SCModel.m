@@ -8,8 +8,9 @@ function [P] = SCModel(P, options)
 
 SC = P.parameters.SC;
 
+global CONFIG
 if ~exist('options', 'var')
-    options = odeset;
+    options = CONFIG.DEFAULTODEOPTIONS;
 end
 
 PrintStatusUpdate(P, "Begin solving...")

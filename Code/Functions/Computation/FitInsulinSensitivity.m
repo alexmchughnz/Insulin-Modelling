@@ -20,8 +20,8 @@ PrintStatusUpdate(P, "Fitting SI...")
 [tG, vG] = GetSimTime(P, P.data.G);
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
 
-[tI, vI] = GetIFromITotal(P);  % [mU/L]
-ppI = griddedInterpolant(tI, vI);  % I(t) [mU/L] piecewise polynomial. Use as function.
+% [tI, vI] = GetIFromITotal(P);  % [mU/L]
+% ppI = griddedInterpolant(tI, vI);  % I(t) [mU/L] piecewise polynomial. Use as function.
 
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;

@@ -1,97 +1,44 @@
-function P = FindOptimalHepaticClearance(P, method, varargin)
+function P = FindOptimalHepaticClearance(P, makeNewGrid, varargin)
 % Find optimal nL and xL, using grid search.
 % Runs a LOT of forward simulations in 'grid' mode - very slow!
 % INPUT:
 %   P        - patient struct
-%   method   - 'grid' to perform grid search
-%              'load' to load previously-generated residuals data
-%   varargin - with 'grid', {1} nL boundary, and
-%                           {2} xL boundary to search over
-%                           {3} desired [nL, xL] grid precision
-%            - otherwise, the filename to load (optional)
+%   varargin - {1} nL boundary, and
+%              {2} xL boundary to search over
+%              {3} desired [nL, xL] grid precision
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
 DP = DebugPlots().FindOptimalHepaticClearance;
 
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.025};
-GRIDFORMAT = @(nLBounds, nLDelta, xLBounds, xLDelta) ...
-            sprintf("grid nL[%g %g]@%g xL[%g %g]@%g", nLBounds, nLDelta, xLBounds, xLDelta);
 
 %% Setup
-if method == "grid"
-    % Load grid settings.
-    if isempty(varargin)
-        settings = GRIDDEFAULTS;
-    else
-        settings = varargin;
-    end
-    
-    nLBounds = settings{1};
-    xLBounds = settings{2};
-    delta = settings{3};
-    
-    % Set up grid.
-    nLDelta = delta(1);
-    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
-    
-    xLDelta = delta(end);
-    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
-    
-    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
-    
-    
-    P = EvaluateGrid(P, nLGrid, xLGrid);
-    gridData = P.persistents.OptimalHepaticGrids{end};
-    
+% Load grid settings.
+if isempty(varargin)
+    settings = GRIDDEFAULTS;
 else
-    if ~isempty(varargin)
-        % Load by name.
-        filename = varargin{1};
-        load(ResultsPath(sprintf(FILEFORMAT, P.patientCode, filename)), ...
-            'nLGrid', 'xLGrid', 'IResiduals');
-    else
-        % Load highest resolution grid file we can find.
-        files = dir(ResultsPath(sprintf("%s_grid *", P.patientCode)));        
-        resolutions = [];
-        for ii = 1:length(files)
-            [~, name, ~] = fileparts(files(ii).name);
-            stringbits = split(name, "@");
-            resolutions(ii) = str2double(stringbits(end));
-        end
-        
-        [~, iiBest] = min(resolutions);
-        file = files(iiBest);
-        filename = file.name;
-        load(fullfile(file.folder, filename), ...
-            'nLGrid', 'xLGrid', 'IResiduals');
-    end
+    settings = varargin;
 end
+nLBounds = settings{1};
+xLBounds = settings{2};
+delta = settings{3};
 
-% if method == "refine"
-%     boundary = 0.1;
-%     delta = 0.005;
-%     
-%     % Find range surrounding 1SD area.
-%     gridMin = min(IResiduals(:));
-%     deltaMSE = abs(IResiduals - gridMin);
-%     isWithin1SD = (deltaMSE <= P.data.stddevMSE);
-%     
-%     nLMin = RoundToMultiple(min(nLGrid(isWithin1SD)), boundary) - boundary;
-%     nLMax = RoundToMultiple(max(nLGrid(isWithin1SD)), boundary) + boundary;
-%     xLMin = RoundToMultiple(min(xLGrid(isWithin1SD)), boundary) - boundary;
-%     xLMax = RoundToMultiple(max(xLGrid(isWithin1SD)), boundary) + boundary;
-%     
-%     % Set up grid.
-%     nLRange = nLMin : delta : nLMax;
-%     xLRange = xLMin : delta : xLMax;
-%     
-%     [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
-%     
-%     filename = sprintf(GRIDFORMAT, ...
-%         [nLMin nLMax], delta, [xLMin xLMax], delta);
-%     IResiduals = EvaluateGrid(P, nLGrid, xLGrid, filename);
-% end
+% Set up grid.
+nLDelta = delta(1);
+nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+
+xLDelta = delta(end);
+xLRange = xLBounds(1) : xLDelta : xLBounds(end);
+
+[xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
+
+if makeNewGrid || ~HasPersistent(P, "OptimalHepaticGrids")
+    % Generate grid if we don't have one saved.  
+    P = EvaluateGrid(P, nLGrid, xLGrid);
+end
+gridData = P.persistents.OptimalHepaticGrids{end};    
+
 
 %% Find Optimal nL/xL
 % Get minimum.
@@ -100,18 +47,13 @@ nLGrid = gridData.nLGrid;
 xLGrid = gridData.xLGrid;
 
 [minIResidual, iiOptimal] = min(IResiduals(:));
-bestnL = nLGrid(iiOptimal);
-bestxL = xLGrid(iiOptimal);
 
-P.results.nL = bestnL;
-P.results.xL = bestxL;
-P.results.minGridMSE = minIResidual;
+P.results.nL = nLGrid(iiOptimal);
+P.results.xL = xLGrid(iiOptimal);
 
 % Get size of minimal error region.
-gridMin = min(IResiduals(:));
-deltaMSE = abs(IResiduals - gridMin);
+deltaMSE = abs(IResiduals - minIResidual);
 isWithin1SD = (deltaMSE <= P.persistents.stddevMSE);
-
 
 optimalnL = nLGrid(isWithin1SD);
 optimalxL = xLGrid(isWithin1SD);
@@ -123,7 +65,7 @@ P.results.OptimalHepaticClearance.nLRange = [L H];
 P.results.OptimalHepaticClearance.xLRange = [L H];
 
 P.results.OptimalHepaticClearance.minimalErrorRegionSize = sum(isWithin1SD(:));
-P.results.OptimalHepaticClearance.minGridMSE = gridMin;
+P.results.OptimalHepaticClearance.minGridMSE = minIResidual;
 %% ------------------------------------------------------------------------
 
 %% Debug Plots
@@ -239,12 +181,22 @@ for ii = 1:numel(nLGrid)
     else
         [tI, vI] = GetSimTime(P, P.data.I);  % Data [mU/L]
         simI = P.results.I;                      % Sim [mU/L]
-    end  
+    end      
+  
     inSimTime = GetTimeIndex(tI, P.results.tArray);
-    IErrors = simI(inSimTime) - vI;
+    
+    dt = diff(tI);
+    
+    cumIntISim = cumtrapz(tI, simI(inSimTime));
+    intISim = (cumIntISim(2:end) - cumIntISim(1:end-1)) ./ dt;
+    
+    cumIntIData = cumtrapz(tI, vI);
+    intIData = (cumIntIData(2:end) - cumIntIData(1:end-1)) ./ dt;    
+    
+    intIErrors = intISim - intIData;
     
     % Save residuals.
-    IResiduals(ii) = sum(IErrors.^2)/numel(vI);  % Mean Squared Errors
+    IResiduals(ii) = sum(intIErrors.^2)/numel(vI);  % Mean Squared Errors
     [row, col] = ind2sub(size(ISimulated), ii);
     ISimulated(row, col, :) = simI(:);
     

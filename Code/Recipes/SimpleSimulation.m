@@ -10,6 +10,7 @@ plots = DebugPlots();
 
 plots.EstimateInsulinSecretion.Uen = 1;
 plots.EstimateInsulinSecretion.CPep = 1;
+plots.FitHepaticClearance.GraphicalID = 1;
 plots.FitInsulinSensitivity.SI = 1;
 plots.SolveSystem.Glucose = 1;
 plots.SolveSystem.Insulin = 1;

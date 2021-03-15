@@ -200,7 +200,7 @@ if DP.GraphicalID
     
     xlabel("Time [min]")
     ylabel("Mean-normalised integral value")
-    legend('Location', 'northwest')
+    legend()
     
 end
 

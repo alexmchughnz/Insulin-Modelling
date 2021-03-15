@@ -8,8 +8,9 @@ function [P] = IDModel(P, options)
 
 ID = P.parameters.ID;
 
+global CONFIG
 if ~exist('options', 'var')
-    options = odeset;
+    options = CONFIG.DEFAULTODEOPTIONS;
 end
 
 PrintStatusUpdate(P, "Begin solving...")

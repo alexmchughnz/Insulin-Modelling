@@ -6,8 +6,9 @@ function [P, Y] = GCModel(P, options)
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
+global CONFIG
 if ~exist('options', 'var')
-    options = odeset;
+    options = CONFIG.DEFAULTODEOPTIONS;
 end
 
 PrintStatusUpdate(P, "Begin solving...")

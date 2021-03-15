@@ -13,22 +13,16 @@ end
 
 PrintStatusUpdate(P, "Solving entire system!")
 
-%% Setup
-options = odeset('RelTol', 1e-5, ...
-    'AbsTol', 1e-4, ...
-    'MaxStep', 0.1);
-
-
 %% Models
-P = GIModel(P, options);
+P = GIModel(P);
 
 if P.data.IType == "detemir"
-    P = IDModel(P, options);
+    P = IDModel(P);
 elseif P.data.IDelivery == "subcutaneous"
-    P = SCModel(P, options);
+    P = SCModel(P);
 end
 
-P = GCModel(P, options);
+P = GCModel(P);
 
 
 %% Fit Evaluation

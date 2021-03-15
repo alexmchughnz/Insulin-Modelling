@@ -13,7 +13,7 @@ recipe = recipeStruct.function;
 tables = TabulateResults(patientSet);
 
 if (CONFIG.SAVERESULTS)
-    SaveOpenFigures(source);
+    SaveOpenFigures(source, recipe);
     
     for tt = 1:length(tables)
         T = tables{tt};

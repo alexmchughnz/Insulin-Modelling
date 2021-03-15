@@ -1,9 +1,11 @@
-function [] = SaveOpenFigures(subfolder)
+function [] = SaveOpenFigures(varargin)
 
 global CONFIG
 
-if isempty(subfolder)
-    subfolder = "";
+if isempty(varargin)
+    subfolderpath = "";
+else
+    subfolderpath = fullfile(varargin{:});
 end
 
 FolderName = CONFIG.PLOTPATH;   % Your destination folder
@@ -32,19 +34,19 @@ for iFig = 1:length(FigList)
     
     % Save
     
-    figDir = fullfile(FolderName, 'fig', subfolder);
+    figDir = fullfile(FolderName, 'fig', subfolderpath);
     if ~isfolder(figDir)
         mkdir(figDir);
     end
     savefig(FigHandle, fullfile(figDir, FigName + ".fig"));
     
-    pngDir = fullfile(FolderName, 'png', subfolder);
+    pngDir = fullfile(FolderName, 'png', subfolderpath);
     if ~isfolder(pngDir)
         mkdir(pngDir);
     end
     saveas(FigHandle, fullfile(pngDir, FigName + ".png"));
     
-    pdfDir = fullfile(FolderName, 'pdf', subfolder);
+    pdfDir = fullfile(FolderName, 'pdf', subfolderpath);
     if ~isfolder(pdfDir)
         mkdir(pdfDir);
     end

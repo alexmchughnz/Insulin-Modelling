@@ -3,6 +3,28 @@ function patientSet = LoadData(source, patientNums, showPlots)
 global CONFIG
 DP = DebugPlots().LoadData;
 
+%% Select function and numbers.
+if source == "Detemir"
+    MakeDataFunction = @MakeDetemir;
+    allNums = [1 3 4];
+elseif source == "DISST"
+    MakeDataFunction = @MakeDISST;
+    allNums = [1:50];
+elseif source == "CREBRF"
+    MakeDataFunction = @MakeCREBRF;
+    allNums = [146 95 68 140 12 19 147 154 33 85 126 46 156 104 72 79 ...
+        73 65 78 105 138 158 87 198 128 169 186 153 115 209 196 160 145 ...
+        216 166 171 220 259 240 253 235 194 263 251];
+elseif source == "OGTTLui"
+    MakeDataFunction = @(pSet) MakeOGTTLui(pSet, showPlots);
+    allNums = [1 2 4 5 14 16 22 23 25 30];
+end
+
+if isequal(patientNums, "all")
+    patientNums = allNums;
+end
+
+
 %% Set up patient set.
 for ii = 1:length(patientNums)    
     P.source = source;
@@ -12,15 +34,7 @@ for ii = 1:length(patientNums)
 end
 
 %% Load data.
-if source == "Detemir"
-    patientSet = MakeDetemir(patientSet);
-elseif source == "DISST"
-    patientSet = MakeDISST(patientSet);
-elseif source == "CREBRF"
-    patientSet = MakeCREBRF(patientSet);
-elseif source == "OGTTLui"
-    patientSet = MakeOGTTLui(patientSet, showPlots);
-end
+    patientSet = MakeDataFunction(patientSet);
 
 %% Apply parameters and persistents to patient structs.
 for ii = 1:length(patientSet)

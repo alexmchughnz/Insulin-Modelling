@@ -211,7 +211,6 @@ saveStruct = struct(...
     'IResiduals', IResiduals, ...
     'ISimulated', ISimulated);
 
-% SaveResults(P, savename, saveStruct)
 if ~HasPersistent(P, "OptimalHepaticGrids")
     P.persistents.OptimalHepaticGrids = {};
 end

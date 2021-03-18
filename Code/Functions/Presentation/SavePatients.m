@@ -6,7 +6,12 @@ for ii = 1:length(patientSet)
     P = patientSet{ii};
     code = matlab.lang.makeValidName(P.patientCode);     
     
-    save(fullfile(CONFIG.DATAPATH, P.source, code), '-struct', 'P');
+    patientDir = fullfile(CONFIG.RESULTPATH, P.source);
+    if ~isfolder(patientDir)
+        mkdir(patientDir);
+    end    
+    save(fullfile(patientDir, code), '-struct', 'P');
+    
     PrintStatusUpdate(P, "Saved patient.")
 end
 

@@ -15,7 +15,7 @@ tStart = tic;
 
 %% Select Recipe
 recipeFunction = @SimpleSim;
-
+resultsTag = "Original";
 
 %% Select Data
 % patientNums = 'all';
@@ -44,7 +44,7 @@ tResults = tic;
 PrintTimeTaken("Main", patientSet, tStart);
 
 SavePatients(patientSetOut);
-PrintResults(patientSetOut, recipeFunction);
+PrintResults(patientSetOut, recipeFunction, resultsTag);
 
 PrintTimeTaken("Results", patientSet, tResults);
 

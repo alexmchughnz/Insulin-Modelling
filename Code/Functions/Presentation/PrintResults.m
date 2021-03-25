@@ -1,4 +1,4 @@
-function PrintResults(patientSet, recipeFunction)
+function PrintResults(patientSet, recipeFunction, tag)
 % Prints (and optionally saves) results of simulation.
 % INPUTS:
 %   patientSet - existing table of results
@@ -13,7 +13,7 @@ recipe = string(recipeStruct.function);
 tables = TabulateResults(patientSet);
 
 if (CONFIG.SAVERESULTS)
-    SaveOpenFigures(source, recipe);
+    SaveOpenFigures(tag, source, recipe);
 end
 
 PanelDebugPlots();
@@ -41,7 +41,7 @@ for tt = 1:length(tables)
             mkdir(recipedir);
         end
         
-        filepath = fullfile(recipedir, recipe+title+".csv");
+        filepath = fullfile(recipedir, tag+recipe+title+".csv");
         writetable(T, filepath, "WriteRowNames", true);
     end
 end

@@ -18,9 +18,9 @@ recipeFunction = @SimpleSimulation;
 
 
 %% Select Data
-patientNums = 'all';
-% patientNums = 23;
-source = "OGTTLui";
+% patientNums = 'all';
+patientNums = 23;
+source = "MockOGTTLui";
 
 %% Load Data
 patientSet = LoadData(source, patientNums, false);

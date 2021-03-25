@@ -14,7 +14,7 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @SimpleSimulation;
+recipeFunction = @SimpleSim;
 
 
 %% Select Data

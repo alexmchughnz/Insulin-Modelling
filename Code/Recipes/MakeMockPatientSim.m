@@ -37,8 +37,8 @@ mockP = rmfield(P, "results");
 mockP.results.tArray = P.results.tArray;
 
 mockP.source = "Mock" + P.source;
+mockP.patientCode = CONFIG.PATIENTFORMAT(mockP);
 mockP.patientNum = 1000 + P.patientNum;
-mockP.patientCode = "Mock" + P.patientCode;
 
 mockP.data = P.data;
 mockP.data.I.value = vI;

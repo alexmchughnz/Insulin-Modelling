@@ -109,8 +109,12 @@ for ii = 1:length(patientSet)
         P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay
-        P.data.I.value = C.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
-        P.data.I.time = tBT';  % [min]
+        vI = C.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
+        tI = tBT';  % [min]   
+        isValid = ~isnan(vI); 
+        
+        P.data.I.value = vI(isValid);
+        P.data.I.time = tI(isValid);
         
         % C-peptide Assay
         P.data.CPep.value = btTable{code, getrow('C', nBtMeas)}';  % [pmol/L]

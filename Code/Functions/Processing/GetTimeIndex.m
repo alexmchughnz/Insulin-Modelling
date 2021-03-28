@@ -8,8 +8,12 @@ t0 = tArray(1);
 dt = tArray(2) - t0;
 for ii = 1:length(tSearch)
     t = tSearch(ii);    
-    n(ii) = round((t-t0)/dt) + 1;
+    n(ii) = round((t-t0)/dt) + 1;    
+    
+    % Fix for rounding up / down too much.
+    n = ConstrainArray(n, min(tArray(:)), max(tArray(:)));
 end
+
 
 end
 

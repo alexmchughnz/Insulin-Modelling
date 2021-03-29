@@ -42,17 +42,17 @@ gridData = P.persistents.OptimalHepaticGrids{end};
 
 %% Find Optimal nL/xL
 % Get minimum.
-IResiduals = gridData.IResiduals;
+residuals = gridData.residuals;
 nLGrid = gridData.nLGrid;
 xLGrid = gridData.xLGrid;
 
-[minIResidual, iiOptimal] = min(IResiduals(:));
+[minIResidual, iiOptimal] = min(residuals(:));
 
 P.results.nL = nLGrid(iiOptimal);
 P.results.xL = xLGrid(iiOptimal);
 
 % Get size of minimal error region.
-deltaMSE = abs(IResiduals - minIResidual);
+deltaMSE = abs(residuals - minIResidual);
 isWithin1SD = (deltaMSE <= P.persistents.stddevMSE);
 
 optimalnL = nLGrid(isWithin1SD);
@@ -79,7 +79,7 @@ if DP.ErrorSurface
     nLRange = sort(unique(nLGrid));
     xLRange = sort(unique(xLGrid));
     
-    gridMin = min(IResiduals(:));
+    gridMin = min(residuals(:));
     
     if isfield(P.data, 'stddevMSE')
         stddevMSE = P.data.stddevMSE;
@@ -88,7 +88,7 @@ if DP.ErrorSurface
     end
     
     % Define colors for different error regions.
-    deltaMSE = abs(IResiduals - gridMin);
+    deltaMSE = abs(residuals - gridMin);
     isWithin1SD = (deltaMSE <= stddevMSE);
     isWithin3SD = (deltaMSE <= 3*stddevMSE);
     
@@ -97,7 +97,7 @@ if DP.ErrorSurface
     CO(:,:,3) = ~isWithin3SD * 1; % blue
     
     % Plot surface.
-    surf(xLRange, nLRange, IResiduals, CO,...
+    surf(xLRange, nLRange, residuals, CO,...
         'HandleVisibility', 'off', ...
         'EdgeColor', 'none', ...
         'FaceColor', 'interp');
@@ -105,11 +105,11 @@ if DP.ErrorSurface
     % > Contour
     % Define contour.
     numLevels = 10;
-    minError = min(IResiduals(:));
+    minError = min(residuals(:));
     levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
     
     % Plot contour.
-    contour3(xLRange, nLRange, IResiduals, ...
+    contour3(xLRange, nLRange, residuals, ...
         levels, ...
         'Color', 'r', ...
         'HandleVisibility', 'off');    
@@ -127,12 +127,12 @@ if DP.ErrorSurface
     % Redraw grid lines.
     spacing = 0.05;
     for ii = 1 : round(spacing/delta) : length(nLRange)
-        plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), IResiduals(ii,:));
+        plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), residuals(ii,:));
         plt.Color = [0 0 0 0.1];
         plt.LineWidth = 0.2;
     end
     for ii = 1 : round(spacing/delta) : length(xLRange)
-        plt = plot3(ones(size(nLRange)) * xLRange(ii), nLRange, IResiduals(:,ii));
+        plt = plot3(ones(size(nLRange)) * xLRange(ii), nLRange, residuals(:,ii));
         plt.Color = [0 0 0 0.1];
         plt.LineWidth = 0.2;
     end
@@ -155,7 +155,7 @@ end
 function P = EvaluateGrid(P, nLGrid, xLGrid)
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
-IResiduals = zeros(size(nLGrid));
+residuals = zeros(size(nLGrid));
 
 runtime = tic;
 for ii = 1:numel(nLGrid)    
@@ -173,23 +173,17 @@ for ii = 1:numel(nLGrid)
     
     % Determine error at raw data points only.
     if (P.source == "Detemir")
-        [tI, vI] = GetSimTime(P, P.data.ITotal);  % Data [mU/L]
         simI = P.results.I + P.results.IDF;       % Sim [mU/L]
     else
-        [tI, vI] = GetSimTime(P, P.data.I);  % Data [mU/L]
         simI = P.results.I;                      % Sim [mU/L]
     end      
-  
-    inSimTime = GetTimeIndex(tI, P.results.tArray);
     
-    dt = diff(tI);
-    
-    
-    A = 
+    [A, b] = AssembleIIntegralSystem(P, P.results.I, P.results.Q);
+    x = [P.results.nL; P.results.xL];
     error = sum((A*x - b).^2);
     
     % Save residuals.
-    IResiduals(ii) = error;  % Sum Squared Errors of I Equation Integrals
+    residuals(ii) = error;  % Sum Squared Errors of I Equation Integrals
     [row, col] = ind2sub(size(ISimulated), ii);
     ISimulated(row, col, :) = simI(:);
     
@@ -201,7 +195,7 @@ end
 saveStruct = struct(...
     'nLGrid', nLGrid, ...
     'xLGrid', xLGrid, ...
-    'IResiduals', IResiduals, ...
+    'residuals', residuals, ...
     'ISimulated', ISimulated);
 
 if ~HasPersistent(P, "OptimalHepaticGrids")

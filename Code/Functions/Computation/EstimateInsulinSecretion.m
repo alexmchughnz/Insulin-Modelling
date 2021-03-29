@@ -12,7 +12,7 @@ DP = DebugPlots().EstimateInsulinSecretion;
 
 CP = P.parameters.CP;
 GC = P.parameters.GC;
-C = LoadConstants();
+CONST = LoadConstants();
 
 PrintStatusUpdate(P, "Estimating Uen..."); 
 
@@ -46,7 +46,7 @@ end
 % Calculate endogenous secretion rate (Uen).
 dvCPep = [diff(CPepArray)/dt; 0];
 S = (dvCPep + (CP.k1+CP.k3).*CPepArray - CP.k2*Y);  % C-peptide secretion [(pmol/L)/min]
-Uen = C.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
+Uen = CONST.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 
 % Expand to original time, and write value to patient struct.
 dt = P.results.tArray(2) - P.results.tArray(1);

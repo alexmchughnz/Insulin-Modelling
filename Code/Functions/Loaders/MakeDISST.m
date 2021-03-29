@@ -6,7 +6,7 @@ function patientSet = MakeDISST(patientSet)
 %   patientSet  - updated cell array of patient structs
 
 global CONFIG
-C = LoadConstants();
+CONST = LoadConstants();
 
 source = "DISST";
 
@@ -76,7 +76,7 @@ for ii = 1:length(patientSet)
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
     
-    P.data.vGBolus = dataTable{code, "GB"} / C.MGlucose * 1e+3;  % [mmol]
+    P.data.vGBolus = dataTable{code, "GB"} / CONST.MGlucose * 1e+3;  % [mmol]
     P.data.tGBolus = dataTable{code, "timeGB"}/60;  % [min]
     P.data.TGBolus = 1;  % [min]
     

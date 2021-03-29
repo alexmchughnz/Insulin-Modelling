@@ -7,7 +7,7 @@ function patientSet = MakeCREBRF(patientSet)
 
 
 global CONFIG
-C = LoadConstants();
+CONST = LoadConstants();
 
 source = "CREBRF";
 
@@ -68,7 +68,7 @@ for ii = 1:length(patientSet)
     % C-peptide Assay
     measC = T{code, repmat("C", 1, nMeas) + measTimes'}';  % [ng/mL]
     measC = measC * 1e+3 / 1e-3;                          % [pg/L]
-    measC = measC / C.MCPeptide;                          % [pmol/L]
+    measC = measC / CONST.MCPeptide;                          % [pmol/L]
     P.data.CPep.value = measC([1:end]);
     P.data.CPep.time = measTimes;  % [min]   
     

@@ -7,7 +7,7 @@ function newPatientSet = MakeOGTTLui(patientSet, showPlots)
 
 global CONFIG
 DEBUGPLOTS = DebugPlots();
-C = LoadConstants();
+CONST = LoadConstants();
 
 getrow = @(label, n) repmat(string(label), 1, n) + (0:n-1);
 
@@ -109,7 +109,7 @@ for ii = 1:length(patientSet)
         P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay
-        vI = C.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
+        vI = CONST.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
         tI = tBT';  % [min]   
         isValid = ~isnan(vI); 
         
@@ -134,7 +134,7 @@ for ii = 1:length(patientSet)
         P.data.GDelivery = "enteral";
         
         vGBolus = 35;  % [g]
-        P.data.vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
+        P.data.vGBolus = vGBolus / CONST.MGlucose * 1e+3;  % [mmol]
         P.data.tGBolus = 0;  % [min]
         P.data.TGBolus = 1;  % [min]
         

@@ -45,15 +45,16 @@ I = ppI(tArray);
 ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
 Q = ppQ(tArray);
 
+
+
 %% Iterative Integral Method (pg. 16)
 nLArray = [0];
 xLArray = [1];
 relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
 tolerance = 0.1/100; % Relative tolerance for convergence.
 
-while any(relativeChange >= tolerance)
-    
-    [A, b, LHS, RHS] = AssembleIIntegralSystem(P, tMeas, I, Q);   
+while any(relativeChange >= tolerance)    
+    [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, tMeas, I, Q);   
     
     % %         Normalise.
     %         A = A./b
@@ -64,27 +65,25 @@ while any(relativeChange >= tolerance)
     nL = x(1);
     xL = 1 - x(2);    
     
-    % Calculate errors.
-    %         errorRel = sqrt((A*x-b).^2)./b
-    %         errorAbs = ((A*x-b).^2)
-    %         errorAbsSum = sum((A*x-b).^2)
-    %         disp(newline)
-    
+    % Calculate deltas.    
     nLChange = (nL-nLArray(end))/nLArray(end);
     xLChange = (xL-xLArray(end))/xLArray(end);
     relativeChange = [nLChange xLChange];
     
+     % Calculate errors.
+    errorRel = sqrt((A*x-b).^2)./b
+    errorAbs = ((A*x-b).^2)
+    errorAbsSum = sum((A*x-b).^2)
+    disp(newline)
+    
+    % Update arrays.
     nLArray = [nLArray nL];
     xLArray = [xLArray xL];
     
-    % Forward simulate to improve I and Q prediction.
+    % Forward simulate to improve I and Q prediction.    
     for ii = 1:100
-        % I(t) = I(t0) + int{k} + CX*(1-xL) - kI*int{I} + CN*nL - kIQ*int{I-Q}
-        I = I0 + cumtrapz(tMinutes, k) + CX*(1-xL) - kI*cumtrapz(tMinutes, I) ...
-            + CN*nL - kIQ*cumtrapz(tMinutes, I-Q);
-        
-        % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
-        Q = Q0 - cQ*cumtrapz(tMinutes, Q) + cI*cumtrapz(tMinutes, I);
+        I = IFunc(nL, xL, I, Q);
+        Q = QFunc(I, Q);
     end
 end
 

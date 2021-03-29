@@ -23,15 +23,14 @@ end
 
 %% Data
 tArray = P.results.tArray;
-
-% Plasma Insulin
-[tMeas, vI] = GetIFromITotal(P); % [mU/L]
+[tI, vI] = GetIFromITotal(P); % [mU/L]
 
 if P.source == "DISST"
-    % Need to add 'false' point for improved fitting.
+    % Need to add 'false' point for improved fitting.    
     [vIBolus, iiBolus] = max(P.data.IBolus(tMinutes));
     tIBolus = tMinutes(iiBolus);
-    [tMeas, order] = sort([tMeas; tIBolus]);
+    
+    [tI, order] = sort([tI; tIBolus]);
     iiBeforeFakePoint = find(order == length(order)) - 1;
     
     fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
@@ -39,13 +38,9 @@ if P.source == "DISST"
     fakeData = [vI; fakeI];
     vI = fakeData(order);
 end
-ppI = griddedInterpolant(tMeas, vI);  % [mU/L]
+
+ppI = griddedInterpolant(tI, vI);  % [mU/L]
 I = ppI(tArray);
-
-% Interstitial Insulin
-ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
-Q = ppQ(tArray);
-
 
 %% Iterative Integral Method (pg. 16)
 nLArray = [0];
@@ -53,8 +48,8 @@ xLArray = [1];
 relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
 tolerance = 0.1/100; % Relative tolerance for convergence.
 
-while any(relativeChange >= tolerance)    
-    [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, tMeas, I, Q);   
+while any(relativeChange >= tolerance)
+    [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, I);
     
     % %         Normalise.
     %         A = A./b
@@ -63,14 +58,14 @@ while any(relativeChange >= tolerance)
     % Solve.
     x = A\b;
     nL = x(1);
-    xL = 1 - x(2);    
+    xL = 1 - x(2);
     
-    % Calculate deltas.    
+    % Calculate deltas.
     nLChange = (nL-nLArray(end))/nLArray(end);
     xLChange = (xL-xLArray(end))/xLArray(end);
     relativeChange = [nLChange xLChange];
     
-     % Calculate errors.
+    % Calculate errors.
     errorRel = sqrt((A*x-b).^2)./b
     errorAbs = ((A*x-b).^2)
     errorAbsSum = sum((A*x-b).^2)
@@ -80,7 +75,7 @@ while any(relativeChange >= tolerance)
     nLArray = [nLArray nL];
     xLArray = [xLArray xL];
     
-    % Forward simulate to improve I and Q prediction.    
+    % Forward simulate to improve I and Q prediction.
     for ii = 1:100
         I = IFunc(nL, xL, I, Q);
         Q = QFunc(I, Q);
@@ -118,7 +113,7 @@ LHS = sum(LHS, 2);
 if DP.GraphicalID
     MakeDebugPlot("Graphical Identifiability", P, DP);
     
-    tIntegrals = mean([tMeas(1:end-1), tMeas(2:end)], CONST.ROWWISE);
+    tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWWISE);
     
     plt = plot(tIntegrals, CNNorm);
     plt.DisplayName = "$n_L$ coeff.";
@@ -142,7 +137,7 @@ if DP.GraphicalID
     
     xlabel("Time [min]")
     ylabel("Mean-normalised integral value")
-    legend()    
+    legend()
 end
 
 % Forward Simulation of Insulin

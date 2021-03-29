@@ -1,11 +1,27 @@
-function [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, tMeas, I, Q)
+function [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, I, Q)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
 
+
+
 %% Setup
 tArray = P.results.tArray;
+tMeas = P.data.I.time;
 iiMeas = GetTimeIndex(tMeas, tArray);
+
+% Plasma Insulin
+if ~exist("I", "var")
+    [tI, vI] = GetIFromITotal(P); % [mU/L]
+    ppI = griddedInterpolant(tI, vI);  % [mU/L]
+    I = ppI(tArray);
+end
+
+% Interstital Insulin
+if ~exist("Q", "var")    
+    ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
+    Q = ppQ(tArray);
+end
 
 % Endogenous Secretion
 Uen = P.results.Uen;

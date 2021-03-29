@@ -6,6 +6,8 @@ function P = FitHepaticClearance(P, forcenLxL)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
+ROWWISE = 2;
+
 DP = DebugPlots().FitHepaticClearance;
 GC = P.parameters.GC;
 
@@ -14,7 +16,8 @@ PrintStatusUpdate(P, "Fitting nL/xL...")
 if exist('forcenLxL', 'var')
     nL = forcenLxL(1);
     xL = forcenLxL(2);
-else    
+else
+
     %% Setup
     % Time and data arrays.
     tMinutes = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
@@ -52,10 +55,12 @@ else
     I0 = I(1);
     
     % Set coefficients for MLR.
-    % Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
-    kI = -GC.nK;
-    kIQ = -GC.nI./GC.VI;
+    % Consider dI/dt = k + cx*(1-xL) - kI*I - cn*nL - kIQ*(I-Q):
+    cx = Uen/GC.VI;
+    cn = I./(1 + GC.alphaI*I);
     k = IInput/GC.VI;
+    kI = GC.nK;
+    kIQ = GC.nI./GC.VI;
     % Also consider dQ/dt = -cQ*Q + cI*I:
     cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
     cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
@@ -68,18 +73,16 @@ else
     tolerance = 0.1/100; % Relative tolerance for convergence.
     while any(relativeChange >= tolerance)
         % Integrating I equation:
-        % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
-        % Renaming CN = int{c1} and CX = int{c2}
-        % CN*nL + CX*(1-xL) = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k} := C
-        CN = cumtrapz(tMinutes, ...
-            -I./(1 + GC.alphaI*I));
-        CX = cumtrapz(tMinutes, ...
-            Uen/GC.VI);
+        % I(t) - I(t0) = int{k} + int{cx}*(1-xL) - kI*int{I} - int{cn}*nL - kIQ*int{I-Q}
+        % Renaming CN = -int{cn} and CX = int{cx}
+        % CN*nL + CX*(1-xL) = I(t) - I(t0) - int{k} + kI*int{I} + kIQ*int{I-Q} := C
+        CN = -cumtrapz(tMinutes, cn);
+        CX = cumtrapz(tMinutes, cx);
         CParts = [I - I0, ...
-            - kI*cumtrapz(tMinutes, I), ...
-            - kIQ*cumtrapz(tMinutes, I-Q), ...
-            - cumtrapz(tMinutes, k)]; % For analysing each term later.
-        C = sum(CParts, 2); % Sum along rows to get column vector.
+            - cumtrapz(tMinutes, k), ...
+            + kI*cumtrapz(tMinutes, I), ...
+            + kIQ*cumtrapz(tMinutes, I-Q)]; % For analysing each term later.
+        C = sum(CParts, ROWWISE); % Sum along rows to get column vector.
         
         % Assembling MLR system, integrating between sample points, and
         % normalising by integral width (dt):
@@ -96,10 +99,14 @@ else
         A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
         b = (ppC(t2) - ppC(t1)) ./ dt;
         
+%         % Normalise.
+%         A = A./b
+%         b = b./b
+        
         % Solve.
         x = A\b;
         nL = x(1);
-        xL = 1 - x(2);
+        xL = 1 - x(2);        
         
         nLChange = (nL-nLArray(end))/nLArray(end);
         xLChange = (xL-xLArray(end))/xLArray(end);
@@ -110,9 +117,9 @@ else
         
         % Forward simulate to improve I and Q prediction.
         for ii = 1:100
-            % I(t) = I(t0) + kI*int{I} + kIQ*int{I-Q} + int{k} + CN*nL + CX*(1-xL)
-            I = I0 + kI*cumtrapz(tMinutes, I) + kIQ*cumtrapz(tMinutes, I-Q) + cumtrapz(tMinutes, k) ...
-                + CN*nL + CX*(1-xL);
+        % I(t) = I(t0) + int{k} + CX*(1-xL) - kI*int{I} + CN*nL - kIQ*int{I-Q}
+        I = I0 + cumtrapz(tMinutes, k) + CX*(1-xL) - kI*cumtrapz(tMinutes, I) ...
+            + CN*nL - kIQ*cumtrapz(tMinutes, I-Q);
             
             % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
             Q = Q0 - cQ*cumtrapz(tMinutes, Q) + cI*cumtrapz(tMinutes, I);

@@ -184,16 +184,12 @@ for ii = 1:numel(nLGrid)
     
     dt = diff(tI);
     
-    cumIntISim = cumtrapz(tI, simI(inSimTime));
-    intISim = (cumIntISim(2:end) - cumIntISim(1:end-1)) ./ dt;
     
-    cumIntIData = cumtrapz(tI, vI);
-    intIData = (cumIntIData(2:end) - cumIntIData(1:end-1)) ./ dt;    
-    
-    intIErrors = intISim - intIData;
+    A = 
+    error = sum((A*x - b).^2);
     
     % Save residuals.
-    IResiduals(ii) = sum(intIErrors.^2)/numel(vI);  % Mean Squared Errors
+    IResiduals(ii) = error;  % Sum Squared Errors of I Equation Integrals
     [row, col] = ind2sub(size(ISimulated), ii);
     ISimulated(row, col, :) = simI(:);
     

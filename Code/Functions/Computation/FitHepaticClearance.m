@@ -6,10 +6,7 @@ function P = FitHepaticClearance(P, forcenLxL)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-ROWWISE = 2;
-
 DP = DebugPlots().FitHepaticClearance;
-GC = P.parameters.GC;
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
@@ -23,16 +20,17 @@ if exist('forcenLxL', 'var')
     return
 end
 
-%% Setup
-% Time and data arrays.
-tMinutes = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
-[tI, vI] = GetIFromITotal(P); % [mU/L]
+%% Data
+tArray = P.results.tArray;
+
+% Plasma Insulin
+[tMeas, vI] = GetIFromITotal(P); % [mU/L]
 
 if P.source == "DISST"
     % Need to add 'false' point for improved fitting.
     [vIBolus, iiBolus] = max(P.data.IBolus(tMinutes));
     tIBolus = tMinutes(iiBolus);
-    [tI, order] = sort([tI; tIBolus]);
+    [tMeas, order] = sort([tMeas; tIBolus]);
     iiBeforeFakePoint = find(order == length(order)) - 1;
     
     fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
@@ -40,36 +38,12 @@ if P.source == "DISST"
     fakeData = [vI; fakeI];
     vI = fakeData(order);
 end
+ppI = griddedInterpolant(tMeas, vI);  % [mU/L]
+I = ppI(tArray);
 
-ppI = griddedInterpolant(tI, vI);  % [mU/L]
-
-
-%% Data
-% Uen
-iiMinutes = GetTimeIndex(tMinutes, P.results.tArray);
-Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
-
-% Q
+% Interstitial Insulin
 ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
-Q = ppQ(tMinutes);
-Q0 = Q(1);
-
-% I
-IInput = GetPlasmaInsulinInput(tMinutes, P);  % [mU/min]
-I = ppI(tMinutes); % [mU/L]
-I0 = I(1);
-
-% Set coefficients for MLR.
-% Consider dI/dt = k + cx*(1-xL) - kI*I - cn*nL - kIQ*(I-Q):
-cx = Uen/GC.VI;
-cn = I./(1 + GC.alphaI*I);
-k = IInput/GC.VI;
-kI = GC.nK;
-kIQ = GC.nI./GC.VI;
-% Also consider dQ/dt = -cQ*Q + cI*I:
-cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
-cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
-
+Q = ppQ(tArray);
 
 %% Iterative Integral Method (pg. 16)
 nLArray = [0];
@@ -78,32 +52,8 @@ relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
 tolerance = 0.1/100; % Relative tolerance for convergence.
 
 while any(relativeChange >= tolerance)
-    % Integrating I equation:
-    % I(t) - I(t0) = int{k} + int{cx}*(1-xL) - kI*int{I} - int{cn}*nL - kIQ*int{I-Q}
-    % Renaming CN = -int{cn} and CX = int{cx}
-    % CN*nL + CX*(1-xL) = I(t) - I(t0) - int{k} + kI*int{I} + kIQ*int{I-Q} := C
-    CN = -cumtrapz(tMinutes, cn);
-    CX = cumtrapz(tMinutes, cx);
-    CParts = [I - I0, ...
-        - cumtrapz(tMinutes, k), ...
-        + kI*cumtrapz(tMinutes, I), ...
-        + kIQ*cumtrapz(tMinutes, I-Q)]; % For analysing each term later.
-    C = sum(CParts, ROWWISE); % Sum along rows to get column vector.
     
-    % Assembling MLR system, integrating between sample points, and
-    % normalising by integral width (dt):
-    % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-    t1 = tI(1:end-1);
-    t2 = tI(2:end);
-    dt = t2 - t1;
-    
-    ppCN = griddedInterpolant(tMinutes, CN);
-    ppCX = griddedInterpolant(tMinutes, CX);
-    ppC  = griddedInterpolant(tMinutes, C);
-    
-    A(:,1) = (ppCN(t2) - ppCN(t1)) ./ dt;
-    A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
-    b = (ppC(t2) - ppC(t1)) ./ dt;
+    [A, b, LHS, RHS] = AssembleIIntegralSystem(P, tMeas, I, Q);   
     
     % %         Normalise.
     %         A = A./b
@@ -112,8 +62,9 @@ while any(relativeChange >= tolerance)
     % Solve.
     x = A\b;
     nL = x(1);
-    xL = 1 - x(2);
+    xL = 1 - x(2);    
     
+    % Calculate errors.
     %         errorRel = sqrt((A*x-b).^2)./b
     %         errorAbs = ((A*x-b).^2)
     %         errorAbsSum = sum((A*x-b).^2)

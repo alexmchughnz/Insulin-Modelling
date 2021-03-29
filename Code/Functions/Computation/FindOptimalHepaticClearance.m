@@ -106,16 +106,13 @@ if DP.ErrorSurface
     % Define contour.
     numLevels = 10;
     minError = min(IResiduals(:));
-%     levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels); % non-linear spacing
     levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
-    %             levels = linspace(min(IResiduals(:)), max(IResiduals(:)), numLevels); % linear spacing
     
     % Plot contour.
     contour3(xLRange, nLRange, IResiduals, ...
         levels, ...
         'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
+        'HandleVisibility', 'off');    
     
     % > Prettying
     delta = nLRange(2) - nLRange(1);

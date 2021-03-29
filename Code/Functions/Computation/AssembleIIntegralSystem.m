@@ -1,7 +1,6 @@
 function [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, tMeas, I, Q)
 
-ROWWISE = 2;
-
+CONST = LoadConstants();
 GC = P.parameters.GC;
 
 %% Setup
@@ -40,7 +39,7 @@ intIQ = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
 RHS = [I -I0 -intk intI intIQ];
-C = sum(RHS, ROWWISE);
+C = sum(RHS, CONST.ROWWISE);
 
 %% Make Minute-Wise Q and I Functions
 % I(t) = I(t0) + int{k} + CX*(1-xL) - kI*int{I} + CN*nL - kIQ*int{I-Q}

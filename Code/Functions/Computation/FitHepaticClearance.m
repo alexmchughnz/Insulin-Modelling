@@ -7,6 +7,7 @@ function P = FitHepaticClearance(P, forcenLxL)
 %   P   - modified patient struct with nL and xL
 
 DP = DebugPlots().FitHepaticClearance;
+CONST = LoadConstants();
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
@@ -44,7 +45,6 @@ I = ppI(tArray);
 % Interstitial Insulin
 ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
 Q = ppQ(tArray);
-
 
 
 %% Iterative Integral Method (pg. 16)
@@ -96,15 +96,16 @@ xL = max(xLArray(end), lb);  % [1]
 P.results.nL = nL;
 P.results.xL = xL;
 
-% Calculate stats.
+% Calculate parameter ID metrics.
 MeanNormalise = @(data) data ./ mean(data);
 
+CN = A(:, 1);
+CX = A(:, 2);
 CNNorm = MeanNormalise(CN);
 CXNorm = MeanNormalise(CX);
 delta2Norm = norm(CNNorm - CXNorm) / length(CN);
 P.results.delta2Norm = delta2Norm;
 
-b = sum(CParts, 2);
 bNorm = MeanNormalise(b);
 P.results.delta2NormnL = norm(CNNorm - bNorm) / length(CN);
 P.results.delta2NormxL = norm(CXNorm - bNorm) / length(CN);
@@ -115,22 +116,21 @@ LHS = sum(LHS, 2);
 
 % Graphical Identifiability Method (Docherty, 2010)
 if DP.GraphicalID
-    [sampleTimes, ~] = GetIFromITotal(P); % Abuse function to get sample times for any patient.
-    
     MakeDebugPlot("Graphical Identifiability", P, DP);
     
-    plt = plot(tMinutes, CNNorm);
+    tIntegrals = mean([tMeas(1:end-1), tMeas(2:end)], CONST.ROWWISE);
+    
+    plt = plot(tIntegrals, CNNorm);
     plt.DisplayName = "$n_L$ coeff.";
     
-    plt = plot(tMinutes, CXNorm);
+    plt = plot(tIntegrals, CXNorm);
     plt.DisplayName = "$x_L$ coeff.";
     
-    plt = plot(tMinutes, bNorm);
+    plt = plot(tIntegrals, bNorm);
     plt.DisplayName = "$b$";
     
-    for ss = 1:length(sampleTimes)
-        t = sampleTimes(ss);
-        ii = GetTimeIndex(t, tMinutes);
+    for ii = 1:length(tIntegrals)
+        t = tIntegrals(ii);
         
         plt = plot([t t], [CNNorm(ii) CXNorm(ii)], 'k');
         plt.Marker = 'o';

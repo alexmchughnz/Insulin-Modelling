@@ -3,7 +3,7 @@
 % Created: 26/01/21
 
 fprintf("Running main - press key to start.\n")
-pause
+% pause
 
 clc
 clear
@@ -14,13 +14,14 @@ config
 tStart = tic;
 
 %% Select Recipe
+% recipeFunction = @MatchIInputSim;
 recipeFunction = @SimpleSim;
-resultsTag = "Original";
+% resultsTag = "Normalised";
 
 %% Select Data
 % patientNums = 'all';
 patientNums = 23;
-source = "MockOGTTLui";
+source = "OGTTLui";
 
 %% Load Data
 patientSet = LoadData(source, patientNums, false);
@@ -44,6 +45,9 @@ tResults = tic;
 PrintTimeTaken("Main", patientSet, tStart);
 
 SavePatients(patientSetOut);
+if ~exist("resultsTag", "var")
+    resultsTag = "";
+end
 PrintResults(patientSetOut, recipeFunction, resultsTag);
 
 PrintTimeTaken("Results", patientSet, tResults);

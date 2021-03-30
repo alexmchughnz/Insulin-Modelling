@@ -25,6 +25,6 @@ if P.data.IType == "human"
     
 end
 
-P.data.IInputArray = IInput; % [mU/min]
+P.data.IInput = IInput; % [mU/min]
 
 end

@@ -13,9 +13,6 @@ end
 
 PrintStatusUpdate(P, "Begin solving...")
 
-% Prepare IInput array.
-P = MakePlasmaInsulinInputArray(P);
-
 % Set up initial conditions.
 [~, vG] = GetSimTime(P, P.data.G);
 [~, vI] = GetIFromITotal(P);  % [mU/L]

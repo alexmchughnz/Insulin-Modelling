@@ -51,6 +51,11 @@ for ii = 1:length(patientSet)
     patientSet{ii} = LoadPersistents(patientSet{ii});
 end
 
+%% Produce data arrays from loaded information.
+for ii = 1:length(patientSet)
+    patientSet{ii} = MakePlasmaInsulinInputArray(patientSet{ii});
+end
+
 %% Debug Plots
 if DP.GlucoseInput
     for ii = 1:length(patientSet)

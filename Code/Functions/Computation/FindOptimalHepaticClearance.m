@@ -11,7 +11,7 @@ function P = FindOptimalHepaticClearance(P, makeNewGrid, varargin)
 
 DP = DebugPlots().FindOptimalHepaticClearance;
 
-GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.025};
+GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
 
 %% Setup
 % Load grid settings.

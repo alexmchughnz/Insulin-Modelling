@@ -21,10 +21,7 @@ DebugPlots(plots);
 
 %% Setup
 P = EstimateInsulinSecretion(P);
-
-integralP = FitHepaticClearance(P);  % To get A and b matrices.
-integralP.patientCode = integralP.patientCode + "(integral)";
-P.results.integrals = integralP.results.integrals;
+P = FitHepaticClearance(P);  % To get A and b matrices.
     
 if ~HasPersistent(P, "stddevMSE")    
     stddev = 5/100;
@@ -33,6 +30,10 @@ if ~HasPersistent(P, "stddevMSE")
     P = AnalyseInsulinVariance(P, stddev, N);
 end
 
+% Copy out P results from integral.
+integralP = P;
+integralP.patientCode = integralP.patientCode + "(integral)";
+
 gridSettings = {[0 0.4], [0.3 0.95], 0.02};
 newGrid = true;
 P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});
@@ -40,6 +41,7 @@ P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
 P = SolveSystem(P, true);
+
 
 PArray = {P integralP};
 

@@ -19,8 +19,7 @@ end
 
 % Interstital Insulin
 if ~exist("Q", "var")    
-    ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
-    Q = ppQ(tArray);
+    Q = GetAnalyticalInterstitialInsulin(I, P);
 end
 
 % Endogenous Secretion

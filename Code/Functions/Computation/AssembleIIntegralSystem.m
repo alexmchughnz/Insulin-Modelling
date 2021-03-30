@@ -26,7 +26,8 @@ end
 Uen = P.results.Uen;
 
 % Exogenous Insulin
-IInput = GetPlasmaInsulinInput(tArray, P);
+P = MakePlasmaInsulinInputArray(P);
+IInput = P.data.IInputArray;
 
 %% Get Coefficients
 % Consider dI/dt = k + cx*(1-xL) - kI*I - cn*nL - kIQ*(I-Q):

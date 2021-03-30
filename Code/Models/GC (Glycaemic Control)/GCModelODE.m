@@ -1,4 +1,4 @@
-function [dY] = GCModelODE(t, Y, P, Y0, ppG, ppI)
+function [dY] = GCModelODE(t, Y, P, Y0)
 % ODE for GC model. Use with ode45.
 % Note that G terms are split into those multiplying SI (GA) and those
 % added to it (Gb). This allows fitting SI from forward sim.
@@ -8,8 +8,6 @@ function [dY] = GCModelODE(t, Y, P, Y0, ppG, ppI)
 %   Y   - states [G; I; Q; GA; Gb] at time == t
 %   P   - patient struct
 %   Y0  - initial conditions of states
-%   ppG - (optional) profile of glucose over time to use
-%   ppI - (optional) profile of insulin over time to use
 % OUTPUT:
 %   dY  - derivatives of states at time == t
 
@@ -27,6 +25,7 @@ n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 Uen    = P.results.Uen(n);       % [mU/min]
 P2     = P.results.P2(n);        % [mmol]
 GFast  = P.data.GFast(t);        % Fasting glucose [mmol/L]
+IInput = P.data.IInputArray(n);
 
 % Patient dependent.
 SI = P.results.SI;        % [L/mU/min]
@@ -50,7 +49,6 @@ if P.data.IType == "detemir"
     Qtot0 = Qtot0 + P.results.QDF(1);  % [mU/L]
 end
 
-IInput = GetPlasmaInsulinInput(t, P);
 
 %% Computation
 dGA = -(G*Qtot - GFast*Qtot0)/(1 + GC.alphaG*Qtot);   % Insulin-mediated uptake.

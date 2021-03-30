@@ -76,9 +76,6 @@ for ii = 1:length(patientSet)
     P.data.tGBolus = data.meal_start;
     P.data.TGBolus = data.meal_durations;
     
-    
-    P = MakeBolusFunctions(P);
-    
     % Glucose Infusion
     if (P.patientNum == 1)
         MAGIC_DEXTROSE_NUMBER = 1.54;  % Assume "how much glucose from 5% dextrose" factor.

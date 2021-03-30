@@ -45,15 +45,17 @@ end
 %% Load data.
 patientSet = MakeDataFunction(patientSet);
 
-%% Apply parameters and persistents to patient structs.
+%% Add remaining elements to patient structs.
 for ii = 1:length(patientSet)
-    patientSet{ii} = LoadParameters(patientSet{ii});
-    patientSet{ii} = LoadPersistents(patientSet{ii});
+    patientSet{ii} = AddParameters(patientSet{ii});
+    patientSet{ii} = AddPersistents(patientSet{ii});
+    
+    patientSet{ii} = AddBolusArrays(patientSet{ii});
+    patientSet{ii} = AddPlasmaInsulinInputArray(patientSet{ii});
 end
 
 %% Produce data arrays from loaded information.
 for ii = 1:length(patientSet)
-    patientSet{ii} = MakePlasmaInsulinInputArray(patientSet{ii});
 end
 
 %% Debug Plots
@@ -63,7 +65,7 @@ if DP.GlucoseInput
         MakeDebugPlot("Glucose Input", P, DP);
         
         subplot(2,1,1)
-        plot(P.results.tArray, P.data.GBolus(P.results.tArray))
+        plot(P.results.tArray, P.results.GBolus)
         ylabel("G Bolus [mmol/min]")
         
         subplot(2,1,2)

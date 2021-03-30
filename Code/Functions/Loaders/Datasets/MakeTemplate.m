@@ -53,7 +53,6 @@ for ii = 1:length(patientSet)
     vIBolus = 1000;  % [mU]
     tIBolus = 0;  % [min]
     TIBolus = 1;  % [min]
-    P.data.IBolus = MakeBolusFunction(vIBolus, tIBolus, TIBolus);  % [mU/min]    
     
     % Glucose Bolus
     P.data.GDelivery = "intravenous | enteral";
@@ -61,7 +60,6 @@ for ii = 1:length(patientSet)
     vGBolus = 100;  % [mmol]
     tGBolus = 0;  % [min]
     TGBolus = 1;  % [min]
-    P.data.GBolus = MakeBolusFunction(vGBolus, tGBolus, TGBolus);  % [mmol/min]     
     
     % Glucose Infusion
     P.data.GInfusion = []; % [mmol/min]

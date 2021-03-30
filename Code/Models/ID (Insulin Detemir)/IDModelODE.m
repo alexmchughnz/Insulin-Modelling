@@ -21,7 +21,8 @@ QDB       = Y(7); %NOTE: Re-removed the factor of 18...?
 
 %% Variables
 % Time dependent.
-IBolus = P.data.IBolus(t); % [mU/min]
+n = GetTimeIndex(t, P.results.tArray);
+IBolus = P.results.IBolus(n); % [mU/min]
 
 %% Computationl
 dIDH = IBolus ...  % Injected subcutaneous insulin detemir.

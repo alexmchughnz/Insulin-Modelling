@@ -15,7 +15,8 @@ QLocal = Y(2);
 
 %% Variables
 % Patient dependent.
-IBolus = P.data.IBolus(t);  % [mU/min]
+n = GetTimeIndex(t, P.results.tArray);
+IBolus = P.results.IBolus(n); % [mU/min]
 
 %% Computation
 dISC    = IBolus - SC.ks2*ISC;

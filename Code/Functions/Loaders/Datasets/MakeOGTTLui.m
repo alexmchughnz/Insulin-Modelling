@@ -138,8 +138,6 @@ for ii = 1:length(patientSet)
         P.data.tGBolus = 0;  % [min]
         P.data.TGBolus = 1;  % [min]
         
-        P = MakeBolusFunctions(P);
-        
         % Glucose Infusion
         P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]
         

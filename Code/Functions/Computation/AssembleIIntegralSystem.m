@@ -26,7 +26,7 @@ end
 Uen = P.results.Uen;
 
 % Exogenous Insulin
-IInput = P.data.IInput;
+IInput = P.results.IInput;
 
 %% Get Coefficients
 % Consider dI/dt = k + cx*(1-xL) - kI*I - cn*nL - kIQ*(I-Q):

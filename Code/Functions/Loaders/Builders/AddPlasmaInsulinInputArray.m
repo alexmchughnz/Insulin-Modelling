@@ -1,4 +1,4 @@
-function P = MakePlasmaInsulinInputArray(P)
+function P = AddPlasmaInsulinInputArray(P)
 % Returns array of insulin input rate over time.
 % INPUT:
 %   P - patient struct
@@ -9,7 +9,7 @@ SC = P.parameters.SC;
 
 if P.data.IType == "human"
     if P.data.IDelivery == "intravenous"
-        IInput = P.data.IBolus(P.results.tArray);  % [mU/min]
+        IInput = P.results.IBolus;  % [mU/min]
         
     elseif P.data.IDelivery == "subcutaneous"
         if ~isfield(P.results, "QLocal")
@@ -25,6 +25,6 @@ if P.data.IType == "human"
     
 end
 
-P.data.IInput = IInput; % [mU/min]
+P.results.IInput = IInput; % [mU/min]
 
 end

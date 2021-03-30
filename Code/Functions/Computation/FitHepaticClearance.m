@@ -27,7 +27,7 @@ tArray = P.results.tArray;
 
 if P.source == "DISST"
     % Need to add 'false' point for improved fitting.    
-    [vIBolus, iiBolus] = max(P.data.IBolus(tMinutes));
+    [vIBolus, iiBolus] = max(P.results.IBolus);
     tIBolus = tMinutes(iiBolus);
     
     [tI, order] = sort([tI; tIBolus]);
@@ -149,7 +149,7 @@ if DP.ForwardSim
     I = ppI(tMinutes);
     kI = GC.nK(P);
     kIQ = GC.nI(P)./GC.VI;
-    k = P.results.Uen/GC.VI + P.data.IBolus(tMinutes)/GC.VI;
+    k = P.results.Uen/GC.VI + P.results.IBolus/GC.VI;
     
     MakeDebugPlot("Insulin Simulation", P, DP);
     

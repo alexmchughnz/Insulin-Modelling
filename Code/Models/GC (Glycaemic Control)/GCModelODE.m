@@ -25,7 +25,7 @@ n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 Uen    = P.results.Uen(n);       % [mU/min]
 P2     = P.results.P2(n);        % [mmol]
 GFast  = P.data.GFast;        % Fasting glucose [mmol/L]
-IInput = P.data.IInput(n);
+IInput = P.results.IInput(n);
 
 % Patient dependent.
 SI = P.results.SI;        % [L/mU/min]
@@ -35,7 +35,7 @@ xL = P.results.xL;        % [1]
 
 % Trial dependent.
 if P.data.GDelivery == "intravenous"
-    GInput = P.data.GBolus(t) + P.data.GInfusion(n);  % [mmol/min]
+    GInput = P.results.GBolus(n) + P.data.GInfusion(n);  % [mmol/min]
 else
     GInput = P.data.GInfusion(n);  % [mmol/min]
 end

@@ -1,4 +1,4 @@
-function P = LoadPersistents(P)
+function P = AddPersistents(P)
 
 global CONFIG
 

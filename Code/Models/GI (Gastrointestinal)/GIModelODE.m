@@ -14,9 +14,11 @@ P1     = Y(1);
 P2     = Y(2);
 
 %% Variables
+n = GetTimeIndex(t, P.results.tArray);
+
 % Patient dependent.
 if P.data.GDelivery == "enteral"
-    D = P.data.GBolus(t);  % [mmol/min]
+    D = P.results.GBolus(n);  % [mmol/min]
 else
     D = 0;
 end

@@ -80,9 +80,6 @@ for ii = 1:length(patientSet)
     P.data.tGBolus = dataTable{code, "timeGB"}/60;  % [min]
     P.data.TGBolus = 1;  % [min]
     
-    
-    P = MakeBolusFunctions(P);
-    
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]    
 

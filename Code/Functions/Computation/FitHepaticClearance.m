@@ -41,6 +41,7 @@ end
 
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
 I = ppI(tArray);
+Q = GetAnalyticalInterstitialInsulin(I, P);
 
 %% Iterative Integral Method (pg. 16)
 nLArray = [0];
@@ -81,6 +82,9 @@ while any(relativeChange >= tolerance)
         Q = QFunc(I, Q);
     end
 end
+
+P.results.integrals.A = A;
+P.results.integrals.b = b;
 
 %% Results
 % Extract final result.

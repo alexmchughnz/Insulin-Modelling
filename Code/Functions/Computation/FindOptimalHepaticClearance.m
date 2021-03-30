@@ -153,11 +153,15 @@ end
 
 %% Functions
 function P = EvaluateGrid(P, nLGrid, xLGrid)
+runtime = tic;
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
 residuals = zeros(size(nLGrid));
 
-runtime = tic;
+% Get integral system for patient.
+A = P.results.integrals.A;
+b = P.results.integrals.b;
+
 for ii = 1:numel(nLGrid)    
     message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
     PrintStatusUpdate(P, message, true);
@@ -171,14 +175,13 @@ for ii = 1:numel(nLGrid)
     P = FitInsulinSensitivity(P, false);
     P = SolveSystem(P);
     
-    % Determine error at raw data points only.
+    % Determine error.
     if (P.source == "Detemir")
         simI = P.results.I + P.results.IDF;       % Sim [mU/L]
     else
         simI = P.results.I;                      % Sim [mU/L]
     end      
     
-    [A, b] = AssembleIIntegralSystem(P, P.results.I, P.results.Q);
     x = [P.results.nL; P.results.xL];
     error = sum((A*x - b).^2);
     

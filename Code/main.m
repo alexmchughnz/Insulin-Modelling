@@ -14,8 +14,8 @@ config
 tStart = tic;
 
 %% Select Recipe
-% recipeFunction = @MatchIInputSim;
-recipeFunction = @SimpleSim;
+% recipeFunction = @SimpleSim;
+recipeFunction = @GridSearchSim;
 % resultsTag = "Normalised";
 
 %% Select Data

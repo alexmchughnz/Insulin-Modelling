@@ -50,7 +50,7 @@ for ii = 1:length(patientSet)
     nMeas = length(measTimes);
     
     P.data.simTime = [floor(min(measTimes)), ceil(max(measTimes))];
-    P.data.simDuration =  @() floor(diff(P.data.simTime));
+    P.data.simDuration =  floor(diff(P.data.simTime));
     P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
     
     %% Assay Data
@@ -58,7 +58,7 @@ for ii = 1:length(patientSet)
     measG = T{code, repmat("G", 1, nMeas) + measTimes'}';  % [mmol/L]
     P.data.G.value = measG([1:end]);  % [mmol/L]
     P.data.G.time = measTimes;  % [min]
-    P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
+    P.data.GFast = P.data.G.value(1);  % [mmol/L]
     
     % Insulin Assay
     measI = T{code, repmat("I", 1, nMeas) + measTimes'}';  % [uU/mL == mU/L]

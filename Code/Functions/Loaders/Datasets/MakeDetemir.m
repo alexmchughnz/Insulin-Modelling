@@ -36,8 +36,8 @@ for ii = 1:length(patientSet)
     GetMins = @(dt) minutes(dt - sys.sim_start_t);  
     
     P.data.simTime     =  [GetMins(sys.sim_start_t), GetMins(sys.sim_end_t)];
-    P.data.simDuration =  @() diff(P.data.simTime);    
-    P.results.tArray = (0 : P.data.simDuration())';
+    P.data.simDuration = floor(diff(P.data.simTime));
+    P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
     
     %% Assay Data
     % Glucose Assay

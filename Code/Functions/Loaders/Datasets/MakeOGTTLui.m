@@ -75,7 +75,7 @@ for ii = 1:length(patientSet)
         allTimes = allTimes(~isnan(allTimes));
         
         P.data.simTime = [min(allTimes) max(allTimes)];
-        P.data.simDuration =  @() floor(diff(P.data.simTime));
+        P.data.simDuration = floor(diff(P.data.simTime));
         P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
         
         
@@ -106,7 +106,7 @@ for ii = 1:length(patientSet)
             P.data.G.value = GPOC';
             P.data.G.time = tPOC';
         end
-        P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
+        P.data.GFast = P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay
         vI = CONST.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]

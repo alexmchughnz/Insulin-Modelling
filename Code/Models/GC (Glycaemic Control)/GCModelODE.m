@@ -24,7 +24,7 @@ Q0 = Y0(3); % [mU]
 n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 Uen    = P.results.Uen(n);       % [mU/min]
 P2     = P.results.P2(n);        % [mmol]
-GFast  = P.data.GFast(t);        % Fasting glucose [mmol/L]
+GFast  = P.data.GFast;        % Fasting glucose [mmol/L]
 IInput = P.data.IInput(n);
 
 % Patient dependent.

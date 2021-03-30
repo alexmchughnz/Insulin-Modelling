@@ -28,14 +28,14 @@ for ii = 1:length(patientSet)
     
     %% Trial Times
     P.data.simTime     = [0 100];  % [min]
-    P.data.simDuration = @() diff(P.data.simTime);  % [min]
-    P.results.tArray = (0 : P.data.simDuration())';  % [min]
+    P.data.simDuration = floor(diff(P.data.simTime));  % [min]
+    P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
     
     %% Assay Data
     % Glucose Assay
     P.data.G.value = [];  % [mmol/L]
     P.data.G.time = [];  % [min]
-    P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
+    P.data.GFast = P.data.G.value(1);  % [mmol/L]
     
     % Insulin Assay
     P.data.I.value = [];  % [mU/L]

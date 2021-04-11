@@ -14,8 +14,8 @@ end
 PrintStatusUpdate(P, "Begin solving...")
 
 % Set up initial conditions.
-[~, vG] = GetSimTime(P, P.data.G);
-[~, vI] = GetIFromITotal(P);  % [mU/L]
+[~, vG] = GetData(P.data.G);  % [mmol/L]
+[~, vI] = GetData(P.data.I);  % [mU/L]
 
 G0 = vG(1);
 I0 = vI(1);

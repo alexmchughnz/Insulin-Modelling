@@ -17,7 +17,7 @@ PrintStatusUpdate(P, "Fitting SI...")
 
 %% Setup
 % Interpolate G and I with piecewise polynomials.
-[tG, vG] = GetSimTime(P, P.data.G);
+[tG, vG] = GetData(P.data.G);
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
 
 % [tI, vI] = GetIFromITotal(P);  % [mU/L]
@@ -43,8 +43,8 @@ optionsLong = odeset('RelTol',1e-5, ...   % Options for other minutes.
 % Set up for different model types.
 P = SolveSystem(P);
 
-[~, vG] = GetSimTime(P, P.data.G);
-[~, vI] = GetIFromITotal(P);  % [mU/L]
+[~, vG] = GetData(P.data.G);
+[~, vI] = GetData(P.data.I);  % [mU/L]
 
 G0 = vG(1);
 I0 = vI(1);

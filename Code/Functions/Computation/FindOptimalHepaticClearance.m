@@ -193,7 +193,8 @@ for ii = 1:numel(nLGrid)
     cumIntIData = cumtrapz(tI, vI);
     intIData = (cumIntIData(2:end) - cumIntIData(1:end-1)) ./ dt;    
     
-    intIErrors = intISim - intIData;
+%     IError = sum()
+    error = sum((A*x - b).^2);
     
     % Save residuals.
     IResiduals(ii) = sum(intIErrors.^2)/numel(vI);  % Mean Squared Errors

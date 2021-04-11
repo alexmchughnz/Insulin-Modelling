@@ -14,15 +14,14 @@ PrintStatusUpdate(P, "Fitting nL/xL...")
 if exist('forcenLxL', 'var')
     nL = forcenLxL(1);
     xL = forcenLxL(2);
-else    
-    %% Setup
-    % Time and data arrays.
-    tMinutes = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
-    [tI, vI] = GetIFromITotal(P); % [mU/L]
+else
+    %% Data
+    tArray = P.results.tArray;
+    [tI, vI] = GetData(P.data.I); % [mU/L]
     
     if P.source == "DISST"
         % Need to add 'false' point for improved fitting.
-        [vIBolus, iiBolus] = max(P.data.IBolus(tMinutes));
+        [vIBolus, iiBolus] = max(P.results.IBolus);
         tIBolus = tMinutes(iiBolus);
         [tI, order] = sort([tI; tIBolus]);
         iiBeforeFakePoint = find(order == length(order)) - 1;
@@ -35,8 +34,6 @@ else
     
     ppI = griddedInterpolant(tI, vI);  % [mU/L]
     
-    
-    %% Data
     % Uen
     iiMinutes = GetTimeIndex(tMinutes, P.results.tArray);
     Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]

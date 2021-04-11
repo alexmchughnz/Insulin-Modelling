@@ -27,7 +27,7 @@ P = GCModel(P);
 
 %% Fit Evaluation
 % Insulin
-[tI, vI] = GetIFromITotal(P); % [mU/L]
+[tI, vI] = GetData(P.data.I);  % [mU/L]
 iiData = GetTimeIndex(tI, P.results.tArray);
 fitI = P.results.I(iiData);
 
@@ -57,7 +57,7 @@ if allowPlots
     if DP.Glucose
         MakeDebugPlot("Plasma Glucose", P, DP);
         
-        [tG, vG] = GetSimTime(P, P.data.G);
+        [tG, vG] = GetData(P.data.G);
         plt = plot(tG, vG, 'g*');
         plt.DisplayName = 'Plasma Sample';        
        
@@ -82,12 +82,12 @@ if allowPlots
         MakeDebugPlot("Plasma Insulin", P, DP);
         
         if P.source == "Detemir"
-            [tI, vI] = GetSimTime(P, P.data.ITotal);  % [mU/L]
+            [tI, vI] = GetData(P.data.ITotal);  % [mU/L]
             I = P.results.I + P.results.IDF;  % [mU/L]
             
             pltylabel = 'Plasma Insulins, I + IDF [mU/L]';            
         else
-            [tI, vI] = GetSimTime(P, P.data.I);  % [mU/L]
+            [tI, vI] = GetData(P.data.I);  % [mU/L]
             I = P.results.I;  % [mU/L]
             
             pltylabel = 'Plasma Insulin, I [mU/l]';

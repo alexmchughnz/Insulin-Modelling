@@ -19,7 +19,7 @@ PrintStatusUpdate(P, "Estimating Uen...");
 %% Setup
 % Time of reading in sim [min]
 % Concentraton of C-peptide [pmol/L]
-[tCPep, vCPep] = GetSimTime(P, P.data.CPep);
+[tCPep, vCPep] = GetData(P.data.CPep);
 
 %% Interpolation
 ppCPep = griddedInterpolant(tCPep, vCPep);

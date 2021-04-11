@@ -11,7 +11,7 @@ function P = AnalyseInsulinVariance(P, stddev, N)
 DP = DebugPlots().AnalyseInsulinVariance;
 
 %% Setup
-[tData, ~] = GetIFromITotal(P);
+tData = P.data.I.time;
 MSE = zeros(1, N);
 
 runtime = tic;
@@ -31,11 +31,11 @@ for ii = 1:N
     copyP = P;
     
     if isfield(P, 'ITotal')
-        [~, vITotal] = GetSimTime(P, P.data.ITotal);
+        [~, vITotal] = GetData(P.data.ITotal);
         trialITotal = noiseFactors .* vITotal;
         copyP.data.ITotal.value = trialITotal;
     else
-        [~, vI] = GetSimTime(P, P.data.I);
+        [~, vI] = GetData(P.data.I);
         trialI = noiseFactors .* vI;
         copyP.data.I.value = trialI;
     end
@@ -86,10 +86,10 @@ P = SolveSystem(P, false);
 
 % Determine error.
 if isfield(P, 'ITotal')
-    [tI, vI] = GetSimTime(P, P.data.ITotal);  % Data [mU/L]
+    [tI, vI] = GetData(P.data.ITotal);  % Data [mU/L]
     simI = P.results.I + P.results.IDF;       % Sim [mU/L]
 else
-    [tI, vI] = GetSimTime(P, P.data.I);  % Data [mU/L]
+    [tI, vI] = GetData(P.data.I);  % Data [mU/L]
     simI = P.results.I;                  % Sim [mU/L]
 end
 

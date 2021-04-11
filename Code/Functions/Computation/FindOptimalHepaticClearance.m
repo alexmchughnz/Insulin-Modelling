@@ -11,48 +11,48 @@ function P = FindOptimalHepaticClearance(P, makeNewGrid, varargin)
 
 DP = DebugPlots().FindOptimalHepaticClearance;
 
-GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.025};
+GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
 
 %% Setup
-% Load grid settings.
-if isempty(varargin)
-    settings = GRIDDEFAULTS;
-else
-    settings = varargin;
-end
-nLBounds = settings{1};
-xLBounds = settings{2};
-delta = settings{3};
-
-% Set up grid.
-nLDelta = delta(1);
-nLRange = nLBounds(1) : nLDelta : nLBounds(end);
-
-xLDelta = delta(end);
-xLRange = xLBounds(1) : xLDelta : xLBounds(end);
-
-[xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
-
 if makeNewGrid || ~HasPersistent(P, "OptimalHepaticGrids")
-    % Generate grid if we don't have one saved.  
+    % Load grid settings.
+    if isempty(varargin)
+        settings = GRIDDEFAULTS;
+    else
+        settings = varargin;
+    end
+    nLBounds = settings{1};
+    xLBounds = settings{2};
+    nLxLDelta = settings{3};
+    
+    % Set up grid.
+    nLDelta = nLxLDelta(1);
+    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+    
+    xLDelta = nLxLDelta(end);
+    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
+    
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
+    
+    % Generate grid if we don't have one saved.
     P = EvaluateGrid(P, nLGrid, xLGrid);
 end
-gridData = P.persistents.OptimalHepaticGrids{end};    
+gridData = P.persistents.OptimalHepaticGrids{end};
 
 
 %% Find Optimal nL/xL
 % Get minimum.
-IResiduals = gridData.IResiduals;
+residuals = gridData.residuals;
 nLGrid = gridData.nLGrid;
 xLGrid = gridData.xLGrid;
 
-[minIResidual, iiOptimal] = min(IResiduals(:));
+[minIResidual, iiOptimal] = min(residuals(:));
 
 P.results.nL = nLGrid(iiOptimal);
 P.results.xL = xLGrid(iiOptimal);
 
 % Get size of minimal error region.
-deltaMSE = abs(IResiduals - minIResidual);
+deltaMSE = abs(residuals - minIResidual);
 isWithin1SD = (deltaMSE <= P.persistents.stddevMSE);
 
 optimalnL = nLGrid(isWithin1SD);
@@ -71,7 +71,7 @@ P.results.OptimalHepaticClearance.minGridMSE = minIResidual;
 %% Debug Plots
 % Error Surface
 if DP.ErrorSurface
-    figTitle = sprintf("Error Surface @ %.3f", delta);
+    figTitle = "Error Surface";
     MakeDebugPlot(figTitle, P, DP);
     
     % > Surface
@@ -79,7 +79,7 @@ if DP.ErrorSurface
     nLRange = sort(unique(nLGrid));
     xLRange = sort(unique(xLGrid));
     
-    gridMin = min(IResiduals(:));
+    gridMin = min(residuals(:));
     
     if isfield(P.data, 'stddevMSE')
         stddevMSE = P.data.stddevMSE;
@@ -88,7 +88,7 @@ if DP.ErrorSurface
     end
     
     % Define colors for different error regions.
-    deltaMSE = abs(IResiduals - gridMin);
+    deltaMSE = abs(residuals - gridMin);
     isWithin1SD = (deltaMSE <= stddevMSE);
     isWithin3SD = (deltaMSE <= 3*stddevMSE);
     
@@ -97,7 +97,7 @@ if DP.ErrorSurface
     CO(:,:,3) = ~isWithin3SD * 1; % blue
     
     % Plot surface.
-    surf(xLRange, nLRange, IResiduals, CO,...
+    surf(xLRange, nLRange, residuals, CO,...
         'HandleVisibility', 'off', ...
         'EdgeColor', 'none', ...
         'FaceColor', 'interp');
@@ -105,17 +105,14 @@ if DP.ErrorSurface
     % > Contour
     % Define contour.
     numLevels = 10;
-    minError = min(IResiduals(:));
-%     levels = logspace(log10(min(IResiduals(:))), log10(max(IResiduals(:))), numLevels); % non-linear spacing
+    minError = min(residuals(:));
     levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
-    %             levels = linspace(min(IResiduals(:)), max(IResiduals(:)), numLevels); % linear spacing
     
     % Plot contour.
-    contour3(xLRange, nLRange, IResiduals, ...
+    contour3(xLRange, nLRange, residuals, ...
         levels, ...
         'Color', 'r', ...
         'HandleVisibility', 'off');
-    
     
     % > Prettying
     delta = nLRange(2) - nLRange(1);
@@ -125,17 +122,17 @@ if DP.ErrorSurface
     
     xlabel("$x_L$ [min$^{-1}$]")
     ylabel("$n_L$")
-    zlabel("Mean of squared errors [(mU/min)^2]") 
+    zlabel("Mean of squared errors [(mU/min)^2]")
     
     % Redraw grid lines.
     spacing = 0.05;
     for ii = 1 : round(spacing/delta) : length(nLRange)
-        plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), IResiduals(ii,:));
+        plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), residuals(ii,:));
         plt.Color = [0 0 0 0.1];
         plt.LineWidth = 0.2;
     end
     for ii = 1 : round(spacing/delta) : length(xLRange)
-        plt = plot3(ones(size(nLRange)) * xLRange(ii), nLRange, IResiduals(:,ii));
+        plt = plot3(ones(size(nLRange)) * xLRange(ii), nLRange, residuals(:,ii));
         plt.Color = [0 0 0 0.1];
         plt.LineWidth = 0.2;
     end
@@ -147,21 +144,25 @@ if DP.ErrorSurface
     y = nLPhys([1 end end 1]);
     z = 1e+6 * ones(1, 4);
     patch(x, y, z, 'r',...
-          'FaceColor', '#D95319', ...
-          'FaceAlpha', 0.2, ...
-          'EdgeColor', 'none')    
+        'FaceColor', '#D95319', ...
+        'FaceAlpha', 0.2, ...
+        'EdgeColor', 'none')
 end
 
 end
 
 %% Functions
 function P = EvaluateGrid(P, nLGrid, xLGrid)
+runtime = tic;
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
-IResiduals = zeros(size(nLGrid));
+residuals = zeros(size(nLGrid));
 
-runtime = tic;
-for ii = 1:numel(nLGrid)    
+% Get integral system for patient.
+A = P.results.integrals.A;
+b = P.results.integrals.b;
+
+for ii = 1:numel(nLGrid)
     message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
     PrintStatusUpdate(P, message, true);
     
@@ -174,30 +175,20 @@ for ii = 1:numel(nLGrid)
     P = FitInsulinSensitivity(P, false);
     P = SolveSystem(P);
     
-    % Determine error at raw data points only.
+    % Determine error.
     if (P.source == "Detemir")
-        [tI, vI] = GetSimTime(P, P.data.ITotal);  % Data [mU/L]
         simI = P.results.I + P.results.IDF;       % Sim [mU/L]
     else
-        [tI, vI] = GetSimTime(P, P.data.I);  % Data [mU/L]
         simI = P.results.I;                      % Sim [mU/L]
-    end      
-  
-    inSimTime = GetTimeIndex(tI, P.results.tArray);
+    end
     
-    dt = diff(tI);
-    
-    cumIntISim = cumtrapz(tI, simI(inSimTime));
-    intISim = (cumIntISim(2:end) - cumIntISim(1:end-1)) ./ dt;
-    
-    cumIntIData = cumtrapz(tI, vI);
-    intIData = (cumIntIData(2:end) - cumIntIData(1:end-1)) ./ dt;    
+    x = [P.results.nL; 1 - P.results.xL];
     
 %     IError = sum()
     error = sum((A*x - b).^2);
     
     % Save residuals.
-    IResiduals(ii) = sum(intIErrors.^2)/numel(vI);  % Mean Squared Errors
+    residuals(ii) = error;  % Sum Squared Errors of I Equation Integrals
     [row, col] = ind2sub(size(ISimulated), ii);
     ISimulated(row, col, :) = simI(:);
     
@@ -209,14 +200,13 @@ end
 saveStruct = struct(...
     'nLGrid', nLGrid, ...
     'xLGrid', xLGrid, ...
-    'IResiduals', IResiduals, ...
+    'residuals', residuals, ...
     'ISimulated', ISimulated);
 
-% SaveResults(P, savename, saveStruct)
 if ~HasPersistent(P, "OptimalHepaticGrids")
     P.persistents.OptimalHepaticGrids = {};
 end
 
-P.persistents.OptimalHepaticGrids{end+1} = saveStruct;   
+P.persistents.OptimalHepaticGrids{end+1} = saveStruct;
 
 end

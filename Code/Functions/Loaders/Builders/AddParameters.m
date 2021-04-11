@@ -1,4 +1,4 @@
-function P = LoadParameters(P)
+function P = AddParameters(P)
 P.parameters.CP = CPParameters(P);
 P.parameters.GC = GCParameters(P);
 P.parameters.GI = GIParameters(P);

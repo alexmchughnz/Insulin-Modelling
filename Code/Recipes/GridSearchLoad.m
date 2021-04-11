@@ -1,6 +1,5 @@
-function PArray = GridSearchSim(P)
-% Recipe for basic fitting and forward simulating a patient.
-% nL/xL found by grid search.
+function PArray = GridSearchLoad(P)
+% Recipe for loading a previously-generate grid search.
 % INPUTS:
 %   P  - patient struct
 % OUTPUT:
@@ -22,23 +21,12 @@ DebugPlots(plots);
 P = EstimateInsulinSecretion(P);
 P = FitHepaticClearance(P);  % To get A and b matrices.
 
-if ~HasPersistent(P, "stddevMSE")
-    % Currently irrelevant since error condition has changed.
-    %     stddev = 5/100;
-    %     N = 1000;
-    %     P = AnalyseInsulinVariance(P, stddev, N);
-    
-    P.persistents.stddevMSE = 1000;
-end
-
 % Copy out P results from integral.
 integralP = P;
 integralP.patientCode = integralP.patientCode + "(integral)";
 
-gridSettings = {[0 0.4], [0.3 0.95], 0.02};
-
-newGrid = true;
-P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});
+newGrid = false;
+P = FindOptimalHepaticClearance(P, newGrid);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

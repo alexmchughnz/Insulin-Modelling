@@ -6,7 +6,7 @@ function patientSet = MakeDISST(patientSet)
 %   patientSet  - updated cell array of patient structs
 
 global CONFIG
-C = LoadConstants();
+CONST = LoadConstants();
 
 source = "DISST";
 
@@ -47,14 +47,14 @@ for ii = 1:length(patientSet)
     %% Trial Times
     measTimes = dataTable{code, repmat("time", 1, nMeas) + (1:nMeas)}'/60;  % Time of measurement [min]
     P.data.simTime = [floor(min(measTimes)), ceil(max(measTimes))];
-    P.data.simDuration =  @() floor(diff(P.data.simTime));
+    P.data.simDuration =  floor(diff(P.data.simTime));
     P.results.tArray = (P.data.simTime(1) : 1/60 : P.data.simTime(end))';
     
     %% Assay Data
     % Glucose Assay
     P.data.G.value = dataTable{code, repmat("G", 1, nMeas) + (1:nMeas)}';  % [mmol/L]
     P.data.G.time = measTimes;  % [min]
-    P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
+    P.data.GFast = P.data.G.value(1);  % [mmol/L]
     
     % Insulin Assay
     P.data.I.value = dataTable{code, repmat("I", 1, nMeas) + (1:nMeas)}';  % [mU/L]
@@ -76,12 +76,9 @@ for ii = 1:length(patientSet)
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
     
-    P.data.vGBolus = dataTable{code, "GB"} / C.MGlucose * 1e+3;  % [mmol]
+    P.data.vGBolus = dataTable{code, "GB"} / CONST.MGlucose * 1e+3;  % [mmol]
     P.data.tGBolus = dataTable{code, "timeGB"}/60;  % [min]
     P.data.TGBolus = 1;  % [min]
-    
-    
-    P = MakeBolusFunctions(P);
     
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]    

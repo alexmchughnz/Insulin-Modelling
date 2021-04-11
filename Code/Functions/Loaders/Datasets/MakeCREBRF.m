@@ -7,7 +7,7 @@ function patientSet = MakeCREBRF(patientSet)
 
 
 global CONFIG
-C = LoadConstants();
+CONST = LoadConstants();
 
 source = "CREBRF";
 
@@ -50,7 +50,7 @@ for ii = 1:length(patientSet)
     nMeas = length(measTimes);
     
     P.data.simTime = [floor(min(measTimes)), ceil(max(measTimes))];
-    P.data.simDuration =  @() floor(diff(P.data.simTime));
+    P.data.simDuration =  floor(diff(P.data.simTime));
     P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
     
     %% Assay Data
@@ -58,7 +58,7 @@ for ii = 1:length(patientSet)
     measG = T{code, repmat("G", 1, nMeas) + measTimes'}';  % [mmol/L]
     P.data.G.value = measG([1:end]);  % [mmol/L]
     P.data.G.time = measTimes;  % [min]
-    P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
+    P.data.GFast = P.data.G.value(1);  % [mmol/L]
     
     % Insulin Assay
     measI = T{code, repmat("I", 1, nMeas) + measTimes'}';  % [uU/mL == mU/L]
@@ -68,7 +68,7 @@ for ii = 1:length(patientSet)
     % C-peptide Assay
     measC = T{code, repmat("C", 1, nMeas) + measTimes'}';  % [ng/mL]
     measC = measC * 1e+3 / 1e-3;                          % [pg/L]
-    measC = measC / C.MCPeptide;                          % [pmol/L]
+    measC = measC / CONST.MCPeptide;                          % [pmol/L]
     P.data.CPep.value = measC([1:end]);
     P.data.CPep.time = measTimes;  % [min]   
     
@@ -96,10 +96,7 @@ for ii = 1:length(patientSet)
     P.data.vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
     P.data.tGBolus = 0;                            % [min]
     P.data.TGBolus = 1;                            % [min]
-    
-    
-    P = MakeBolusFunctions(P);
-    
+        
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray));
     

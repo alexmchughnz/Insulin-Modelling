@@ -3,7 +3,7 @@
 % Created: 26/01/21
 
 fprintf("Running main - press key to start.\n")
-pause
+% pause
 
 clc
 clear
@@ -46,7 +46,10 @@ tResults = tic;
 PrintTimeTaken("Main", patientSet, tStart);
 
 SavePatients(patientSetOut);
-PrintResults(patientSetOut, recipeFunction);
+if ~exist("resultsTag", "var")
+    resultsTag = "";
+end
+PrintResults(patientSetOut, recipeFunction, resultsTag);
 
 PrintTimeTaken("Results", patientSet, tResults);
 

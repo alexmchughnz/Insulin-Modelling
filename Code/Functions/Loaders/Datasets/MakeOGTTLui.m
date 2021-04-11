@@ -7,7 +7,7 @@ function newPatientSet = MakeOGTTLui(patientSet, showPlots)
 
 global CONFIG
 DEBUGPLOTS = DebugPlots();
-C = LoadConstants();
+CONST = LoadConstants();
 
 getrow = @(label, n) repmat(string(label), 1, n) + (0:n-1);
 
@@ -75,7 +75,7 @@ for ii = 1:length(patientSet)
         allTimes = allTimes(~isnan(allTimes));
         
         P.data.simTime = [min(allTimes) max(allTimes)];
-        P.data.simDuration =  @() floor(diff(P.data.simTime));
+        P.data.simDuration = floor(diff(P.data.simTime));
         P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
         
         
@@ -106,11 +106,15 @@ for ii = 1:length(patientSet)
             P.data.G.value = GPOC';
             P.data.G.time = tPOC';
         end
-        P.data.GFast = @(~) P.data.G.value(1);  % [mmol/L]
+        P.data.GFast = P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay
-        P.data.I.value = C.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
-        P.data.I.time = tBT';  % [min]
+        vI = CONST.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
+        tI = tBT';  % [min]   
+        isValid = ~isnan(vI); 
+        
+        P.data.I.value = vI(isValid);
+        P.data.I.time = tI(isValid);
         
         % C-peptide Assay
         P.data.CPep.value = btTable{code, getrow('C', nBtMeas)}';  % [pmol/L]
@@ -130,11 +134,9 @@ for ii = 1:length(patientSet)
         P.data.GDelivery = "enteral";
         
         vGBolus = 35;  % [g]
-        P.data.vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
+        P.data.vGBolus = vGBolus / CONST.MGlucose * 1e+3;  % [mmol]
         P.data.tGBolus = 0;  % [min]
         P.data.TGBolus = 1;  % [min]
-        
-        P = MakeBolusFunctions(P);
         
         % Glucose Infusion
         P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]

@@ -1,4 +1,4 @@
-function [] = SaveOpenFigures(varargin)
+function [] = SaveOpenFigures(tag, varargin)
 
 global CONFIG
 
@@ -21,8 +21,8 @@ for iFig = 1:length(FigList)
     
     
     % Edit    
-    FigName   = get(AxisHandle.Title, 'String');
-    FigName = matlab.lang.makeValidName(FigName);        
+    FigName = get(AxisHandle.Title, 'String');
+    FigName = tag + matlab.lang.makeValidName(FigName);        
     
     if (CONFIG.PUBLISHPLOTS)
         title('')

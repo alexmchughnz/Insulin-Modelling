@@ -19,12 +19,10 @@ runtime = tic;
 %% Simulate
 for ii = 1:N
     % Randomly vary data according to normal distribution.
-    isFakeData = (tData <= 0);
     randNums = Inf;
     while any(abs(randNums) > 3)  % Limit to within 3 SDs.
         randNums = randn(size(tData));
     end
-    randNums(isFakeData) = randNums(1); % Apply same variance to fake data.
     noiseFactors = 1 + stddev*randNums;
     
     % Vary correct data based on trial.

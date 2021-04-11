@@ -99,18 +99,4 @@ SI = A\b;
 % Write estimated data into patient struct, overwriting defaults.
 P.results.SI = SI;  % [L/mU/min]
 
-
-%% Debug Plots
-if allowPlots
-    if DP.SI
-        MakeDebugPlot("SI", P, DP);
-        SIArray = P.results.SI * ones(1, numel(P.results.tArray));
-        plot(P.results.tArray, SIArray, 'k')
-        
-        xlabel('Time')
-        ylabel('$S_I$ [L/mU/min]')
-        
-        ylim([0 2e-3])
-    end
-end
 end

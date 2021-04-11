@@ -72,9 +72,9 @@ P.results.MatchIInput.nLnKScales = nLnKScales;
 P.results.MatchIInput.UenScales = UenScales;
 
 % Plot optimal fit for unchanged parameters.
-uuOpt = find(UenScales == 1.0);
-nnOpt = find(nLnKScales == 1.0);
-optimalIScale = IScales(uuOpt, nnOpt);
+[~, iiOpt] = min(IErrors(:));
+
+optimalIScale = IScales(iiOpt);
 optimalP = ScalePatientField(optimalIScale, P, "data", "vIBolus");
 optimalP = MakeBolusFunctions(optimalP);       
 SolveSystem(optimalP, true);

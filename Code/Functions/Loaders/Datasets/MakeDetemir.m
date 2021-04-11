@@ -6,7 +6,7 @@ function patientSet = MakeDetemir(patientSet)
 %   patientSet  - updated cell array of patient structs
 
 global CONFIG
-C = LoadConstants();
+CONST = LoadConstants();
 
 source = "Detemir";
 
@@ -36,8 +36,8 @@ for ii = 1:length(patientSet)
     GetMins = @(dt) minutes(dt - sys.sim_start_t);  
     
     P.data.simTime     =  [GetMins(sys.sim_start_t), GetMins(sys.sim_end_t)];
-    P.data.simDuration =  @() diff(P.data.simTime);    
-    P.results.tArray = (0 : P.data.simDuration())';
+    P.data.simDuration = floor(diff(P.data.simTime));
+    P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';  % [min]
     
     %% Assay Data
     % Glucose Assay
@@ -53,7 +53,7 @@ for ii = 1:length(patientSet)
     P.data.GFast = @(t) (t < tFast)*GFast1 + (t >= tFast)*GFast2;
     
     % Insulin Assay    
-    P.data.ITotal.value = C.pmol2mU(data.PlasmaI);  % [mU/L]
+    P.data.ITotal.value = CONST.pmol2mU(data.PlasmaI);  % [mU/L]
     P.data.ITotal.time  = GetMins(data.PlasmaI_time);  % [min]
     
     % C-peptide Assay
@@ -72,12 +72,9 @@ for ii = 1:length(patientSet)
     % Glucose Bolus
     P.data.GDelivery = "enteral";
     
-    P.data.vGBolus = (data.carbs) / C.MGlucose * 1000;  % [mmol]
+    P.data.vGBolus = (data.carbs) / CONST.MGlucose * 1000;  % [mmol]
     P.data.tGBolus = data.meal_start;
     P.data.TGBolus = data.meal_durations;
-    
-    
-    P = MakeBolusFunctions(P);
     
     % Glucose Infusion
     if (P.patientNum == 1)
@@ -94,7 +91,7 @@ for ii = 1:length(patientSet)
         
         % Return infusion data.
         iiInfusion = (startTime <= P.results.tArray) & (P.results.tArray < endTime); % 1 if infusion active [logical]
-        P.data.GInfusion = iiInfusion .* MAGIC_DEXTROSE_NUMBER/C.MGlucose/60;  % [mmol/min]
+        P.data.GInfusion = iiInfusion .* MAGIC_DEXTROSE_NUMBER/CONST.MGlucose/60;  % [mmol/min]
     else
         P.data.GInfusion = zeros(size(P.results.tArray)); % By default, no infusion.
     end

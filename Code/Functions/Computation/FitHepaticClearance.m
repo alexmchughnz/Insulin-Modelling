@@ -6,186 +6,134 @@ function P = FitHepaticClearance(P, forcenLxL)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
+global CONFIG
+
 DP = DebugPlots().FitHepaticClearance;
-GC = P.parameters.GC;
+CONST = LoadConstants();
 
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
 if exist('forcenLxL', 'var')
     nL = forcenLxL(1);
     xL = forcenLxL(2);
-else
-    %% Data
-    tArray = P.results.tArray;
-    [tI, vI] = GetData(P.data.I); % [mU/L]
     
-    if P.source == "DISST"
-        % Need to add 'false' point for improved fitting.
-        [vIBolus, iiBolus] = max(P.results.IBolus);
-        tIBolus = tMinutes(iiBolus);
-        [tI, order] = sort([tI; tIBolus]);
-        iiBeforeFakePoint = find(order == length(order)) - 1;
-        
-        fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
-        
-        fakeData = [vI; fakeI];
-        vI = fakeData(order);
-    end
+    P.results.nL = nL;
+    P.results.xL = xL;
     
-    ppI = griddedInterpolant(tI, vI);  % [mU/L]
-    
-    % Uen
-    iiMinutes = GetTimeIndex(tMinutes, P.results.tArray);
-    Uen = P.results.Uen(iiMinutes); % minutewise [mU/min]
-    
-    %Q
-    ppQ = GetAnalyticalInterstitialInsulin(ppI, P);
-    Q = ppQ(tMinutes);
-    Q0 = Q(1);
-    
-    % I
-    IInput = GetPlasmaInsulinInput(tMinutes, P);  % [mU/min]
-    I = ppI(tMinutes); % [mU/L]
-    I0 = I(1);
-    
-    % Set coefficients for MLR.
-    % Consider dI/dt = kI*I + c1*nL + kIQ*(I-Q) + c2*(1-xL) + k:
-    kI = -GC.nK;
-    kIQ = -GC.nI./GC.VI;
-    k = IInput/GC.VI;
-    % Also consider dQ/dt = -cQ*Q + cI*I:
-    cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
-    cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
-    
-    
-    %% Iterative Integral Method (pg. 16)
-    nLArray = [0];
-    xLArray = [1];
-    relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
-    tolerance = 0.1/100; % Relative tolerance for convergence.
-    while any(relativeChange >= tolerance)
-        % Integrating I equation:
-        % I(t) - I(t0) = kI*int{I} + int{c1}*nL + kIQ*int{I-Q} + int{c2}*(1-xL) + int{k}
-        % Renaming CN = int{c1} and CX = int{c2}
-        % CN*nL + CX*(1-xL) = I(t) - I(t0) - kI*int{I} - kIQ*int{I-Q} - int{k} := C
-        CN = cumtrapz(tMinutes, ...
-            -I./(1 + GC.alphaI*I));
-        CX = cumtrapz(tMinutes, ...
-            Uen/GC.VI);
-        CParts = [I - I0, ...
-            - kI*cumtrapz(tMinutes, I), ...
-            - kIQ*cumtrapz(tMinutes, I-Q), ...
-            - cumtrapz(tMinutes, k)]; % For analysing each term later.
-        C = sum(CParts, 2); % Sum along rows to get column vector.
-        
-        % Assembling MLR system, integrating between sample points, and
-        % normalising by integral width (dt):
-        % [CN(t) CX(t)] * (nL; 1-xL) = [C(t)]
-        t1 = tI(1:end-1);
-        t2 = tI(2:end);
-        dt = t2 - t1;
-        
-        ppCN = griddedInterpolant(tMinutes, CN);
-        ppCX = griddedInterpolant(tMinutes, CX);
-        ppC  = griddedInterpolant(tMinutes, C);
-        
-        A(:,1) = (ppCN(t2) - ppCN(t1)) ./ dt;
-        A(:,2) = (ppCX(t2) - ppCX(t1)) ./ dt;
-        b = (ppC(t2) - ppC(t1)) ./ dt;
-        
-        % Solve.
-        x = A\b;
-        nL = x(1);
-        xL = 1 - x(2);
-        
-        nLChange = (nL-nLArray(end))/nLArray(end);
-        xLChange = (xL-xLArray(end))/xLArray(end);
-        relativeChange = [nLChange xLChange];
-        
-        nLArray = [nLArray nL];
-        xLArray = [xLArray xL];
-        
-        % Forward simulate to improve I and Q prediction.
-        for ii = 1:100
-            % I(t) = I(t0) + kI*int{I} + kIQ*int{I-Q} + int{k} + CN*nL + CX*(1-xL)
-            I = I0 + kI*cumtrapz(tMinutes, I) + kIQ*cumtrapz(tMinutes, I-Q) + cumtrapz(tMinutes, k) ...
-                + CN*nL + CX*(1-xL);
-            
-            % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
-            Q = Q0 - cQ*cumtrapz(tMinutes, Q) + cI*cumtrapz(tMinutes, I);
-        end
-    end
-    
-    %% Results
-    % Extract final result.
-    lb = 1e-7;  % Lower bound on nL/xL.
-    nL = max(nLArray(end), lb);  % [1/min]
-    xL = max(xLArray(end), lb);  % [1]
+    return
 end
+
+%% Data
+tArray = P.results.tArray;
+[tI, vI] = GetIFromITotal(P); % [mU/L]
+
+if P.source == "DISST"
+    % Need to add 'false' point for improved fitting.    
+    [vIBolus, iiBolus] = max(P.results.IBolus);
+    tIBolus = tMinutes(iiBolus);
+    
+    [tI, order] = sort([tI; tIBolus]);
+    iiBeforeFakePoint = find(order == length(order)) - 1;
+    
+    fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
+    
+    fakeData = [vI; fakeI];
+    vI = fakeData(order);
+end
+
+ppI = griddedInterpolant(tI, vI);  % [mU/L]
+I = ppI(tArray);
+Q = GetAnalyticalInterstitialInsulin(I, P);
+
+%% Iterative Integral Method (pg. 16)
+nLArray = [0];
+xLArray = [1];
+relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
+tolerance = 0.1/100; % Relative tolerance for convergence.
+
+while any(relativeChange >= tolerance)
+    [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, I);
+    
+    % %         Normalise.
+    %         A = A./b
+    %         b = b./b
+    
+    % Solve.
+    x = A\b;
+    nL = x(1);
+    xL = 1 - x(2);
+    
+    % Calculate deltas.
+    nLChange = (nL-nLArray(end))/nLArray(end);
+    xLChange = (xL-xLArray(end))/xLArray(end);
+    relativeChange = [nLChange xLChange];
+    
+    % Calculate errors.
+    if CONFIG.HIGHDETAIL
+        errorRel = sqrt((A*x-b).^2)./b
+        errorAbs = ((A*x-b).^2)
+        errorAbsSum = sum((A*x-b).^2)
+        disp(newline)
+    end
+    
+    % Update arrays.
+    nLArray = [nLArray nL];
+    xLArray = [xLArray xL];
+    
+    % Forward simulate to improve I and Q prediction.
+    for ii = 1:100
+        I = IFunc(nL, xL, I, Q);
+        Q = QFunc(I, Q);
+    end
+end
+
+P.results.integrals.A = A;
+P.results.integrals.b = b;
+
+%% Results
+% Extract final result.
+lb = 1e-7;  % Lower bound on nL/xL.
+nL = max(nLArray(end), lb);  % [1/min]
+xL = max(xLArray(end), lb);  % [1]
 
 P.results.nL = nL;
 P.results.xL = xL;
 
-% Calculate stats.
+% Calculate parameter ID metrics.
 MeanNormalise = @(data) data ./ mean(data);
 
+CN = A(:, 1);
+CX = A(:, 2);
 CNNorm = MeanNormalise(CN);
 CXNorm = MeanNormalise(CX);
 delta2Norm = norm(CNNorm - CXNorm) / length(CN);
 P.results.delta2Norm = delta2Norm;
 
-b = sum(CParts, 2);
 bNorm = MeanNormalise(b);
 P.results.delta2NormnL = norm(CNNorm - bNorm) / length(CN);
 P.results.delta2NormxL = norm(CXNorm - bNorm) / length(CN);
 
 %% Debug Plots
-% nL/xL Values per Patient
-if DP.nLxL
-    MakeDebugPlot("nL/xL", P, DP);
-    
-    subplot (2, 1, 1)
-    plot(tMinutes, P.results.nL, 'b')
-    for ii = 1:length(iiBounds)
-        split = iiBounds(ii);
-        L = line([split split], ylim);
-        L.LineWidth = 0.5;
-        L.Color = 'k';
-    end
-    
-    ylabel("$n_L$ [1/min]")
-    
-    
-    subplot(2, 1, 2)
-    plot(tMinutes, P.results.xL, 'r')
-    
-    xlabel("Time [min]")
-    ylabel("$x_L$ [-]")
-    
-end
-
 LHS = [CN CX] .* [nL xL];
 LHS = sum(LHS, 2);
-b = sum(CParts, 2);
 
 % Graphical Identifiability Method (Docherty, 2010)
 if DP.GraphicalID
-    [sampleTimes, ~] = GetIFromITotal(P); % Abuse function to get sample times for any patient.
-    
     MakeDebugPlot("Graphical Identifiability", P, DP);
     
-    plt = plot(tMinutes, CNNorm);
+    tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWWISE);
+    
+    plt = plot(tIntegrals, CNNorm);
     plt.DisplayName = "$n_L$ coeff.";
     
-    plt = plot(tMinutes, CXNorm);
+    plt = plot(tIntegrals, CXNorm);
     plt.DisplayName = "$x_L$ coeff.";
     
-    plt = plot(tMinutes, bNorm);
+    plt = plot(tIntegrals, bNorm);
     plt.DisplayName = "$b$";
     
-    for ss = 1:length(sampleTimes)
-        t = sampleTimes(ss);
-        ii = GetTimeIndex(t, tMinutes);
+    for ii = 1:length(tIntegrals)
+        t = tIntegrals(ii);
         
         plt = plot([t t], [CNNorm(ii) CXNorm(ii)], 'k');
         plt.Marker = 'o';
@@ -198,7 +146,6 @@ if DP.GraphicalID
     xlabel("Time [min]")
     ylabel("Mean-normalised integral value")
     legend()
-    
 end
 
 % Forward Simulation of Insulin
@@ -206,7 +153,7 @@ if DP.ForwardSim
     I = ppI(tMinutes);
     kI = GC.nK(P);
     kIQ = GC.nI(P)./GC.VI;
-    k = P.results.Uen/GC.VI + P.data.IBolus(tMinutes)/GC.VI;
+    k = P.results.Uen/GC.VI + P.results.IBolus/GC.VI;
     
     MakeDebugPlot("Insulin Simulation", P, DP);
     

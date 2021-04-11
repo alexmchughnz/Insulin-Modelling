@@ -14,30 +14,30 @@ DP = DebugPlots().FindOptimalHepaticClearance;
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
 
 %% Setup
-% Load grid settings.
-if isempty(varargin)
-    settings = GRIDDEFAULTS;
-else
-    settings = varargin;
-end
-nLBounds = settings{1};
-xLBounds = settings{2};
-delta = settings{3};
-
-% Set up grid.
-nLDelta = delta(1);
-nLRange = nLBounds(1) : nLDelta : nLBounds(end);
-
-xLDelta = delta(end);
-xLRange = xLBounds(1) : xLDelta : xLBounds(end);
-
-[xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
-
 if makeNewGrid || ~HasPersistent(P, "OptimalHepaticGrids")
-    % Generate grid if we don't have one saved.  
+    % Load grid settings.
+    if isempty(varargin)
+        settings = GRIDDEFAULTS;
+    else
+        settings = varargin;
+    end
+    nLBounds = settings{1};
+    xLBounds = settings{2};
+    nLxLDelta = settings{3};
+    
+    % Set up grid.
+    nLDelta = nLxLDelta(1);
+    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+    
+    xLDelta = nLxLDelta(end);
+    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
+    
+    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
+    
+    % Generate grid if we don't have one saved.
     P = EvaluateGrid(P, nLGrid, xLGrid);
 end
-gridData = P.persistents.OptimalHepaticGrids{end};    
+gridData = P.persistents.OptimalHepaticGrids{end};
 
 
 %% Find Optimal nL/xL
@@ -71,7 +71,7 @@ P.results.OptimalHepaticClearance.minGridMSE = minIResidual;
 %% Debug Plots
 % Error Surface
 if DP.ErrorSurface
-    figTitle = sprintf("Error Surface @ %.3f", delta);
+    figTitle = sprintf("Error Surface @ %.3f");
     MakeDebugPlot(figTitle, P, DP);
     
     % > Surface
@@ -112,7 +112,7 @@ if DP.ErrorSurface
     contour3(xLRange, nLRange, residuals, ...
         levels, ...
         'Color', 'r', ...
-        'HandleVisibility', 'off');    
+        'HandleVisibility', 'off');
     
     % > Prettying
     delta = nLRange(2) - nLRange(1);
@@ -122,7 +122,7 @@ if DP.ErrorSurface
     
     xlabel("$x_L$ [min$^{-1}$]")
     ylabel("$n_L$")
-    zlabel("Mean of squared errors [(mU/min)^2]") 
+    zlabel("Mean of squared errors [(mU/min)^2]")
     
     % Redraw grid lines.
     spacing = 0.05;
@@ -144,9 +144,9 @@ if DP.ErrorSurface
     y = nLPhys([1 end end 1]);
     z = 1e+6 * ones(1, 4);
     patch(x, y, z, 'r',...
-          'FaceColor', '#D95319', ...
-          'FaceAlpha', 0.2, ...
-          'EdgeColor', 'none')    
+        'FaceColor', '#D95319', ...
+        'FaceAlpha', 0.2, ...
+        'EdgeColor', 'none')
 end
 
 end
@@ -162,7 +162,7 @@ residuals = zeros(size(nLGrid));
 A = P.results.integrals.A;
 b = P.results.integrals.b;
 
-for ii = 1:numel(nLGrid)    
+for ii = 1:numel(nLGrid)
     message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
     PrintStatusUpdate(P, message, true);
     
@@ -180,9 +180,9 @@ for ii = 1:numel(nLGrid)
         simI = P.results.I + P.results.IDF;       % Sim [mU/L]
     else
         simI = P.results.I;                      % Sim [mU/L]
-    end      
+    end
     
-    x = [P.results.nL; P.results.xL];
+    x = [P.results.nL; 1 - P.results.xL];
     error = sum((A*x - b).^2);
     
     % Save residuals.
@@ -205,6 +205,6 @@ if ~HasPersistent(P, "OptimalHepaticGrids")
     P.persistents.OptimalHepaticGrids = {};
 end
 
-P.persistents.OptimalHepaticGrids{end+1} = saveStruct;   
+P.persistents.OptimalHepaticGrids{end+1} = saveStruct;
 
 end

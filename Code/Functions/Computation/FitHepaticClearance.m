@@ -6,6 +6,8 @@ function P = FitHepaticClearance(P, forcenLxL)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
+global CONFIG
+
 DP = DebugPlots().FitHepaticClearance;
 CONST = LoadConstants();
 
@@ -67,10 +69,12 @@ while any(relativeChange >= tolerance)
     relativeChange = [nLChange xLChange];
     
     % Calculate errors.
-    errorRel = sqrt((A*x-b).^2)./b
-    errorAbs = ((A*x-b).^2)
-    errorAbsSum = sum((A*x-b).^2)
-    disp(newline)
+    if CONFIG.HIGHDETAIL
+        errorRel = sqrt((A*x-b).^2)./b
+        errorAbs = ((A*x-b).^2)
+        errorAbsSum = sum((A*x-b).^2)
+        disp(newline)
+    end
     
     % Update arrays.
     nLArray = [nLArray nL];

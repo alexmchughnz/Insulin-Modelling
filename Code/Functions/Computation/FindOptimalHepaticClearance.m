@@ -71,7 +71,7 @@ P.results.OptimalHepaticClearance.minGridMSE = minIResidual;
 %% Debug Plots
 % Error Surface
 if DP.ErrorSurface
-    figTitle = sprintf("Error Surface @ %.3f");
+    figTitle = "Error Surface";
     MakeDebugPlot(figTitle, P, DP);
     
     % > Surface
@@ -183,6 +183,8 @@ for ii = 1:numel(nLGrid)
     end
     
     x = [P.results.nL; 1 - P.results.xL];
+    
+    IError = sum()
     error = sum((A*x - b).^2);
     
     % Save residuals.

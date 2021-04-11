@@ -28,7 +28,7 @@ if ~HasPersistent(P, "stddevMSE")
     %     N = 1000;
     %     P = AnalyseInsulinVariance(P, stddev, N);
     
-    P.persistents.stddevMSE = 100;
+    P.persistents.stddevMSE = 1000;
 end
 
 % Copy out P results from integral.

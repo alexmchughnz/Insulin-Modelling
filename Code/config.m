@@ -29,6 +29,7 @@ CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
 CONFIG.STATUSDEPTH = 3;
 CONFIG.PUBLISHPLOTS = false;
 CONFIG.SAVERESULTS = true;
+CONFIG.HIGHDETAIL = false;
 
 defaultOptions = odeset('RelTol', 1e-5, ...
     'AbsTol', 1e-4, ...

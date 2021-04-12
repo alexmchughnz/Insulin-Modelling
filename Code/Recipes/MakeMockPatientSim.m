@@ -24,13 +24,8 @@ DebugPlots(plots);
 P = SimpleSim(P);
 
 % Now sample model results at times of measurements.
-tI = P.data.I.time;
-iiI = GetTimeIndex(tI, P.results.tArray);
-vI = P.results.I(iiI);
-
-tG = P.data.G.time;
-iiG = GetTimeIndex(tG, P.results.tArray);
-vG = P.results.G(iiG);
+[tI, vI] = GetResultsSample(P, P.data.I.time, P.results.I);
+[tG, vG] = GetResultsSample(P, P.data.G.time, P.results.G);
 
 % Produce a basic patient struct with simulated data.
 mockP = rmfield(P, "results");

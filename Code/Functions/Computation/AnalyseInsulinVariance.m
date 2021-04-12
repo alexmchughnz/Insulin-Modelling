@@ -83,19 +83,10 @@ P = FitInsulinSensitivity(P, false);
 P = SolveSystem(P, false);
 
 % Determine error.
-if isfield(P, 'ITotal')
-    [tI, vI] = GetData(P.data.ITotal);  % Data [mU/L]
-    simI = P.results.I + P.results.IDF;       % Sim [mU/L]
-else
-    [tI, vI] = GetData(P.data.I);  % Data [mU/L]
-    simI = P.results.I;                  % Sim [mU/L]
-end
-
-iiI = GetTimeIndex(tI, P.results.tArray);
-simI = simI(iiI);
+[tI, vI] = GetData(P.data.I);  % Data [mU/L]
+[~, simI] = GetResultsSample(P, tI, P.results.I);
 
 error = simI - vI;
-error = error(tI >= 0);  % Only evaluate error at true points.
 MSE = mean(error.^2);
 end
 

@@ -28,8 +28,7 @@ P = GCModel(P);
 %% Fit Evaluation
 % Insulin
 [tI, vI] = GetData(P.data.I);  % [mU/L]
-iiData = GetTimeIndex(tI, P.results.tArray);
-fitI = P.results.I(iiData);
+[~, fitI] = GetResultsSample(P, tI, P.results.I);
 
 IMAPE = mean(abs(vI - fitI)./vI);
 P.results.fits.insulinMAPE = IMAPE;
@@ -38,10 +37,8 @@ ISSE = sum((vI - fitI).^2);
 P.results.fits.insulinSSE = ISSE;
 
 % Glucose
-vG = P.data.G.value;
-tG = P.data.G.time;
-iiData = GetTimeIndex(tG, P.results.tArray);
-fitG = P.results.G(iiData);
+[tG, vG] = GetData(P.data.G);  % [mU/L]
+[~, fitG] = GetResultsSample(P, tG, P.results.G);
 
 GMAPE = mean(abs(vG - fitG)./vG);
 P.results.fits.glucoseMAPE = GMAPE;

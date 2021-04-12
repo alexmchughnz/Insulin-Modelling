@@ -14,9 +14,9 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @SimpleSim;
-% recipeFunction = @GridSearchSim;
-resultsTag = "Penalised";
+% recipeFunction = @SimpleSim;
+recipeFunction = @GridSearchSim;
+% resultsTag = "Penalised";
 
 % %% Select Data
 % patientNums = 'all';

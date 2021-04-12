@@ -25,7 +25,7 @@ end
 
 %% Data
 tArray = P.results.tArray;
-[tI, vI] = GetIFromITotal(P); % [mU/L]
+[tI, vI] = GetData(P.data.I); % [mU/L]
 
 if P.source == "DISST"
     % Need to add 'false' point for improved fitting.    

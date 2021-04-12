@@ -8,11 +8,8 @@ function PArray = MatchnLSim(P)
 %% Plots
 plots = DebugPlots();
 
-plots.EstimateInsulinSecretion.Uen = 1;
-plots.SolveSystem.Glucose = 1;
-plots.SolveSystem.Insulin = 1;
-
 DebugPlots(plots);
+
 
 %% Setup
 P = EstimateInsulinSecretion(P);

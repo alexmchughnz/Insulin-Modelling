@@ -9,15 +9,8 @@ function PArray = GridSearchSim(P)
 %% Plots
 plots = DebugPlots();
 
-plots.EstimateInsulinSecretion.Uen = 0;
-plots.EstimateInsulinSecretion.CPep = 0;
-plots.SolveSystem.Glucose = 1;
-plots.SolveSystem.Insulin = 1;
-
-plots.FindOptimalHepaticClearance.ErrorSurface = 1;
-plots.FindOptimalHepaticClearance.ErrorComparison = 1;
-
 DebugPlots(plots);
+
 
 %% Setup
 P = EstimateInsulinSecretion(P);

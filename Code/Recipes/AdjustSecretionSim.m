@@ -8,11 +8,6 @@ function PArray = AdjustSecretionSim(P)
 %% Plots
 plots = DebugPlots();
 
-plots.AdjustDataProfile.BeforeAfter = 1;
-plots.SolveSystem.Glucose = 1;
-plots.SolveSystem.Insulin = 1;
-plots.FindOptimalHepaticClearance.ErrorSurface = 1;
-
 DebugPlots(plots);
 
 

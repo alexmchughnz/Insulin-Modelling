@@ -36,7 +36,7 @@ end
 integralP = P;
 integralP.patientCode = integralP.patientCode + "(integral)";
 
-gridSettings = {[0 1], [0 1], 0.02};
+gridSettings = {[0.02 1], [0.02 1], 0.02};
 
 newGrid = true;
 P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});

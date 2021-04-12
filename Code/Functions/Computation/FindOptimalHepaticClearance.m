@@ -217,7 +217,7 @@ for ii = 1:numel(nLGrid)
     
     % Get other parameters and forward simulate models.
     P = FindGutEmptyingRate(P);
-    P = FitInsulinSensitivity(P, false);
+    P = FitInsulinSensitivity(P);
     P = SolveSystem(P);
     
     % Determine error.    

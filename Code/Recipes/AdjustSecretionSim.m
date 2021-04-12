@@ -101,6 +101,6 @@ findP = FindOptimalHepaticClearance(findP, "grid", gridSettings{:});
 
 % Simulate.
 findP = FindGutEmptyingRate(findP);
-findP = FitInsulinSensitivity(findP, false);
+findP = FitInsulinSensitivity(findP);
 findP = SolveSystem(findP, true);
 end

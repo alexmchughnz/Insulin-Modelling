@@ -1,4 +1,4 @@
-function P = SimpleSimulation(P)
+function P = SimpleSim(P)
 % Recipe for basic fitting and forward simulating a patient.
 % INPUTS:
 %   P  - patient struct

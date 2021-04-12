@@ -14,6 +14,7 @@ plots.SolveSystem.Glucose = 1;
 plots.SolveSystem.Insulin = 1;
 
 plots.FindOptimalHepaticClearance.ErrorSurface = 1;
+plots.FindOptimalHepaticClearance.ErrorComparison = 1;
 
 DebugPlots(plots);
 

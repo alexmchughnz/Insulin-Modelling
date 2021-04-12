@@ -15,6 +15,7 @@ plots.SolveSystem.Glucose = 1;
 plots.SolveSystem.Insulin = 1;
 
 plots.FindOptimalHepaticClearance.ErrorSurface = 1;
+plots.FindOptimalHepaticClearance.ErrorComparison = 1;
 
 DebugPlots(plots);
 
@@ -35,7 +36,7 @@ end
 integralP = P;
 integralP.patientCode = integralP.patientCode + "(integral)";
 
-gridSettings = {[0 0.4], [0.3 0.95], 0.02};
+gridSettings = {[0 1], [0 1], 0.02};
 
 newGrid = true;
 P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});

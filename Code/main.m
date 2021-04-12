@@ -16,7 +16,7 @@ tStart = tic;
 %% Select Recipe
 % recipeFunction = @SimpleSim;
 recipeFunction = @GridSearchSim;
-% resultsTag = "Penalised";
+resultsTag = "Penalised";
 
 % %% Select Data
 % patientNums = 'all';

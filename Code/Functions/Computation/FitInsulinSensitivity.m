@@ -1,4 +1,4 @@
-function P = FitInsulinSensitivity(P, allowPlots)
+function P = FitInsulinSensitivity(P)
 % Fits data to find SI over time for a patient.
 % INPUTS:
 %   P      - patient struct
@@ -6,12 +6,6 @@ function P = FitInsulinSensitivity(P, allowPlots)
 %   P          - modified patient struct with SI
 %   allowPlots - flag for whether debug plots should appear (allows
 %                suppression)
-
-DP = DebugPlots().FitInsulinSensitivity;
-
-if ~exist('allowPlots', 'var')
-    allowPlots = true;
-end
 
 PrintStatusUpdate(P, "Fitting SI...")
 

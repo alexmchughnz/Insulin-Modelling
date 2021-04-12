@@ -177,43 +177,6 @@ if DP.ForwardSim
     ylabel("Interstitial insulin, Q [mU/L]")
 end
 
-% Equation Terms
-if DP.EquationTerms
-    ITerm = CParts(:, 1);
-    intITerm = CParts(:, 2);
-    intIQTerm = CParts(:, 3);
-    intUenTerm = CParts(:, 4);
-    
-    MakeDebugPlot("Equation Terms", P, DP);
-    
-    plt = plot(tMinutes, LHS, 'b');
-    plt.DisplayName = "A*x";
-    
-    plt = plot(tMinutes, intITerm, 'r');
-    plt.DisplayName = "nK * integral(I)";
-    
-    plt = plot(tMinutes, intIQTerm, 'g');
-    plt.DisplayName = "nI/vI * integral(I-Q)";
-    
-    plt = plot(tMinutes, intUenTerm, 'm');
-    plt.DisplayName = "-integral((Uen+IBolus)/vI)";
-    
-    plt = plot(tMinutes, ITerm, 'c');
-    plt.DisplayName = "I - I0";
-    
-    xlabel("Time [min]")
-    ylabel("Mean-normalised value of term [mU/L]")
-    legend()
-end
-
-% Insulin Terms
-if DP.InsulinTerms
-    MakeDebugPlot("Insulin Terms", P, DP);
-    plot(tMinutes,  cumtrapz(tMinutes, cI*I), 'g')
-    plot(tMinutes, cumtrapz(tMinutes, I./(1 + GC.alphaI*I)))
-    legend("integral(nK*I)", "integral(I./(1 + alphaI*I))")
-end
-
 % Convergence
 if DP.Convergence
     MakeDebugPlot("Convergence Plot", P, DP);

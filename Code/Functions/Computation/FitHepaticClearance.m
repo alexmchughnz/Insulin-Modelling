@@ -8,9 +8,6 @@ function P = FitHepaticClearance(P, forcenLxL)
 
 global CONFIG
 
-DP = DebugPlots().FitHepaticClearance;
-CONST = LoadConstants();
-
 PrintStatusUpdate(P, "Fitting nL/xL...")
 
 if exist('forcenLxL', 'var')
@@ -90,6 +87,7 @@ end
 P.results.integrals.A = A;
 P.results.integrals.b = b;
 
+
 %% Results
 % Extract final result.
 lb = 1e-7;  % Lower bound on nL/xL.
@@ -113,29 +111,42 @@ bNorm = MeanNormalise(b);
 P.results.delta2NormnL = norm(CNNorm - bNorm) / length(CN);
 P.results.delta2NormxL = norm(CXNorm - bNorm) / length(CN);
 
-%% Debug Plots
-LHS = [CN CX] .* [nL xL];
-LHS = sum(LHS, 2);
 
-% Graphical Identifiability Method (Docherty, 2010)
+%% Plotting
+plotvars.nLArray = nLArray;
+plotvars.xLArray = xLArray;
+plotvars.CNNorm = CNNorm;
+plotvars.CXNorm = CXNorm;
+plotvars.bNorm = bNorm;
+
+MakePlots(P, plotvars);
+end
+
+
+function MakePlots(P, plotvars)
+DP = DebugPlots().FitHepaticClearance;
+CONST = LoadConstants();
+
+%% Graphical Identifiability Method (Docherty, 2010)
 if DP.GraphicalID
     MakeDebugPlot("Graphical Identifiability", P, DP);
     
+    [tI, ~] = GetData(P.data.I); % [mU/L]
     tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWWISE);
     
-    plt = plot(tIntegrals, CNNorm);
+    plt = plot(tIntegrals, plotvars.CNNorm);
     plt.DisplayName = "$n_L$ coeff.";
     
-    plt = plot(tIntegrals, CXNorm);
+    plt = plot(tIntegrals, plotvars.CXNorm);
     plt.DisplayName = "$x_L$ coeff.";
     
-    plt = plot(tIntegrals, bNorm);
+    plt = plot(tIntegrals, plotvars.bNorm);
     plt.DisplayName = "$b$";
     
     for ii = 1:length(tIntegrals)
         t = tIntegrals(ii);
         
-        plt = plot([t t], [CNNorm(ii) CXNorm(ii)], 'k');
+        plt = plot([t t], [plotvars.CNNorm(ii) plotvars.CXNorm(ii)], 'k');
         plt.Marker = 'o';
         plt.MarkerFaceColor = 'auto';
         plt.HandleVisibility = 'off';
@@ -148,40 +159,11 @@ if DP.GraphicalID
     legend()
 end
 
-% Forward Simulation of Insulin
-if DP.ForwardSim
-    I = ppI(tMinutes);
-    kI = GC.nK(P);
-    kIQ = GC.nI(P)./GC.VI;
-    k = P.results.Uen/GC.VI + P.results.IBolus/GC.VI;
-    
-    MakeDebugPlot("Insulin Simulation", P, DP);
-    
-    subplot(2,1,1)
-    hold on
-    plot(tMinutes, I)
-    
-    simI = LHS + I0 ...
-        + kI * cumtrapz(tMinutes, kI*I) ...
-        + kIQ * cumtrapz(tMinutes, I-Q) ...
-        + cumtrapz(tMinutes, k);
-    plot(tMinutes, simI)
-    
-    xlabel("Time [min]")
-    ylabel("Plasma insulin, I [mU/L]")
-    legend("interpolated", "simulated")
-    
-    subplot(2,1,2)
-    hold on
-    plot(tMinutes, Q)
-    ylabel("Interstitial insulin, Q [mU/L]")
-end
-
-% Convergence
+%% Convergence
 if DP.Convergence
     MakeDebugPlot("Convergence Plot", P, DP);
-    plot(nLArray, 'b')
-    plot(xLArray, 'r')
+    plot(plotvars.nLArray, 'b')
+    plot(plotvars.xLArray, 'r')
     
     legend("nL", "xL")
 end

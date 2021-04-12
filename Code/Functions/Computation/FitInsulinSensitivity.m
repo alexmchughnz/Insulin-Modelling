@@ -4,8 +4,6 @@ function P = FitInsulinSensitivity(P)
 %   P      - patient struct
 % OUTPUT:
 %   P          - modified patient struct with SI
-%   allowPlots - flag for whether debug plots should appear (allows
-%                suppression)
 
 PrintStatusUpdate(P, "Fitting SI...")
 

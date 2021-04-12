@@ -1,13 +1,12 @@
 function P = AdjustDataProfile(P, patternTime, patternScale, varargin)
-% desc
+% Function to add some disturbance or pertubation to a time profile.
 % INPUT:
-%   P        - patient struct
-%   stddev   - proportional
-%   N        - number of trials to run
+%   P             - patient struct
+%   patternTime   - pattern of data points to edit
+%   patternScale  - factors to apply over
+%   varargin      - struct path to field to edit
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
-
-DP = DebugPlots().AdjustDataProfile;
 
 AUC = @(time, data) trapz(time, data);
 
@@ -16,7 +15,7 @@ path = varargin;
 dataProfile = getfield(P, path{:});
 
 %% Adjust
-% Collect the Uen points at measurement times.  
+% Collect the Uen points at measurement times.
 ppData = griddedInterpolant(P.results.tArray, dataProfile);
 
 measurementTimes = P.data.CPep.time;
@@ -64,26 +63,32 @@ PrintStatusUpdate(P, message2, true);
 %% Save
 P = setfield(P, path{:}, newDataProfile);
 
+%% Plotting
+plotvars.path = path;
+plotvars.dataProfile = dataProfile;
+plotvars.newDataProfile = newDataProfile;
+MakePlots(P, plotvars);
 
-%% ==================================================
+end
 
 
-%% Debug Plots
-% Before and After
-if DP.BeforeAfter
-    MakeDebugPlot(path{end} + "Before VS After Adjustment", P, DP);
+
+function MakePlots(P, plotvars)
+%% Before and After
+DP = DebugPlots().AdjustDataProfile;
+
+if DP.BeforeAfter       
+    MakeDebugPlot(plotvars.path{end} + "Before VS After Adjustment", P, DP);
     
-    plt = plot(P.results.tArray, dataProfile, 'k:');
-    plt.DisplayName = path{end};
+    plt = plot(P.results.tArray, plotvars.dataProfile, 'k:');
+    plt.DisplayName = plotvars.path{end};
     
-    plt = plot(P.results.tArray, newDataProfile, 'r');
-    plt.DisplayName = "Adjusted " + path{end};
+    plt = plot(P.results.tArray, plotvars.newDataProfile, 'r');
+    plt.DisplayName = "Adjusted " + plotvars.path{end};
     
     xlabel("Time [min]")
-    ylabel(path{end})
+    ylabel(plotvars.path{end})
     
     legend()
 end
-
 end
-

@@ -5,12 +5,6 @@ function P = SolveSystem(P, allowPlots)
 % OUTPUT:
 %   P   - modified patient struct with SI
 
-DP = DebugPlots().SolveSystem;
-
-if ~exist('allowPlots', 'var')
-    allowPlots = false;
-end
-
 PrintStatusUpdate(P, "Solving entire system!")
 
 %% Models
@@ -47,72 +41,76 @@ GSSE = sum((vG - fitG).^2);
 P.results.fits.glucoseSSE = GSSE;
 
 
-%% Debug Plots
-if allowPlots
-    tArray = P.results.tArray;
-    
-    if DP.Glucose
-        MakeDebugPlot("Plasma Glucose", P, DP);
-        
-        [tG, vG] = GetData(P.data.G);
-        plt = plot(tG, vG, 'g*');
-        plt.DisplayName = 'Plasma Sample';        
-       
-        plt = plot(tArray, P.results.G, 'k');
-        plt.DisplayName = 'Model Prediction';
-        
-        if isfield(P.data, 'tGBolus')
-            plt = line([P.data.tGBolus P.data.tGBolus], ylim, ...
-                       'Color', 'g', ...
-                       'LineStyle', '--');
-            plt.DisplayName = 'Bolus Input';
-        end
-        
-        xlabel('Time')
-        ylabel('Plasma Glucose, G [mmol/L]')
-        legend()
-        
-        ylim([4 15])
-    end
-    
-    if DP.Insulin
-        MakeDebugPlot("Plasma Insulin", P, DP);
-        
-        if P.source == "Detemir"
-            [tI, vI] = GetData(P.data.ITotal);  % [mU/L]
-            I = P.results.I + P.results.IDF;  % [mU/L]
-            
-            pltylabel = 'Plasma Insulins, I + IDF [mU/L]';            
-        else
-            [tI, vI] = GetData(P.data.I);  % [mU/L]
-            I = P.results.I;  % [mU/L]
-            
-            pltylabel = 'Plasma Insulin, I [mU/l]';
-        end
-        
-        plt = plot(tI, vI, 'r*');
-        plt.DisplayName = 'Plasma Sample';    
-        
-        plt = plot(tArray, I, 'k');
-        plt.DisplayName = 'Model Prediction';   
-        
-        if isfield(P.data, 'tIBolus')
-            x = [P.data.tIBolus'; P.data.tIBolus'];
-            y = repmat(ylim', numel(P.data.tIBolus), 1);
-            
-            plt = line(x, y, ...
-                       'Color', 'r', ...
-                       'LineStyle', '--');
-            plt(1).DisplayName = 'Bolus Input';
-            for pp = 2:length(plt)
-               plt(pp).HandleVisibility = 'off'; 
-            end
-        end
-        
-        xlabel('Time [min]')
-        ylabel(pltylabel)
-        legend()
-    end
+%% Plotting
+if ~exist('allowPlots', 'var')
+    allowPlots = false;
 end
 
+if allowPlots
+    MakePlots(P);
+end
+
+end
+
+
+function MakePlots(P)
+DP = DebugPlots().SolveSystem;
+
+tArray = P.results.tArray;
+
+%% Glucose
+if DP.Glucose
+    MakeDebugPlot("Plasma Glucose", P, DP);
+    
+    [tG, vG] = GetData(P.data.G);
+    plt = plot(tG, vG, 'g*');
+    plt.DisplayName = 'Plasma Sample';
+    
+    plt = plot(tArray, P.results.G, 'k');
+    plt.DisplayName = 'Model Prediction';
+    
+    if isfield(P.data, 'tGBolus')
+        plt = line([P.data.tGBolus P.data.tGBolus], ylim, ...
+            'Color', 'g', ...
+            'LineStyle', '--');
+        plt.DisplayName = 'Bolus Input';
+    end
+    
+    xlabel('Time')
+    ylabel('Plasma Glucose, G [mmol/L]')
+    legend()
+    
+    ylim([4 15])
+end
+
+%% Insulin
+if DP.Insulin
+    MakeDebugPlot("Plasma Insulin", P, DP);
+    
+    [tI, vI] = GetData(P.data.I);  % [mU/L]
+    I = P.results.I;  % [mU/L]
+    
+    plt = plot(tI, vI, 'r*');
+    plt.DisplayName = 'Plasma Sample';
+    
+    plt = plot(tArray, I, 'k');
+    plt.DisplayName = 'Model Prediction';
+    
+    if isfield(P.data, 'tIBolus')
+        x = [P.data.tIBolus'; P.data.tIBolus'];
+        y = repmat(ylim', numel(P.data.tIBolus), 1);
+        
+        plt = line(x, y, ...
+            'Color', 'r', ...
+            'LineStyle', '--');
+        plt(1).DisplayName = 'Bolus Input';
+        for pp = 2:length(plt)
+            plt(pp).HandleVisibility = 'off';
+        end
+    end
+    
+    xlabel('Time [min]')
+    ylabel('Plasma Insulin, I [mU/l]')
+    legend()
+end
 end

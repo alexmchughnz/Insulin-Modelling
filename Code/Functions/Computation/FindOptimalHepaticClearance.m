@@ -9,8 +9,6 @@ function P = FindOptimalHepaticClearance(P, makeNewGrid, varargin)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-DP = DebugPlots().FindOptimalHepaticClearance;
-
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
 
 %% Setup
@@ -66,73 +64,10 @@ P.results.OptimalHepaticClearance.xLRange = [L H];
 
 P.results.OptimalHepaticClearance.minimalErrorRegionSize = sum(isWithin1SD(:));
 P.results.OptimalHepaticClearance.minGridMSE = objectiveMin;
-%% ------------------------------------------------------------------------
 
-%% Debug Plots
-% Error Surface
-if DP.ErrorSurface
-    figTitle = "Error Surface";
-    MakeDebugPlot(figTitle, P, DP);
-    
-    % > Surface
-    % Define surface parameters.
-    nLRange = sort(unique(nLGrid));
-    xLRange = sort(unique(xLGrid));
-    
-    gridMin = min(objectiveValues(:));
-    
-    if isfield(P.data, 'stddevMSE')
-        stddevMSE = P.data.stddevMSE;
-    else
-        stddevMSE = 20/100 * gridMin;  % Default to 20%.
-    end
-    
-    % Define colors for different error regions.
-    deltaMSE = abs(objectiveValues - gridMin);
-    isWithin1SD = (deltaMSE <= stddevMSE);
-    isWithin3SD = (deltaMSE <= 3*stddevMSE);
-    
-    CO(:,:,1) = ~isWithin1SD * 1; %  red
-    CO(:,:,2) = ones(size(deltaMSE)) * 1; % green
-    CO(:,:,3) = ~isWithin3SD * 1; % blue
-    
-    % Plot surface.
-    surf(xLRange, nLRange, objectiveValues, CO,...
-        'HandleVisibility', 'off', ...
-        'EdgeColor', 'none', ...
-        'FaceColor', 'interp');
-    
-    % > Contour
-    % Define contour.
-    numLevels = 10;
-    minError = min(objectiveValues(:));
-    levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
-    
-    % Plot contour.
-    contour3(xLRange, nLRange, objectiveValues, ...
-        levels, ...
-        'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
-    % > Prettying    
-    xlim([0 1])
-    ylim([0 1])
-    
-    xlabel("$x_L$ [min$^{-1}$]")
-    ylabel("$n_L$")
-    zlabel("Mean of squared errors [(mU/min)^2]")    
-    
-    % Add physiological region.
-    xLPhys = [0.5 0.9];
-    nLPhys = [0.1 0.3];
-    x = xLPhys([1 1 end end]);
-    y = nLPhys([1 end end 1]);
-    z = 1e+6 * ones(1, 4);
-    patch(x, y, z, 'r',...
-        'FaceColor', '#D95319', ...
-        'FaceAlpha', 0.2, ...
-        'EdgeColor', 'none')
-end
+
+%% Plotting
+MakePlots(P);
 
 % Error Comparison
 if DP.ErrorComparison
@@ -194,7 +129,7 @@ end
 
 end
 
-%% Functions
+
 function P = EvaluateGrid(P, nLGrid, xLGrid)
 runtime = tic;
 
@@ -220,9 +155,9 @@ for ii = 1:numel(nLGrid)
     P = FitInsulinSensitivity(P);
     P = SolveSystem(P);
     
-    % Determine error.    
-    x = [P.results.nL; 1 - P.results.xL];  
-    integralError = sum((A*x - b).^2);    
+    % Determine error.
+    x = [P.results.nL; 1 - P.results.xL];
+    integralError = sum((A*x - b).^2);
     
     [tI, vI] = GetData(P.data.I);
     [~, simI] = GetResultsSample(P, tI, P.results.I);
@@ -232,7 +167,7 @@ for ii = 1:numel(nLGrid)
     totalObjectiveValue = integralError + scale*dataError;
     
     % Save residuals.
-    integralErrors(ii) = integralError;  
+    integralErrors(ii) = integralError;
     dataErrors(ii) = dataError;
     objectiveValues(ii) = totalObjectiveValue;
     [row, col] = ind2sub(size(P.results.I), ii);
@@ -258,3 +193,79 @@ end
 P.persistents.OptimalHepaticGrids{end+1} = saveStruct;
 
 end
+
+
+function MakePlots(P)
+DP = DebugPlots().FindOptimalHepaticClearance;
+
+gridData = P.persistents.OptimalHepaticGrids{end};
+objectiveValues = gridData.objectiveValues;
+nLGrid = gridData.nLGrid;
+xLGrid = gridData.xLGrid;
+
+
+%% Error Surface
+if DP.ErrorSurface
+    figTitle = "Error Surface";
+    MakeDebugPlot(figTitle, P, DP);
+    
+    %% Surface
+    % Define surface parameters.
+    nLRange = sort(unique(nLGrid));
+    xLRange = sort(unique(xLGrid));
+    gridMin = min(objectiveValues(:));
+    
+    if isfield(P.data, 'stddevMSE')
+        stddevMSE = P.data.stddevMSE;
+    else
+        stddevMSE = 20/100 * gridMin;  % Default to 20%.
+    end
+    
+    % Define colors for different error regions.
+    deltaMSE = abs(objectiveValues - gridMin);
+    isWithin1SD = (deltaMSE <= stddevMSE);
+    isWithin3SD = (deltaMSE <= 3*stddevMSE);
+    
+    CO(:,:,1) = ~isWithin1SD * 1; %  red
+    CO(:,:,2) = ones(size(deltaMSE)) * 1; % green
+    CO(:,:,3) = ~isWithin3SD * 1; % blue
+    
+    % Plot surface.
+    surf(xLRange, nLRange, objectiveValues, CO,...
+        'HandleVisibility', 'off', ...
+        'EdgeColor', 'none', ...
+        'FaceColor', 'interp');
+    
+    %% Contour
+    % Define contour.
+    numLevels = 10;
+    minError = min(objectiveValues(:));
+    levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
+    
+    % Plot contour.
+    contour3(xLRange, nLRange, objectiveValues, ...
+        levels, ...
+        'Color', 'r', ...
+        'HandleVisibility', 'off');
+    
+    %% Prettying
+    xlim([0 1])
+    ylim([0 1])
+    
+    xlabel("$x_L$ [min$^{-1}$]")
+    ylabel("$n_L$")
+    zlabel("Mean of squared errors [(mU/min)^2]")
+    
+    % Add physiological region.
+    xLPhys = [0.5 0.9];
+    nLPhys = [0.1 0.3];
+    x = xLPhys([1 1 end end]);
+    y = nLPhys([1 end end 1]);
+    z = 1e+6 * ones(1, 4);
+    patch(x, y, z, 'r',...
+        'FaceColor', '#D95319', ...
+        'FaceAlpha', 0.2, ...
+        'EdgeColor', 'none')
+end
+end
+

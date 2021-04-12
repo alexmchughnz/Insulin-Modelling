@@ -8,8 +8,6 @@ function P = AnalyseInsulinVariance(P, stddev, N)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-DP = DebugPlots().AnalyseInsulinVariance;
-
 %% Setup
 tData = P.data.I.time;
 MSE = zeros(1, N);
@@ -48,34 +46,20 @@ end
 stddevError = std(MSE);
 P.persistents.stddevMSE = stddevError;
 
-message = sprintf("1 std. dev. of MSE is %g" ,stddevError);
+message = sprintf("1 std. dev. of MSE is %g", stddevError);
 PrintStatusUpdate(P, message, true);
 
-%% ==================================================
-%% Debug Plots
-% Error
-if DP.Error
-    MakeDebugPlot("Insulin Error", P, DP);
-    
-    histogram(MSE, 50, ...
-        'Normalization', 'probability');
-    
-    xlabel("Mean Squared Error")
-    ylabel("Probability")
-    
-%     title(sprintf("P%d: Distribution of Model MSEs with Noise SD = %g*data (N = %d)", ...
-%         P.patientNum, stddev, N))
-    
-    txt = sprintf("SD = %g", stddevError);
-    xlimits = xlim;
-    ylimits = ylim;
-    text(0.9*xlimits(end), 0.9*ylimits(end), txt);
-end
+
+%% Plotting
+plotvars.stddev = stddev;
+plotvars.N = N;
+plotvars.stddevError = stddevError;
+MakePlots(P, plotvars);
+
 
 end
 
 
-%% Functions
 function MSE = GetSimError(P)
 % Get other parameters and forward simulate models.
 P = FindGutEmptyingRate(P);
@@ -90,4 +74,26 @@ error = simI - vI;
 MSE = mean(error.^2);
 end
 
+
+function MakePlots(P, plotvars)
+DP = DebugPlots().AnalyseInsulinVariance;
+
+%% Error
+if DP.Error
+    plotTitle = sprintf("Distribution of Model MSEs with Noise SD = %g*data (N = %d)", plotvars.stddev, plotvars.N);
+    MakeDebugPlot(plotTitle, P, DP);
+    
+    histogram(MSE, 50, ...
+        'Normalization', 'probability');
+    
+    xlabel("Mean Squared Error")
+    ylabel("Probability")  
+    
+    txt = sprintf("SD = %g", plotvars.stddevError);
+    xlimits = xlim;
+    ylimits = ylim;
+    text(0.9*xlimits(end), 0.9*ylimits(end), txt);
+end
+
+end
 

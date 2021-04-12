@@ -1,7 +1,6 @@
 function patientSet = LoadData(source, patientNums, showPlots)
 
 global CONFIG
-DP = DebugPlots().LoadData;
 
 isSource = @(dataset) contains(source, dataset, 'IgnoreCase', true);
 
@@ -52,26 +51,6 @@ for ii = 1:length(patientSet)
     
     patientSet{ii} = AddBolusArrays(patientSet{ii});
     patientSet{ii} = AddPlasmaInsulinInputArray(patientSet{ii});
-end
-
-%% Produce data arrays from loaded information.
-for ii = 1:length(patientSet)
-end
-
-%% Debug Plots
-if DP.GlucoseInput
-    for ii = 1:length(patientSet)
-        P = patientSet{ii};
-        MakeDebugPlot("Glucose Input", P, DP);
-        
-        subplot(2,1,1)
-        plot(P.results.tArray, P.results.GBolus)
-        ylabel("G Bolus [mmol/min]")
-        
-        subplot(2,1,2)
-        plot(P.results.tArray, P.data.GInfusion)
-        ylabel("G Infusion [mmol/min]")
-    end
 end
 
 end

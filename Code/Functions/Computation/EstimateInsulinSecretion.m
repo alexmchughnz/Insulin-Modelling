@@ -8,8 +8,6 @@ function P = EstimateInsulinSecretion(P)
 % OUTPUT:
 %   P   - modified patient struct with Uen
 
-DP = DebugPlots().EstimateInsulinSecretion;
-
 CP = P.parameters.CP;
 GC = P.parameters.GC;
 CONST = LoadConstants();
@@ -52,11 +50,19 @@ Uen = CONST.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/mi
 dt = P.results.tArray(2) - P.results.tArray(1);
 P.results.Uen = repelem(Uen, round(1/dt), 1);
 
-%% Debug Plots
+%% Plotting
+MakePlots(P);
+
+end
+
+function MakePlots(P)
+DP = DebugPlots().EstimateInsulinSecretion;
+
+%% CPep
 if DP.CPep
    MakeDebugPlot("C-peptide", P, DP);
    
-   plt = plot(tCPep, vCPep, 'b*');
+   plt = plot(P.data.CPep.time, P.data.CPep.value, 'b*');
    plt.DisplayName = "Plasma Sample";
    
    xlabel("Time [min]")
@@ -64,13 +70,14 @@ if DP.CPep
    
    legend
 end
+
+%% Uen
 if DP.Uen
    MakeDebugPlot("Uen", P, DP);
-   plot(tArray, Uen)
+   plot(P.results.tArray, P.results.Uen)
    
    xlabel("Time [min]")
    ylabel("Uen [mU/min]")
 end
 
 end
-

@@ -114,28 +114,13 @@ if DP.ErrorSurface
         'Color', 'r', ...
         'HandleVisibility', 'off');
     
-    % > Prettying
-    delta = nLRange(2) - nLRange(1);
-    
-    xlim([0.1 0.9])
-    ylim([0 0.7])
+    % > Prettying    
+    xlim([0 1])
+    ylim([0 1])
     
     xlabel("$x_L$ [min$^{-1}$]")
     ylabel("$n_L$")
-    zlabel("Mean of squared errors [(mU/min)^2]")
-    
-    % Redraw grid lines.
-%     spacing = 0.05;
-%     for ii = 1 : round(spacing/delta) : length(nLRange)
-%         plt = plot3(xLRange, ones(size(xLRange)) * nLRange(ii), objectiveValues(ii,:));
-%         plt.Color = [0 0 0 0.1];
-%         plt.LineWidth = 0.2;
-%     end
-%     for ii = 1 : round(spacing/delta) : length(xLRange)
-%         plt = plot3(ones(size(nLRange)) * xLRange(ii), nLRange, objectiveValues(:,ii));
-%         plt.Color = [0 0 0 0.1];
-%         plt.LineWidth = 0.2;
-%     end
+    zlabel("Mean of squared errors [(mU/min)^2]")    
     
     % Add physiological region.
     xLPhys = [0.5 0.9];
@@ -243,7 +228,7 @@ for ii = 1:numel(nLGrid)
     [~, simI] = GetResultsSample(P, tI, P.results.I);
     dataError = sum((vI-simI).^2);
     
-    scale = 1/100;
+    scale = 0;
     totalObjectiveValue = integralError + scale*dataError;
     
     % Save residuals.

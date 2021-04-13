@@ -5,7 +5,8 @@ function P = FindGutEmptyingRate(P)
 % OUTPUT:
 %   P   - modified patient struct with best found d2    
 
-if HasPersistent(P, "optimald2")
+[P, hasOptd2] = GetPersistent(P, "optimald2");
+if hasOptd2
     P.results.d2 = P.persistents.optimald2;
     return
 end

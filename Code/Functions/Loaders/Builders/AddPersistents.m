@@ -2,10 +2,12 @@ function P = AddPersistents(P)
 
 global CONFIG
 
-filename = fullfile(CONFIG.RESULTPATH, P.source, P.patientCode+'.mat');
+code = matlab.lang.makeValidName(P.patientCode);
+
+filename = fullfile(CONFIG.RESULTPATH, P.source, code+'.mat');
 
 if isfile(filename)
-    loadP = load(fullfile(CONFIG.RESULTPATH, P.source, P.patientCode));
+    loadP = load(fullfile(CONFIG.RESULTPATH, P.source, code));
     
     if isfield(loadP, "persistents")
         P.persistents = loadP.persistents;

@@ -12,7 +12,8 @@ function P = FindOptimalHepaticClearance(P, makeNewGrid, varargin)
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
 
 %% Setup
-if makeNewGrid || ~HasPersistent(P, "OptimalHepaticGrids")
+[P, hasGrids] = GetPersistent(P, "OptimalHepaticGrids");
+if makeNewGrid || ~hasGrids
     % Load grid settings.
     if isempty(varargin)
         settings = GRIDDEFAULTS;
@@ -186,7 +187,8 @@ saveStruct = struct(...
     'objectiveValues', objectiveValues, ...
     'ISimulated', ISimulated);
 
-if ~HasPersistent(P, "OptimalHepaticGrids")
+[P, hasGrids] = GetPersistent(P, "OptimalHepaticGrids");
+if ~hasGrids
     P.persistents.OptimalHepaticGrids = {};
 end
 

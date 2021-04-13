@@ -16,7 +16,8 @@ DebugPlots(plots);
 P = EstimateInsulinSecretion(P);
 P = FitHepaticClearance(P);  % To get A and b matrices.
 
-if ~HasPersistent(P, "stddevMSE")
+[P, hasMSE] = GetPersistent(P, "stddevMSE");
+if ~hasMSE
     % Currently irrelevant since error condition has changed.
     %     stddev = 5/100;
     %     N = 1000;

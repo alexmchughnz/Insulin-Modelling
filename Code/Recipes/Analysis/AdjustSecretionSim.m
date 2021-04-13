@@ -83,7 +83,8 @@ fitP = SolveSystem(fitP, true);
 findP = P;
 findP.patientCode = findP.patientCode + "find";
 
-if ~HasPersistent(findP, "stddevMSE")
+[findP, hasMSE] = GetPersistent(findP, "stddevMSE");
+if ~hasMSE
     findP = FitHepaticClearance(findP);    
     stddev = 5/100;
     N = 1000;

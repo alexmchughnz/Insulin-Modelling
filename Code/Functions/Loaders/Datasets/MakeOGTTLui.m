@@ -117,8 +117,13 @@ for ii = 1:length(patientSet)
         P.data.I.time = tI(isValid);
         
         % C-peptide Assay
-        P.data.CPep.value = btTable{code, getrow('C', nBtMeas)}';  % [pmol/L]
-        P.data.CPep.time = tBT';  % [min]
+        vCPep = btTable{code, getrow('C', nBtMeas)}';  % [pmol/L]
+        tCPep = tBT';  % [min]
+        
+        isValid = ~isnan(vCPep); 
+        
+        P.data.CPep.value = vCPep(isValid);
+        P.data.CPep.time = tCPep(isValid);
         
         %% Trial Inputs
         % Insulin Bolus

@@ -1,9 +1,9 @@
-function P = AnalyseInsulinVariance(P, stddev, N)
+function P = AnalyseInsulinVariance(P, stdDevPc, N)
 % Runs a Monte Carlo simulation, varying insulin data by a normal
 % distributed scale factor with SD = stddev*data.
 % INPUT:
 %   P        - patient struct
-%   stddev   - proportional
+%   stddevPc - proportional
 %   N        - number of trials to run
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
@@ -21,46 +21,38 @@ for ii = 1:N
     while any(abs(randNums) > 3)  % Limit to within 3 SDs.
         randNums = randn(size(tData));
     end
-    noiseFactors = 1 + stddev*randNums;
+    varianceMultipliers = 1 + stdDevPc*randNums;
     
     % Vary correct data based on trial.
-    copyP = P;
-    
-    if isfield(P, 'ITotal')
-        [~, vITotal] = GetData(P.data.ITotal);
-        trialITotal = noiseFactors .* vITotal;
-        copyP.data.ITotal.value = trialITotal;
-    else
-        [~, vI] = GetData(P.data.I);
-        trialI = noiseFactors .* vI;
-        copyP.data.I.value = trialI;
-    end
+    copyP = ScalePatientField(P, varianceMultipliers, "data", "I", "value");
     
     % Forward simulate with varied data.
-    MSE(ii) = GetSimError(copyP);
+    [SSE(ii), MSE(ii)] = GetSimErrors(copyP);
     
     % Print time.
     runtime = PrintTimeRemaining("AnalyseInsulinVariance", runtime, ii, N, P);
 end
 
-stddevError = std(MSE);
-P.persistents.stddevMSE = stddevError;
+P.persistents.stddevMSE = std(MSE);
+P.persistents.stddevSSE = std(SSE);
 
-message = sprintf("1 std. dev. of MSE is %g", stddevError);
-PrintStatusUpdate(P, message, true);
+message1 = sprintf("1 std. dev. of SSE is %g", P.persistents.stddevSSE);
+message2 = sprintf("1 std. dev. of MSE is %g", P.persistents.stddevMSE);
+PrintStatusUpdate(P, message1, true);
+PrintStatusUpdate(P, message2, true);
 
 
 %% Plotting
-plotvars.stddev = stddev;
+plotvars.stddev = stdDevPc;
 plotvars.N = N;
-plotvars.stddevError = stddevError;
+plotvars.MSE = MSE;
 MakePlots(P, plotvars);
 
 
 end
 
 
-function MSE = GetSimError(P)
+function [SSE, MSE] = GetSimErrors(P)
 % Get other parameters and forward simulate models.
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
@@ -71,6 +63,7 @@ P = SolveSystem(P, false);
 [~, simI] = GetResultsSample(P, tI, P.results.I);
 
 error = simI - vI;
+SSE = sum(error.^2);
 MSE = mean(error.^2);
 end
 
@@ -83,13 +76,13 @@ if DP.Error
     plotTitle = sprintf("Distribution of Model MSEs with Noise SD = %g*data (N = %d)", plotvars.stddev, plotvars.N);
     MakeDebugPlot(plotTitle, P, DP);
     
-    histogram(MSE, 50, ...
+    histogram(plotvars.MSE, 50, ...
         'Normalization', 'probability');
     
     xlabel("Mean Squared Error")
     ylabel("Probability")  
     
-    txt = sprintf("SD = %g", plotvars.stddevError);
+    txt = sprintf("SD = %g", std(plotvars.MSE));
     xlimits = xlim;
     ylimits = ylim;
     text(0.9*xlimits(end), 0.9*ylimits(end), txt);

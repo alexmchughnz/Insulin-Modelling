@@ -47,7 +47,8 @@ for ii = 1:length(patientSet)
         end
         tables{tt}.Properties.Description = name;
         
-        tables{tt} = AddField(tables{tt}, code, P.data, "stddevMSE");
+        tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
+        tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
         tables{tt} = AddField(tables{tt}, code, P.results, "minGridMSE");
         tables{tt} = AddField(tables{tt}, code, P.results, "minimalErrorRegionSize");
         

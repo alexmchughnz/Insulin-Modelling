@@ -1,13 +1,23 @@
 function P = ScalePatientField(P, scale, varargin)
     path = varargin;
 
+    % Edit value of field.
     fieldValue = getfield(P, path{:});
     fieldValue = fieldValue .* scale;
     P = setfield(P, path{:}, fieldValue);
     
-    P.patientCode = P.patientCode + sprintf(" (%s x %.2g)", ...
-        path{end}, scale);
+    % Tag patient code with its modifier.
+    varName = path{end};
     
-    message = sprintf("%s scaled by %.2f.", path{end}, scale);
+    if numel(scale) == 1
+        scaleTag = sprintf("%.2g", scale);
+    else
+        scaleTag = sprintf("[%.2f to %.2f]", min(scale), max(scale));
+    end
+    tag = sprintf("(%s x %s)", varName, scaleTag);
+    
+    P.patientCode = strjoin([P.patientCode, tag]);
+    
+    message = sprintf("%s scaled by %s", varName, scaleTag);
     PrintStatusUpdate(P, message);
 end

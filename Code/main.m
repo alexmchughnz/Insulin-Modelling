@@ -14,8 +14,9 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @SimpleSim;
+% recipeFunction = @SimpleSim;
 % recipeFunction = @GridSearchSim;
+recipeFunction = @IterateParametersSim;
 % resultsTag = "Penalised";
 
 % %% Select Data

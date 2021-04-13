@@ -37,7 +37,7 @@ for nn = 1:numN
     % Adjust clearance values.
 %     nP.parameters.GC.nK = P.parameters.GC.nK * nLnKScales(nn);
     
-    nP = ScalePatientField(nLnKScales(nn), nP, "results", "nL");
+    nP = ScalePatientField(nP, nLnKScales(nn), "results", "nL");
     
     for uu = 1:numU        
         % Edit patient.
@@ -45,7 +45,7 @@ for nn = 1:numN
         uP.patientNum = 1000*uP.patientNum + 10*uu + nn;
         
         % Adjust Uen values.
-        uP = ScalePatientField(UenScales(uu), uP, "results", "Uen");
+        uP = ScalePatientField(uP, UenScales(uu), "results", "Uen");
         
         % Simulate for optimal insulin error.       
         GetInsulinError = MakeInsulinErrorFunc(uP);   

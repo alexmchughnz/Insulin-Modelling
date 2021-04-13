@@ -1,16 +1,13 @@
-function P = ScalePatientField(scale, P, varargin)
+function P = ScalePatientField(P, scale, varargin)
     path = varargin;
 
     fieldValue = getfield(P, path{:});
     fieldValue = fieldValue .* scale;
     P = setfield(P, path{:}, fieldValue);
     
-    fieldName = strjoin(string(path), '.');
-    codeParts = split(P.patientCode, " ");
+    P.patientCode = P.patientCode + sprintf(" (%s x %.2g)", ...
+        path{end}, scale);
     
-    P.patientCode = codeParts(1) + sprintf(" (%s x %.2g)", ...
-        fieldName, scale);
-    
-    message = sprintf("%s scaled by %.2f.", fieldName, scale);
+    message = sprintf("%s scaled by %.2f.", path{end}, scale);
     PrintStatusUpdate(P, message);
 end

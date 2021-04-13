@@ -1,4 +1,4 @@
-function P = AddPlasmaInsulinInputArray(P)
+function P = AddPlasmaInsulinInputArray(P, forceReSim)
 % Returns array of insulin input rate over time.
 % INPUT:
 %   P - patient struct
@@ -7,12 +7,16 @@ function P = AddPlasmaInsulinInputArray(P)
 
 SC = P.parameters.SC;
 
+if ~exist("forceReSim", "var")
+    forceReSim = false;
+end
+
 if P.data.IType == "human"
     if P.data.IDelivery == "intravenous"
         IInput = P.results.IBolus;  % [mU/min]
         
     elseif P.data.IDelivery == "subcutaneous"
-        if ~isfield(P.results, "QLocal")
+        if forceReSim || ~isfield(P.results, "QLocal")
             % Simulate SC model if not already done.
             P = SCModel(P);
         end

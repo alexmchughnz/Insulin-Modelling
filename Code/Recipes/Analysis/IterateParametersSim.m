@@ -21,6 +21,14 @@ PArray = {};
 %% Functions
 JLKArray = [0.1 : 0.1 : 1.0];  % "Justified Loss from injection in Knee"
 ks3RateArray = [1.0 : 0.2 : 2.0];
+        
+% Find measure of variance due to insulin error for this patient.
+[P, hasSSE] = GetPersistent(P, "stddevSSE");
+if ~hasSSE
+    stdDevPc = 5/100;
+    N = 1000;
+    P = AnalyseInsulinVariance(P, stdDevPc, N);
+end
 
 for kk = 1:numel(ks3RateArray)
     % Apply change to ks3 parameter.
@@ -37,14 +45,6 @@ for kk = 1:numel(ks3RateArray)
         
         % Now run full simulation for patient.
         jjP = SimpleSim(jjP);        
-        
-        % Find measure of variance due to insulin error.
-        [jjP, hasSSE] = GetPersistent(jjP, "stddevSSE");
-        if ~hasSSE
-            stdDevPc = 5/100;
-            N = 1000;
-            jjP = AnalyseInsulinVariance(jjP, stdDevPc, N);
-        end
         
         % Save.
         PArray{end+1} = jjP;

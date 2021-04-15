@@ -14,7 +14,13 @@ MSE = zeros(1, N);
 
 runtime = tic;
 
-%% Simulate
+%% Simulate 
+% Ensure parameters are present.
+P = EstimateInsulinSecretion(P);
+P = FitHepaticClearance(P);
+P = FindGutEmptyingRate(P);
+P = FitInsulinSensitivity(P);
+
 for ii = 1:N
     % Randomly vary data according to normal distribution.
     randNums = Inf;
@@ -53,9 +59,7 @@ end
 
 
 function [SSE, MSE] = GetSimErrors(P)
-% Get other parameters and forward simulate models.
-P = FindGutEmptyingRate(P);
-P = FitInsulinSensitivity(P);
+% Forward simulate models.
 P = SolveSystem(P, false);
 
 % Determine error.

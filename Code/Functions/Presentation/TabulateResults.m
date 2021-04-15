@@ -36,6 +36,9 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinSSE", @(x) x, "insulinSSE [(mU/L)^2]");
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseSSE", @(x) x, "glucoseSSE [(mmol/L)^2]");
     end
+        
+    tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
+    tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
     
     %% Find Optimal Hepatic Clearance
     
@@ -47,17 +50,15 @@ for ii = 1:length(patientSet)
         end
         tables{tt}.Properties.Description = name;
         
-        tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
-        tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
-        tables{tt} = AddField(tables{tt}, code, P.results, "minGridMSE");
-        tables{tt} = AddField(tables{tt}, code, P.results, "minimalErrorRegionSize");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "minGridMSE");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "minimalErrorRegionSize");
         
-        tables{tt} = AddField(tables{tt}, code, P.results, "nLRange", @diff);
-        tables{tt} = AddField(tables{tt}, code, P.results, "nLRange", @(x) x(1), "nLRangeLower");
-        tables{tt} = AddField(tables{tt}, code, P.results, "nLRange", @(x) x(end), "nLRangeUpper");
-        tables{tt} = AddField(tables{tt}, code, P.results, "xLRange", @diff);
-        tables{tt} = AddField(tables{tt}, code, P.results, "xLRange", @(x) x(1), "xLRangeLower");
-        tables{tt} = AddField(tables{tt}, code, P.results, "xLRange", @(x) x(end), "xLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "nLRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "nLRange", @(x) x(1), "nLRangeLower");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "nLRange", @(x) x(end), "nLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @(x) x(1), "xLRangeLower");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @(x) x(end), "xLRangeUpper");
     end
     
     

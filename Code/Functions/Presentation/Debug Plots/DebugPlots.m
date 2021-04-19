@@ -16,6 +16,7 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.FitHepaticClearance.Convergence = true;
     
     DEBUGPLOTS.FindOptimalHepaticClearance.ErrorSurface = true;
+    DEBUGPLOTS.FindOptimalJLKxL.ErrorSurface = true;
     
     DEBUGPLOTS.AnalyseInsulinVariance.Error = true;
     

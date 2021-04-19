@@ -1,4 +1,4 @@
-function P = FitHepaticClearance(P, forcenLxL)
+function P = FitnLxL(P, forcenLxL)
 % Fits data using MLR to find nL and xL.
 % INPUT:
 %   P   - patient struct
@@ -49,7 +49,7 @@ relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
 tolerance = 0.1/100; % Relative tolerance for convergence.
 
 while any(relativeChange >= tolerance)
-    [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, I);
+    [A, b, IFunc, QFunc] = AssemblenLxLSystem(P, I);
     
     % %         Normalise.
     %         A = A./b

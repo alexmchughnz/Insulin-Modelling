@@ -1,9 +1,7 @@
-function [A, b, IFunc, QFunc] = AssembleIIntegralSystem(P, I, Q)
+function [A, b, IFunc, QFunc] = GetnLxLIntegralSystem(P, I, Q)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
-
-
 
 %% Setup
 tArray = P.results.tArray;

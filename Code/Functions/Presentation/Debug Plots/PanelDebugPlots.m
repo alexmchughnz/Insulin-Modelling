@@ -9,7 +9,7 @@ if ~exist('monitor', 'var')
     monitor = 1;
 end
 
-GetFigNum = @(figrow) dot([100 10 1], figrow);
+GetFigNum = @(figrow) dot([1000 100 1], figrow);
 
 if ~isempty(figData)
     patientCounts = figData(:, 1);

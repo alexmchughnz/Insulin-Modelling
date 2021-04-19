@@ -5,7 +5,10 @@ persistent DEBUGPLOTS;
 if exist("newPlots", "var")
     DEBUGPLOTS = newPlots;
     
-elseif isempty(DEBUGPLOTS)    
+elseif isempty(DEBUGPLOTS)
+    DEBUGPLOTS.FIGURES = []; 
+    
+    %% Functions    
     DEBUGPLOTS.EstimateInsulinSecretion.Uen = true;
     DEBUGPLOTS.EstimateInsulinSecretion.CPep = true;
     
@@ -19,7 +22,8 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.SolveSystem.Glucose = true;
     DEBUGPLOTS.SolveSystem.Insulin = true;
     
-    DEBUGPLOTS.FIGURES = [];    
+    %% Recipes
+    DEBUGPLOTS.IterateParametersSim.SSEHeatmap = true;
 end
 
 plots = DEBUGPLOTS;

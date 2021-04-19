@@ -9,7 +9,7 @@ function F = MakeDebugPlot(figTitle, P, DP)
 
 DEBUGPLOTS = DebugPlots();
 
-GetFigNum = @(p, s, n) 100*p + 10*s + n;
+GetFigNum = @(p, s, n) 1000*p + 100*s + n;
 
 
 persistent seenPatients;

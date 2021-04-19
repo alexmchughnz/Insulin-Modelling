@@ -17,18 +17,24 @@ for iFig = 1:length(FigList)
     FigHandle.Units = 'pixels';
     FigHandle.Position = [0 0 400 300];
     
-    AxisHandle = FigHandle.Children(end);
+    AxisHandle = FigHandle.CurrentAxes;
     
     
-    % Edit    
-    FigName = get(AxisHandle.Title, 'String');
+    % Edit
+    % Weird workaround, sometimes a char array and sometimes a "graphics.text.primitive".
+    if ischar(AxisHandle.Title)  
+        FigName = AxisHandle.Title;
+    else
+        FigName = get(AxisHandle.Title, 'String');
+    end
+    
     FigName = tag + matlab.lang.makeValidName(FigName);        
     
     if (CONFIG.PUBLISHPLOTS)
         title('')
     end
     
-    if ~isempty(AxisHandle.Legend)
+    if isfield(AxisHandle, 'Legend') && ~isempty(AxisHandle.Legend)
         legend('Location','southoutside')
     end
     

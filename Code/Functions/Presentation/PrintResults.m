@@ -6,20 +6,12 @@ function PrintResults(patientSet, recipeFunction, tag)
 global CONFIG
 
 source = patientSet{end}.source;
-
 recipeStruct = functions(recipeFunction);
 recipe = string(recipeStruct.function);
 
-tables = TabulateResults(patientSet);
-
-if (CONFIG.SAVERESULTS)
-    SaveOpenFigures(tag, source, recipe);
-end
-
-PanelDebugPlots();
-
 
 %% Tables
+tables = TabulateResults(patientSet);
 for tt = 1:length(tables)
     T = tables{tt};
     title = string(T.Properties.Description);
@@ -45,3 +37,10 @@ for tt = 1:length(tables)
         writetable(T, filepath, "WriteRowNames", true);
     end
 end
+
+%% Plots
+if (CONFIG.SAVERESULTS)
+    SaveOpenFigures(tag, source, recipe);
+end
+
+PanelDebugPlots();

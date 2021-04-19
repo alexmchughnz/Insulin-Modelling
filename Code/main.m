@@ -21,8 +21,8 @@ recipeFunction = @IterateParametersSim;
 
 % %% Select Data
 % patientNums = 'all';
-patientNums = [23];
-% patientNums = [1 4 14 22 23 25 30];
+% patientNums = [23];
+patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";
 
 %% Load Data

@@ -11,6 +11,7 @@ plots.EstimateInsulinSecretion.Uen = false;
 plots.EstimateInsulinSecretion.CPep = false;
 plots.FitHepaticClearance.GraphicalID = false;
 plots.FitHepaticClearance.Convergence = false;
+plots.SolveSystem.Insulin = false;
 plots.SolveSystem.Glucose = false;
 
 DebugPlots(plots);
@@ -19,8 +20,8 @@ DebugPlots(plots);
 PArray = {};
 
 %% Functions
-JLKArray = [0.05 : 0.05 : 0.3];  % "Justified Loss from injection in Knee"
-ks3RateArray = [1 : 0.25 : 3];
+JLKArray = 0.05 : 0.15 : 1.0;  % "Justified Loss from injection in Knee"
+ks3RateArray = 1 : 2 : 10;
 
 % Find measure of variance due to insulin error for this patient.
 [P, hasSSE] = GetPersistent(P, "stddevSSE");
@@ -51,6 +52,13 @@ for kk = 1:numel(ks3RateArray)
     end
 end
 
+% Hacky to only display *optimal* insulin plot.
+plots.SolveSystem.Insulin = true;
+DebugPlots(plots);
+[~, iiOpt] = min(cellfun(@(P) P.results.fits.insulinSSE, PArray));
+POpt = PArray{iiOpt};
+SolveSystem(POpt, true);
+
 %% Plotting
 plotvars.P = P;
 plotvars.JLKArray = JLKArray;
@@ -64,18 +72,28 @@ function MakePlots(PArray, plotvars)
 DP = DebugPlots().IterateParametersSim;
 
 %% SSE Heatmap
-if DP.SSEHeatmap    
+if DP.SSEHeatmap   
+    % Get grid of SSE values.
     gridDim = [numel(plotvars.JLKArray), numel(plotvars.ks3RateArray)];
     
     SSEArray = cellfun(@(P) P.results.fits.insulinSSE, PArray);    
     SSEGrid = reshape(SSEArray, gridDim);
+    
+    % Remove non-optimal values from grid.
+    stddevSSE = plotvars.P.persistents.stddevSSE;
+    minSSE =  min(SSEArray(:));
+    isOptimalZone = abs(SSEArray - minSSE) <= stddevSSE;
+    
+    optimalSSEGrid = SSEGrid;
+    optimalSSEGrid(~isOptimalZone) = NaN;
+    
     
     MakeDebugPlot("SSE Heatmap", plotvars.P, DP);
     hold off  % Needed for heatmap.
     
     xvalues = plotvars.ks3RateArray; 
     yvalues = plotvars.JLKArray;
-    h = heatmap(xvalues, yvalues, SSEGrid);
+    h = heatmap(xvalues, yvalues, optimalSSEGrid);
     
     h.Title = "Insulin SSE Heatmap";
     h.XLabel = "ks3 Multiplier";

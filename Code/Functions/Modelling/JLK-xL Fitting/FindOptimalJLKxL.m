@@ -143,7 +143,7 @@ xLGrid = gridData.xLGrid;
 
 %% Error Surface
 if DP.ErrorSurface
-    figTitle = "Error Surface";
+    figTitle = "JLK-xL Error Surface";
     MakeDebugPlot(figTitle, P, DP);
     
     %% Surface

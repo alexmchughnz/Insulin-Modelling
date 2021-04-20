@@ -1,4 +1,4 @@
-function P = FitnLxL(P, forcenLxL)
+function P = IntegralFitnLxL(P, forcenLxL)
 % Fits data using MLR to find nL and xL.
 % INPUT:
 %   P   - patient struct

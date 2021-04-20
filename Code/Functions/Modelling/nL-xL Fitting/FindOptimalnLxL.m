@@ -1,4 +1,4 @@
-function P = FindOptimalHepaticClearance(P, makeNewGrid, varargin)
+function P = FindOptimalnLxL(P, makeNewGrid, varargin)
 % Find optimal nL and xL, using grid search.
 % Runs a LOT of forward simulations in 'grid' mode - very slow!
 % INPUT:

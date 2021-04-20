@@ -1,4 +1,4 @@
-function P = FitJLKxL(P, forceJLKxL)
+function P = IntegralFitJLKxL(P, forceParameters)
 % Fits data using MLR to find JLK and xL.
 % INPUT:
 %   P   - patient struct
@@ -11,8 +11,8 @@ global CONFIG
 PrintStatusUpdate(P, "Fitting JLK/xL...")
 
 if exist('forceJLKxL', 'var')
-    JLK = forceJLKxL(1);
-    xL = forceJLKxL(2);
+    JLK = forceParameters(1);
+    xL = forceParameters(2);
     
     P.results.JLK = JLK;
     P.results.xL = xL;
@@ -116,7 +116,7 @@ CONST = LoadConstants();
 
 %% Graphical Identifiability Method (Docherty, 2010)
 if DP.GraphicalID
-    MakeDebugPlot("Graphical Identifiability", P, DP);
+    MakeDebugPlot("JLK-xL Graphical Identifiability", P, DP);
     
     [tI, ~] = GetData(P.data.I); % [mU/L]
     tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWWISE);
@@ -125,7 +125,7 @@ if DP.GraphicalID
     plt.DisplayName = "$n_L$ coeff.";
     
     plt = plot(tIntegrals, plotvars.CXNorm);
-    plt.DisplayName = "$x_L$ coeff.";
+    plt.DisplayName = "$J_LK$ coeff.";
     
     plt = plot(tIntegrals, plotvars.bNorm);
     plt.DisplayName = "$b$";
@@ -148,7 +148,7 @@ end
 
 %% Convergence
 if DP.Convergence
-    MakeDebugPlot("Convergence Plot", P, DP);
+    MakeDebugPlot("JLK-xL Convergence Plot", P, DP);
     plot(plotvars.JLKArray, 'b')
     plot(plotvars.xLArray, 'r')
     

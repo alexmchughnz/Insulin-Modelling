@@ -12,8 +12,6 @@ DebugPlots(plots);
 
 
 %% Setup
-P.results.nL = 0.15;
-
 P = EstimateInsulinSecretion(P);
 P = FitJLKxL(P);  % To get A and b matrices.
 

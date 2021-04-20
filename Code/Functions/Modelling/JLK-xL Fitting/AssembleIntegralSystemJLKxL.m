@@ -1,4 +1,4 @@
-function [A, b, IFunc, QFunc] = GetJLKxLIntegralSystem(P, I, Q)
+function [A, b, IFunc, QFunc] = AssembleIntegralSystemJLKxL(P, I, Q)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;

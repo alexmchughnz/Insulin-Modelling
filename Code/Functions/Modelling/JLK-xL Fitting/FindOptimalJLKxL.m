@@ -1,35 +1,43 @@
-function P = FindOptimalJLKxL(P, makeNewGrid)
-% Find optimal nL and xL, using grid search.
-% Runs a LOT of forward simulations in 'grid' mode - very slow!
+function P = FindOptimalJLKxL(P, makeNewGrid, gridOptions)
+% Finds optimal JLK and xL using grid search.
+% Runs a LOT of forward simulations - very slow!
 % INPUT:
-%   P   - patient struct
+%   P           - patient struct
+%   makeNewGrid - bool for if to load or re-simulate
+%   gridOptions - struct with ranges and stepsizes
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
 GRIDNAME = "JLKxLGrids";
-GRIDDEFAULTS = {[0.1 1.0], [0.075 0.95], [0.05 0.025]};
+GRIDDEFAULTS.JLKRange = [0, 1.0];
+GRIDDEFAULTS.JLKStep = 0.1;
+GRIDDEFAULTS.xLRange = [0.075, 0.95];
+GRIDDEFAULTS.xLStep = 0.025;
+
 
 %% Setup
+if ~exist("gridOptions", "var")
+    gridOptions = GRIDDEFAULTS;
+end
+
 [P, hasGrids] = GetPersistent(P, GRIDNAME);
 if makeNewGrid || ~hasGrids
     % Load grid settings.
-    settings = GRIDDEFAULTS;
-    JLKBounds = settings{1};
-    xLBounds = settings{2};
-    JLKxLDelta = settings{3};
+    JLKRange = gridOptions.JLKRange;
+    JLKStep = gridOptions.JLKStep;
+    xLRange = gridOptions.xLRange;
+    xLStep = gridOptions.xLStep;
     
     % Set up grid.
-    JLKDelta = JLKxLDelta(1);
-    JLKRange = JLKBounds(1) : JLKDelta : JLKBounds(end);
-    
-    xLDelta = JLKxLDelta(end);
-    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
+    JLKRange = JLKRange(1) : JLKStep : JLKRange(end);
+    xLRange = xLRange(1) : xLStep : xLRange(end);
     
     [xLGrid, JLKGrid] = meshgrid(xLRange, JLKRange);
     
     % Generate grid if we don't have one saved.
     P = EvaluateGrid(P, JLKGrid, xLGrid, GRIDNAME);
 end
+
 gridData = P.persistents.(GRIDNAME){end};
 
 
@@ -112,7 +120,7 @@ for ii = 1:numel(JLKGrid)
     [row, col] = ind2sub(size(P.results.I), ii);
     ISimulated(row, col, :) = P.results.I(:);
     
-    runtime = PrintTimeRemaining("FindFindOptimal", ...
+    runtime = PrintTimeRemaining("FindOptimal", ...
         runtime, ii, numel(JLKGrid), P);
 end
 

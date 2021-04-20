@@ -13,7 +13,7 @@ DebugPlots(plots);
 
 %% Setup
 P = EstimateInsulinSecretion(P);
-P = FitJLKxL(P);  % To get A and b matrices.
+P = IntegralFitJLKxL(P);  % To get A and b matrices.
 
 [P, hasMSE] = GetPersistent(P, "stddevMSE");
 if ~hasMSE

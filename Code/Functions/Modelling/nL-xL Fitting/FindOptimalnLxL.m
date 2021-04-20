@@ -1,41 +1,42 @@
-function P = FindOptimalnLxL(P, makeNewGrid, varargin)
-% Find optimal nL and xL, using grid search.
-% Runs a LOT of forward simulations in 'grid' mode - very slow!
+function P = FindOptimalnLxL(P, makeNewGrid, gridOptions)
+% Finds optimal nL and xL using grid search.
+% Runs a LOT of forward simulations - very slow!
 % INPUT:
-%   P        - patient struct
-%   varargin - {1} nL boundary, and
-%              {2} xL boundary to search over
-%              {3} desired [nL, xL] grid precision
+%   P           - patient struct
+%   makeNewGrid - bool for if to load or re-simulate
+%   gridOptions - struct with ranges and stepsizes
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
 GRIDNAME = "nLxLGrids";
-GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
+GRIDDEFAULTS.nLRange = [0, 0.8];
+GRIDDEFAULTS.nLStep = 0.02;
+GRIDDEFAULTS.xLRange = [0.075, 0.95];
+GRIDDEFAULTS.xLStep = 0.02;
+
 
 %% Setup
+if ~exist("gridOptions", "var")
+    gridOptions = GRIDDEFAULTS;
+end
+
 [P, hasGrids] = GetPersistent(P, GRIDNAME);
 if makeNewGrid || ~hasGrids
     % Load grid settings.
-    if isempty(varargin)
-        settings = GRIDDEFAULTS;
-    else
-        settings = varargin;
-    end
-    nLBounds = settings{1};
-    xLBounds = settings{2};
-    nLxLDelta = settings{3};
+    % Load grid settings.
+    nLRange = gridOptions.nLRange;
+    nLStep = gridOptions.nLStep;
+    xLRange = gridOptions.xLRange;
+    xLStep = gridOptions.xLStep;
     
     % Set up grid.
-    nLDelta = nLxLDelta(1);
-    nLRange = nLBounds(1) : nLDelta : nLBounds(end);
+    nLRange = nLRange(1) : nLStep : nLRange(end);
+    xLRange = xLRange(1) : xLStep : xLRange(end);
     
-    xLDelta = nLxLDelta(end);
-    xLRange = xLBounds(1) : xLDelta : xLBounds(end);
-    
-    [xLGrid, nLGrid] = meshgrid(xLRange, nLRange);
+    [xLGrid, JLKGrid] = meshgrid(xLRange, nLRange);
     
     % Generate grid if we don't have one saved.
-    P = EvaluateGrid(P, nLGrid, xLGrid);
+    P = EvaluateGrid(P, JLKGrid, xLGrid, GRIDNAME);
 end
 gridData = P.persistents.(GRIDNAME){end};
 
@@ -69,12 +70,14 @@ P.results.FindOptimal.minGridMSE = objectiveMin;
 
 
 %% Plotting
-MakePlots(P);
+plotvars.GRIDNAME = GRIDNAME;
+
+MakePlots(P, plotvars);
 
 end
 
 
-function P = EvaluateGrid(P, nLGrid, xLGrid)
+function P = EvaluateGrid(P, nLGrid, xLGrid, GRIDNAME)
 runtime = tic;
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
@@ -117,7 +120,7 @@ for ii = 1:numel(nLGrid)
     [row, col] = ind2sub(size(P.results.I), ii);
     ISimulated(row, col, :) = P.results.I(:);
     
-    runtime = PrintTimeRemaining("FindFindOptimal", ...
+    runtime = PrintTimeRemaining("FindOptimal", ...
         runtime, ii, numel(nLGrid), P);
 end
 
@@ -130,7 +133,7 @@ saveStruct = struct(...
     'objectiveValues', objectiveValues, ...
     'ISimulated', ISimulated);
 
-[P, hasGrids] = GetPersistent(P, "nLxLGrids");
+[P, hasGrids] = GetPersistent(P, GRIDNAME);
 if ~hasGrids
     P.persistents.(GRIDNAME) = {};
 end
@@ -140,10 +143,10 @@ P.persistents.(GRIDNAME){end+1} = saveStruct;
 end
 
 
-function MakePlots(P)
+function MakePlots(P, plotvars)
 DP = DebugPlots().FindOptimal;
 
-gridData = P.persistents.nLxLGrids{end};
+gridData = P.persistents.(plotvars.GRIDNAME){end};
 objectiveValues = gridData.objectiveValues;
 nLGrid = gridData.nLGrid;
 xLGrid = gridData.xLGrid;

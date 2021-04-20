@@ -36,7 +36,7 @@ relativeChange = [Inf Inf]; % Change in [JLK xL] at each iteration.
 tolerance = 0.1/100; % Relative tolerance for convergence.
 
 while any(relativeChange >= tolerance)
-    [A, b, IFunc, QFunc] = GetJLKxLIntegralSystem(P, I);
+    [A, b, IFunc, QFunc] = AssembleIntegralSystemJLKxL(P, I);
     
     % %         Normalise.
     %         A = A./b

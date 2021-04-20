@@ -6,10 +6,11 @@ function P = FindOptimalJLKxL(P, makeNewGrid)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
+GRIDNAME = "JLKxLGrids";
 GRIDDEFAULTS = {[0.1 1.0], [0.075 0.95], [0.05 0.025]};
 
 %% Setup
-[P, hasGrids] = GetPersistent(P, "OptimalInputGrids");
+[P, hasGrids] = GetPersistent(P, GRIDNAME);
 if makeNewGrid || ~hasGrids
     % Load grid settings.
     settings = GRIDDEFAULTS;
@@ -27,9 +28,9 @@ if makeNewGrid || ~hasGrids
     [xLGrid, JLKGrid] = meshgrid(xLRange, JLKRange);
     
     % Generate grid if we don't have one saved.
-    P = EvaluateGrid(P, JLKGrid, xLGrid);
+    P = EvaluateGrid(P, JLKGrid, xLGrid, GRIDNAME);
 end
-gridData = P.persistents.OptimalInputGrids{end};
+gridData = P.persistents.(GRIDNAME){end};
 
 
 %% Find Optimal nL/xL
@@ -51,22 +52,24 @@ optimalJLK = JLKGrid(isWithin1SD);
 optimalxL = xLGrid(isWithin1SD);
 
 [L, H] = bounds(optimalJLK);
-P.results.OptimalInputAndClearance.JLKRange = [L H];
+P.results.FindOptimal.JLKRange = [L H];
 
 [L, H] = bounds(optimalxL);
-P.results.OptimalInputAndClearance.xLRange = [L H];
+P.results.FindOptimal.xLRange = [L H];
 
-P.results.OptimalInputAndClearance.minimalErrorRegionSize = sum(isWithin1SD(:));
-P.results.OptimalInputAndClearance.minGridMSE = objectiveMin;
+P.results.FindOptimal.minimalErrorRegionSize = sum(isWithin1SD(:));
+P.results.FindOptimal.minGridMSE = objectiveMin;
 
 
 %% Plotting
-MakePlots(P);
+plotvars.GRIDNAME = GRIDNAME;
+
+MakePlots(P, plotvars);
 
 end
 
 
-function P = EvaluateGrid(P, JLKGrid, xLGrid)
+function P = EvaluateGrid(P, JLKGrid, xLGrid, GRIDNAME)
 runtime = tic;
 
 ISimulated = zeros([size(JLKGrid) length(P.results.tArray)]);
@@ -109,7 +112,7 @@ for ii = 1:numel(JLKGrid)
     [row, col] = ind2sub(size(P.results.I), ii);
     ISimulated(row, col, :) = P.results.I(:);
     
-    runtime = PrintTimeRemaining("FindOptimalInputAndClearance", ...
+    runtime = PrintTimeRemaining("FindFindOptimal", ...
         runtime, ii, numel(JLKGrid), P);
 end
 
@@ -122,20 +125,20 @@ saveStruct = struct(...
     'objectiveValues', objectiveValues, ...
     'ISimulated', ISimulated);
 
-[P, hasGrids] = GetPersistent(P, "OptimalInputGrids");
+[P, hasGrids] = GetPersistent(P, GRIDNAME);
 if ~hasGrids
-    P.persistents.OptimalInputGrids = {};
+    P.persistents.(GRIDNAME) = {};
 end
 
-P.persistents.OptimalInputGrids{end+1} = saveStruct;
+P.persistents.(GRIDNAME){end+1} = saveStruct;
 
 end
 
 
-function MakePlots(P)
-DP = DebugPlots().FindOptimalJLKxL;
+function MakePlots(P, plotvars)
+DP = DebugPlots().FindOptimal;
 
-gridData = P.persistents.OptimalInputGrids{end};
+gridData = P.persistents.(plotvars.GRIDNAME){end};
 objectiveValues = gridData.objectiveValues;
 JLKGrid = gridData.JLKGrid;
 xLGrid = gridData.xLGrid;

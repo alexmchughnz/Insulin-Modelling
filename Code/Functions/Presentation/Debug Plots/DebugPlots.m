@@ -12,11 +12,10 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.EstimateInsulinSecretion.Uen = true;
     DEBUGPLOTS.EstimateInsulinSecretion.CPep = true;
     
-    DEBUGPLOTS.FitHepaticClearance.GraphicalID = true; 
-    DEBUGPLOTS.FitHepaticClearance.Convergence = true;
+    DEBUGPLOTS.IntegralFit.GraphicalID = true; 
+    DEBUGPLOTS.IntegralFit.Convergence = true;
     
-    DEBUGPLOTS.FindOptimalHepaticClearance.ErrorSurface = true;
-    DEBUGPLOTS.FindOptimalJLKxL.ErrorSurface = true;
+    DEBUGPLOTS.FindOptimal.ErrorSurface = true;
     
     DEBUGPLOTS.AnalyseInsulinVariance.Error = true;
     

@@ -14,7 +14,7 @@ DebugPlots(plots);
 
 %% Setup
 P = EstimateInsulinSecretion(P);
-P = FitHepaticClearance(P);  % To get A and b matrices.
+P = IntegralFitnLxL(P);  % To get A and b matrices.
 
 [P, hasMSE] = GetPersistent(P, "stddevMSE");
 if ~hasMSE
@@ -33,7 +33,7 @@ integralP.patientCode = integralP.patientCode + "(integral)";
 gridSettings = {[0.02 1], [0.02 1], 0.02};
 
 newGrid = true;
-P = FindOptimalHepaticClearance(P, newGrid, gridSettings{:});
+P = FindOptimalnLxL(P, newGrid, gridSettings{:});
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

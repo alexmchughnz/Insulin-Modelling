@@ -1,4 +1,4 @@
-function PArray = InputGridSearchSim(P)
+function PArray = JLKGridSearchSim(P)
 % Recipe for basic fitting and forward simulating a patient.
 % nL/xL found by grid search.
 % INPUTS:

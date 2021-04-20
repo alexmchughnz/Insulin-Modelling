@@ -9,10 +9,11 @@ function P = FindOptimalnLxL(P, makeNewGrid, varargin)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
+GRIDNAME = "nLxLGrids";
 GRIDDEFAULTS = {[-0.1 0.775], [0.075 0.95], 0.02};
 
 %% Setup
-[P, hasGrids] = GetPersistent(P, "OptimalHepaticGrids");
+[P, hasGrids] = GetPersistent(P, GRIDNAME);
 if makeNewGrid || ~hasGrids
     % Load grid settings.
     if isempty(varargin)
@@ -36,7 +37,7 @@ if makeNewGrid || ~hasGrids
     % Generate grid if we don't have one saved.
     P = EvaluateGrid(P, nLGrid, xLGrid);
 end
-gridData = P.persistents.OptimalHepaticGrids{end};
+gridData = P.persistents.(GRIDNAME){end};
 
 
 %% Find Optimal nL/xL
@@ -58,75 +59,17 @@ optimalnL = nLGrid(isWithin1SD);
 optimalxL = xLGrid(isWithin1SD);
 
 [L, H] = bounds(optimalnL);
-P.results.OptimalHepaticClearance.nLRange = [L H];
+P.results.FindOptimal.nLRange = [L H];
 
 [L, H] = bounds(optimalxL);
-P.results.OptimalHepaticClearance.xLRange = [L H];
+P.results.FindOptimal.xLRange = [L H];
 
-P.results.OptimalHepaticClearance.minimalErrorRegionSize = sum(isWithin1SD(:));
-P.results.OptimalHepaticClearance.minGridMSE = objectiveMin;
+P.results.FindOptimal.minimalErrorRegionSize = sum(isWithin1SD(:));
+P.results.FindOptimal.minGridMSE = objectiveMin;
 
 
 %% Plotting
 MakePlots(P);
-
-% Error Comparison
-if DP.ErrorComparison
-    figTitle = "Error Comparison";
-    MakeDebugPlot(figTitle, P, DP);
-    
-    % Integral Error
-    subplot(1,2,1)
-    hold on
-    
-    % Define surface parameters.
-    nLRange = sort(unique(nLGrid));
-    xLRange = sort(unique(xLGrid));  
-    
-    % Plot surface.
-    surf(xLRange, nLRange, gridData.integralErrors, ...
-        'HandleVisibility', 'off', ...
-        'EdgeColor', 'none', ...
-        'FaceColor', 'interp');
-    
-    % Plot contour.
-    minError = min(gridData.integralErrors(:));
-    levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
-    contour3(xLRange, nLRange, gridData.integralErrors, ...
-        levels, ...
-        'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
-    xlim([0 1])
-    ylim([0 1])
-    
-    
-    % Data Error
-    subplot(1,2,2)
-    hold on
-    
-    % Define surface parameters.
-    nLRange = sort(unique(nLGrid));
-    xLRange = sort(unique(xLGrid));  
-    
-    % Plot surface.
-    surf(xLRange, nLRange, gridData.dataErrors, ...
-        'HandleVisibility', 'off', ...
-        'EdgeColor', 'none', ...
-        'FaceColor', 'interp');    
-    
-    % Plot contour.
-    minError = min(gridData.dataErrors(:));
-    levels = logspace(log10(minError), log10(1e+3*minError), numLevels);
-    contour3(xLRange, nLRange, gridData.dataErrors, ...
-        levels, ...
-        'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
-    xlim([0 1])
-    ylim([0 1])
-end
-
 
 end
 
@@ -174,7 +117,7 @@ for ii = 1:numel(nLGrid)
     [row, col] = ind2sub(size(P.results.I), ii);
     ISimulated(row, col, :) = P.results.I(:);
     
-    runtime = PrintTimeRemaining("FindOptimalHepaticClearance", ...
+    runtime = PrintTimeRemaining("FindFindOptimal", ...
         runtime, ii, numel(nLGrid), P);
 end
 
@@ -187,20 +130,20 @@ saveStruct = struct(...
     'objectiveValues', objectiveValues, ...
     'ISimulated', ISimulated);
 
-[P, hasGrids] = GetPersistent(P, "OptimalHepaticGrids");
+[P, hasGrids] = GetPersistent(P, "nLxLGrids");
 if ~hasGrids
-    P.persistents.OptimalHepaticGrids = {};
+    P.persistents.(GRIDNAME) = {};
 end
 
-P.persistents.OptimalHepaticGrids{end+1} = saveStruct;
+P.persistents.(GRIDNAME){end+1} = saveStruct;
 
 end
 
 
 function MakePlots(P)
-DP = DebugPlots().FindOptimalHepaticClearance;
+DP = DebugPlots().FindOptimal;
 
-gridData = P.persistents.OptimalHepaticGrids{end};
+gridData = P.persistents.nLxLGrids{end};
 objectiveValues = gridData.objectiveValues;
 nLGrid = gridData.nLGrid;
 xLGrid = gridData.xLGrid;

@@ -40,9 +40,8 @@ for ii = 1:length(patientSet)
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
     
-    %% Find Optimal Hepatic Clearance
-    
-    name = "OptimalHepaticClearance";
+    %% Find Optimal Parameters  
+    name = "FindOptimal";
     if isfield(P.results, name)
         tt = tt + 1;
         if tt > length(tables)
@@ -51,6 +50,7 @@ for ii = 1:length(patientSet)
         tables{tt}.Properties.Description = name;
         
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "minGridMSE");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "minGridSSE");
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "minimalErrorRegionSize");
         
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "nLRange", @diff);
@@ -59,6 +59,9 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @diff);
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @(x) x(1), "xLRangeLower");
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @(x) x(end), "xLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "JLKRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "JLKRange", @(x) x(1), "JLKLower");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "JLKRange", @(x) x(end), "JLKUpper");
     end
     
     

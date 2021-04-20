@@ -111,7 +111,7 @@ end
 
 
 function MakePlots(P, plotvars)
-DP = DebugPlots().FitHepaticClearance;
+DP = DebugPlots().IntegralFit;
 CONST = LoadConstants();
 
 %% Graphical Identifiability Method (Docherty, 2010)

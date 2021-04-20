@@ -70,7 +70,7 @@ adjP = fitP;
 adjP.results.Uen = adjUen;
 
 % Fit.
-adjP = FitHepaticClearance(adjP);
+adjP = IntegralFitnLxL(adjP);
 fitP.results.nL = adjP.results.nL;
 fitP.results.xL = adjP.results.xL;
 
@@ -85,7 +85,7 @@ findP.patientCode = findP.patientCode + "find";
 
 [findP, hasMSE] = GetPersistent(findP, "stddevMSE");
 if ~hasMSE
-    findP = FitHepaticClearance(findP);    
+    findP = IntegralFitnLxL(findP);    
     stddev = 5/100;
     N = 1000;
     findP = AnalyseInsulinVariance(findP, stddev, N);
@@ -93,7 +93,7 @@ end
 
 % Run grid search.
 gridSettings = {[-0.1 0.775], [0.075 0.95], 0.025};
-findP = FindOptimalHepaticClearance(findP, "grid", gridSettings{:});
+findP = FindOptimalnLxL(findP, "grid", gridSettings{:});
 
 % Simulate.
 findP = FindGutEmptyingRate(findP);

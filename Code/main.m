@@ -16,7 +16,7 @@ tStart = tic;
 %% Select Recipe
 % recipeFunction = @SimpleSim;
 % recipeFunction = @GridSearchSim;
-recipeFunction = @InputGridSearchSim;
+recipeFunction = @JLKGridSearchSim;
 % resultsTag = "Penalised";
 
 % %% Select Data
@@ -36,10 +36,12 @@ runtime = tic;
 for ii = 1:numPatients
     runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii}, true);
     
+    % TEMP
     nLArray = [0.1 0.1 0.1...
                0.1 0.1...
                0.15 0.06 0.14 0.06 0.16];
     patientSet{ii}.results.nL = nLArray(ii);
+    % \TEMP
 
     patientsOut = recipeFunction(patientSet{ii});
     patientSetOut = [patientSetOut patientsOut];    

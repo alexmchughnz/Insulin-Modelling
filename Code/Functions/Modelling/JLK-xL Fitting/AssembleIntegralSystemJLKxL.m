@@ -46,19 +46,17 @@ cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 CJ = cumtrapz(tArray, cj);
 CX = cumtrapz(tArray, cx);
 
-intIaI = kIaI*cumtrapz(tArray, I./(1 + GC.alphaI*I));
-intI = kI*cumtrapz(tArray, I);
-intIQ = kIQ*cumtrapz(tArray, I-Q);
+intIaITerm = kIaI*cumtrapz(tArray, I./(1 + GC.alphaI*I));
+intITerm = kI*cumtrapz(tArray, I);
+intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
-RHS = [I -I0 intIaI intI intIQ];
+RHS = [I -I0 intIaITerm intITerm intIQTerm];
 C = sum(RHS, CONST.ROWWISE);
 
 %% Make Minute-Wise Q and I Functions
 % I(t) = I(t0) + CJ*JLK + CX*(1-xL) - kIaI*int{I/(1+aI*I)} - kI*int{I} - kIQ*int{I-Q}
-IFunc = @(JLK, xL, I, Q) I(1) + CJ*JLK + CX*(1-xL) ...
-    - kIaI*cumtrapz(tArray, I./(1 + GC.alphaI*I)) ...
-    - kI*cumtrapz(tArray, I) - kIQ*cumtrapz(tArray, I-Q);
+IFunc = @(JLK, xL, I, Q) I(1) + CJ*JLK + CX*(1-xL) - intIaITerm - intITerm - intIQTerm;
 
 % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
 QFunc = @(I, Q) Q(1) - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);

@@ -1,4 +1,4 @@
-function [A, b, IFunc, QFunc] = AssembleIntegralSystemnLxL(P, I, Q)
+function [A, b, IFunc, QFunc] = AssembleIntegralSystemJLKnL(P, I, Q)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
@@ -27,11 +27,11 @@ Uen = P.results.Uen;
 IInput = P.results.IInput;
 
 %% Get Coefficients
-% Consider dI/dt = k + cx*(1-xL) - kI*I - cn*nL - kIQ*(I-Q):
-cx = Uen/GC.VI;
+% Consider dI/dt = cj*JLK - cn*nL + kU*Uen - kI*I - kIQ*(I-Q):
+cj = IInput/GC.VI;
 cn = I./(1 + GC.alphaI*I);
 
-k = IInput/GC.VI;
+kU = (1 - P.results.xL)/GC.VI;
 kI = GC.nK;
 kIQ = GC.nI./GC.VI;
 
@@ -40,31 +40,31 @@ cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
 cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
 %% Integrate I Equation
-% I(t) - I(t0) = int{k} + int{cx}*(1-xL) - kI*int{I} - int{cn}*nL - kIQ*int{I-Q}
-% Defining CN = -int{cn} and CX = int{cx}
-% CN*nL + CX*(1-xL) = I(t) - I(t0) - int{k} + kI*int{I} + kIQ*int{I-Q} := C
+% I(t) - I(t0) = int{cj}*JLK - int{cn}*nL + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+% Defining CJ = int{cj} and CN = -int{cx}
+% CJ*JLK + CN*nL = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} := C
+CJ = cumtrapz(tArray, cj);
 CN = -cumtrapz(tArray, cn);
-CX = cumtrapz(tArray, cx);
 
-intkTerm = cumtrapz(tArray, k);
+intUTerm = kU*cumtrapz(tArray, Uen);
 intITerm = kI*cumtrapz(tArray, I);
 intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
-RHS = [I -I0 -intkTerm intITerm intIQTerm];
+RHS = [I -I0 intUTerm intITerm intIQTerm];
 C = sum(RHS, CONST.ROWWISE);
 
 %% Make Minute-Wise Q and I Functions
-% I(t) = I(t0) + CN*nL + CX*(1-xL) + int{k} - kI*int{I} - kIQ*int{I-Q}
-IFunc = @(nL, xL, I, Q) I(1) + CN*nL + CX*(1-xL) + intkTerm - intITerm - intIQTerm;
+% I(t) = I(t0) + CJ*JLK + CN*nL + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+IFunc = @(JLK, nL, I, Q) I(1) + CJ*JLK + CN*nL + intUTerm - intITerm - intIQTerm;
 
 % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
 QFunc = @(I, Q) Q(1) - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
 
 %% Assemble MLR System
 % Extract values at measurement points.
+vCJ = CJ(iiMeas);
 vCN = CN(iiMeas);
-vCX = CX(iiMeas);
 vC = C(iiMeas);
 
 % Find time width of each integral wedge. 
@@ -77,9 +77,9 @@ dt = t2 - t1;
 
 % Assemble MLR system by evaluating integral between 
 % sample points, and normalising by integral width (dt):
-% [CN(t) CX(t)] * (nL; 1-xL) = [C(t)] @ measurement times only
-A(:,1) = (vCN(second) - vCN(first)) ./ dt;  
-A(:,2) = (vCX(second) - vCX(first)) ./ dt;
+% [CJ(t) CX(t)] * (JLK; 1-xL) = [C(t)] @ measurement times only
+A(:,1) = (vCJ(second) - vCJ(first)) ./ dt;  
+A(:,2) = (vCN(second) - vCN(first)) ./ dt;
 b = (vC(second) - vC(first)) ./ dt;
     
 end

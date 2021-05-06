@@ -77,7 +77,7 @@ function P = EvaluateGrid(P, nLGrid, xLGrid)
 global CONFIG
 runtime = tic;
 
-ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
+ISimulated = cell(size(nLGrid));
 objectiveValues = zeros(size(nLGrid));
 integralErrors = zeros(size(nLGrid));
 dataErrors = zeros(size(nLGrid));
@@ -116,14 +116,11 @@ for ii = 1:numel(nLGrid)
     integralErrors(ii) = integralError;
     dataErrors(ii) = dataError;
     objectiveValues(ii) = totalObjectiveValue;
-    [row, col] = ind2sub(size(P.results.I), ii);
-    ISimulated(row, col, :) = P.results.I(:);
+    ISimulated{ii} = P.results.I;
     
-    delay = 10;
-    if mod(ii, delay) == 0
+    interval = 10;
     runtime = PrintTimeRemaining("FindOptimalHepaticClearance", ...
-        runtime, ii, numel(nLGrid)/delay, P);
-    end
+        runtime, ii, numel(nLGrid), P, false, interval);
 end
 
 % Export results.

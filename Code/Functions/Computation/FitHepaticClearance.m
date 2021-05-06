@@ -27,12 +27,12 @@ tArray = P.results.tArray;
 if P.source == "DISST"
     % Need to add 'false' point for improved fitting.    
     [vIBolus, iiBolus] = max(P.results.IBolus);
-    tIBolus = tMinutes(iiBolus);
+    tIBolus = P.results.tArray(iiBolus);
     
     [tI, order] = sort([tI; tIBolus]);
     iiBeforeFakePoint = find(order == length(order)) - 1;
     
-    fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
+    fakeI = vIBolus/P.parameters.GC.VI + vI(iiBeforeFakePoint); % [mU/L]
     
     fakeData = [vI; fakeI];
     vI = fakeData(order);

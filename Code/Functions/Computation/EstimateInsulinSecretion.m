@@ -22,8 +22,8 @@ PrintStatusUpdate(P, "Estimating Uen...");
 %% Interpolation
 ppCPep = griddedInterpolant(tCPep, vCPep);
 
-% Make 1-minute spaced time vector, and interpolate CPep values.
-tArray = [P.data.simTime(1) : 1 : P.data.simTime(end)]';  % Minute-wise time range [min]
+% Interpolate CPep values.
+tArray = P.results.tArray;  % Time range [min]
 dt = tArray(2) - tArray(1);
 CPepArray = ppCPep(tArray);
 
@@ -46,9 +46,8 @@ dvCPep = [diff(CPepArray)/dt; 0];
 S = (dvCPep + (CP.k1+CP.k3).*CPepArray - CP.k2*Y);  % C-peptide secretion [(pmol/L)/min]
 Uen = CONST.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 
-% Expand to original time, and write value to patient struct.
-dt = P.results.tArray(2) - P.results.tArray(1);
-P.results.Uen = repelem(Uen, round(1/dt), 1);
+% Write value to patient struct.
+P.results.Uen = Uen;
 
 %% Plotting
 MakePlots(P);

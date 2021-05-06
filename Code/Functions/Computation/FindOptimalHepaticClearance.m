@@ -70,68 +70,11 @@ P.results.OptimalHepaticClearance.minGridMSE = objectiveMin;
 %% Plotting
 MakePlots(P);
 
-% Error Comparison
-if DP.ErrorComparison
-    figTitle = "Error Comparison";
-    MakeDebugPlot(figTitle, P, DP);
-    
-    % Integral Error
-    subplot(1,2,1)
-    hold on
-    
-    % Define surface parameters.
-    nLRange = sort(unique(nLGrid));
-    xLRange = sort(unique(xLGrid));  
-    
-    % Plot surface.
-    surf(xLRange, nLRange, gridData.integralErrors, ...
-        'HandleVisibility', 'off', ...
-        'EdgeColor', 'none', ...
-        'FaceColor', 'interp');
-    
-    % Plot contour.
-    minError = min(gridData.integralErrors(:));
-    levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
-    contour3(xLRange, nLRange, gridData.integralErrors, ...
-        levels, ...
-        'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
-    xlim([0 1])
-    ylim([0 1])
-    
-    
-    % Data Error
-    subplot(1,2,2)
-    hold on
-    
-    % Define surface parameters.
-    nLRange = sort(unique(nLGrid));
-    xLRange = sort(unique(xLGrid));  
-    
-    % Plot surface.
-    surf(xLRange, nLRange, gridData.dataErrors, ...
-        'HandleVisibility', 'off', ...
-        'EdgeColor', 'none', ...
-        'FaceColor', 'interp');    
-    
-    % Plot contour.
-    minError = min(gridData.dataErrors(:));
-    levels = logspace(log10(minError), log10(1e+3*minError), numLevels);
-    contour3(xLRange, nLRange, gridData.dataErrors, ...
-        levels, ...
-        'Color', 'r', ...
-        'HandleVisibility', 'off');
-    
-    xlim([0 1])
-    ylim([0 1])
-end
-
-
 end
 
 
 function P = EvaluateGrid(P, nLGrid, xLGrid)
+global CONFIG
 runtime = tic;
 
 ISimulated = zeros([size(nLGrid) length(P.results.tArray)]);
@@ -144,8 +87,10 @@ A = P.results.integrals.A;
 b = P.results.integrals.b;
 
 for ii = 1:numel(nLGrid)
-    message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
-    PrintStatusUpdate(P, message, true);
+    if CONFIG.HIGHDETAIL
+        message = sprintf('Searching at nL/xL = %g/%g...', nLGrid(ii), xLGrid(ii));
+        PrintStatusUpdate(P, message, true);
+    end
     
     % Apply nL/xL for iteration.
     P.results.nL = nLGrid(ii);
@@ -165,7 +110,7 @@ for ii = 1:numel(nLGrid)
     dataError = sum((vI-simI).^2);
     
     scale = 0;
-    totalObjectiveValue = integralError + scale*dataError;
+    totalObjectiveValue = dataError;  % FOR BMS DATA
     
     % Save residuals.
     integralErrors(ii) = integralError;
@@ -174,8 +119,11 @@ for ii = 1:numel(nLGrid)
     [row, col] = ind2sub(size(P.results.I), ii);
     ISimulated(row, col, :) = P.results.I(:);
     
+    delay = 10;
+    if mod(ii, delay) == 0
     runtime = PrintTimeRemaining("FindOptimalHepaticClearance", ...
-        runtime, ii, numel(nLGrid), P);
+        runtime, ii, numel(nLGrid)/delay, P);
+    end
 end
 
 % Export results.

@@ -93,15 +93,12 @@ for ii = 1:length(patientSet)
     P.data.GDelivery = "intravenous";
     
     vGBolus = min(0.3*P.data.mass, 30);     % [g]
-    P.data.vGBolus = vGBolus / C.MGlucose * 1e+3;  % [mmol]
+    P.data.vGBolus = vGBolus / CONST.MGlucose * 1e+3;  % [mmol]
     P.data.tGBolus = 0;                            % [min]
     P.data.TGBolus = 1;                            % [min]
         
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray));
-    
-    %% Other
-    P = GetCPeptideParameters(P);
     
     %% Save
     patientSet{ii} = P;

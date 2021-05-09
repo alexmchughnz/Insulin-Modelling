@@ -23,12 +23,12 @@ if P.data.IType == "human"
         end
         
         IInput = SC.ks3*P.results.QLocal;  % [mU/min]
-        
-    else
-        IInput = 0;
     end
     
+else
+    IInput = zeros(size(P.results.tArray));
 end
+
 
 P.results.IInput = IInput; % [mU/min]
 

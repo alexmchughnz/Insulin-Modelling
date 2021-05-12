@@ -2,7 +2,7 @@ function P = StepwiseFitJLKnL(P, forceParameters)
 % Fits data using MLR to find JLK and nL.
 % INPUT:
 %   P   - patient struct
-%   forceJLKxL - [JLK, xL] to force (for plots)
+%   forceParameters - [JLK, xL] to force (for plots)
 % OUTPUT:
 %   P   - modified patient struct with JLK and xL
 
@@ -21,20 +21,20 @@ if exist('forceJLKxL', 'var')
 end
 
 %% Integral
-[A, b, IFunc, QFunc] = AssembleIntegralSystemJLKnL(P);
+[A, b, IFunc, QFunc] = AssembleIntegralSystemnLxL(P);
     
-firstInterval = 1:2;
+firstInterval = 1:4;
 completeInterval = 1:length(b);
 
 % Fix xL then fit nL over first 10 minutes.
 xL = 0.7;
 
-CJ1 = A(firstInterval, 1);
+CX1 = A(firstInterval, 1);
 CN1 = A(firstInterval, 2);
 b1 = b(firstInterval);
 
 % CN*nL = b - CX*xL
-nL = CN1 \ (b1 - CN1*xL);
+P.results.nL = CN1 \ (b1 - CX1*xL);
 
 % Now over whole interval, fit JLK.
 CN = A(:, 1);
@@ -44,7 +44,6 @@ CX = A(:, 2);
 nL = CN \ (b - CX*xL);
 P.results.integrals.A = A;
 P.results.integrals.b = b;
-%% Results
 
 
 %% Results

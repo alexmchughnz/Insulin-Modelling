@@ -1,7 +1,10 @@
-function [A, b, IFunc, QFunc] = AssembleIntegralSystemJLKnL(P, I, Q)
+function [A, b, IFunc, QFunc, JLKName, nLName] = AssembleIntegralSystemJLKnL(P, I, Q)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
+
+JLKName = "JLK";
+nLName = "nL";
 
 %% Setup
 tArray = P.results.tArray;

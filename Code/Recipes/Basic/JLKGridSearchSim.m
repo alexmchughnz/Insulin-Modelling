@@ -13,7 +13,9 @@ DebugPlots(plots);
 
 %% Setup
 P = EstimateInsulinSecretion(P);
-P = IntegralFitJLKxL(P);  % To get A and b matrices.
+P.results.xL = 0.7; % FIXED
+P = IntegralFitParameters(P, @AssembleIntegralSystemJLKnL);
+% P = StepwiseFitJLKnL(P);  % To get A and b matrices.
 
 [P, hasMSE] = GetPersistent(P, "stddevMSE");
 if ~hasMSE

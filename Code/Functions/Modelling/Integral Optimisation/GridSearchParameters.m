@@ -1,14 +1,13 @@
-function P = FindOptimalJLKxL(P, makeNewGrid, gridOptions)
-% Finds optimal JLK and xL using grid search.
+function P = GridSearchParameters(P, integralSystemFunc, makeNewGrid, gridOptions)
+% Finds optimal parameters using grid search.
 % Runs a LOT of forward simulations - very slow!
 % INPUT:
 %   P           - patient struct
 %   makeNewGrid - bool for if to load or re-simulate
 %   gridOptions - struct with ranges and stepsizes
 % OUTPUT:
-%   P   - modified patient struct with nL and xL
+%   P   - modified patient struct with optimal parameters.
 
-GRIDNAME = "JLKxLGrids";
 GRIDDEFAULTS.JLKRange = [0, 1.0];
 GRIDDEFAULTS.JLKStep = 0.1;
 GRIDDEFAULTS.xLRange = [0.075, 0.95];
@@ -16,6 +15,10 @@ GRIDDEFAULTS.xLStep = 0.025;
 
 
 %% Setup
+% Run integral system to get names.
+[~, ~, ~, ~, paramNames] = integralSystemFunc(P);
+gridName = paramNames(1) + paramNames(2) + "Grids";
+
 if ~exist("gridOptions", "var")
     gridOptions = GRIDDEFAULTS;
 end
@@ -23,79 +26,80 @@ end
 [P, hasGrids] = GetPersistent(P, GRIDNAME);
 if makeNewGrid || ~hasGrids
     % Load grid settings.
-    JLKRange = gridOptions.JLKRange;
-    JLKStep = gridOptions.JLKStep;
-    xLRange = gridOptions.xLRange;
-    xLStep = gridOptions.xLStep;
+    param1Range = gridOptions.range(1);
+    param1Step = gridOptions.step(1);
+    param2Range = gridOptions.range(2);
+    param2Step = gridOptions.step(2);
     
     % Set up grid.
-    JLKRange = JLKRange(1) : JLKStep : JLKRange(end);
-    xLRange = xLRange(1) : xLStep : xLRange(end);
+    param1Range = param1Range(1) : param1Step : param1Range(end);
+    param2Range = param2Range(1) : param2Step : param2Range(end);
     
-    [xLGrid, JLKGrid] = meshgrid(xLRange, JLKRange);
+    [param2Grid, param1Grid] = meshgrid(param2Range, param1Range);
     
     % Generate grid if we don't have one saved.
-    P = EvaluateGrid(P, JLKGrid, xLGrid, GRIDNAME);
+    P = EvaluateGrid(P, param1Grid, param2Grid, integralSystemFunc, gridName);
 end
 
-gridData = P.persistents.(GRIDNAME){end};
+gridData = P.persistents.(gridName){end};
 
 
-%% Find Optimal nL/xL
+%% Find Optimal nL/param2
 % Get minimum.
 objectiveValues = gridData.objectiveValues;
-JLKGrid = gridData.JLKGrid;
-xLGrid = gridData.xLGrid;
+param1Grid = gridData.param1Grid;
+param2Grid = gridData.param2Grid;
 
 [objectiveMin, iiMinimum] = min(objectiveValues(:));
 
-P.results.JLK = JLKGrid(iiMinimum);
-P.results.xL = xLGrid(iiMinimum);
+P.results.param1 = param1Grid(iiMinimum);
+P.results.param2 = param2Grid(iiMinimum);
 
 % Get size of minimal error region.
 deltaMSE = abs(objectiveValues - objectiveMin);
 isWithin1SD = (deltaMSE <= P.persistents.stddevMSE);
 
-optimalJLK = JLKGrid(isWithin1SD);
-optimalxL = xLGrid(isWithin1SD);
+optimalParam1 = param1Grid(isWithin1SD);
+optimalParam2 = param2Grid(isWithin1SD);
 
-[L, H] = bounds(optimalJLK);
-P.results.FindOptimal.JLKRange = [L H];
+[L, H] = bounds(optimalParam1);
+P.results.GridSearch.(paramNames(1)+Range) = [L H];
 
-[L, H] = bounds(optimalxL);
-P.results.FindOptimal.xLRange = [L H];
+[L, H] = bounds(optimalParam2);
+P.results.GridSearch.(paramNames(2)+Range) = [L H];
 
-P.results.FindOptimal.minimalErrorRegionSize = sum(isWithin1SD(:));
-P.results.FindOptimal.minGridMSE = objectiveMin;
+P.results.GridSearch.minimalErrorRegionSize = sum(isWithin1SD(:));
+P.results.GridSearch.minGridMSE = objectiveMin;
 
 
 %% Plotting
-plotvars.GRIDNAME = GRIDNAME;
+plotvars.gridName = gridName;
+plotvars.param1Name = paramNames(1);
+plotvars.param2Name = paramNames(2);
 
 MakePlots(P, plotvars);
 
 end
 
 
-function P = EvaluateGrid(P, JLKGrid, xLGrid, GRIDNAME)
+function P = EvaluateGrid(P, param1Grid, param2Grid, integralSystemFunc, gridName)
 runtime = tic;
 
-ISimulated = zeros([size(JLKGrid) length(P.results.tArray)]);
-objectiveValues = zeros(size(JLKGrid));
-integralErrors = zeros(size(JLKGrid));
-dataErrors = zeros(size(JLKGrid));
+[A, b, ~, ~, paramNames] = integralSystemFunc(P);
+
+% Set up results grids.
+objectiveValues = zeros(size(param1Grid));
+integralErrors = zeros(size(param1Grid));
+dataErrors = zeros(size(param1Grid));
 
 % Get integral system for patient.
-A = P.results.integrals.A;
-b = P.results.integrals.b;
-
-for ii = 1:numel(JLKGrid)
-    message = sprintf('Searching at JLK/xL = %g/%g...', JLKGrid(ii), xLGrid(ii));
+for ii = 1:numel(param1Grid)
+    message = sprintf('Searching at %s/%s = %g/%g...', paramNames(1), paramNames(2), param1Grid(ii), param2Grid(ii));
     PrintStatusUpdate(P, message, true);
     
-    % Apply JLK/xL for iteration.
-    P.results.JLK = JLKGrid(ii);
-    P.results.xL = xLGrid(ii);
+    % Apply param1/param2 for iteration.
+    P.results.(paramNames(1)) = param1Grid(ii);
+    P.results.(paramNames(2)) = param2Grid(ii);
     
     % Get other parameters and forward simulate models.
     P = FindGutEmptyingRate(P);
@@ -103,64 +107,61 @@ for ii = 1:numel(JLKGrid)
     P = SolveSystem(P);
     
     % Determine error.
-    x = [P.results.JLK; 1 - P.results.xL];
+    x = [P.results.(paramNames(1));
+         P.results.(paramNames(2))];
     integralError = sum((A*x - b).^2);
     
     [tI, vI] = GetData(P.data.I);
     [~, simI] = GetResultsSample(P, tI, P.results.I);
     dataError = sum((vI-simI).^2);
     
-    scale = 0;
-    totalObjectiveValue = integralError + scale*dataError;
+    totalObjectiveValue = integralError;
     
     % Save residuals.
     integralErrors(ii) = integralError;
     dataErrors(ii) = dataError;
     objectiveValues(ii) = totalObjectiveValue;
-    [row, col] = ind2sub(size(P.results.I), ii);
-    ISimulated(row, col, :) = P.results.I(:);
     
-    runtime = PrintTimeRemaining("FindOptimal", ...
-        runtime, ii, numel(JLKGrid), P);
+    runtime = PrintTimeRemaining("GridSearchParameters", ...
+        runtime, ii, numel(param1Grid), P);
 end
 
 % Export results.
 saveStruct = struct(...
-    'JLKGrid', JLKGrid, ...
-    'xLGrid', xLGrid, ...
+    'param1Grid', param1Grid, ...
+    'param2Grid', param2Grid, ...
     'integralErrors', integralErrors, ...
     'dataErrors', dataErrors, ...
-    'objectiveValues', objectiveValues, ...
-    'ISimulated', ISimulated);
+    'objectiveValues', objectiveValues);
 
-[P, hasGrids] = GetPersistent(P, GRIDNAME);
+[P, hasGrids] = GetPersistent(P, gridName);
 if ~hasGrids
-    P.persistents.(GRIDNAME) = {};
+    P.persistents.(gridName) = {};
 end
 
-P.persistents.(GRIDNAME){end+1} = saveStruct;
+P.persistents.(gridName){end+1} = saveStruct;
 
 end
 
 
 function MakePlots(P, plotvars)
-DP = DebugPlots().FindOptimal;
+DP = DebugPlots().GridSearchParameters;
 
-gridData = P.persistents.(plotvars.GRIDNAME){end};
+gridData = P.persistents.(plotvars.gridName){end};
 objectiveValues = gridData.objectiveValues;
-JLKGrid = gridData.JLKGrid;
-xLGrid = gridData.xLGrid;
+param1Grid = gridData.param1Grid;
+param2Grid = gridData.param2Grid;
 
 
 %% Error Surface
 if DP.ErrorSurface
-    figTitle = "JLK-xL Error Surface";
+    figTitle = sprintf("%s-%s Error Surface", plotvars.param1Name, plotvars.param2Name);
     MakeDebugPlot(figTitle, P, DP);
     
     %% Surface
     % Define surface parameters.
-    JLKRange = sort(unique(JLKGrid));
-    xLRange = sort(unique(xLGrid));
+    param1Range = sort(unique(param1Grid));
+    param2Range = sort(unique(param2Grid));
     gridMin = min(objectiveValues(:));
     
     if isfield(P.data, 'stddevMSE')
@@ -179,7 +180,7 @@ if DP.ErrorSurface
     CO(:,:,3) = ~isWithin3SD * 1; % blue
     
     % Plot surface.
-    surf(xLRange, JLKRange, objectiveValues, CO,...
+    surf(param2Range, param1Range, objectiveValues, CO,...
         'HandleVisibility', 'off', ...
         'EdgeColor', 'none', ...
         'FaceColor', 'interp');
@@ -191,7 +192,7 @@ if DP.ErrorSurface
     levels = logspace(log10(minError), log10(1e+3*minError), numLevels); % non-linear spacing
     
     % Plot contour.
-    contour3(xLRange, JLKRange, objectiveValues, ...
+    contour3(param2Range, param1Range, objectiveValues, ...
         levels, ...
         'Color', 'r', ...
         'HandleVisibility', 'off');
@@ -205,10 +206,10 @@ if DP.ErrorSurface
     zlabel("Mean of squared errors [(mU/min)^2]")
     
     % Add physiological region.
-    xLPhys = [0.5 0.9];
-    JLKPhys = [0.1 0.3];
-    x = xLPhys([1 1 end end]);
-    y = JLKPhys([1 end end 1]);
+    param2Phys = [0.5 0.9];
+    param1Phys = [0.1 0.3];
+    x = param2Phys([1 1 end end]);
+    y = param1Phys([1 end end 1]);
     z = 1e+6 * ones(1, 4);
     patch(x, y, z, 'r',...
         'FaceColor', '#D95319', ...

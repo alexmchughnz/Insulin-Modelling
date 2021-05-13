@@ -40,8 +40,8 @@ for ii = 1:length(patientSet)
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
     
-    %% Find Optimal Parameters  
-    name = "FindOptimal";
+    %% Grid Search Parameters  
+    name = "GridSearch";
     if isfield(P.results, name)
         tt = tt + 1;
         if tt > length(tables)

@@ -1,20 +1,23 @@
-function PArray = GridSearchSim(P)
+function P = nLxLGridSearchSim(P)
 % Recipe for basic fitting and forward simulating a patient.
 % nL/xL found by grid search.
 % INPUTS:
 %   P  - patient struct
 % OUTPUT:
-%   PArray  - updated patient structs
+%   P  - updated patient struct
+
+%% Options
+gridOptions.range = {[0 1], [0 1]};
+gridOptions.step = [0.2];
+
 
 %% Plots
 plots = DebugPlots();
-
 DebugPlots(plots);
 
 
 %% Setup
 P = EstimateInsulinSecretion(P);
-P = IntegralFitnLxL(P);  % To get A and b matrices.
 
 [P, hasMSE] = GetPersistent(P, "stddevMSE");
 if ~hasMSE
@@ -26,21 +29,12 @@ if ~hasMSE
     P.persistents.stddevMSE = 1000;
 end
 
-% Copy out P results from integral.
-integralP = P;
-integralP.patientCode = integralP.patientCode + "(integral)";
-
-gridSettings = {[0.02 1], [0.02 1], 0.02};
-
 newGrid = true;
-P = FindOptimalnLxL(P, newGrid, gridSettings{:});
+P = GridSearchParameters(P, @AssembleIntegralSystemnLxL, newGrid, gridOptions);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
 P = SolveSystem(P, true);
-
-
-PArray = {P integralP};
 
 end
 

@@ -105,13 +105,12 @@ delta2Norm = norm(CParam1Norm - CParam2Norm) / length(CParam1);
 P.results.delta2Norm = delta2Norm;
 
 bNorm = MeanNormalise(b);
-P.results.("delta2Norm" + param1Name) = norm(CParam1Norm - bNorm) / length(CParam1);
-P.results.("delta2Norm" + param2Name) = norm(CParam2Norm - bNorm) / length(CParam1);
+P.results.("delta2Norm" + paramNames(1)) = norm(CParam1Norm - bNorm) / length(CParam1);
+P.results.("delta2Norm" + paramNames(2)) = norm(CParam2Norm - bNorm) / length(CParam1);
 
 
 %% Plotting
-plotvars.param1Name = param1Name;
-plotvars.param2Name = param2Name;
+plotvars.paramNames = paramNames;
 plotvars.param1Array = param1Array;
 plotvars.param2Array = param2Array;
 plotvars.CParam1Norm = CParam1Norm;
@@ -134,10 +133,10 @@ if DP.GraphicalID
     tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWWISE);
     
     plt = plot(tIntegrals, plotvars.CParam1Norm);
-    plt.DisplayName = plotvars.param1Name + " coeff.";
+    plt.DisplayName = plotvars.paramNames(1) + " coeff.";
     
     plt = plot(tIntegrals, plotvars.CParam2Norm);
-    plt.DisplayName = plotvars.param2Name + " coeff.";
+    plt.DisplayName = plotvars.paramNames(2) + " coeff.";
     
     plt = plot(tIntegrals, plotvars.bNorm);
     plt.DisplayName = "$b$";
@@ -164,6 +163,6 @@ if DP.Convergence
     plot(plotvars.param1Array, 'b')
     plot(plotvars.param2Array, 'r')
     
-    legend(plotvars.param1Name, plotvars.param2Name)
+    legend(plotvars.paramNames(1), plotvars.paramNames(2))
 end
 end

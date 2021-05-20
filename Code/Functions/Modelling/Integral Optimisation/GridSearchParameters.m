@@ -26,8 +26,8 @@ if makeNewGrid || ~hasGrids
     % Load grid settings.
     param1Range = gridOptions.range{1};
     param1Step = gridOptions.step(1);
-    param2Range = gridOptions.range{2};
-    param2Step = gridOptions.step(2);
+    param2Range = gridOptions.range{end};
+    param2Step = gridOptions.step(end);
     
     % Set up grid.
     param1Range = param1Range(1) : param1Step : param1Range(end);
@@ -72,8 +72,7 @@ P.results.GridSearch.minGridMSE = objectiveMin;
 
 %% Plotting
 plotvars.gridName = gridName;
-plotvars.param1Name = paramNames(1);
-plotvars.param2Name = paramNames(2);
+plotvars.paramNames = paramNames;
 
 MakePlots(P, plotvars);
 
@@ -153,7 +152,7 @@ param2Grid = gridData.param2Grid;
 
 %% Error Surface
 if DP.ErrorSurface
-    figTitle = sprintf("%s-%s Error Surface", plotvars.param1Name, plotvars.param2Name);
+    figTitle = sprintf("%s-%s Error Surface", plotvars.paramNames(1), plotvars.paramNames(2));
     MakeDebugPlot(figTitle, P, DP);
     
     %% Surface
@@ -199,8 +198,8 @@ if DP.ErrorSurface
     xlim([0 1])
     ylim([0 1])
     
-    xlabel("$x_L$ [min$^{-1}$]")
-    ylabel("$J_LK$")
+    xlabel(plotvars.paramNames(2))
+    ylabel(plotvars.paramNames(1))
     zlabel("Mean of squared errors [(mU/min)^2]")
     
     % Add physiological region.

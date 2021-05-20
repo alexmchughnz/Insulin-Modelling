@@ -13,7 +13,7 @@ DebugPlots(plots);
 
 %% Functions
 P = EstimateInsulinSecretion(P);
-P = IntegralFitnLxL(P);
+P = IntegralFitParameters(P, @AssembleIntegralSystemnLxL);
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
 P = SolveSystem(P, true);

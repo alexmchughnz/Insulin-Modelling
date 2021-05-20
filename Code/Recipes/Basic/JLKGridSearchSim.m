@@ -30,11 +30,6 @@ if ~hasMSE
     P.persistents.stddevMSE = 1000;
 end
 
-% Copy out P results from integral.
-integralP = P;
-integralP.patientCode = integralP.patientCode + "(integral)";
-
-
 newGrid = true;
 P = GridSearchParameters(P, @AssembleIntegralSystemJLKnL, newGrid, gridOptions);
 

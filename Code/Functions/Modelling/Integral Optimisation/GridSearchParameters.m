@@ -8,10 +8,8 @@ function P = GridSearchParameters(P, integralSystemFunc, makeNewGrid, gridOption
 % OUTPUT:
 %   P   - modified patient struct with optimal parameters.
 
-GRIDDEFAULTS.JLKRange = [0, 1.0];
-GRIDDEFAULTS.JLKStep = 0.1;
-GRIDDEFAULTS.xLRange = [0.075, 0.95];
-GRIDDEFAULTS.xLStep = 0.025;
+GRIDDEFAULTS.range = {[0 1], [0 1]};
+GRIDDEFAULTS.step = [0.1 0.025];
 
 
 %% Setup
@@ -23,12 +21,12 @@ if ~exist("gridOptions", "var")
     gridOptions = GRIDDEFAULTS;
 end
 
-[P, hasGrids] = GetPersistent(P, GRIDNAME);
+[P, hasGrids] = GetPersistent(P, gridName);
 if makeNewGrid || ~hasGrids
     % Load grid settings.
-    param1Range = gridOptions.range(1);
+    param1Range = gridOptions.range{1};
     param1Step = gridOptions.step(1);
-    param2Range = gridOptions.range(2);
+    param2Range = gridOptions.range{2};
     param2Step = gridOptions.step(2);
     
     % Set up grid.
@@ -52,8 +50,8 @@ param2Grid = gridData.param2Grid;
 
 [objectiveMin, iiMinimum] = min(objectiveValues(:));
 
-P.results.param1 = param1Grid(iiMinimum);
-P.results.param2 = param2Grid(iiMinimum);
+P.results.(paramNames(1)) = param1Grid(iiMinimum);
+P.results.(paramNames(2)) = param2Grid(iiMinimum);
 
 % Get size of minimal error region.
 deltaMSE = abs(objectiveValues - objectiveMin);
@@ -63,10 +61,10 @@ optimalParam1 = param1Grid(isWithin1SD);
 optimalParam2 = param2Grid(isWithin1SD);
 
 [L, H] = bounds(optimalParam1);
-P.results.GridSearch.(paramNames(1)+Range) = [L H];
+P.results.GridSearch.(paramNames(1)+"Range") = [L H];
 
 [L, H] = bounds(optimalParam2);
-P.results.GridSearch.(paramNames(2)+Range) = [L H];
+P.results.GridSearch.(paramNames(2)+"Range") = [L H];
 
 P.results.GridSearch.minimalErrorRegionSize = sum(isWithin1SD(:));
 P.results.GridSearch.minGridMSE = objectiveMin;

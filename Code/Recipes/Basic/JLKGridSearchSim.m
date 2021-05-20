@@ -14,8 +14,6 @@ DebugPlots(plots);
 %% Setup
 P = EstimateInsulinSecretion(P);
 P.results.xL = 0.7; % FIXED
-P = IntegralFitParameters(P, @AssembleIntegralSystemJLKnL);
-% P = StepwiseFitJLKnL(P);  % To get A and b matrices.
 
 [P, hasMSE] = GetPersistent(P, "stddevMSE");
 if ~hasMSE
@@ -33,7 +31,7 @@ integralP.patientCode = integralP.patientCode + "(integral)";
 
 
 newGrid = true;
-P = FindOptimalJLKxL(P, newGrid);
+P = GridSearchParameters(P, @AssembleIntegralSystemJLKnL, newGrid);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

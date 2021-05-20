@@ -43,22 +43,22 @@ cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
 %% Integrate I Equation
 % I(t) - I(t0) = int{k} + int{cx}*(1-xL) - kI*int{I} - int{cn}*nL - kIQ*int{I-Q}
-% Defining CN = -int{cn} and CX = int{cx}
-% CN*nL + CX*(1-xL) = I(t) - I(t0) - int{k} + kI*int{I} + kIQ*int{I-Q} := C
+% Defining CN = -int{cn} and CX = -int{cx}
+% CN*nL + CX*xL = I(t) - I(t0) - int{k} + kI*int{I} + kIQ*int{I-Q} + CX := C
 CN = -cumtrapz(tArray, cn);
-CX = cumtrapz(tArray, cx);
+CX = -cumtrapz(tArray, cx);
 
 intkTerm = cumtrapz(tArray, k);
 intITerm = kI*cumtrapz(tArray, I);
 intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
-RHS = [I -I0 -intkTerm intITerm intIQTerm];
+RHS = [I -I0 -intkTerm intITerm intIQTerm CX];
 C = sum(RHS, CONST.ROWWISE);
 
 %% Make Minute-Wise Q and I Functions
-% I(t) = I(t0) + CN*nL + CX*(1-xL) + int{k} - kI*int{I} - kIQ*int{I-Q}
-IFunc = @(nL, xL, I, Q) I(1) + CN*nL + CX*(1-xL) + intkTerm - intITerm - intIQTerm;
+% I(t) = I(t0) + CN*nL + CX*xL + int{k} - kI*int{I} - kIQ*int{I-Q} - CX
+IFunc = @(nL, xL, I, Q) I(1) + CN*nL + CX*xL + intkTerm - intITerm - intIQTerm - CX;
 
 % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
 QFunc = @(I, Q) Q(1) - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
@@ -79,7 +79,7 @@ dt = t2 - t1;
 
 % Assemble MLR system by evaluating integral between 
 % sample points, and normalising by integral width (dt):
-% [CN(t) CX(t)] * (nL; 1-xL) = [C(t)] @ measurement times only
+% [CN(t) CX(t)] * (nL; xL) = [C(t)] @ measurement times only
 A(:,1) = (vCN(second) - vCN(first)) ./ dt;  
 A(:,2) = (vCX(second) - vCX(first)) ./ dt;
 b = (vC(second) - vC(first)) ./ dt;

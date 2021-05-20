@@ -6,6 +6,11 @@ function PArray = JLKGridSearchSim(P)
 % OUTPUT:
 %   PArray  - updated patient structs
 
+%% Options
+gridOptions.range = {[0 1], [0 1]};
+gridOptions.step = [0.1, 0.1];
+
+
 %% Plots
 plots = DebugPlots();
 DebugPlots(plots);
@@ -31,7 +36,7 @@ integralP.patientCode = integralP.patientCode + "(integral)";
 
 
 newGrid = true;
-P = GridSearchParameters(P, @AssembleIntegralSystemJLKnL, newGrid);
+P = GridSearchParameters(P, @AssembleIntegralSystemJLKnL, newGrid, gridOptions);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

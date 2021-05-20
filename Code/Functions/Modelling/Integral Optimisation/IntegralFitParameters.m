@@ -55,7 +55,7 @@ while any(relativeChange >= tolerance)
     % Solve.
     x = A\b;
     param1 = x(1);
-    param2 = 1 - x(2);
+    param2 = x(2);
     
     % Calculate deltas.
     param1Change = (param1-param1Array(end))/param1Array(end);
@@ -91,8 +91,8 @@ lb = 1e-7;  % Lower bound on nL/xL.
 param1 = max(param1Array(end), lb);  % [1/min]
 param2 = max(param2Array(end), lb);  % [1]
 
-P.results.(param1Name) = param1;
-P.results.(param2Name) = param2;
+P.results.(paramNames(1)) = param1;
+P.results.(paramNames(2)) = param2;
 
 % Calculate parameter ID metrics.
 MeanNormalise = @(data) data ./ mean(data);

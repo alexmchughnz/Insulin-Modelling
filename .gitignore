@@ -5,8 +5,6 @@
 *.docx
 *.ppt
 *.pptx
-*.xls
-*.xlsx
 *.tmp
 *.csv
 *.asv

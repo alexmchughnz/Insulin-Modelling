@@ -8,7 +8,11 @@ function P = IntegralFitParameters(P, integralSystemFunc)
 
 global CONFIG
 
-PrintStatusUpdate(P, "Fitting nL/xL...")
+
+%% Options
+doIterative = false;
+tolerance = 0.1/100; % Relative tolerance for convergence.
+
 
 if exist('forcenLxL', 'var')
     param1 = forcenLxL(1);
@@ -20,12 +24,14 @@ if exist('forcenLxL', 'var')
     return
 end
 
+PrintStatusUpdate(P, "Fitting nL/xL...")
+
 %% Data
 tArray = P.results.tArray;
 [tI, vI] = GetData(P.data.I); % [mU/L]
 
 if P.source == "DISST"
-    % Need to add 'false' point for improved fitting.    
+    % Need to add 'false' point for improved fitting.
     [vIBolus, iiBolus] = max(P.results.IBolus);
     tIBolus = tMinutes(iiBolus);
     
@@ -42,42 +48,42 @@ ppI = griddedInterpolant(tI, vI);  % [mU/L]
 I = ppI(tArray);
 Q = GetAnalyticalInterstitialInsulin(I, P);
 
-%% Iterative Integral Method (pg. 16)
-param1Array = [0];
-param2Array = [1];
-relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
-tolerance = 0.1/100; % Relative tolerance for convergence.
+%% Integral Method
+converged = false;
 
-while any(relativeChange >= tolerance)
+if doIterative
+    param1Array = [0];
+    param2Array = [1];
+    relativeChange = [Inf Inf]; % Change in [nL xL] at each iteration.
+end
+
+while ~converged
     [A, b, IFunc, QFunc, paramNames] = integralSystemFunc(P, I);
-
+    
     
     % Solve.
     x = A\b;
     param1 = x(1);
     param2 = x(2);
     
-    % Calculate deltas.
-    param1Change = (param1-param1Array(end))/param1Array(end);
-    param2Change = (param2-param2Array(end))/param2Array(end);
-    relativeChange = [param1Change param2Change];
-    
-    % Calculate errors.
-    if CONFIG.HIGHDETAIL
-        errorRel = sqrt((A*x-b).^2)./b
-        errorAbs = ((A*x-b).^2)
-        errorAbsSum = sum((A*x-b).^2)
-        disp(newline)
-    end
-    
-    % Update arrays.
-    param1Array(end+1) = param1;
-    param2Array(end+1) = param2;
-    
     % Forward simulate to improve I and Q prediction.
     for ii = 1:100
         I = IFunc(param1, param2, I, Q);
         Q = QFunc(I, Q);
+    end
+    
+    if doIterative
+        % Calculate deltas.
+        param1Change = (param1-param1Array(end))/param1Array(end);
+        param2Change = (param2-param2Array(end))/param2Array(end);
+        relativeChange = [param1Change param2Change];
+        
+        % Update arrays.
+        param1Array(end+1) = param1;
+        param2Array(end+1) = param2;
+        converged = all(relativeChange < tolerance);
+    else
+        converged = true;
     end
 end
 
@@ -88,8 +94,8 @@ P.results.integrals.b = b;
 %% Results
 % Extract final result.
 lb = 1e-7;  % Lower bound on nL/xL.
-param1 = max(param1Array(end), lb);  % [1/min]
-param2 = max(param2Array(end), lb);  % [1]
+param1 = max(param1, lb);  % [1/min]
+param2 = max(param2, lb);  % [1]
 
 P.results.(paramNames(1)) = param1;
 P.results.(paramNames(2)) = param2;
@@ -110,9 +116,13 @@ P.results.("delta2Norm" + paramNames(2)) = norm(CParam2Norm - bNorm) / length(CP
 
 
 %% Plotting
+if doIterative
+    plotvars.param1Array = param1Array;
+    plotvars.param2Array = param2Array;
+end
+
+
 plotvars.paramNames = paramNames;
-plotvars.param1Array = param1Array;
-plotvars.param2Array = param2Array;
 plotvars.CParam1Norm = CParam1Norm;
 plotvars.CParam2Norm = CParam2Norm;
 plotvars.bNorm = bNorm;
@@ -158,11 +168,13 @@ if DP.GraphicalID
 end
 
 %% Convergence
-if DP.Convergence
-    MakeDebugPlot("Convergence Plot", P, DP);
-    plot(plotvars.param1Array, 'b')
-    plot(plotvars.param2Array, 'r')
-    
-    legend(plotvars.paramNames(1), plotvars.paramNames(2))
+if isfield(plotvars, "param1Array")
+    if DP.Convergence
+        MakeDebugPlot("Convergence Plot", P, DP);
+        plot(plotvars.param1Array, 'b')
+        plot(plotvars.param2Array, 'r')
+        
+        legend(plotvars.paramNames(1), plotvars.paramNames(2))
+    end
 end
 end

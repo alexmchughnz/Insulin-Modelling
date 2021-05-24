@@ -14,15 +14,13 @@ config
 tStart = tic;
 
 %% Select Recipe
-% recipeFunction = @SimpleSim;
+recipeFunction = @SimpleSim;
 % recipeFunction = @GridSearchSim;
-recipeFunction = @JLKGridSearchSim;
+% recipeFunction = @JLKGridSearchSim;
 % resultsTag = "Penalised";
 
-% %% Select Data
-% patientNums = 'all';
-% patientNums = [14];
-patientNums = [1 4 14 22 23 25 30];
+%% Select Data
+patientNums = [5 22 23 25 30];
 source = "OGTTLui";
 
 %% Load Data

@@ -82,9 +82,6 @@ for ii = 1:length(patientSet)
     
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]    
-
-    %% Other
-    P = GetCPeptideParameters(P);    
     
     %% Save
     patientSet{ii} = P;

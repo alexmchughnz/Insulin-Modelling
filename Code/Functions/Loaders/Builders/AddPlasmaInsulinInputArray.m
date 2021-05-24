@@ -5,7 +5,6 @@ function P = AddPlasmaInsulinInputArray(P, forceReSim)
 % OUTPUT:
 %   P - patient struct updated with insulin input array
 
-SC = P.parameters.SC;
 
 if ~exist("forceReSim", "var")
     forceReSim = false;
@@ -16,18 +15,20 @@ if P.data.IType == "human"
         IInput = P.results.IBolus;  % [mU/min]
         
     elseif P.data.IDelivery == "subcutaneous"
+        SC = P.parameters.SC;
+        
         if forceReSim || ~isfield(P.results, "QLocal")
             % Simulate SC model if not already done.
             P = SCModel(P);
         end
         
         IInput = SC.ks3*P.results.QLocal;  % [mU/min]
-        
-    else
-        IInput = 0;
     end
     
+else
+    IInput = zeros(size(P.results.tArray));
 end
+
 
 P.results.IInput = IInput; % [mU/min]
 

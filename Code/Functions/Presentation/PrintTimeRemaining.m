@@ -1,4 +1,20 @@
-function runtime = PrintTimeRemaining(activity, runtime, counter, max, P, showLine)
+function runtime = PrintTimeRemaining(activity, runtime, counter, max, ...
+                                      P, showLine, interval)
+
+% Settings
+
+wrapFunc = @() 0;
+if exist("showLine", "var")
+    if(showLine)
+        wrapFunc = @() PrintLine();
+    end
+end
+
+if ~exist("interval", "var")
+    interval = 1;
+end
+
+% Calculate
 fitTime = duration(seconds(toc(runtime)));
 timeRemaining = datestr(fitTime*(max - counter + 1), 'HH:MM:SS');
 
@@ -6,23 +22,18 @@ message = sprintf('(%d/%d) %s remaining for %s.', ...
     counter, max, timeRemaining, activity);
 
 % Display
-
-disp('')
-
-if exist('showLine', 'var')
-    if(showLine)
-        PrintLine();
-    end
+if mod(counter, interval) == 0
+    disp('')
+    
+    wrapFunc();
+    
+    PrintStatusUpdate(P, message, true);
+    
+    wrapFunc();
 end
-
-PrintStatusUpdate(P, message, true);
-
-if exist('showLine', 'var')
-    if(showLine)
-        PrintLine();
-    end
-end
-
+    
 runtime = tic;
+
+
 end
 

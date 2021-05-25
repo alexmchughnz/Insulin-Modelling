@@ -43,4 +43,5 @@ if (CONFIG.SAVERESULTS)
     SaveOpenFigures(tag, source, recipe);
 end
 
-PanelDebugPlots();
+monitor = 3;
+PanelDebugPlots(monitor);

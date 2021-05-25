@@ -20,8 +20,8 @@ recipeFunction = @SimpleSim;
 % resultsTag = "Penalised";
 
 % %% Select Data
-% patientNums = 'best';
-patientNums = 5;
+patientNums = 'best';
+% patientNums = 5;
 % patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";
 

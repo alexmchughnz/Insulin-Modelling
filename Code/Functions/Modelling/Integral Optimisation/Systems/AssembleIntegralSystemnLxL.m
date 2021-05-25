@@ -29,7 +29,7 @@ Uen = P.results.Uen;
 IInput = P.results.IInput;
 
 %% Get Coefficients
-% Consider dI/dt = k + cx*(1-xL) - kI*I - cn*nL - kIQ*(I-Q):
+% Consider dI/dt = k + cx*1 - cx*xL - cn*nL - kI*I - kIQ*(I-Q):
 cx = Uen/GC.VI;
 cn = I./(1 + GC.alphaI*I);
 
@@ -42,23 +42,23 @@ cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
 cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
 
 %% Integrate I Equation
-% I(t) - I(t0) = int{k} + int{cx}*(1-xL) - kI*int{I} - int{cn}*nL - kIQ*int{I-Q}
-% Defining CN = -int{cn} and CX = -int{cx}
-% CN*nL + CX*xL = I(t) - I(t0) - int{k} + kI*int{I} + kIQ*int{I-Q} + CX := C
-CN = -cumtrapz(tArray, cn);
-CX = -cumtrapz(tArray, cx);
+% I(t) - I(t0) = int{k} + int{cx}*1 - int{cx}*xL - int{cn}*nL - kI*int{I} - kIQ*int{I-Q}
+% Defining CN = int{cn} and CX = int{cx}
+% CN*nL + CX*xL = -I(t) + I(t0) + int{k} + CX - kI*int{I} - kIQ*int{I-Q} := C
+CN = cumtrapz(tArray, cn);
+CX = cumtrapz(tArray, cx);
 
 intkTerm = cumtrapz(tArray, k);
 intITerm = kI*cumtrapz(tArray, I);
 intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
-RHS = [I -I0 -intkTerm intITerm intIQTerm CX];
+RHS = [-I +I0 +intkTerm +CX -intITerm -intIQTerm ];
 C = sum(RHS, CONST.ROWWISE);
 
 %% Make Minute-Wise Q and I Functions
-% I(t) = I(t0) + CN*nL + CX*xL + int{k} - kI*int{I} - kIQ*int{I-Q} - CX
-IFunc = @(nL, xL, I, Q) I(1) + CN*nL + CX*xL + intkTerm - intITerm - intIQTerm - CX;
+% I(t) = I(t0) + int{k} + CX - kI*int{I} - kIQ*int{I-Q} - CN*nL - CX*xL
+IFunc = @(nL, xL, I, Q) I(1) + intkTerm + CX - intITerm - intIQTerm - CN*nL - CX*xL;
 
 % Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
 QFunc = @(I, Q) Q(1) - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);

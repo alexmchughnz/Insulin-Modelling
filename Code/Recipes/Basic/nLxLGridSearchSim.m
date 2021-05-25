@@ -19,14 +19,12 @@ DebugPlots(plots);
 %% Setup
 P = EstimateInsulinSecretion(P);
 
-[P, hasMSE] = GetPersistent(P, "stddevMSE");
-if ~hasMSE
-    % Currently irrelevant since error condition has changed.
-    %     stddev = 5/100;
-    %     N = 1000;
-    %     P = AnalyseInsulinVariance(P, stddev, N);
-    
-    P.persistents.stddevMSE = 1000;
+% Find measure of variance due to insulin error for this patient.
+[P, hasSSE] = GetPersistent(P, "stddevMSE");
+if ~hasSSE
+    stdDevPc = 5/100;
+    N = 1000;
+    P = AnalyseInsulinVariance(P, stdDevPc, N);
 end
 
 newGrid = true;

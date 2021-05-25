@@ -20,8 +20,8 @@ DebugPlots(plots);
 PArray = {};
 
 %% Functions
-JLKArray = 0 : 0.1 : 1;  % "Justified Loss from injection in Knee"
-ks3RateArray = 1 : 2 : 10;
+JLKArray = 0.5 : 0.1 : 1;  % "Justified Loss from injection in Knee"
+ks3RateArray = 1 : 1 : 5;
 
 % Find measure of variance due to insulin error for this patient.
 [P, hasSSE] = GetPersistent(P, "stddevSSE");

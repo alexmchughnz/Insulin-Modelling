@@ -1,4 +1,4 @@
-function PArray = IterateParametersSim(P)
+function POpt = IterateParametersSim(P)
 % INPUTS:
 %   P  - patient struct
 % OUTPUT:
@@ -56,8 +56,10 @@ end
 plots.SolveSystem.Insulin = true;
 DebugPlots(plots);
 [~, iiOpt] = min(cellfun(@(P) P.results.fits.insulinSSE, PArray));
+
 POpt = PArray{iiOpt};
 SolveSystem(POpt, true);
+POpt.patientLabel = P.patientLabel;
 
 %% Plotting
 plotvars.P = P;

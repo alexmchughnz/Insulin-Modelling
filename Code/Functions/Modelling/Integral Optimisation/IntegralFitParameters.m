@@ -177,4 +177,5 @@ if isfield(plotvars, "param1Array")
         legend(plotvars.paramNames(1), plotvars.paramNames(2))
     end
 end
+
 end

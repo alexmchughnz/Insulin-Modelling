@@ -21,6 +21,7 @@ elseif isempty(DEBUGPLOTS)
     
     DEBUGPLOTS.SolveSystem.Glucose = true;
     DEBUGPLOTS.SolveSystem.Insulin = true;
+    DEBUGPLOTS.SolveSystem.CoefficientShapes = true; 
     
     %% Recipes
     DEBUGPLOTS.IterateParametersSim.SSEHeatmap = true;

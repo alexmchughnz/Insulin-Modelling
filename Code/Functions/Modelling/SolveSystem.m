@@ -113,4 +113,26 @@ if DP.Insulin
     ylabel('Plasma Insulin, I [mU/l]')
     legend()
 end
+
+%% Coefficient Shapes
+if DP.CoefficientShapes
+    GC = P.parameters.GC;
+    
+    MakeDebugPlot("Coefficient Shapes", P, DP);    
+    
+    [tI, vI] = GetData(P.data.I);  % [mU/L]
+    plt = plot(tI, vI, 'r*');
+    plt.DisplayName = 'Plasma Sample';
+    
+    plt = plot(tArray, P.results.Uen/GC.VI, 'g');
+    plt.DisplayName = 'Endogenous';
+    
+    plt = plot(tArray, P.results.IInput/GC.VI, 'b');
+    plt.DisplayName = 'Exogenous';
+    
+    xlabel("Time [min]")
+    ylabel("Insulin [mU/L]")
+    legend()
+end
+
 end

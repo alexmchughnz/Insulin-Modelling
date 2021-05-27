@@ -13,6 +13,7 @@ plots.IntegralFit.GraphicalID = false;
 plots.IntegralFit.Convergence = false;
 plots.SolveSystem.Insulin = false;
 plots.SolveSystem.Glucose = false;
+plots.SolveSystem.CoefficientShapes = false;
 
 DebugPlots(plots);
 
@@ -54,12 +55,13 @@ end
 
 % Hacky to only display *optimal* insulin plot.
 plots.SolveSystem.Insulin = true;
+plots.SolveSystem.CoefficientShapes = true;
 DebugPlots(plots);
 [~, iiOpt] = min(cellfun(@(P) P.results.fits.insulinSSE, PArray));
 
 POpt = PArray{iiOpt};
 SolveSystem(POpt, true);
-POpt.patientLabel = P.patientLabel;
+POpt.patientCode = P.patientCode;
 
 %% Plotting
 plotvars.P = P;
@@ -90,14 +92,16 @@ if DP.SSEHeatmap
     optimalSSEGrid(~isOptimalZone) = NaN;
     
     
-    MakeDebugPlot("SSE Heatmap", plotvars.P, DP);
+    F = MakeDebugPlot("SSE Heatmap", plotvars.P, DP);
     hold off  % Needed for heatmap.
+    
+    plotTitle = F.Children(1).Title.String;
     
     xvalues = plotvars.ks3RateArray; 
     yvalues = plotvars.JLKArray;
     h = heatmap(xvalues, yvalues, optimalSSEGrid);
     
-    h.Title = "Insulin SSE Heatmap";
+    h.Title = plotTitle;
     h.XLabel = "ks3 Multiplier";
     h.YLabel = "JLK (proportion of SC injection present)";
     

@@ -35,8 +35,11 @@ numPatients = length(patientSet);
 runtime = tic;
 for ii = 1:numPatients
     runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii}, true);
-
-    patientsOut = recipeFunction(patientSet{ii});
+   
+    patientsOut = recipeFunction(patientSet{ii});    
+    
+    SavePatients({patientsOut});
+    
     patientSetOut = [patientSetOut patientsOut];    
 end
 
@@ -46,7 +49,6 @@ tResults = tic;
 
 PrintTimeTaken("Main", patientSet, tStart);
 
-SavePatients(patientSetOut);
 if ~exist("resultsTag", "var")
     resultsTag = "";
 end

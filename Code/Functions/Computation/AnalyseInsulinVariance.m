@@ -36,7 +36,7 @@ for ii = 1:N
     [SSE(ii), MSE(ii)] = GetSimErrors(copyP);
     
     % Print time.
-    runtime = PrintTimeRemaining("AnalyseInsulinVariance", runtime, ii, N, P);
+    runtime = PrintTimeRemaining("AnalyseInsulinVariance", runtime, ii, N, P, false, 50);
 end
 
 P.persistents.stddevMSE = std(MSE);

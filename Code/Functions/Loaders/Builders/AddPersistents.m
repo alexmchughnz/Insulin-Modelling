@@ -2,7 +2,7 @@ function P = AddPersistents(P)
 
 global CONFIG
 
-code = matlab.lang.makeValidName(P.patientCode);
+code = MakeValidName(P.patientCode);
 
 filename = fullfile(CONFIG.RESULTPATH, P.source, code+'.mat');
 

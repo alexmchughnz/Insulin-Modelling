@@ -15,7 +15,7 @@ for ii = 1:length(patientSet)
     %% Load Data
     % Either a whole sheet at a time, outside the loop, or
     % file-by-file inside the loop.
-    code = matlab.lang.makeValidName(P.patientCode);
+    code = MakeValidName(P.patientCode);
     
     patientDir = fullfile(CONFIG.DATAPATH, P.source);
     patientFile = fullfile(patientDir, code+".mat");

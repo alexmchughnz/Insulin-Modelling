@@ -20,15 +20,9 @@ for iFig = 1:length(FigList)
     AxisHandle = FigHandle.CurrentAxes;
     
     
-    % Edit
-    % Weird workaround, sometimes a char array and sometimes a "graphics.text.primitive".
-    if ischar(AxisHandle.Title)  
-        FigName = AxisHandle.Title;
-    else
-        FigName = get(AxisHandle.Title, 'String');
-    end
-    
-    FigName = tag + matlab.lang.makeValidName(FigName);        
+    % Edit    
+    FigName = FigHandle.Name;
+    FigName = tag + matlab.lang.makeValidName(FigName, "ReplacementStyle", "delete");
     
     if (CONFIG.PUBLISHPLOTS)
         title('')

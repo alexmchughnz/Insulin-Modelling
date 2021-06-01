@@ -41,9 +41,11 @@ end
 % Make figure.
 fignum = GetFigNum(P.patientNum, set, num);
 F = figure(fignum);
+F.Name = sprintf("%d: %s", P.patientNum, figTitle);
+F.NumberTitle = "off";
+
 axes
 hold on
-title(F.Children(1), P.patientCode + ": " + figTitle);
 DEBUGPLOTS.FIGURES = vertcat(DEBUGPLOTS.FIGURES, [P.patientNum, set, num]);
 
 % Update pointers.

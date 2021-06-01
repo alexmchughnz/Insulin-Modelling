@@ -21,8 +21,8 @@ for iFig = 1:length(FigList)
     
     
     % Edit    
-    FigName = get(AxisHandle.Title, 'String');
-    FigName = tag + matlab.lang.makeValidName(FigName);        
+    FigName = FigHandle.Name;
+    FigName = tag + matlab.lang.makeValidName(FigName, "ReplacementStyle", "delete");
     
     if (CONFIG.PUBLISHPLOTS)
         title('')

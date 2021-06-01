@@ -17,12 +17,10 @@ for iFig = 1:length(FigList)
     FigHandle.Units = 'pixels';
     FigHandle.Position = [0 0 400 300];
     
-    AxisHandle = FigHandle.Children(end);
-    
+    AxisHandle = FigHandle.Children(end);    
     
     % Edit    
-    FigName = FigHandle.Name;
-    FigName = tag + matlab.lang.makeValidName(FigName, "ReplacementStyle", "delete");
+    FigName = MakeValidName(FigHandle.Name);
     
     if (CONFIG.PUBLISHPLOTS)
         title('')

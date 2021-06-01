@@ -8,7 +8,7 @@ end
 
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    code = matlab.lang.makeValidName(P.patientCode);     
+    code = MakeValidName(P.patientCode);     
     
     patientDir = fullfile(location, P.source);
     if ~isfolder(patientDir)

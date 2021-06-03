@@ -33,8 +33,12 @@ for tt = 1:length(tables)
             mkdir(recipedir);
         end
         
+        try
         filepath = fullfile(recipedir, tag+recipe+title+".csv");
         writetable(T, filepath, "WriteRowNames", true);
+        catch
+            disp("Results file open - cannot save!")
+        end
     end
 end
 

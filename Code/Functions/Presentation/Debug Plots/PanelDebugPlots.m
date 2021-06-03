@@ -38,15 +38,20 @@ if ~isempty(figData)
         % Position figure.   
         F.Units = 'pixels';     
         screensize = num2cell(get(groot, 'MonitorPositions'));
-        [x, ~, w, h] = screensize{monitor, :};
+        [x, y, w, h] = screensize{monitor, :};
+
+        borderHeight = 84;
+        taskBarHeight = 40;
         
-        position = num2cell(F.Position);
-        [~, ~, ~, h0] = position{1, :};
+        screenHeight = h - taskBarHeight;
         
-        F.Position = [x + w*(pIndex-1)/numPatients, ...
-            (h-1.3*h0) - (h-h0)*nIndex/maxFigs, ...
-            w/numPatients, ...
-            h0];
+        windowWidth = w/numPatients;
+        windowHeight = screenHeight/maxFigs;
+        
+        F.Position = [x + windowWidth*(pIndex-1), ...
+            y + h - windowHeight*(nIndex+1), ...
+            windowWidth, ...
+            windowHeight-borderHeight];
         
         % Update pointers.
         nCounts(pIndex) = nCounts(pIndex) + 1;

@@ -14,13 +14,12 @@ config
 tStart = tic;
 
 %% Select Recipe
-% recipeFunction = @SimpleSim;
-% recipeFunction = @GridSearchSim;
-recipeFunction = @IterateParametersSim;
+recipeFunction = @SimpleSim;
+% recipeFunction = @IterateParametersSim;
 % resultsTag = "Penalised";
 
 % %% Select Data
-patientNums = 'best';
+patientNums = 'all';
 % patientNums = 5;
 % patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";

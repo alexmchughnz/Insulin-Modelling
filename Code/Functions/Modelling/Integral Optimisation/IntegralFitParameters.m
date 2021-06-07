@@ -2,7 +2,6 @@ function P = IntegralFitParameters(P, integralSystemFunc)
 % Fits data using MLR to fit for parameters.
 % INPUT:
 %   P   - patient struct
-%   forcenLxL - [nL, xL] to force (for plots)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
@@ -13,18 +12,7 @@ global CONFIG
 doIterative = false;
 tolerance = 0.1/100; % Relative tolerance for convergence.
 
-
-if exist('forcenLxL', 'var')
-    param1 = forcenLxL(1);
-    param2 = forcenLxL(2);
-    
-    P.results.nL = param1;
-    P.results.xL = param2;
-    
-    return
-end
-
-PrintStatusUpdate(P, "Fitting nL/xL...")
+PrintStatusUpdate(P, "Fitting parameters...")
 
 %% Data
 tArray = P.results.tArray;

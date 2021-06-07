@@ -14,10 +14,8 @@ DebugPlots(plots);
 %% Functions
 P = EstimateInsulinSecretion(P);
 
-
-[A, b] = AssembleIntegralSystemnLxL(P);
-P.results.xL = 0.7;
-P.results.nL = A(:,1) \ (b - A(:,2)*P.results.xL);
+nLxL = [NaN, 0.7];
+P = FixAndFitParameters(P, @AssembleIntegralSystemnLxL, nLxL);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

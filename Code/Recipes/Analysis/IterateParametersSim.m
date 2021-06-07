@@ -21,8 +21,11 @@ DebugPlots(plots);
 PArray = {};
 
 %% Functions
-JLKArray = 0.5 : 0.1 : 1;  % "Justified Loss from injection in Knee"
-ks3RateArray = 1 : 1 : 5;
+P = EstimateInsulinSecretion(P);
+P = FixAndFitParameters(P, @AssembleIntegralSystemnLxL, [NaN, 0.7]);
+
+JLKArray = 0.1 : 0.1 : 1;  % "Justified Loss from injection in Knee"
+ks3RateArray = 1 : 1 : 10;
 
 % Find measure of variance due to insulin error for this patient.
 [P, hasSSE] = GetPersistent(P, "stddevSSE");
@@ -46,7 +49,10 @@ for kk = 1:numel(ks3RateArray)
         jjP = AddPlasmaInsulinInputArray(jjP, forceReSim); % Re-simulate SC model to change QLocal.
         
         % Now run full simulation for patient.
-        jjP = SimpleSim(jjP);
+        
+        jjP = FindGutEmptyingRate(jjP);
+        jjP = FitInsulinSensitivity(jjP);
+        jjP = SolveSystem(jjP);
         
         % Save.
         PArray{end+1} = jjP;

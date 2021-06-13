@@ -3,6 +3,8 @@ function PanelDebugPlots(monitor)
 % INPUTS:
 %   monitor - integer representing which monitor to display plots on
 
+global CONST
+
 figData = DebugPlots().FIGURES;
 
 if ~exist('monitor', 'var')
@@ -38,7 +40,12 @@ if ~isempty(figData)
         % Position figure.   
         F.Units = 'pixels';     
         screensize = num2cell(get(groot, 'MonitorPositions'));
+        
+        if monitor > size(screensize, CONST.ROWWISE)
+            monitor = 1;
+        end
         [x, y, w, h] = screensize{monitor, :};
+            
 
         borderHeight = 84;
         taskBarHeight = 40;

@@ -1,13 +1,16 @@
-function [tSpan, spline] = MakeSplineBasisFunctions(nSplines, maxOrder, maxT)
+function splineBases = MakeSplineBasisFunctions(nSplines, maxOrder, tArray)
 PLOTALLSPLINES = false;
 
-knotWidth = maxT/(nSplines-maxOrder);  % Time width of knots.
+tStart = tArray(1);
+tEnd = tArray(end);
+tDelta = diff(tArray(1:2));
 
-knotStart = -maxOrder * knotWidth;
-knotEnd = (nSplines + maxOrder - 1) * knotWidth;
+knotWidth = (tEnd-tStart)/(nSplines-maxOrder);  % Time width of knots.
+
+knotStart = tStart - maxOrder*knotWidth;
+knotEnd = (nSplines + maxOrder - 1)*knotWidth;
 knots = knotStart : knotWidth : knotEnd;   % Time location of knots.
 
-tDelta = 0.01;
 tSpan = (knots(1) : tDelta : knots(end))';
 phi = zeros(length(tSpan), nSplines, maxOrder+1);  % 3D basis func array.
 
@@ -38,11 +41,9 @@ for order = 1:maxOrder
 end
 
 % Return final spline set within range.
-spline = phi(:, :, end);
-isInRange = (0 <= tSpan) & (tSpan <= maxT);
-
-tSpan = tSpan(isInRange);
-spline = spline(isInRange, 1:nSplines);
+splineBases = phi(:, :, end);
+isInRange = (tStart <= tSpan) & (tSpan <= tEnd);
+splineBases = splineBases(isInRange, 1:nSplines);
 end
 
 

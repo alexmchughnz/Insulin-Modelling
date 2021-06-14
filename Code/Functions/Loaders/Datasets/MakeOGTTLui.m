@@ -76,7 +76,7 @@ for ii = 1:length(patientSet)
         
         P.data.simTime = [min(allTimes) max(allTimes)];
         P.data.simDuration = floor(diff(P.data.simTime));
-        P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
+        P.results.tArray = round(P.data.simTime(1) : P.data.simTime(end))';
         
         
         %% Assay Data

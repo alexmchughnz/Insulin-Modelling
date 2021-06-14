@@ -1,5 +1,5 @@
-function [tSpan, splines] = MakeSplineBasisFunctions(nSplines, maxOrder, maxT)
-
+function [tSpan, spline] = MakeSplineBasisFunctions(nSplines, maxOrder, maxT)
+PLOTALLSPLINES = false;
 
 knotWidth = maxT/(nSplines-maxOrder);  % Time width of knots.
 
@@ -22,7 +22,7 @@ for ii = 1 : length(knots)-1
     end
 end
 
-plotsplines(tSpan, knots, phi, order);
+plotsplines(tSpan, knots, phi, order, PLOTALLSPLINES);
 
 % Recursively define higher order splines.
 for order = 1:maxOrder
@@ -33,28 +33,37 @@ for order = 1:maxOrder
         phi(:, ii, order+1) = prevSplineTerm + nextSplineTerm;
     end
     
-    plotsplines(tSpan, knots, phi, order);
+    plotsplines(tSpan, knots, phi, order, PLOTALLSPLINES);
     
 end
+
+% Return final spline set within range.
+spline = phi(:, :, end);
+isInRange = (0 <= tSpan) & (tSpan <= maxT);
+
+tSpan = tSpan(isInRange);
+spline = spline(isInRange, 1:nSplines);
 end
 
 
-function plotsplines(tSpan, knots, phi, order)
-spline = phi(:, :, order+1);
-
-figure(order+1)
-hold on
-
-ylim([0 1])
-
-plot(tSpan, spline);
-
-knotCoords = [knots; knots];
-line(knotCoords, repmat(ylim', 1, length(knotCoords)), ...
-    'Color', 'k', 'LineStyle', ':', 'LineWidth', 0.5)
-
-
-title(sprintf("Order = %d", order))
-xlabel("Time")
-ylabel("Basis Func")
+function plotsplines(tSpan, knots, phi, order, enable)
+if enable
+    spline = phi(:, :, order+1);
+    
+    figure
+    hold on
+    
+    ylim([0 1])
+    
+    plot(tSpan, spline);
+    
+    knotCoords = [knots; knots];
+    line(knotCoords, repmat(ylim', 1, length(knotCoords)), ...
+        'Color', 'k', 'LineStyle', ':', 'LineWidth', 0.5)
+    
+    
+    title(sprintf("Order = %d", order))
+    xlabel("Time")
+    ylabel("Basis Func")
+end
 end

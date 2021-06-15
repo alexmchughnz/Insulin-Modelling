@@ -22,15 +22,16 @@ Q0 = Y0(3); % [mU]
 %% Variables
 % Time dependent.
 n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
+
 Uen    = P.results.Uen(n);       % [mU/min]
 P2     = P.results.P2(n);        % [mmol]
 GFast  = P.data.GFast;        % Fasting glucose [mmol/L]
 IInput = P.results.IInput(n);
+nL     = P.results.nL(n);        % [1/min]
 
 % Patient dependent.
 SI = P.results.SI;        % [L/mU/min]
 d2 = P.results.d2;
-nL = P.results.nL;        % [1/min]
 xL = P.results.xL;        % [1]
 
 % Trial dependent.

@@ -13,6 +13,11 @@ end
 
 PrintStatusUpdate(P, "Begin solving...")
 
+% Reshape single parameters into time-sized arrays.
+if length(P.results.nL) == 1
+    P.results.nL = P.results.nL * ones(size(P.results.tArray));
+end
+
 % Set up initial conditions.
 [~, vG] = GetData(P.data.G);  % [mmol/L]
 [~, vI] = GetData(P.data.I);  % [mU/L]

@@ -31,7 +31,7 @@ shapes = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
 % dI/dt = cj*JLK - cn*nL + kU*Uen - kI*I - kIQ*(I-Q)
 %   with nL = sum(nLWeight_i * shape_i).
 
-% Let cWeight_i = shape_i * cn. 
+% Let cWeight_i = shape_i * cn.
 % We can express equation as:
 % dI/dt = cj*JLK - sum(cWeight_i * nLWeight_i) + kU*Uen - kI*I - kIQ*(I-Q)
 cj = IInput/GC.VI;
@@ -91,4 +91,36 @@ P = ApplyInsulinLossFactor(P, JLK);
 nLWeights = x(2:end);
 P.results.nL = shapes * nLWeights;
 
+
+%% Plotting
+plotvars.shapes = shapes;
+plotvars.nLWeights = nLWeights;
+MakePlots(P, plotvars);
 end
+
+
+function MakePlots(P, plotvars)
+DP = DebugPlots().FitSplines;
+
+%% Splines
+if DP.Splines
+    MakeDebugPlot("Splines", P, DP);
+    
+    % Plot nL.
+    plt = plot(P.results.tArray, P.results.nL, 'b');
+    plt.DisplayName = "nL";
+    
+    
+    % Plot fitted splines.
+    plot(P.results.tArray, plotvars.shapes .* plotvars.nLWeights', ':', ...
+        'LineWidth', 1, 'HandleVisibility', 'off');
+    
+    
+    xlabel("Time [min]")
+    ylabel("nL [1/min]")
+    
+    legend
+end
+
+end
+

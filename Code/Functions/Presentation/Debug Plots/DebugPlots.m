@@ -15,6 +15,8 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.IntegralFit.GraphicalID = true; 
     DEBUGPLOTS.IntegralFit.Convergence = true;
     
+    DEBUGPLOTS.FitSplines.Splines = true; 
+    
     DEBUGPLOTS.GridSearchParameters.ErrorSurface = true;
     
     DEBUGPLOTS.AnalyseInsulinVariance.Error = true;

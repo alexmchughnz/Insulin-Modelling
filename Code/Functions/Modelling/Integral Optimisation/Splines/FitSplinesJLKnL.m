@@ -27,7 +27,7 @@ IInput = P.results.IInput;
 
 %% Get Coefficients
 % Collect basis functions for splines.
-order = 4;
+order = 2;
 shapes = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
 
 % Consider:
@@ -87,7 +87,7 @@ b = CValues;
 
 %% Solve For Splines
 % Enforce constraints on variables.
-lbJLK = 0;
+lbJLK = 0.1;
 ubJLK = 1;
 lbxLW = 0.05;
 ubxLW = 0.3;

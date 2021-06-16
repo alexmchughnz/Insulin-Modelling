@@ -25,6 +25,8 @@ for ii = 1:length(patientSet)
     end
     tables{tt}.Properties.Description = name;
     
+    tables{tt} = AddField(tables{tt}, code, P.results, "JLK", @(x) x, "JLK [/1]");
+    
     tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
     tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");

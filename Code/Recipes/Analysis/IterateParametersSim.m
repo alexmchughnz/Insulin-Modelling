@@ -42,14 +42,9 @@ for kk = 1:numel(ks3RateArray)
     
     for jj = 1:numel(JLKArray)
         % Apply IInput proportion.
-        jjP = ScalePatientField(kkP, JLKArray(jj), "data", "vIBolus");
-        jjP = AddBolusArrays(jjP);
+        jjP = ApplyInsulinLossFactor(kkP, JLKArray(jj));
         
-        forceReSim = true;
-        jjP = AddPlasmaInsulinInputArray(jjP, forceReSim); % Re-simulate SC model to change QLocal.
-        
-        % Now run full simulation for patient.
-        
+        % Now run full simulation for patient.        
         jjP = FindGutEmptyingRate(jjP);
         jjP = FitInsulinSensitivity(jjP);
         jjP = SolveSystem(jjP);

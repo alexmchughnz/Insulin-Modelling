@@ -1,9 +1,7 @@
-function [A, b, IFunc, QFunc, paramNames] = AssembleSplinesSystemJLKnL(P, numSplines)
+function [P, A, b, shapes] = FitSplinesJLKnL(P, numSplines)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
-
-paramNames = ["JLK", "nL"];
 
 %% Setup
 tArray = P.results.tArray;
@@ -35,7 +33,7 @@ shapes = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
 
 % Let cWeight_i = shape_i * cn. 
 % We can express equation as:
-%   cj*JLK - sum(cWeight_i * nLWeight_i) + kU*Uen - kI*I - kIQ*(I-Q)
+% dI/dt = cj*JLK - sum(cWeight_i * nLWeight_i) + kU*Uen - kI*I - kIQ*(I-Q)
 cj = IInput/GC.VI;
 cn = I./(1 + GC.alphaI*I);
 cWeights =  shapes .* cn;
@@ -44,12 +42,8 @@ kU = (1 - P.results.xL)/GC.VI;
 kI = GC.nK;
 kIQ = GC.nI./GC.VI;
 
-% Also consider dQ/dt = -cQ*Q + cI*I:
-cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q - easier to use
-cI = GC.nI/GC.VQ;  % Constant term coefficent of I - easier to use
-
 %% Integrate I Equation
-% I(t) - I(t0) = int{cj}*JLK - int{cn}*nL + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+% I(t) - I(t0) = int{cj}*JLK - int{sum(cWeight_i * nLWeight_i)} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
 % Defining CJ = int{cj} and CWeights = -int{cWeights}
 % CJ*JLK + CN*nL = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} := C
 CJ = cumtrapz(tArray, cj);
@@ -62,13 +56,6 @@ intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 I0 = I(1) * ones(size(I));
 RHS = [I -I0 intUTerm intITerm intIQTerm];
 C = sum(RHS, CONST.ROWWISE);
-
-%% Make Minute-Wise Q and I Functions
-% I(t) = I(t0) + CJ*JLK + CN*nL + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
-IFunc = @(JLK, nL, I, Q) I(1) + CJ*JLK + CWeights*nL + intUTerm - intITerm - intIQTerm;
-
-% Q(t) = Q(t0) - cQ*int{Q} + cI*int{I}
-QFunc = @(I, Q) Q(1) - cQ*cumtrapz(tArray, Q) + cI*cumtrapz(tArray, I);
 
 %% Assemble MLR System
 % Extract values at measurement points.
@@ -94,5 +81,14 @@ CValues = (vC(second) - vC(first)) ./ dt;
 A(:,1) = CJValues;
 A(:,2:numSplines+1) = CWValues;
 b = CValues;
+
+%% Solve For Splines
+x = A\b;
+JLK = x(1);
+
+P = ApplyInsulinLossFactor(P, JLK);
+
+nLWeights = x(2:end);
+P.results.nL = shapes * nLWeights;
 
 end

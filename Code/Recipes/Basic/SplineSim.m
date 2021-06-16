@@ -16,7 +16,9 @@ P = EstimateInsulinSecretion(P);
 
 P.results.xL = 0.7
 numSplines = 10;
-[A, b] = AssembleSplinesSystemJLKnL(P, numSplines);
+
+% Manually solving here in the meantime.
+P = FitSplinesJLKnL(P, numSplines);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

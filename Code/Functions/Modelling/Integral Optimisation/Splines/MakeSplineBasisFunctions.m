@@ -5,7 +5,7 @@ tStart = tArray(1);
 tEnd = tArray(end);
 tDelta = diff(tArray(1:2));
 
-knotWidth = (tEnd-tStart)/(nSplines-maxOrder);  % Time width of knots.
+knotWidth = round((tEnd-tStart)/(nSplines-maxOrder));  % Time width of knots.
 
 knotStart = tStart - maxOrder*knotWidth;
 knotEnd = (nSplines + maxOrder - 1)*knotWidth;

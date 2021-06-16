@@ -3,7 +3,7 @@ function PanelDebugPlots(monitor)
 % INPUTS:
 %   monitor - integer representing which monitor to display plots on
 
-global CONST
+CONST = LoadConstants();
 
 figData = DebugPlots().FIGURES;
 

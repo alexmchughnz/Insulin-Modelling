@@ -53,7 +53,7 @@ intITerm = kI*cumtrapz(tArray, I);
 intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
-RHS = [I -I0 intUTerm intITerm intIQTerm];
+RHS = [I -I0 -intUTerm intITerm intIQTerm];
 C = sum(RHS, CONST.ROWWISE);
 
 %% Make Minute-Wise Q and I Functions

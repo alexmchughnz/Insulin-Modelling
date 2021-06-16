@@ -3,6 +3,9 @@ function [P, A, b, shapes] = FitSplinesJLKnL(P, numSplines)
 CONST = LoadConstants();
 GC = P.parameters.GC;
 
+numFixedParameters = 1;
+numTotalParameters = numFixedParameters + numSplines;
+
 %% Setup
 tArray = P.results.tArray;
 tMeas = P.data.I.time;
@@ -24,7 +27,7 @@ IInput = P.results.IInput;
 
 %% Get Coefficients
 % Collect basis functions for splines.
-order = 2;
+order = 4;
 shapes = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
 
 % Consider:
@@ -45,7 +48,7 @@ kIQ = GC.nI./GC.VI;
 %% Integrate I Equation
 % I(t) - I(t0) = int{cj}*JLK - int{sum(cWeight_i * nLWeight_i)} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
 % Defining CJ = int{cj} and CWeights = -int{cWeights}
-% CJ*JLK + CN*nL = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} := C
+% CJ*JLK + CWeights*nLWeights = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} := C
 CJ = cumtrapz(tArray, cj);
 CWeights = -cumtrapz(tArray, cWeights);
 
@@ -54,7 +57,7 @@ intITerm = kI*cumtrapz(tArray, I);
 intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
-RHS = [I -I0 intUTerm intITerm intIQTerm];
+RHS = [I -I0 -intUTerm intITerm intIQTerm];
 C = sum(RHS, CONST.ROWWISE);
 
 %% Assemble MLR System
@@ -79,11 +82,23 @@ CWValues = (vCWeights(second,:) - vCWeights(first,:)) ./ dt;
 CValues = (vC(second) - vC(first)) ./ dt;
 
 A(:,1) = CJValues;
-A(:,2:numSplines+1) = CWValues;
+A(:,2:numTotalParameters) = CWValues;
 b = CValues;
 
 %% Solve For Splines
-x = A\b;
+% Enforce constraints on variables.
+lbJLK = 0;
+ubJLK = 1;
+lbxLW = 0.05;
+ubxLW = 0.3;
+
+lb(1) = lbJLK;
+lb(2:numTotalParameters) = lbxLW;
+ub(1) = ubJLK;
+ub(2:numTotalParameters) = ubxLW;
+
+% Solve using linear solver.
+x = lsqlin(A, b, [], [], [], [], lb, ub);
 JLK = x(1);
 
 P = ApplyInsulinLossFactor(P, JLK);
@@ -112,7 +127,7 @@ if DP.Splines
     
     
     % Plot fitted splines.
-    plot(P.results.tArray, plotvars.shapes .* plotvars.nLWeights', ':', ...
+    plot(P.results.tArray, plotvars.shapes .* plotvars.nLWeights', '--', ...
         'LineWidth', 1, 'HandleVisibility', 'off');
     
     

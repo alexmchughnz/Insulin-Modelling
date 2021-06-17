@@ -14,11 +14,11 @@ DebugPlots(plots);
 %% Functions
 P = EstimateInsulinSecretion(P);
 
-P.results.xL = 0.7
+% P.results.xL = 0.7
 numSplines = 10;
 
 % Manually solving here in the meantime.
-P = FitSplinesJLKnL(P, numSplines);
+P = FitSplinesJLKxLnL(P, numSplines);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

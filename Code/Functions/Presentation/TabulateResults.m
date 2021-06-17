@@ -27,7 +27,11 @@ for ii = 1:length(patientSet)
     
     tables{tt} = AddField(tables{tt}, code, P.results, "JLK", @(x) x, "JLK [/1]");
     
-    tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
+    if all(P.results.nL == P.results.nL(1))
+        tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
+    else
+        tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) mean(x), "mean nL [1/min]");
+    end
     tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
     
@@ -35,14 +39,14 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
         
-        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinSSE", @(x) x, "insulinSSE [(mU/L)^2]");
-        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseSSE", @(x) x, "glucoseSSE [(mmol/L)^2]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMSE", @(x) x, "insulinMSE [(mU/L)^2]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMSE", @(x) x, "glucoseMSE [(mmol/L)^2]");
     end
-        
+    
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
     
-    %% Grid Search Parameters  
+    %% Grid Search Parameters
     name = "GridSearch";
     if isfield(P.results, name)
         tt = tt + 1;

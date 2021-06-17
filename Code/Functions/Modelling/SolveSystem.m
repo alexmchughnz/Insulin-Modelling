@@ -23,22 +23,28 @@ P = GCModel(P);
 % Insulin
 [tI, vI] = GetData(P.data.I);  % [mU/L]
 [~, fitI] = GetResultsSample(P, tI, P.results.I);
+NI = numel(vI);
 
 IMAPE = mean(abs(vI - fitI)./vI);
 P.results.fits.insulinMAPE = IMAPE;
 
 ISSE = sum((vI - fitI).^2);
+IMSE = ISSE/NI;
 P.results.fits.insulinSSE = ISSE;
+P.results.fits.insulinMSE = IMSE;
 
 % Glucose
 [tG, vG] = GetData(P.data.G);  % [mU/L]
 [~, fitG] = GetResultsSample(P, tG, P.results.G);
+NG = numel(vI);
 
 GMAPE = mean(abs(vG - fitG)./vG);
 P.results.fits.glucoseMAPE = GMAPE;
 
 GSSE = sum((vG - fitG).^2);
+GMSE = GSSE/NG;
 P.results.fits.glucoseSSE = GSSE;
+P.results.fits.glucoseMSE = GMSE;
 
 
 %% Plotting

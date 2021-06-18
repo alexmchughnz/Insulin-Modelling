@@ -16,6 +16,7 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.IntegralFit.Convergence = true;
     
     DEBUGPLOTS.FitSplines.Splines = true; 
+    DEBUGPLOTS.FitSplines.nLGlucose = true; 
     
     DEBUGPLOTS.GridSearchParameters.ErrorSurface = true;
     

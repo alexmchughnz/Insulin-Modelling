@@ -146,5 +146,30 @@ if DP.Splines
     legend
 end
 
+%%
+if DP.nLGlucose
+    persistent nLGlucosePlot;
+    
+    if isempty(nLGlucosePlot)
+        nLGlucosePlot = MakeDebugPlot("nL and G Correlation", P, DP);
+    else
+        figure(nLGlucosePlot)
+    end
+    
+    
+[tG, vG] = GetData(P.data.G); % [mmol/L]
+iiG = GetTimeIndex(tG, P.results.tArray);
+nL = P.results.nL(iiG);
+
+plt = scatter(nL, vG, 'x');
+plt.DisplayName = "P" + P.patientNum;
+
+xlabel("nL [1/min]")
+ylabel("Measured G [mmol/L]")
+
+legend
+    
+end
+
 end
 

@@ -7,6 +7,7 @@ fprintf("Running main - press key to start.\n")
 
 clc
 clear
+clear functions
 close all
 
 config

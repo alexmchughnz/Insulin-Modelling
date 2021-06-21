@@ -9,6 +9,7 @@
 *.csv
 *.asv
 
+.MATLABDriveTag
 
 P*.mat
 

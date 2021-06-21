@@ -15,12 +15,12 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @SplineSim;
+recipeFunction = @IteratexLSplineSim;
 % resultsTag = "Penalised";
 
 % %% Select Data
 % patientNums = 23;
-patientNums = 'best';
+% patientNums = 'best';
 % patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";
 
@@ -37,9 +37,9 @@ for ii = 1:numPatients
    
     patientsOut = recipeFunction(patientSet{ii});    
     
-    SavePatients({patientsOut});
+    SavePatients(patientsOut(:));
     
-    patientSetOut = [patientSetOut patientsOut];    
+    patientSetOut = [patientSetOut; patientsOut(:)];    
 end
 
 %% Results

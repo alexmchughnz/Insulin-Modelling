@@ -41,7 +41,8 @@ end
 % Make figure.
 fignum = GetFigNum(P.patientNum, set, num);
 F = figure(fignum);
-F.Name = sprintf("%d: %s", P.patientNum, figTitle);
+
+F.Name = sprintf("%d (%s): %s", P.patientNum, P.patientSuffix, figTitle);
 F.NumberTitle = "off";
 
 axes

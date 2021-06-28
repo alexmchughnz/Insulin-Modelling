@@ -38,7 +38,7 @@ for ii = 1:numPatients
    
     patientsOut = recipeFunction(patientSet{ii});    
     
-    SavePatients({patientsOut});
+    SavePatients(patientsOut);
     
     patientSetOut = [patientSetOut patientsOut];    
 end

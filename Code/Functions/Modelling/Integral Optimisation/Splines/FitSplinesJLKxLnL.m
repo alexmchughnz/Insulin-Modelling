@@ -1,10 +1,9 @@
-function [P, A, b, shapes] = FitSplinesJLKxLnL(P, numSplines)
+function [P, A, b, basisSplines] = FitSplinesJLKxLnL(P, numSplines)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
 
 numFixedParameters = 2;
-numTotalParameters = numFixedParameters + numSplines;
 
 %% Setup
 tArray = P.results.tArray;
@@ -28,7 +27,9 @@ IInput = P.results.IInput;
 %% Get Coefficients
 % Collect basis functions for splines.
 order = 2;
-shapes = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
+basisSplines = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
+numTotalSplines = size(basisSplines, CONST.ROWWISE);
+numTotalParameters = numFixedParameters + numTotalSplines;
 
 % Consider:
 % dI/dt = cj*JLK + cx*(1-xL) - cn*nL + kU*Uen - kI*I - kIQ*(I-Q)
@@ -40,7 +41,7 @@ shapes = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
 cj = IInput/GC.VI;
 cx = Uen/GC.VI;
 cn = I./(1 + GC.alphaI*I);
-cWeights =  shapes .* cn;
+cWeights =  basisSplines .* cn;
 
 kI = GC.nK;
 kIQ = GC.nI./GC.VI;
@@ -113,11 +114,11 @@ P = ApplyInsulinLossFactor(P, JLK);
 P.results.xL = x(2);
 
 nLWeights = x(3:end);
-P.results.nL = shapes * nLWeights;
+P.results.nL = basisSplines * nLWeights;
 
 
 %% Plotting
-plotvars.shapes = shapes;
+plotvars.basisSplines = basisSplines;
 plotvars.nLWeights = nLWeights;
 MakePlots(P, plotvars);
 end
@@ -136,7 +137,7 @@ if DP.Splines
     
     
     % Plot fitted splines.
-    plot(P.results.tArray, plotvars.shapes .* plotvars.nLWeights', '--', ...
+    plot(P.results.tArray, plotvars.basisSplines .* plotvars.nLWeights', '--', ...
         'LineWidth', 1, 'HandleVisibility', 'off');
     
     

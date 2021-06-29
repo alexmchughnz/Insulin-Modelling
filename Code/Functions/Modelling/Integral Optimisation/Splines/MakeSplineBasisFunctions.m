@@ -1,34 +1,33 @@
-function basisSplines = MakeSplineBasisFunctions(numKnots, order, tArray)
+function basisSplines = MakeSplineBasisFunctions(P, numKnots, order)
 % Creates basis spline functions for a time array.
-% This function enforces 'numKnots' knots within the range of tArray, and 
+% This function enforces 'numKnots' knots within the range of tArray, and
 % generates additional splines for higher orders.
 
-PLOTALLSPLINES = true;
 
 %% Setup
 % Time
-tStart = tArray(1);
-tEnd = tArray(end);
-tDelta = diff(tArray(1:2));
+tStart = P.results.tArray(1);
+tEnd = P.results.tArray(end);
+tDelta = diff(P.results.tArray(1:2));
 
 % Knots
-knotSpacing = RoundToMultiple((tEnd-tStart)/(numKnots-1), tDelta);  % Time width of knots.
+knotSpacing = RoundToMultiple((tEnd-tStart)/(numKnots-1), tDelta, -1);  % Time width of knots.
 numExtraKnots = order;  % k-th order splines requires k extra knots/ k-1 splines at each end to fully define all in range.
 
 knotStart = tStart - numExtraKnots*knotSpacing;  % Time location of knots.
 knotEnd = tStart + (numKnots+numExtraKnots)*knotSpacing;
-knots = knotStart : knotSpacing : knotEnd;   
+knots = knotStart : knotSpacing : knotEnd;
 
 % Splines
-tSplineSpan = (knots(1) : tDelta : knots(end))';        % Extended time range covering all splines.
-numSplines = length(knots) - 1;            % One spline in between each adjacent pair of knots.
-phi = zeros(length(tSplineSpan), numSplines, order+1);  % 3D array of spline functions. Dimensions are [time, spline, order].
+tSpan = (knots(1) : tDelta : knots(end))';        % Extended time range covering all splines.
+numSplines = length(knots) - 1;                   % One spline in between each adjacent pair of knots.
+phi = zeros(length(tSpan), numSplines, order+1);  % 3D array of spline functions. Dimensions are [time, spline, order].
 
 %% Spline Creation
 % Set up zeroth-order splines.
 k = 0;
 for ii = 1 : length(knots)-1
-    isKnotActive = (knots(ii) <= tSplineSpan) & (tSplineSpan < knots(ii+1));
+    isKnotActive = (knots(ii) <= tSpan) & (tSpan < knots(ii+1));
     iiActive = find(isKnotActive);
     
     if ~isempty(iiActive)
@@ -36,50 +35,58 @@ for ii = 1 : length(knots)-1
     end
 end
 
-plotsplines(tSplineSpan, tArray, knots, phi, k, PLOTALLSPLINES);
-
 % Recursively define higher order splines.
 for k = 1:order
-    % A k-th order spline interpolates the (k-1)-th order spline at the
-    % knot k knots away.
-    for ii = 1 : numSplines - k 
-        prevSplineTerm = (tSplineSpan - knots(ii)) / (knots(ii+k) - knots(ii)) .* phi(:,ii,k);
-        nextSplineTerm = (knots(ii+k+1) - tSplineSpan) / (knots(ii+k+1) - knots(ii+1)) .* phi(:,ii+1,k);
+    % The i-th spline of order k interpolates the (i+k)-th spline
+    % of order k-1.
+    for ii = 1 : numSplines - k
+        prevSplineTerm = (tSpan - knots(ii)) / (knots(ii+k) - knots(ii)) .* phi(:,ii,k);
+        nextSplineTerm = (knots(ii+k+1) - tSpan) / (knots(ii+k+1) - knots(ii+1)) .* phi(:,ii+1,k);
         
         phi(:, ii, k+1) = prevSplineTerm + nextSplineTerm;
     end
-    
-    plotsplines(tSplineSpan, tArray, knots, phi, k, PLOTALLSPLINES);
-    
 end
 
 % Return final spline set within range.
 basisSplines = phi(:, :, end);
-isInRange = (tStart <= tSplineSpan) & (tSplineSpan <= tEnd);
+isInRange = (tStart <= tSpan) & (tSpan <= tEnd);
 basisSplines = basisSplines(isInRange, 1:numKnots);
+
+%% Plotting
+plotvars.tSpan = tSpan;
+plotvars.phi = phi;
+plotvars.knots = knots;
+plotvars.order = order;
+MakePlots(P, plotvars);
 end
 
+function MakePlots(P, plotvars)
+DP = DebugPlots().MakeSplineBasisFunctions;
 
-function plotsplines(tSplineSpan, tRange, knots, phi, order, enable)
-if enable
-    spline = phi(:, :, order+1);
+%% Splines
+if DP.Splines
+    MakeDebugPlot("Basis Splines", P, DP);
     
-    figure
-    hold on
+    for k = (0 : plotvars.order) + 1
+        subplot(plotvars.order+1, 1, k)
+        hold on
+        
+        spline = plotvars.phi(:, :, k);
+        
+        plot(plotvars.tSpan, spline);
+        
+        knotCoords = [plotvars.knots; plotvars.knots];
+        line(knotCoords, repmat(ylim', 1, length(knotCoords)), ...
+            'Color', 'k', 'LineStyle', ':', 'LineWidth', 0.5)
+        
+        line([P.results.tArray(1) P.results.tArray(end)], [1 1], ...
+            'Color', 'b', 'LineWidth', 2)
+        
+        ylim([0 1])
+        title(sprintf("Order = %d", k-1))
+        ylabel("Spline Value")
+    end
     
-    ylim([0 1])
-    
-    plot(tSplineSpan, spline);
-    
-    knotCoords = [knots; knots];
-    line(knotCoords, repmat(ylim', 1, length(knotCoords)), ...
-        'Color', 'k', 'LineStyle', ':', 'LineWidth', 0.5)       
-    
-    line([tRange(1) tRange(end)], [1 1], ...
-        'Color', 'b', 'LineWidth', 2)    
-    
-    title(sprintf("Order = %d", order))
     xlabel("Time")
-    ylabel("Basis Func")
 end
 end

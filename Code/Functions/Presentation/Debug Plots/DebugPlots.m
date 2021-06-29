@@ -12,6 +12,8 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.EstimateInsulinSecretion.Uen = true;
     DEBUGPLOTS.EstimateInsulinSecretion.CPep = true;
     
+    DEBUGPLOTS.MakeSplineBasisFunctions.Splines = true;
+    
     DEBUGPLOTS.IntegralFit.GraphicalID = true; 
     DEBUGPLOTS.IntegralFit.Convergence = true;
     

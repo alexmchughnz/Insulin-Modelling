@@ -23,22 +23,28 @@ P = GCModel(P);
 % Insulin
 [tI, vI] = GetData(P.data.I);  % [mU/L]
 [~, fitI] = GetResultsSample(P, tI, P.results.I);
+NI = numel(vI);
 
 IMAPE = mean(abs(vI - fitI)./vI);
 P.results.fits.insulinMAPE = IMAPE;
 
 ISSE = sum((vI - fitI).^2);
+IMSE = ISSE/NI;
 P.results.fits.insulinSSE = ISSE;
+P.results.fits.insulinMSE = IMSE;
 
 % Glucose
 [tG, vG] = GetData(P.data.G);  % [mU/L]
 [~, fitG] = GetResultsSample(P, tG, P.results.G);
+NG = numel(vI);
 
 GMAPE = mean(abs(vG - fitG)./vG);
 P.results.fits.glucoseMAPE = GMAPE;
 
 GSSE = sum((vG - fitG).^2);
+GMSE = GSSE/NG;
 P.results.fits.glucoseSSE = GSSE;
+P.results.fits.glucoseMSE = GMSE;
 
 
 %% Plotting
@@ -113,4 +119,26 @@ if DP.Insulin
     ylabel('Plasma Insulin, I [mU/l]')
     legend()
 end
+
+%% Coefficient Shapes
+if DP.CoefficientShapes
+    GC = P.parameters.GC;
+    
+    MakeDebugPlot("Coefficient Shapes", P, DP);    
+    
+    [tI, vI] = GetData(P.data.I);  % [mU/L]
+    plt = plot(tI, vI, 'r*');
+    plt.DisplayName = 'Plasma Sample';
+    
+    plt = plot(tArray, P.results.Uen/GC.VI, 'g');
+    plt.DisplayName = 'Endogenous';
+    
+    plt = plot(tArray, P.results.IInput/GC.VI, 'b');
+    plt.DisplayName = 'Exogenous';
+    
+    xlabel("Time [min]")
+    ylabel("Insulin [mU/L]")
+    legend()
+end
+
 end

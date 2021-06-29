@@ -14,7 +14,7 @@ tables = {};
 for ii = 1:length(patientSet)
     tt = 0;
     P = patientSet{ii};
-    code = P.patientCode;
+    code = sprintf("%s (%s)", P.patientCode, P.patientSuffix);
     
     %% Main Results
     
@@ -25,7 +25,13 @@ for ii = 1:length(patientSet)
     end
     tables{tt}.Properties.Description = name;
     
-    tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
+    tables{tt} = AddField(tables{tt}, code, P.results, "JLK", @(x) x, "JLK [/1]");
+    
+    if all(P.results.nL == P.results.nL(1))
+        tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) x(1), "nL [1/min]");
+    else
+        tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) mean(x), "mean nL [1/min]");
+    end
     tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
     
@@ -33,16 +39,15 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMAPE", @(x) 100*x, "glucoseMAPE [%]");
         
-        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinSSE", @(x) x, "insulinSSE [(mU/L)^2]");
-        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseSSE", @(x) x, "glucoseSSE [(mmol/L)^2]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMSE", @(x) x, "insulinMSE [(mU/L)^2]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMSE", @(x) x, "glucoseMSE [(mmol/L)^2]");
     end
-        
+    
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
     
-    %% Find Optimal Hepatic Clearance
-    
-    name = "OptimalHepaticClearance";
+    %% Grid Search Parameters
+    name = "GridSearch";
     if isfield(P.results, name)
         tt = tt + 1;
         if tt > length(tables)
@@ -51,6 +56,7 @@ for ii = 1:length(patientSet)
         tables{tt}.Properties.Description = name;
         
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "minGridMSE");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "minGridSSE");
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "minimalErrorRegionSize");
         
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "nLRange", @diff);
@@ -59,6 +65,9 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @diff);
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @(x) x(1), "xLRangeLower");
         tables{tt} = AddField(tables{tt}, code, P.results.(name), "xLRange", @(x) x(end), "xLRangeUpper");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "JLKRange", @diff);
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "JLKRange", @(x) x(1), "JLKLower");
+        tables{tt} = AddField(tables{tt}, code, P.results.(name), "JLKRange", @(x) x(end), "JLKUpper");
     end
     
     

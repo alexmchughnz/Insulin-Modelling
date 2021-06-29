@@ -7,6 +7,7 @@ fprintf("Running main - press key to start.\n")
 
 clc
 clear
+clear functions
 close all
 
 config
@@ -14,14 +15,12 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @SimpleSim;
-% recipeFunction = @GridSearchSim;
-% recipeFunction = @IterateParametersSim;
+recipeFunction = @SplineSim;
 % resultsTag = "Penalised";
 
-% %% Select Data
-% patientNums = 'best';
-patientNums = 5;
+%% Select Data
+% patientNums = 23;
+patientNums = 'best';
 % patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";
 
@@ -40,7 +39,7 @@ for ii = 1:numPatients
     
     SavePatients(patientsOut);
     
-    patientSetOut = [patientSetOut patientsOut];    
+    patientSetOut = [patientSetOut; patientsOut(:)];    
 end
 
 %% Results

@@ -6,20 +6,12 @@ function PrintResults(patientSet, recipeFunction, tag)
 global CONFIG
 
 source = patientSet{end}.source;
-
 recipeStruct = functions(recipeFunction);
 recipe = string(recipeStruct.function);
 
-tables = TabulateResults(patientSet);
-
-if (CONFIG.SAVERESULTS)
-    SaveOpenFigures(tag, source, recipe);
-end
-
-PanelDebugPlots();
-
 
 %% Tables
+tables = TabulateResults(patientSet);
 for tt = 1:length(tables)
     T = tables{tt};
     title = string(T.Properties.Description);
@@ -41,7 +33,19 @@ for tt = 1:length(tables)
             mkdir(recipedir);
         end
         
+        try
         filepath = fullfile(recipedir, tag+recipe+title+".csv");
         writetable(T, filepath, "WriteRowNames", true);
+        catch
+            disp("Results file open - cannot save!")
+        end
     end
 end
+
+%% Plots
+if (CONFIG.SAVERESULTS)
+    SaveOpenFigures(tag, source, recipe);
+end
+
+monitor = 3;
+PanelDebugPlots(monitor);

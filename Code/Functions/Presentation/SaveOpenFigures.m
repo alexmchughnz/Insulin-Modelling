@@ -20,18 +20,13 @@ for iFig = 1:length(FigList)
     AxisHandle = FigHandle.Children(end);    
     
     % Edit    
-    FigName = MakeValidName(FigHandle.Name);
+    FigName = MakeValidName(tag+FigHandle.Name);
     
-    if (CONFIG.PUBLISHPLOTS)
-        title('')
-    end
-    
-    if ~isempty(AxisHandle.Legend)
+    if isfield(AxisHandle, 'Legend') && ~isempty(AxisHandle.Legend)
         legend('Location','southoutside')
     end
     
-    % Save
-    
+    % Save    
     figDir = fullfile(FolderName, 'fig', subfolderpath);
     if ~isfolder(figDir)
         mkdir(figDir);

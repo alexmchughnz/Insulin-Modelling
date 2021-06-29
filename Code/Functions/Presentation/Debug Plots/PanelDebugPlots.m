@@ -3,13 +3,15 @@ function PanelDebugPlots(monitor)
 % INPUTS:
 %   monitor - integer representing which monitor to display plots on
 
+CONST = LoadConstants();
+
 figData = DebugPlots().FIGURES;
 
 if ~exist('monitor', 'var')
     monitor = 1;
 end
 
-GetFigNum = @(figrow) dot([100 10 1], figrow);
+GetFigNum = @(figrow) dot([1000 100 1], figrow);
 
 if ~isempty(figData)
     patientCounts = figData(:, 1);
@@ -38,15 +40,25 @@ if ~isempty(figData)
         % Position figure.   
         F.Units = 'pixels';     
         screensize = num2cell(get(groot, 'MonitorPositions'));
-        [x, ~, w, h] = screensize{monitor, :};
         
-        position = num2cell(F.Position);
-        [~, ~, ~, h0] = position{1, :};
+        if monitor > size(screensize, CONST.ROWWISE)
+            monitor = 1;
+        end
+        [x, y, w, h] = screensize{monitor, :};
+            
+
+        borderHeight = 84;
+        taskBarHeight = 40;
         
-        F.Position = [x + w*(pIndex-1)/numPatients, ...
-            (h-1.3*h0) - (h-h0)*nIndex/maxFigs, ...
-            w/numPatients, ...
-            h0];
+        screenHeight = h - taskBarHeight;
+        
+        windowWidth = w/numPatients;
+        windowHeight = screenHeight/maxFigs;
+        
+        F.Position = [x + windowWidth*(pIndex-1), ...
+            y + h - windowHeight*(nIndex+1), ...
+            windowWidth, ...
+            max(windowHeight-borderHeight, 100)];
         
         % Update pointers.
         nCounts(pIndex) = nCounts(pIndex) + 1;

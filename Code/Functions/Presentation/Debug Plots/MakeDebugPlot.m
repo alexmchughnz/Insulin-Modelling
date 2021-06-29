@@ -9,7 +9,7 @@ function F = MakeDebugPlot(figTitle, P, DP)
 
 DEBUGPLOTS = DebugPlots();
 
-GetFigNum = @(p, s, n) 100*p + 10*s + n;
+GetFigNum = @(p, s, n) 1000*p + 100*s + n;
 
 
 persistent seenPatients;
@@ -41,7 +41,8 @@ end
 % Make figure.
 fignum = GetFigNum(P.patientNum, set, num);
 F = figure(fignum);
-F.Name = sprintf("%d: %s", P.patientNum, figTitle);
+
+F.Name = sprintf("%d (%s): %s", P.patientNum, P.patientSuffix, figTitle);
 F.NumberTitle = "off";
 
 axes

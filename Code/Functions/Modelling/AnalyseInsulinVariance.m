@@ -17,7 +17,7 @@ runtime = tic;
 %% Simulate 
 % Ensure parameters are present.
 P = EstimateInsulinSecretion(P);
-P = FitHepaticClearance(P);
+P = IntegralFitParameters(P, @AssembleIntegralSystemnLxL);
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
 

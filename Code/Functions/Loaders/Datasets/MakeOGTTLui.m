@@ -76,20 +76,20 @@ for ii = 1:length(patientSet)
         
         P.data.simTime = [min(allTimes) max(allTimes)];
         P.data.simDuration = floor(diff(P.data.simTime));
-        P.results.tArray = (P.data.simTime(1) : P.data.simTime(end))';
+        P.results.tArray = round(P.data.simTime(1) : P.data.simTime(end))';
         
         
         %% Assay Data
         % Glucose Assay
         isVenous = logical(rmmissing(pocTable{code, getrow('v', nPocMeas)}));
-        GPOC = rmmissing(pocTable{code, getrow('G', nPocMeas)});
-        tPOC = rmmissing(pocTable{code, getrow('tG', nPocMeas)});
+        vGPOC = rmmissing(pocTable{code, getrow('G', nPocMeas)});
+        tGPOC = rmmissing(pocTable{code, getrow('tG', nPocMeas)});
         
-        vPOCV = GPOC(isVenous);  % Venous + Test Strip
-        tPOCV = tPOC(isVenous);  % [min]
+        vGPOCV = vGPOC(isVenous);  % Venous + Test Strip
+        tGPOCV = tGPOC(isVenous);  % [min]
         
-        vPOCF = GPOC(~isVenous);  % Finger Prick + Test Strip
-        tPOCF = tPOC(~isVenous);  % [min]
+        vGPOCF = vGPOC(~isVenous);  % Finger Prick + Test Strip
+        tGPOCF = tGPOC(~isVenous);  % [min]
         
         vGBT = btTable{code, getrow('G', nBtMeas)};  % Blood Test
         tBT = btTable{code, getrow('TP', nBtMeas)};
@@ -99,12 +99,23 @@ for ii = 1:length(patientSet)
         vGBT = vGBT(isValid);  % [mmol/L]
         tGBT = tBT(isValid);  % [min]
         
+        % Incorporate venous POC values where BT not available.
         if any(isValid)
-            P.data.G.value = vGBT';
-            P.data.G.time = tGBT';
+            tUseAssay = tGBT;
+            iiUseAssay = ismember(tGPOCV, tUseAssay);
+            tUsePOC = tGPOCV(~iiUseAssay);
+            
+            [tFinal, order] = sort([tUseAssay, tUsePOC]);
+            vFinal = [vGBT vGPOCV];
+            vFinal = vFinal(order);
+            
+            
+            P.data.G.value = vFinal';
+            P.data.G.time = tFinal';          
+            
         else
-            P.data.G.value = GPOC';
-            P.data.G.time = tPOC';
+            P.data.G.value = vGPOC';
+            P.data.G.time = tGPOC';
         end
         P.data.GFast = P.data.G.value(1);  % [mmol/L]
         
@@ -153,10 +164,10 @@ for ii = 1:length(patientSet)
             DP = DEBUGPLOTS.MakeOGTTLui;
             MakeDebugPlot("OGTTLui Input", P, DP);
             
-            plt = plot(tPOCV, vPOCV, 'b*');
+            plt = plot(tGPOCV, vGPOCV, 'b*');
             plt.DisplayName = "Venous Test Strip";
             
-            plt = plot(tPOCF, vPOCF, 'b+');
+            plt = plot(tGPOCF, vGPOCF, 'b+');
             plt.DisplayName = "Finger Prick Test Strip";
             
             if ~isempty(vGBT)

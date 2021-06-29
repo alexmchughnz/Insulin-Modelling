@@ -1,4 +1,4 @@
-function [P, A, b, basisSplines] = FitSplinesJLKxLnL(P, numSplines)
+function [P, A, b, basisSplines] = FitSplinesJLKxLnL(P, numKnots)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
@@ -27,7 +27,7 @@ IInput = P.results.IInput;
 %% Get Coefficients
 % Collect basis functions for splines.
 order = 2;
-basisSplines = MakeSplineBasisFunctions(numSplines, order, P.results.tArray);
+basisSplines = MakeSplineBasisFunctions(numKnots, order, P.results.tArray);
 numTotalSplines = size(basisSplines, CONST.ROWWISE);
 numTotalParameters = numFixedParameters + numTotalSplines;
 

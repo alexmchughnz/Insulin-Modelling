@@ -39,6 +39,7 @@ end
 for k = 1:order
     % The i-th spline of order k interpolates the (i+k)-th spline
     % of order k-1.
+    % A spline of order k connects (k+2) knots.
     for ii = 1 : numSplines - k
         prevSplineTerm = (tSpan - knots(ii)) / (knots(ii+k) - knots(ii)) .* phi(:,ii,k);
         nextSplineTerm = (knots(ii+k+1) - tSpan) / (knots(ii+k+1) - knots(ii+1)) .* phi(:,ii+1,k);
@@ -50,7 +51,7 @@ end
 % Return final spline set within range.
 basisSplines = phi(:, :, end);
 isInRange = (tStart <= tSpan) & (tSpan <= tEnd);
-basisSplines = basisSplines(isInRange, 1:numKnots);
+basisSplines = basisSplines(isInRange, :);
 
 %% Plotting
 plotvars.tSpan = tSpan;

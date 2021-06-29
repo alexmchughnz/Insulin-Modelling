@@ -8,6 +8,11 @@ function P = SplineSim(P)
 %% Plots
 plots = DebugPlots();
 
+    plots.EstimateInsulinSecretion.Uen = false;
+    plots.EstimateInsulinSecretion.CPep = false;
+    
+    plots.SolveSystem.CoefficientShapes = false; 
+    
 DebugPlots(plots);
 
 
@@ -15,10 +20,10 @@ DebugPlots(plots);
 P = EstimateInsulinSecretion(P);
 
 % P.results.xL = 0.7
-numSplines = 10;
+numKnots = 10;
 
 % Manually solving here in the meantime.
-P = FitSplinesJLKxLnL(P, numSplines);
+P = FitSplinesJLKxLnL(P, numKnots);
 
 P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);

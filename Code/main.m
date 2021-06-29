@@ -19,8 +19,8 @@ recipeFunction = @SplineSim;
 % resultsTag = "Penalised";
 
 %% Select Data
-patientNums = [5 30];
-% patientNums = 'best';
+% patientNums = [30];
+patientNums = 'all';
 % patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";
 

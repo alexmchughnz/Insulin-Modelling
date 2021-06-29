@@ -93,6 +93,7 @@ for ii = 1:length(patientSet)
         
         tBT = btTable{code, getrow('TP', nBtMeas)};        
         isBTValid = ~isnan(tBT);
+        tBT = tBT(isBTValid);
         
         vGBT = btTable{code, getrow('G', nBtMeas)};  % Blood Test
         vGBT = vGBT(isBTValid);
@@ -103,25 +104,23 @@ for ii = 1:length(patientSet)
         tGBT = tBT(isGBTMeasured);  % [min]
         
         if not(all(isGBTMeasured))
-%             missingtBT = tBT(~isBTMeasureValid);
-%             min(abs()) []
+            missingtBT = tBT(~isGBTMeasured);
             
-            tUseAssay = tGBT;
-            iiUseAssay = ismember(tGPOCV, tUseAssay);
-            tUsePOC = tGPOCV(~iiUseAssay);
+            % Each column is a missing BT timepoint; each row is a
+            % replacement venous point. min will find the index of the 
+            % closest venous point to each missing BT point.
+            distanceMatrix = abs(missingtBT - tGPOCV');
+            [~, iiReplace] = min(distanceMatrix);
             
-            [tFinal, order] = sort([tUseAssay, tUsePOC]);
-            vFinal = [vGBT vGPOCV];
-            vFinal = vFinal(order);
-            
+            vFinal(isGBTMeasured) = vGBT;
+            vFinal(~isGBTMeasured) = vGPOCV(iiReplace);
             
             P.data.G.value = vFinal';
-            P.data.G.time = tFinal';          
-            
         else
-            P.data.G.value = vGPOC';
-            P.data.G.time = tGPOC';
+            P.data.G.value = vGBT';
         end
+        P.data.G.time = tBT';
+        
         P.data.GFast = P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay

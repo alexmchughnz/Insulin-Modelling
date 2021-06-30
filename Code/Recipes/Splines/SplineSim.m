@@ -13,6 +13,8 @@ plots = DebugPlots();
     
     plots.SolveSystem.CoefficientShapes = false; 
     
+    plots.MakeSplineBasisFunctions.Splines = true;
+    
 DebugPlots(plots);
 
 

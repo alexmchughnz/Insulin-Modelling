@@ -27,7 +27,9 @@ IInput = P.results.IInput;
 %% Get Coefficients
 % Collect basis functions for splines.
 order = 3;
-basisSplines = MakeSplineBasisFunctions(P, numKnots, order);
+knotLocations = P.data.I.time;
+
+basisSplines = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
 numTotalSplines = size(basisSplines, CONST.ROWWISE);
 numTotalParameters = numFixedParameters + numTotalSplines;
 

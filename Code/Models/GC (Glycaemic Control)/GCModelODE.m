@@ -41,7 +41,6 @@ else
     GInput = P.data.GInfusion(n);  % [mmol/min]
 end
 
-
 Qtot = Q;
 Qtot0 = Q0;
 if P.data.IType == "detemir"
@@ -54,13 +53,13 @@ end
 %% Computation
 dGA = -(G*Qtot - GFast*Qtot0)/(1 + GC.alphaG*Qtot);   % Insulin-mediated uptake.
 
-dGb =GInput/GC.VG...          % Exogenous IV glucose input.
+dGb = GInput/GC.VG ...        % Exogenous IV glucose input.
     + d2/GC.VG * P2 ...       % Endogenous input from gut.
     + GC.EGP/GC.VG ...        % Endogenous production.
     - GC.pg * (G-GFast) ...   % Non insulin-mediated uptake.
     - GC.CNS/GC.VG;           % Central nervous system uptake.
 
-dG = dGb + SI*dGA;
+dG  = dGb + SI*dGA;
 
 dI  = IInput/GC.VI ...              % Exogenous input (IV or subcut).
     + Uen * (1 - xL)/GC.VI ...      % Endogenous input.

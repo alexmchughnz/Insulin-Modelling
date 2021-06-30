@@ -91,50 +91,56 @@ for ii = 1:length(patientSet)
         vGPOCF = vGPOC(~isVenous);  % Finger Prick + Test Strip
         tGPOCF = tGPOC(~isVenous);  % [min]
         
+        tBT = btTable{code, getrow('TP', nBtMeas)};        
+        isBTValid = ~isnan(tBT);
+        tBT = tBT(isBTValid);
+        
         vGBT = btTable{code, getrow('G', nBtMeas)};  % Blood Test
-        tBT = btTable{code, getrow('TP', nBtMeas)};
+        vGBT = vGBT(isBTValid);
         
-        % Small workaround for some missing BT data for some subjects.
-        isValid = ~isnan(vGBT);
-        vGBT = vGBT(isValid);  % [mmol/L]
-        tGBT = tBT(isValid);  % [min]
+        % Incorporate venous POC Glucose values where BT G not available.
+        isGBTMeasured = ~isnan(vGBT);
+        vGBT = vGBT(isGBTMeasured);  % [mmol/L]
+        tGBT = tBT(isGBTMeasured);  % [min]
         
-        % Incorporate venous POC values where BT not available.
-        if any(isValid)
-            tUseAssay = tGBT;
-            iiUseAssay = ismember(tGPOCV, tUseAssay);
-            tUsePOC = tGPOCV(~iiUseAssay);
+        if not(all(isGBTMeasured))
+            missingtBT = tBT(~isGBTMeasured);
             
-            [tFinal, order] = sort([tUseAssay, tUsePOC]);
-            vFinal = [vGBT vGPOCV];
-            vFinal = vFinal(order);
+            % Each column is a missing BT timepoint; each row is a
+            % replacement venous point. min will find the index of the 
+            % closest venous point to each missing BT point.
+            distanceMatrix = abs(missingtBT - tGPOCV');
+            [~, iiReplace] = min(distanceMatrix);
             
+            vFinal(isGBTMeasured) = vGBT;
+            vFinal(~isGBTMeasured) = vGPOCV(iiReplace);
             
             P.data.G.value = vFinal';
-            P.data.G.time = tFinal';          
-            
         else
-            P.data.G.value = vGPOC';
-            P.data.G.time = tGPOC';
+            P.data.G.value = vGBT';
         end
+        P.data.G.time = tBT';
+        
         P.data.GFast = P.data.G.value(1);  % [mmol/L]
         
         % Insulin Assay
         vI = CONST.pmol2mU(btTable{code, getrow('I', nBtMeas)})';  % [mU/L]
-        tI = tBT';  % [min]   
-        isValid = ~isnan(vI); 
+        vI = vI(isBTValid);
         
-        P.data.I.value = vI(isValid);
-        P.data.I.time = tI(isValid);
+        tI = tBT';  % [min]   
+        isBTValid = ~isnan(vI); 
+        
+        P.data.I.value = vI(isBTValid);
+        P.data.I.time = tI(isBTValid);
         
         % C-peptide Assay
         vCPep = btTable{code, getrow('C', nBtMeas)}';  % [pmol/L]
         tCPep = tBT';  % [min]
         
-        isValid = ~isnan(vCPep); 
+        isBTValid = ~isnan(vCPep); 
         
-        P.data.CPep.value = vCPep(isValid);
-        P.data.CPep.time = tCPep(isValid);
+        P.data.CPep.value = vCPep(isBTValid);
+        P.data.CPep.time = tCPep(isBTValid);
         
         %% Trial Inputs
         % Insulin Bolus
@@ -164,6 +170,10 @@ for ii = 1:length(patientSet)
             DP = DEBUGPLOTS.MakeOGTTLui;
             MakeDebugPlot("OGTTLui Input", P, DP);
             
+            % All Glucose Data
+            subplot(2, 1, 1)
+            hold on
+            
             plt = plot(tGPOCV, vGPOCV, 'b*');
             plt.DisplayName = "Venous Test Strip";
             
@@ -171,15 +181,37 @@ for ii = 1:length(patientSet)
             plt.DisplayName = "Finger Prick Test Strip";
             
             if ~isempty(vGBT)
-                plt = plot(tGBT, vGBT, 'g*');
+                plt = plot(tGBT, vGBT, 'r*');
                 plt.DisplayName = "Blood Test";
             end
-            
-            xlim([0 inf])
             ylim([4 14])
             
-            ylabel("Plasma Glucose [mmol/L]")
+            for tt = tBT
+                line([tt tt], ylim, 'Color', 'k', 'LineStyle', ':', ...
+                    'LineWidth', 0.5, 'HandleVisibility', 'off')
+            end
+            
             legend()
+            
+            ylabel("Plasma Glucose [mmol/L]")
+            
+            % Final Glucose Data
+            subplot(2, 1, 2)    
+            hold on
+            
+            plt = plot(P.data.G.time, P.data.G.value, 'g*');
+            plt.DisplayName = "Final Profile";
+            
+            ylim([4 14])
+            
+            for tt = tBT
+                line([tt tt], ylim, 'Color', 'k', 'LineStyle', ':', ...
+                    'LineWidth', 0.5, 'HandleVisibility', 'off')
+            end
+            
+            legend()
+            ylabel("Plasma Glucose [mmol/L]")
+            xlabel("Time [min]")
         end
         
         %% Save

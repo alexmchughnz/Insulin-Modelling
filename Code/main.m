@@ -19,12 +19,14 @@ recipeFunction = @SplineSim;
 % resultsTag = "Penalised";
 
 %% Select Data
-% % % patientNums = [5];
-patientNums = 'all';
+patientNums = [5];
+% patientNums = 'all';
+% patientNums = [1 4 14 22 23 25 30];
 source = "OGTTLui";
 
 %% Load Data
-patientSet = LoadData(source, patientNums, false);
+showLoadPlots = true;
+patientSet = LoadData(source, patientNums, showLoadPlots);
 patientSetOut = {};
 
 %% Run

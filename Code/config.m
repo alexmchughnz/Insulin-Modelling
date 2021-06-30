@@ -1,8 +1,10 @@
 set(groot, 'defaultTextInterpreter','latex');
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
-set(groot, 'DefaultLineLineWidth', 2.0);
-set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 8 6]);
+set(groot, 'defaultLegendLocation', 'eastoutside')
+set(groot, 'defaultLegendOrientation', 'vertical')
+set(groot, 'defaultLineLineWidth', 2.0);
+set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 20 8]);
 format shortG
 format compact
 warning('off', 'MATLAB:table:RowsAddedExistingVars');

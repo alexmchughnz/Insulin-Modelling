@@ -5,11 +5,6 @@ function P = FindGutEmptyingRate(P)
 % OUTPUT:
 %   P   - modified patient struct with best found d2    
 
-[P, hasOptd2] = GetPersistent(P, "optimald2");
-if hasOptd2
-    P.results.d2 = P.persistents.optimald2;
-    return
-end
     
 %% Setup
 % Input grid.
@@ -45,14 +40,13 @@ for ii = 1:N
     % Find average error G(t, d2) to measured data.
     [~, simG] = GetResultsSample(copyP, tG, copyP.results.G);
     
-    error = simG - vG;
-    error = error(tG >= 0);  % Only evaluate error at true points.
-    GErrorGrid(ii) = mean(error.^2); 
+    glucoseSSE = (simG - vG).^2;
+    GErrorGrid(ii) = mean(glucoseSSE); 
 end
 
 %% Solving
-isBest = GErrorGrid == min(GErrorGrid);
-P.results.d2 = d2Grid(isBest);  % [1/min]
+[~, iiBest] = min(GErrorGrid);
+P.results.d2 = d2Grid(iiBest);  % [1/min]
 P.persistents.optimald2 = P.results.d2;
 
 

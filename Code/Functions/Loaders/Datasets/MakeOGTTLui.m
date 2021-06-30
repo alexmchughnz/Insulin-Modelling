@@ -209,6 +209,7 @@ for ii = 1:length(patientSet)
                     'LineWidth', 0.5, 'HandleVisibility', 'off')
             end
             
+            legend()
             ylabel("Plasma Glucose [mmol/L]")
             xlabel("Time [min]")
         end

@@ -77,13 +77,14 @@ for ii = 1:length(patientSet)
         P.data.simTime = [min(allTimes) max(allTimes)];
         P.data.simDuration = floor(diff(P.data.simTime));
         P.results.tArray = round(P.data.simTime(1) : P.data.simTime(end))';
+        tDelta = diff(P.results.tArray(1:2));
         
         
         %% Assay Data
         % Glucose Assay
         isVenous = logical(rmmissing(pocTable{code, getrow('v', nPocMeas)}));
         vGPOC = rmmissing(pocTable{code, getrow('G', nPocMeas)});
-        tGPOC = rmmissing(pocTable{code, getrow('tG', nPocMeas)});
+        tGPOC = RoundToMultiple(rmmissing(pocTable{code, getrow('tG', nPocMeas)}), tDelta);
         
         vGPOCV = vGPOC(isVenous);  % Venous + Test Strip
         tGPOCV = tGPOC(isVenous);  % [min]
@@ -93,7 +94,7 @@ for ii = 1:length(patientSet)
         
         tBT = btTable{code, getrow('TP', nBtMeas)};        
         isBTValid = ~isnan(tBT);
-        tBT = tBT(isBTValid);
+        tBT = RoundToMultiple(tBT(isBTValid), tDelta);
         
         vGBT = btTable{code, getrow('G', nBtMeas)};  % Blood Test
         vGBT = vGBT(isBTValid);

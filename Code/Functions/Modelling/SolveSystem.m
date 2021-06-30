@@ -112,22 +112,25 @@ if DP.GlucoseComponents
     MakeDebugPlot("Glucose Components", P, DP);
     hold on
     
-    plt = plot(tArray, GInput/GC.VG);
+    int = @(x) cumtrapz(tArray, x);
+    
+    plt = plot(tArray, int(GInput/GC.VG));
     plt.DisplayName = 'Exogenous Glucose';
-    plt = plot(tArray, P.results.d2/GC.VG * P.results.P2);
+    plt = plot(tArray, int(P.results.d2/GC.VG * P.results.P2));
     plt.DisplayName = 'Glucose from Gut';
-    plt = plot(tArray, GC.EGP/GC.VG * ones(size(tArray)));
+    plt = plot(tArray, int(GC.EGP/GC.VG * ones(size(tArray))));
     plt.DisplayName = 'EGP';
-    plt = plot(tArray, -GC.pg * (G - GFast));
+    plt = plot(tArray, int(-GC.pg * (G - GFast)));
     plt.DisplayName = 'NIM Uptake';
-    plt = plot(tArray, -P.results.SI .* (G.*Qtot - GFast.*Qtot0)./(1 + GC.alphaG*Qtot));
+    plt = plot(tArray, int(-P.results.SI .* (G.*Qtot - GFast.*Qtot0)./(1 + GC.alphaG*Qtot)));
     plt.DisplayName = 'IM Uptake (with SI)';
-    plt = plot(tArray, - GC.CNS/GC.VG * ones(size(tArray)));
+    plt = plot(tArray, int(- GC.CNS/GC.VG * ones(size(tArray))));
     plt.DisplayName = 'CNS Uptake';
     
     xlabel('Time [min]')
-    ylabel('Glucose Rate [mmol/L/min]')
+    ylabel('Glucose Contribution [mmol/L]')
     legend()
+    grid on
 end
 
 %% Insulin

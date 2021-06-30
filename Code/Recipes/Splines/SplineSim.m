@@ -19,10 +19,8 @@ DebugPlots(plots);
 %% Functions
 P = EstimateInsulinSecretion(P);
 
-% P.results.xL = 0.7
-numKnots = 10;
-
 % Manually solving here in the meantime.
+numKnots = numel(P.data.I.value) + 1;
 P = FitSplinesJLKxLnL(P, numKnots);
 
 P = FindGutEmptyingRate(P);

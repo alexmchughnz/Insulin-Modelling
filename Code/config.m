@@ -1,8 +1,10 @@
 set(groot, 'defaultTextInterpreter','latex');
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
-set(groot, 'DefaultLineLineWidth', 2.0);
-set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 8 6]);
+set(groot, 'defaultLegendLocation', 'eastoutside')
+set(groot, 'defaultLegendOrientation', 'vertical')
+set(groot, 'defaultLineLineWidth', 2.0);
+set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 20 8]);
 format shortG
 format compact
 warning('off', 'MATLAB:table:RowsAddedExistingVars');
@@ -27,7 +29,7 @@ addpath(genpath(CONFIG.PLOTPATH));
 
 CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
 CONFIG.STATUSDEPTH = 3;
-CONFIG.SAVERESULTS = false;
+CONFIG.SAVERESULTS = true;
 CONFIG.HIGHDETAIL = false;
 
 defaultOptions = odeset('RelTol', 1e-5, ...

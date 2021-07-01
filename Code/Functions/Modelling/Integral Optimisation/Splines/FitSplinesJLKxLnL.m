@@ -26,7 +26,7 @@ IInput = P.results.IInput;
 
 %% Get Coefficients
 % Collect basis functions for splines.
-order = 2;
+order = 3;
 knotLocations = P.data.I.time;
 
 basisSplines = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
@@ -120,13 +120,15 @@ for ii = 1:numDiffs
     nLConstraint(ii, ii+1) = 1;
     
     % Change directional constraint based on deltaG.
-    nLConstraint(ii, :) = nLConstraint(ii, :) .* -sign(deltaG(ii));
+    % nL should decrease if G is increasing, thus
+    % (nL(ii+1) - nL(ii)) * sign(G(ii+1) - G(ii)) < 0
+    nLConstraint(ii, :) = nLConstraint(ii, :) .* sign(deltaG(ii));
 end
 
 % Place directional constraints on data-range splines.
-% A structure is [fixedParams, extraSplines, dataSplines, extraSplines].
+% "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
 numConstrainedSplines = size(nLConstraint, CONST.ROWWISE);
-iiDataSpline = numFixedParameters + numExtraSplines + [1:numConstrainedSplines];
+iiDataSpline = numFixedParameters + numExtraSplines + 1 + [1:numConstrainedSplines];
 AConstraint = zeros(numDiffs, numTotalParameters);
 AConstraint(:, iiDataSpline) = nLConstraint;
 
@@ -189,12 +191,26 @@ if DP.nLGlucose
 [tG, vG] = GetData(P.data.G); % [mmol/L]
 iiG = GetTimeIndex(tG, P.results.tArray);
 nL = P.results.nL(iiG);
+nLNorm = nL ./ max(nL);
 
-plt = scatter(nL, vG, 'x');
-plt.DisplayName = "P" + P.patientNum;
+% Scatter
+sct = plot(vG, nLNorm, 'x');
+sct.DisplayName = "P" + P.patientNum;
 
-xlabel("nL [1/min]")
-ylabel("Measured G [mmol/L]")
+% Linear Interpolation
+A(:,1) = vG;
+A(:,2) = ones(size(vG));
+b = nLNorm;
+theta = A\b;
+m = theta(1);
+c = theta(2);
+
+GArray = 4:11;
+plt = plot(GArray, m*GArray+c, 'Color', sct.Color);
+plt.HandleVisibility = 'off';
+
+xlabel("Measured G [mmol/L]")
+ylabel("Normalised nL [-]")
 
 legend
     

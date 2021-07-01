@@ -26,11 +26,12 @@ IInput = P.results.IInput;
 
 %% Get Coefficients
 % Collect basis functions for splines.
-order = 3;
+order = 2;
 knotLocations = P.data.I.time;
 
 basisSplines = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
 numTotalSplines = size(basisSplines, CONST.ROWWISE);
+numExtraSplines = 1;  % Each side, added for higher-order interpolations.
 numTotalParameters = numFixedParameters + numTotalSplines;
 
 % Consider:
@@ -92,7 +93,7 @@ A(:,3:numTotalParameters) = CWValues;
 b = CValues;
 
 %% Solve For Splines
-% Enforce constraints on variables.
+% Enforce absolute value constraints on variables.
 lbJLK = 0.01;
 ubJLK = 1;
 lbxL = 0.6;
@@ -107,8 +108,33 @@ ub(1) = ubJLK;
 ub(2) = ubxL;
 ub(3:numTotalParameters) = ubnLW;
 
+% Enforce directional constraint on nL. delta(nL) should always be opposite
+% to delta(G).
+[~, vG] = GetData(P.data.G);
+deltaG = vG(2:end) - vG(1:end-1);
+numDiffs = numel(deltaG);
+
+for ii = 1:numDiffs
+    % Set up difference matrix.
+    nLConstraint(ii, ii) = -1;
+    nLConstraint(ii, ii+1) = 1;
+    
+    % Change directional constraint based on deltaG.
+    nLConstraint(ii, :) = nLConstraint(ii, :) .* -sign(deltaG(ii));
+end
+
+% Place directional constraints on data-range splines.
+% A structure is [fixedParams, extraSplines, dataSplines, extraSplines].
+numConstrainedSplines = size(nLConstraint, CONST.ROWWISE);
+iiDataSpline = numFixedParameters + numExtraSplines + [1:numConstrainedSplines];
+AConstraint = zeros(numDiffs, numTotalParameters);
+AConstraint(:, iiDataSpline) = nLConstraint;
+
+bConstraint = zeros(numDiffs, 1);
+
+
 % Solve using linear solver.
-x = lsqlin(A, b, [], [], [], [], lb, ub);
+x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb, ub);
 
 JLK = x(1);
 P = ApplyInsulinLossFactor(P, JLK);

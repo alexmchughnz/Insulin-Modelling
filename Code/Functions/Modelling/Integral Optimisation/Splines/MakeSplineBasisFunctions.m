@@ -1,4 +1,4 @@
-function basisSplines = MakeSplineBasisFunctions(P, order, mode, varargin)
+function [basisSplines] = MakeSplineBasisFunctions(P, order, mode, varargin)
 % Creates basis spline functions for a time array.
 % This function enforces 'numKnots' knots within the range of tArray, and
 % generates additional splines for higher orders.
@@ -7,8 +7,8 @@ function basisSplines = MakeSplineBasisFunctions(P, order, mode, varargin)
 %% Setup
 % Time
 tDelta = diff(P.results.tArray(1:2));
-tStart = P.results.tArray(1), tDelta;
-tEnd = P.results.tArray(end), tDelta;
+tStart = P.results.tArray(1);
+tEnd = P.results.tArray(end);
 
 % Knots
 numExtraKnots = order;  % k-th order splines requires k extra knots / k-1 splines at each end to fully define all in range.
@@ -75,8 +75,9 @@ end
 
 % Return final spline set within range.
 basisSplines = phi(:, :, end);
-isInRange = (tStart <= tSpan) & (tSpan <= tEnd);
-basisSplines = basisSplines(isInRange, :);
+isInTimeRange = (tStart <= tSpan) & (tSpan <= tEnd);
+ccSplinePresent = 1 : numSplines-order; % For k-order splines, the last k splines are zeroed.
+basisSplines = basisSplines(isInTimeRange, ccSplinePresent);
 
 %% Plotting
 plotvars.tSpan = tSpan;

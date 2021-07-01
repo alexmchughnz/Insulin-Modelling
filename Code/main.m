@@ -20,12 +20,11 @@ recipeFunction = @SplineSim;
 
 %% Select Data
 % patientNums = [5];
-patientNums = 'all';
-% patientNums = [1 4 14 22 23 25 30];
+patientNums = 'best';
 source = "OGTTLui";
 
 %% Load Data
-showLoadPlots = true;
+showLoadPlots = false;
 patientSet = LoadData(source, patientNums, showLoadPlots);
 patientSetOut = {};
 

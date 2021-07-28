@@ -41,6 +41,9 @@ for ii = 1:length(patientSet)
         
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMSE", @(x) x, "insulinMSE [(mU/L)^2]");
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMSE", @(x) x, "glucoseMSE [(mmol/L)^2]");
+        
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMSE", @sqrt, "insulinRMSE [mU/L]");
+        tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMSE", @sqrt, "glucoseRMSE [mmol/L]");
     end
     
     tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");

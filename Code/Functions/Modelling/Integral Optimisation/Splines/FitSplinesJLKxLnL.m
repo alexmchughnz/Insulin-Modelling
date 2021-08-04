@@ -108,31 +108,39 @@ ub(1) = ubJLK;
 ub(2) = ubxL;
 ub(3:numTotalParameters) = ubnLW;
 
-% Enforce directional constraint on nL. delta(nL) should always be opposite
-% to delta(G).
+% Enforce constraints on nL.
 [~, vG] = GetData(P.data.G);
 deltaG = vG(2:end) - vG(1:end-1);
 numDiffs = numel(deltaG);
 
 for ii = 1:numDiffs
     % Set up difference matrix.
-    nLConstraint(ii, ii) = -1;
-    nLConstraint(ii, ii+1) = 1;
-    
-    % Change directional constraint based on deltaG.
-    % nL should decrease if G is increasing, thus
-    % (nL(ii+1) - nL(ii)) * sign(G(ii+1) - G(ii)) < 0
-    nLConstraint(ii, :) = nLConstraint(ii, :) .* sign(deltaG(ii));
+    nLDiff(ii, ii) = -1;
+    nLDiff(ii, ii+1) = 1;
 end
 
-% Place directional constraints on data-range splines.
-% "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
-numConstrainedSplines = size(nLConstraint, CONST.ROWWISE);
-iiDataSpline = numFixedParameters + numExtraSplines + 1 + [1:numConstrainedSplines];
-AConstraint = zeros(numDiffs, numTotalParameters);
-AConstraint(:, iiDataSpline) = nLConstraint;
+% Directional constraint - delta(nL) should always be opposite to delta(G).
+% nL should decrease if G is increasing, thus
+% (nL(ii+1) - nL(ii)) * sign(G(ii+1) - G(ii)) < 0
+nLDirectionConstraint =  nLDiff .* sign(deltaG);
 
-bConstraint = zeros(numDiffs, 1);
+% Change over time constraint - delta(nL) should be less than
+% 0.001 min^-2 (Caumo, 2007).
+maxnLRateChange = 0.001;
+deltat = tMeas(2:end) - tMeas(1:end-1);
+deltanL = maxnLRateChange * deltat;
+nLChangeConstraint = nLDiff .* -sign(deltaG);
+
+
+% Place constraints on data-range splines.
+% "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
+numConstrainedSplines = size(nLDirectionConstraint, CONST.ROWWISE);
+iiDataSpline = numFixedParameters + numExtraSplines + 1 + [1:numConstrainedSplines];
+
+AConstraint = zeros(2*numDiffs, numTotalParameters);
+AConstraint(:, iiDataSpline) = [nLDirectionConstraint; nLChangeConstraint];
+
+bConstraint = [zeros(numDiffs, 1); deltanL];
 
 
 % Solve using linear solver.
@@ -188,31 +196,31 @@ if DP.nLGlucose
     end
     
     
-[tG, vG] = GetData(P.data.G); % [mmol/L]
-iiG = GetTimeIndex(tG, P.results.tArray);
-nL = P.results.nL(iiG);
-nLNorm = nL ./ max(nL);
-
-% Scatter
-sct = plot(vG, nLNorm, 'x');
-sct.DisplayName = "P" + P.patientNum;
-
-% Linear Interpolation
-A(:,1) = vG;
-A(:,2) = ones(size(vG));
-b = nLNorm;
-theta = A\b;
-m = theta(1);
-c = theta(2);
-
-GArray = 4:11;
-plt = plot(GArray, m*GArray+c, 'Color', sct.Color);
-plt.HandleVisibility = 'off';
-
-xlabel("Measured G [mmol/L]")
-ylabel("Normalised nL [-]")
-
-legend
+    [tG, vG] = GetData(P.data.G); % [mmol/L]
+    iiG = GetTimeIndex(tG, P.results.tArray);
+    nL = P.results.nL(iiG);
+    nLNorm = nL ./ max(nL);
+    
+    % Scatter
+    sct = plot(vG, nLNorm, 'x');
+    sct.DisplayName = "P" + P.patientNum;
+    
+    % Linear Interpolation
+    A(:,1) = vG;
+    A(:,2) = ones(size(vG));
+    b = nLNorm;
+    theta = A\b;
+    m = theta(1);
+    c = theta(2);
+    
+    GArray = 4:11;
+    plt = plot(GArray, m*GArray+c, 'Color', sct.Color);
+    plt.HandleVisibility = 'off';
+    
+    xlabel("Measured G [mmol/L]")
+    ylabel("Normalised nL [-]")
+    
+    legend
     
 end
 

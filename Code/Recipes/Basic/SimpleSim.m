@@ -5,21 +5,19 @@ function P = SimpleSim(P)
 % OUTPUT:
 %   P  - updated patient struct
 
-%% Plots
-plots = DebugPlots();
-
-DebugPlots(plots);
-
 
 %% Functions
-P = EstimateInsulinSecretion(P);
+P = EstimateInsulinSecretion(P);  % Fit Uen.
 
-nLxL = [NaN, 0.7];
-P = FixAndFitParameters(P, @AssembleIntegralSystemnLxL, nLxL);
+P = IntegralFitParameters(P, @AssembleIntegralSystemnLxL);  % Fit nL/xL, integral method.
 
-P = FindGutEmptyingRate(P);
-P = FitInsulinSensitivity(P);
-P = SolveSystem(P, true);
+P = FindGutEmptyingRate(P);  % Find d2.
+
+P = FitInsulinSensitivity(P);  % Fit SI.
+
+
+
+P = SolveSystem(P, true);  % Simulate G, I, Q, etc.
 
 end
 

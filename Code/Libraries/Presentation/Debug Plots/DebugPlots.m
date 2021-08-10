@@ -25,7 +25,8 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.AnalyseInsulinVariance.Error = true;
     
     DEBUGPLOTS.SolveSystem.Glucose = true;
-    DEBUGPLOTS.SolveSystem.Insulin = true;
+    DEBUGPLOTS.SolveSystem.PlasmaInsulin = true;
+    DEBUGPLOTS.SolveSystem.InterstitialInsulin = true;
     DEBUGPLOTS.SolveSystem.GlucoseComponents = true;
     DEBUGPLOTS.SolveSystem.CoefficientShapes = true; 
     

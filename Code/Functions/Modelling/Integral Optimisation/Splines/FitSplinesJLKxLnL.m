@@ -29,9 +29,8 @@ IInput = P.results.IInput;
 order = 3;
 knotLocations = P.data.I.time;
 
-basisSplines = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
+[basisSplines, allKnots] = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
 numTotalSplines = size(basisSplines, CONST.ROWWISE);
-numExtraSplines = 1;  % Each side, added for higher-order interpolations.
 numTotalParameters = numFixedParameters + numTotalSplines;
 
 % Consider:
@@ -92,7 +91,7 @@ A(:,2) = CXValues;
 A(:,3:numTotalParameters) = CWValues;
 b = CValues;
 
-%% Solve For Splines
+%% Set up Splines
 % Enforce absolute value constraints on variables.
 lbJLK = 0.01;
 ubJLK = 1;
@@ -108,39 +107,47 @@ ub(1) = ubJLK;
 ub(2) = ubxL;
 ub(3:numTotalParameters) = ubnLW;
 
-% Enforce constraints on nL.
-[~, vG] = GetData(P.data.G);
-deltaG = vG(2:end) - vG(1:end-1);
-numDiffs = numel(deltaG);
+% Enforce constraints on nL spline weights.
+numConstraints = numTotalSplines - 1;
 
-for ii = 1:numDiffs
+[~, vG] = GetData(P.data.G);
+GDiffs = vG(2:end) - vG(1:end-1);
+
+for ii = 1:numConstraints
     % Set up difference matrix.
-    nLDiff(ii, ii) = -1;
-    nLDiff(ii, ii+1) = 1;
+    nLDiffMatrix(ii, ii) = -1;
+    nLDiffMatrix(ii, ii+1) = 1;
 end
 
 % Directional constraint - delta(nL) should always be opposite to delta(G).
+% Expand delta(G) pattern by at edges to constrain "extra" splines.
+diffPattern = [GDiffs(1); GDiffs];                                 % One extra left-hand spline.
+diffPattern(numel(diffPattern)+1 : numConstraints) = GDiffs(end);  % Any number of extra right-hand splines.
 % nL should decrease if G is increasing, thus
-% (nL(ii+1) - nL(ii)) * sign(G(ii+1) - G(ii)) < 0
-nLDirectionConstraint =  nLDiff .* sign(deltaG);
+% sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < 0
+nLDirectionA = sign(diffPattern) .* nLDiffMatrix;
+nLDirectionb = zeros(numConstraints, 1);
 
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
-maxnLRateChange = 0.001;
-deltat = tMeas(2:end) - tMeas(1:end-1);
-deltanL = maxnLRateChange * deltat;
-nLChangeConstraint = nLDiff .* -sign(deltaG);
+maxnLRateOfChange = 0.001;  % [min^-2]
+tDeltas = allKnots(order : end-order)'; % Take off extra knots, keep those that define data range.
+maxnLDeltas = maxnLRateOfChange * tDeltas;
+% Absolute change in nL must be less than max change, thus
+% abs(nL(ii+1) - nL(ii))  < maxnLDeltas(ii)
+% sign(nL(ii+1) - nL(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
+% -sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
+nLChangeA = -sign(diffPattern) .* nLDiffMatrix ;
+nLChangeb = maxnLDeltas;
 
-
-% Place constraints on data-range splines.
+% Place constraints on splines.
 % "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
-numConstrainedSplines = size(nLDirectionConstraint, CONST.ROWWISE);
-iiDataSpline = numFixedParameters + numExtraSplines + 1 + [1:numConstrainedSplines];
+iiSplines = numFixedParameters + [1:numTotalSplines];
 
-AConstraint = zeros(2*numDiffs, numTotalParameters);
-AConstraint(:, iiDataSpline) = [nLDirectionConstraint; nLChangeConstraint];
+AConstraint = zeros(2*numConstraints, numTotalParameters);
+AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
 
-bConstraint = [zeros(numDiffs, 1); deltanL];
+bConstraint = [nLDirectionb; nLChangeb];
 
 
 % Solve using linear solver.

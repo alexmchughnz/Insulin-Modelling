@@ -1,4 +1,4 @@
-function [basisSplines] = MakeSplineBasisFunctions(P, order, mode, varargin)
+function [basisSplines, knots] = MakeSplineBasisFunctions(P, order, mode, varargin)
 % Creates basis spline functions for a time array.
 % This function enforces 'numKnots' knots within the range of tArray, and
 % generates additional splines for higher orders.
@@ -11,7 +11,7 @@ tStart = P.results.tArray(1);
 tEnd = P.results.tArray(end);
 
 % Knots
-numExtraKnots = order;  % k-th order splines requires k extra knots / k-1 splines at each end to fully define all in range.
+numExtraKnots = order;  % k-th order splines requires k extra knots / 1 spline at each end to fully define all in range.
 
 if mode == "numKnots"
     % Fixed Number of Knots

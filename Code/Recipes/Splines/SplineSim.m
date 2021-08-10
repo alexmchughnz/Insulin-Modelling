@@ -23,7 +23,6 @@ DebugPlots(plots);
 %% Functions
 P = EstimateInsulinSecretion(P);
 
-% Manually solving here in the meantime.
 numKnots = numel(P.data.I.value) + 1;
 P = FitSplinesJLKxLnL(P, numKnots);
 

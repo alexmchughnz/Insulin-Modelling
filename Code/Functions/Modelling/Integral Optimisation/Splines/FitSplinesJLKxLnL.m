@@ -109,7 +109,6 @@ ub(3:numTotalParameters) = ubnLW;
 
 % Enforce constraints on nL spline weights.
 numConstraints = numTotalSplines - 1;
-
 [~, vG] = GetData(P.data.G);
 GDiffs = vG(2:end) - vG(1:end-1);
 
@@ -131,7 +130,8 @@ nLDirectionb = zeros(numConstraints, 1);
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
 maxnLRateOfChange = 0.001;  % [min^-2]
-tDeltas = allKnots(order : end-order)'; % Take off extra knots, keep those that define data range.
+dataKnots = allKnots(order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
+tDeltas = diff(dataKnots);
 maxnLDeltas = maxnLRateOfChange * tDeltas;
 % Absolute change in nL must be less than max change, thus
 % abs(nL(ii+1) - nL(ii))  < maxnLDeltas(ii)

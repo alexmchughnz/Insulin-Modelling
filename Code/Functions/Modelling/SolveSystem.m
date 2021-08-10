@@ -130,6 +130,10 @@ if DP.GlucoseComponents
     xlabel('Time [min]')
     ylabel('Glucose Contribution [mmol/L]')
     legend()
+    
+    lim = max(abs(ylim));
+    ylim([-lim lim])
+    
     grid on
 end
 

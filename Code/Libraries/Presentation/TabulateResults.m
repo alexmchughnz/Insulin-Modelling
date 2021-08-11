@@ -43,8 +43,10 @@ for ii = 1:length(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "glucoseMSE", @(x) x, "glucoseMSE [(mmol/L)^2]");
     end
     
-    tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
-    tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
+    if isfield(P, 'persistents')
+        tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevMSE");
+        tables{tt} = AddField(tables{tt}, code, P.persistents, "stddevSSE");
+    end
     
     %% Grid Search Parameters
     name = "GridSearch";

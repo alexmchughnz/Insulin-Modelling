@@ -1,4 +1,4 @@
-function basisSplines = MakeSplineBasisFunctions(P, numKnots, order)
+function [basisSplines, knots] = MakeSplineBasisFunctions(P, order, mode, varargin)
 % Creates basis spline functions for a time array.
 % This function enforces 'numKnots' knots within the range of tArray, and
 % generates additional splines for higher orders.
@@ -6,17 +6,42 @@ function basisSplines = MakeSplineBasisFunctions(P, numKnots, order)
 
 %% Setup
 % Time
+tDelta = diff(P.results.tArray(1:2));
 tStart = P.results.tArray(1);
 tEnd = P.results.tArray(end);
-tDelta = diff(P.results.tArray(1:2));
 
 % Knots
-knotSpacing = RoundToMultiple((tEnd-tStart)/(numKnots-1), tDelta, -1);  % Time width of knots.
-numExtraKnots = order;  % k-th order splines requires k extra knots/ k-1 splines at each end to fully define all in range.
+numExtraKnots = order;  % k-th order splines requires k extra knots / 1 spline at each end to fully define all in range.
 
-knotStart = tStart - numExtraKnots*knotSpacing;  % Time location of knots.
-knotEnd = tStart + (numKnots+numExtraKnots)*knotSpacing;
-knots = knotStart : knotSpacing : knotEnd;
+if mode == "numKnots"
+    % Fixed Number of Knots
+    numKnots = varargin{1};
+    
+    knotSpacing = RoundToMultiple((tEnd-tStart)/(numKnots-1), tDelta, -1);  % Time width of knots.
+    
+    knotStart = tStart - numExtraKnots*knotSpacing;  % Time location of knots.
+    knotEnd = tStart + (numKnots+numExtraKnots)*knotSpacing;
+    knots = knotStart : knotSpacing : knotEnd;
+    
+elseif mode == "knotLocations"
+    % Specified Knot Locations
+    knots = varargin{1}';    
+    extraKnotSpacing = floor(mean(diff(knots)));
+    
+    % Add knots to cover time range if required.
+    if tStart < knots(1)
+        knots = [knots(1)-extraKnotSpacing, knots];
+    end
+    if knots(end) < tEnd
+        knots = [knots, knots(end)+extraKnotSpacing];
+    end
+    
+    extraLeftKnots = knots(1) - extraKnotSpacing * [numExtraKnots:-1:1];
+    extraRightKnots = knots(end) + extraKnotSpacing * [1:+1:numExtraKnots];
+    
+    knots = [extraLeftKnots knots extraRightKnots];
+    
+end
 
 % Splines
 tSpan = (knots(1) : tDelta : knots(end))';        % Extended time range covering all splines.
@@ -50,8 +75,9 @@ end
 
 % Return final spline set within range.
 basisSplines = phi(:, :, end);
-isInRange = (tStart <= tSpan) & (tSpan <= tEnd);
-basisSplines = basisSplines(isInRange, :);
+isInTimeRange = (tStart <= tSpan) & (tSpan <= tEnd);
+ccSplinePresent = 1 : numSplines-order; % For k-order splines, the last k splines are zeroed.
+basisSplines = basisSplines(isInTimeRange, ccSplinePresent);
 
 %% Plotting
 plotvars.tSpan = tSpan;

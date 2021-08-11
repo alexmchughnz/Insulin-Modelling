@@ -1,10 +1,10 @@
 set(groot, 'defaultTextInterpreter','latex');
 set(groot, 'defaultAxesTickLabelInterpreter','latex'); 
 set(groot, 'defaultLegendInterpreter','latex');
-set(groot, 'defaultLegendLocation', 'eastoutside')
+set(groot, 'defaultLegendLocation', 'southoutside')
 set(groot, 'defaultLegendOrientation', 'vertical')
 set(groot, 'defaultLineLineWidth', 2.0);
-set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 20 8]);
+set(groot, 'defaultFigureUnits', 'centimeters', 'defaultFigurePosition', [0 0 20 12]);
 format shortG
 format compact
 warning('off', 'MATLAB:table:RowsAddedExistingVars');
@@ -14,6 +14,7 @@ clear DebugPlots
 
 global CONFIG
 CONFIG.FUNCPATH  = fullfile(pwd, 'Functions');
+CONFIG.LIBPATH = fullfile(pwd, 'Libraries');
 CONFIG.MODELPATH = fullfile(pwd, 'Models');
 CONFIG.RECIPEPATH = fullfile(pwd, 'Recipes');
 CONFIG.DATAPATH  = fullfile(pwd, '..', 'Data');
@@ -21,6 +22,7 @@ CONFIG.RESULTPATH = fullfile(pwd, '..', 'Results');
 CONFIG.PLOTPATH = fullfile(pwd, '..', 'Plots');
 
 addpath(genpath(CONFIG.FUNCPATH));
+addpath(genpath(CONFIG.LIBPATH));
 addpath(genpath(CONFIG.MODELPATH));
 addpath(genpath(CONFIG.RECIPEPATH));
 addpath(genpath(CONFIG.DATAPATH));

@@ -32,6 +32,11 @@ if ~isempty(figData)
         % Make figure.
         figNum = GetFigNum(figRow);
         F = figure(figNum);
+        ax = gca();
+        lgd = ax.Legend;
+        if ~isempty(lgd)
+        lgd.Location = 'best';
+        end
         
         % Get position indices.
         pIndex = find(seenPatients == currentPatient);

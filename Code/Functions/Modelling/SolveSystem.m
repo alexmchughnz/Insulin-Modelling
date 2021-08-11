@@ -64,30 +64,6 @@ DP = DebugPlots().SolveSystem;
 
 tArray = P.results.tArray;
 
-%% Glucose
-if DP.Glucose
-    MakeDebugPlot("Plasma Glucose", P, DP);
-    
-    [tG, vG] = GetData(P.data.G);
-    plt = plot(tG, vG, 'g*');
-    plt.DisplayName = 'Plasma Sample';
-    
-    plt = plot(tArray, P.results.G, 'k');
-    plt.DisplayName = 'Model Prediction';
-    
-    if isfield(P.data, 'tGBolus')
-        plt = line([P.data.tGBolus P.data.tGBolus], ylim, ...
-            'Color', 'g', ...
-            'LineStyle', '--');
-        plt.DisplayName = 'Bolus Input';
-    end
-    
-    xlabel('Time')
-    ylabel('Plasma Glucose, G [mmol/L]')
-    legend()
-    
-    ylim([4 15])
-end
 
 %% Glucose Components
 if DP.GlucoseComponents
@@ -130,11 +106,40 @@ if DP.GlucoseComponents
     xlabel('Time [min]')
     ylabel('Glucose Contribution [mmol/L]')
     legend()
+    
+    lim = max(abs(ylim));
+    ylim([-lim lim])
+    
     grid on
 end
 
-%% Insulin
-if DP.Insulin
+%% Glucose
+if DP.Glucose
+    MakeDebugPlot("Plasma Glucose", P, DP);
+    
+    [tG, vG] = GetData(P.data.G);
+    plt = plot(tG, vG, 'g*');
+    plt.DisplayName = 'Plasma Sample';
+    
+    plt = plot(tArray, P.results.G, 'k');
+    plt.DisplayName = 'Model Prediction';
+    
+    if isfield(P.data, 'tGBolus')
+        plt = line([P.data.tGBolus P.data.tGBolus], ylim, ...
+            'Color', 'g', ...
+            'LineStyle', '--');
+        plt.DisplayName = 'Bolus Input';
+    end
+    
+    xlabel('Time')
+    ylabel('Plasma Glucose, G [mmol/L]')
+    legend()
+    
+    ylim([4 15])
+end
+
+%% Plasma Insulin
+if DP.PlasmaInsulin
     MakeDebugPlot("Plasma Insulin", P, DP);
     
     [tI, vI] = GetData(P.data.I);  % [mU/L]
@@ -161,6 +166,20 @@ if DP.Insulin
     
     xlabel('Time [min]')
     ylabel('Plasma Insulin, I [mU/l]')
+    legend()
+end
+
+%% Interstitial Insulin
+if DP.InterstitialInsulin
+    MakeDebugPlot("Interstitial Insulin", P, DP);
+    
+    Q = P.results.Q;  % [mU/L]
+        
+    plt = plot(tArray, Q, 'k');
+    plt.DisplayName = 'Model Prediction';
+    
+    xlabel('Time [min]')
+    ylabel('Interstitial Insulin, Q [mU/l]')
     legend()
 end
 

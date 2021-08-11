@@ -1,7 +1,7 @@
 function GC = GCParameters(P)
 
 % Parameters
-GC.pg   = 0.004;                       % Non insulin mediated uptake [1/min]
+GC.pg   = 0.04;                       % Non insulin mediated uptake [1/min]
 GC.EGP = 0.96;                        % Endogenous glucose production [mmol/min]
 GC.CNS = 0.3;                         % Central nervous system glucose uptake [mmol/min]
 GC.alphaI = 0.0017;                   % Hepatic clearance saturation constant [L/mU]

@@ -26,8 +26,10 @@ IInput = P.results.IInput;
 
 %% Get Coefficients
 % Collect basis functions for splines.
-order = 4;
-basisSplines = MakeSplineBasisFunctions(P, numKnots, order);
+order = 3;
+knotLocations = P.data.I.time;
+
+[basisSplines, allKnots] = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
 numTotalSplines = size(basisSplines, CONST.ROWWISE);
 numTotalParameters = numFixedParameters + numTotalSplines;
 
@@ -89,8 +91,8 @@ A(:,2) = CXValues;
 A(:,3:numTotalParameters) = CWValues;
 b = CValues;
 
-%% Solve For Splines
-% Enforce constraints on variables.
+%% Set up Splines
+% Enforce absolute value constraints on variables.
 lbJLK = 0.01;
 ubJLK = 1;
 lbxL = 0.6;
@@ -105,8 +107,51 @@ ub(1) = ubJLK;
 ub(2) = ubxL;
 ub(3:numTotalParameters) = ubnLW;
 
+% Enforce constraints on nL spline weights.
+numConstraints = numTotalSplines - 1;
+[~, vG] = GetData(P.data.G);
+GDiffs = vG(2:end) - vG(1:end-1);
+
+for ii = 1:numConstraints
+    % Set up difference matrix.
+    nLDiffMatrix(ii, ii) = -1;
+    nLDiffMatrix(ii, ii+1) = 1;
+end
+
+% Directional constraint - delta(nL) should always be opposite to delta(G).
+% Expand delta(G) pattern by at edges to constrain "extra" splines.
+diffPattern = [GDiffs(1); GDiffs];                                 % One extra left-hand spline.
+diffPattern(numel(diffPattern)+1 : numConstraints) = GDiffs(end);  % Any number of extra right-hand splines.
+% nL should decrease if G is increasing, thus
+% sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < 0
+nLDirectionA = sign(diffPattern) .* nLDiffMatrix;
+nLDirectionb = zeros(numConstraints, 1);
+
+% Change over time constraint - delta(nL) should be less than
+% 0.001 min^-2 (Caumo, 2007).
+maxnLRateOfChange = 0.001;  % [min^-2]
+dataKnots = allKnots(order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
+tDeltas = diff(dataKnots);
+maxnLDeltas = maxnLRateOfChange * tDeltas;
+% Absolute change in nL must be less than max change, thus
+% abs(nL(ii+1) - nL(ii))  < maxnLDeltas(ii)
+% sign(nL(ii+1) - nL(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
+% -sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
+nLChangeA = -sign(diffPattern) .* nLDiffMatrix ;
+nLChangeb = maxnLDeltas;
+
+% Place constraints on splines.
+% "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
+iiSplines = numFixedParameters + [1:numTotalSplines];
+
+AConstraint = zeros(2*numConstraints, numTotalParameters);
+AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
+
+bConstraint = [nLDirectionb; nLChangeb];
+
+
 % Solve using linear solver.
-x = lsqlin(A, b, [], [], [], [], lb, ub);
+x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb, ub);
 
 JLK = x(1);
 P = ApplyInsulinLossFactor(P, JLK);
@@ -158,17 +203,31 @@ if DP.nLGlucose
     end
     
     
-[tG, vG] = GetData(P.data.G); % [mmol/L]
-iiG = GetTimeIndex(tG, P.results.tArray);
-nL = P.results.nL(iiG);
-
-plt = scatter(nL, vG, 'x');
-plt.DisplayName = "P" + P.patientNum;
-
-xlabel("nL [1/min]")
-ylabel("Measured G [mmol/L]")
-
-legend
+    [tG, vG] = GetData(P.data.G); % [mmol/L]
+    iiG = GetTimeIndex(tG, P.results.tArray);
+    nL = P.results.nL(iiG);
+    nLNorm = nL ./ max(nL);
+    
+    % Scatter
+    sct = plot(vG, nLNorm, 'x');
+    sct.DisplayName = "P" + P.patientNum;
+    
+    % Linear Interpolation
+    A(:,1) = vG;
+    A(:,2) = ones(size(vG));
+    b = nLNorm;
+    theta = A\b;
+    m = theta(1);
+    c = theta(2);
+    
+    GArray = 4:11;
+    plt = plot(GArray, m*GArray+c, 'Color', sct.Color);
+    plt.HandleVisibility = 'off';
+    
+    xlabel("Measured G [mmol/L]")
+    ylabel("Normalised nL [-]")
+    
+    legend
     
 end
 

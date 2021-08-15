@@ -15,7 +15,7 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @SplineSim;
+recipeFunction = @LineSearchJLKSim;
 % resultsTag = "Penalised";
 
 %% Select Data

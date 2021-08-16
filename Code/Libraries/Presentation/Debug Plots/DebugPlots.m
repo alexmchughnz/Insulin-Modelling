@@ -10,12 +10,12 @@ elseif isempty(DEBUGPLOTS)
     
     %% Functions    
     DEBUGPLOTS.EstimateInsulinSecretion.Uen = true;
-    DEBUGPLOTS.EstimateInsulinSecretion.CPep = true;
+    DEBUGPLOTS.EstimateInsulinSecretion.CPep = false;
     
     DEBUGPLOTS.MakeSplineBasisFunctions.Splines = false;
     
-    DEBUGPLOTS.IntegralFit.GraphicalID = true; 
-    DEBUGPLOTS.IntegralFit.Convergence = true;
+    DEBUGPLOTS.IntegralFit.GraphicalID = false;
+    DEBUGPLOTS.IntegralFit.Convergence = false;
     
     DEBUGPLOTS.FitSplines.Splines = true; 
     DEBUGPLOTS.FitSplines.nLGlucose = false; 
@@ -26,9 +26,9 @@ elseif isempty(DEBUGPLOTS)
     
     DEBUGPLOTS.SolveSystem.Glucose = true;
     DEBUGPLOTS.SolveSystem.PlasmaInsulin = true;
-    DEBUGPLOTS.SolveSystem.InterstitialInsulin = true;
-    DEBUGPLOTS.SolveSystem.GlucoseComponents = true;
-    DEBUGPLOTS.SolveSystem.CoefficientShapes = true; 
+    DEBUGPLOTS.SolveSystem.InterstitialInsulin = false;
+    DEBUGPLOTS.SolveSystem.GlucoseComponents = false;
+    DEBUGPLOTS.SolveSystem.CoefficientShapes = false; 
     
     %% Recipes
     DEBUGPLOTS.IterateParametersSim.SSEHeatmap = true;

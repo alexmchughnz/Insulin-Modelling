@@ -128,7 +128,7 @@ if DP.GraphicalID
     MakeDebugPlot("Graphical Identifiability", P, DP);
     
     [tI, ~] = GetData(P.data.I); % [mU/L]
-    tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWWISE);
+    tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWDIR);
     
     plt = plot(tIntegrals, plotvars.CParam1Norm);
     plt.DisplayName = plotvars.paramNames(1) + " coeff.";

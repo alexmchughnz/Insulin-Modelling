@@ -13,9 +13,9 @@ plots = DebugPlots();
     
     plots.SolveSystem.CoefficientShapes = false; 
     
-    plots.MakeSplineBasisFunctions.Splines = true;
+    plots.MakeSplineBasisFunctions.Splines = false;
     
-    plots.FitSplines.nLGlucose = true;
+    plots.FitSplines.nLGlucose = false;
     
 DebugPlots(plots);
 

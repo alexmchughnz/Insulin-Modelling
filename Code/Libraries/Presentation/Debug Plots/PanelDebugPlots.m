@@ -46,7 +46,7 @@ if ~isempty(figData)
         F.Units = 'pixels';     
         screensize = num2cell(get(groot, 'MonitorPositions'));
         
-        if monitor > size(screensize, CONST.ROWWISE)
+        if monitor > size(screensize, CONST.ROWDIR)
             monitor = 1;
         end
         [x, y, w, h] = screensize{monitor, :};

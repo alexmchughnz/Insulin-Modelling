@@ -30,7 +30,11 @@ P.results.xL = 0.7;
 numKnots = numel(P.data.I.value) + 1;
 P = FitSplinesnL(P, numKnots);
 
-P = FindGutEmptyingRate(P);
+% Find d2 and fit SI.
+halfLifeRange = 5 : 10 : 95;
+d2Range = log(2)./halfLifeRange;
+P = FindOptimalValue(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
+
 P = FitInsulinSensitivity(P);
 
 % Find optimal JLK.

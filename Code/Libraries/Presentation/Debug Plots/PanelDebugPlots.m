@@ -18,8 +18,10 @@ if ~isempty(figData)
     maxFigs = sum(patientCounts == mode(patientCounts));
     numPatients = length(unique(patientCounts));
     
+    numCols = max(3, numPatients);
+    
     seenPatients = [];
-    nCounts = zeros(1, numPatients);
+    nCounts = zeros(1, numCols);
     
     for ii = 1 : size(figData, 1)  
         % Grab patient info for figure.
@@ -46,7 +48,7 @@ if ~isempty(figData)
         F.Units = 'pixels';     
         screensize = num2cell(get(groot, 'MonitorPositions'));
         
-        if monitor > size(screensize, CONST.ROWDIR)
+        if monitor > size(screensize, CONST.COLUMNDIR)
             monitor = 1;
         end
         [x, y, w, h] = screensize{monitor, :};
@@ -57,7 +59,7 @@ if ~isempty(figData)
         
         screenHeight = h - taskBarHeight;
         
-        windowWidth = w/numPatients;
+        windowWidth = w/numCols;
         windowHeight = screenHeight/maxFigs;
         
         F.Position = [x + windowWidth*(pIndex-1), ...

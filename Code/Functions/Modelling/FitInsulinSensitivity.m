@@ -12,9 +12,6 @@ PrintStatusUpdate(P, "Fitting SI...")
 [tG, vG] = GetData(P.data.G);
 ppG = griddedInterpolant(tG, vG);  % G(t) [mmol/L] piecewise polynomial. Use as function.
 
-% [tI, vI] = GetIFromITotal(P);  % [mU/L]
-% ppI = griddedInterpolant(tI, vI);  % I(t) [mU/L] piecewise polynomial. Use as function.
-
 % Create SI array and initial time boundaries.
 defaultSI = 10.8e-4;
 P.results.SI = defaultSI;  % SI value over trial.
@@ -75,17 +72,21 @@ t    = [t1(1); t2];
 Y    = [Y1(1, :); Y2];
 
 % Solve linear system to find SI.
-%       deltaG = int{dGA}*SI + int{dGb}
-%        GA*SI = deltaG - Gb
+% At each row, between t1 and t2:
+%       delta{G} = int{dGA}*SI + int{dGb}
+%        delta{GA}*SI = delta{G} - delta{Gb}
 % therefore:
-%           SI = GA\(deltaG - Gb)
+%           SI = delta{GA}\(delta{G} - delta{Gb})
 GA = Y(:, ccGA);         % Coefficient of SI in equation.
 Gb = Y(:, ccGb);         % Added terms in equation.
 
-deltaG  = ppG(tEnd) - ppG(tStart);  % Change in G over interval.
+G  = ppG(P.results.tArray);  % Change in G over interval.
 
-A = GA;
-b = deltaG - Gb;
+first = 1:length(P.results.tArray)-1;
+second = 2:length(P.results.tArray);
+
+A = GA(second) - GA(first);
+b = (G(second) - G(first)) - (Gb(second) - Gb(first));
 SI = A\b;
 
 % Write estimated data into patient struct, overwriting defaults.

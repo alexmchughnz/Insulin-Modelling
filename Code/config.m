@@ -30,7 +30,7 @@ addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.PLOTPATH));
 
 CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
-CONFIG.STATUSDEPTH = 3;
+CONFIG.STATUSDEPTH = 2;
 CONFIG.SAVERESULTS = true;
 CONFIG.HIGHDETAIL = false;
 

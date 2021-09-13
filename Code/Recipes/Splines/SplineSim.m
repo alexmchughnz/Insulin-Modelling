@@ -13,7 +13,7 @@ plots = DebugPlots();
     
     plots.SolveSystem.CoefficientShapes = false; 
     
-    plots.MakeSplineBasisFunctions.Splines = false;
+    plots.MakeSplineBasisFunctions.Splines = true;
     
     plots.FitSplines.nLGlucose = false;
     
@@ -24,10 +24,22 @@ DebugPlots(plots);
 P = EstimateInsulinSecretion(P);
 
 numKnots = numel(P.data.I.value) + 1;
+P = FitSplinesxLnL(P, numKnots);
+
+halfLifeRange = 5 : 10 : 95;
+d2Range = log(2)./halfLifeRange;
+P = FindOptimalValue(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
+
+GFastRange = [0.1 : 0.1 : 1] * P.data.GFast;
+P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
+
+ks3Range = [0.1 : 0.1 : 2] * P.parameters.SC.ks3;
+P = FindOptimalValue(P, "parameters.SC.ks3", ks3Range, @InsulinError, @FitInsulinSensitivity);
+
 P = FitSplinesJLKxLnL(P, numKnots);
 
-P = FindGutEmptyingRate(P);
 P = FitInsulinSensitivity(P);
+
 P = SolveSystem(P, true);
 
 end

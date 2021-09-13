@@ -27,7 +27,7 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.SolveSystem.Glucose = true;
     DEBUGPLOTS.SolveSystem.PlasmaInsulin = true;
     DEBUGPLOTS.SolveSystem.InterstitialInsulin = false;
-    DEBUGPLOTS.SolveSystem.GlucoseComponents = false;
+    DEBUGPLOTS.SolveSystem.GlucoseComponents = true;
     DEBUGPLOTS.SolveSystem.CoefficientShapes = false; 
     
     %% Recipes

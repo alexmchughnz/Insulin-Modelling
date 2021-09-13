@@ -5,7 +5,7 @@ function P = SimpleSim(P)
 % OUTPUT:
 %   P  - updated patient struct
 
-
+                                                                                                                                             
 %% Functions
 P = EstimateInsulinSecretion(P);  % Fit Uen.
 
@@ -13,9 +13,10 @@ P = IntegralFitParameters(P, @AssembleIntegralSystemnLxL);  % Fit nL/xL, integra
 
 P = FindGutEmptyingRate(P);  % Find d2.
 
-P = FitInsulinSensitivity(P);  % Fit SI.
+GFastRange = [0.1 : 0.1 : 1] * P.data.GFast;
+P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
 
-
+P = FitInsulinSensitivity(P);
 
 P = SolveSystem(P, true);  % Simulate G, I, Q, etc.
 

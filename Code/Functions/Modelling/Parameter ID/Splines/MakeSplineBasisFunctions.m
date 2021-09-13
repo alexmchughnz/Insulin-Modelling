@@ -114,6 +114,6 @@ if DP.Splines
         ylabel("Spline Value")
     end
     
-    xlabel("Time")
+    xlabel("Time [min]")
 end
 end

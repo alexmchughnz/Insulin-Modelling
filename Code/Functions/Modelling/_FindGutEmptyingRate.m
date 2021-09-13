@@ -8,7 +8,7 @@ function P = FindGutEmptyingRate(P)
     
 %% Setup
 % Input grid.
-halfLifeGrid = 10 : 10 : 90;
+halfLifeGrid = 5 : 10 : 95;
 d2Grid = log(2)./halfLifeGrid;
 N = length(d2Grid);
 

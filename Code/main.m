@@ -15,12 +15,12 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @nLxLGridSearchSim;
+recipeFunction = @FixedxLSplineSim;
 % resultsTag = "Penalised";
 
 %% Select Data
 % patientNums = [5];
-patientNums = 'best';
+patientNums = 'all';
 source = "OGTTLui";
 
 %% Load Data

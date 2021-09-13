@@ -7,8 +7,8 @@ function P = nLxLGridSearchSim(P)
 %   P  - updated patient struct
 
 %% Options
-gridOptions.range = {[0 1], [0 1]};
-gridOptions.step = [0.2];
+gridOptions.range = {[0 0.5], [0.4 1]};
+gridOptions.step = [0.02];
 
 
 %% Plots

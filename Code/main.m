@@ -15,7 +15,7 @@ config
 tStart = tic;
 
 %% Select Recipe
-recipeFunction = @LineSearchJLKSim;
+recipeFunction = @nLxLGridSearchSim;
 % resultsTag = "Penalised";
 
 %% Select Data

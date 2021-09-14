@@ -113,14 +113,21 @@ for ii = 1:length(patientSet)
             distanceMatrix = abs(missingtBT - tGPOCV');
             [~, iiReplace] = min(distanceMatrix);
             
-            vFinal(isGBTMeasured) = vGBT;
-            vFinal(~isGBTMeasured) = vGPOCV(iiReplace);
+            % Include the unique venous points closest to each missing BT.
+            iiReplace = unique(iiReplace);
+            
+            tFinal = [tGBT tGPOCV(iiReplace)];
+            [tFinal, order] = sort(tFinal);
+            
+            vFinal = [vGBT vGPOCV(iiReplace)];
+            vFinal = vFinal(order);
             
             P.data.G.value = vFinal';
+            P.data.G.time = tFinal';
         else
             P.data.G.value = vGBT';
+            P.data.G.time = tBT';
         end
-        P.data.G.time = tBT';
         
         P.data.GFast = P.data.G.value(1);  % [mmol/L]
         

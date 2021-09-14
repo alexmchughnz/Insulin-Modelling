@@ -34,6 +34,7 @@ for ii = 1:length(patientSet)
     end
     tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");    
     
+    tables{tt} = AddField(tables{tt}, code, P.results, "d2", @(x) x, "d2 [1/min]");
     tables{tt} = AddField(tables{tt}, code, P.data, "GFast", @(x) x, "Gb [mmol/L]");
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
     

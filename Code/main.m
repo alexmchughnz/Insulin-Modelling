@@ -43,7 +43,6 @@ for ii = 1:numPatients
 end
 
 %% Results
-clc
 tResults = tic;
 
 PrintTimeTaken("Main", patientSet, tStart);

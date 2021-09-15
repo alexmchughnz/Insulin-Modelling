@@ -35,9 +35,9 @@ halfLifeRange = 5 : 10 : 95;
 d2Range = log(2)./halfLifeRange;
 P = FindOptimalValue(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
 
-% % Find GFast.
-% GFastRange = 1 : 0.25 : 6;
-% P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
+% Find GFast.
+GFastRange = 1 : 0.25 : 6;
+P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
 
 P = FitInsulinSensitivity(P);
 

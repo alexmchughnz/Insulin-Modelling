@@ -20,7 +20,7 @@ recipeFunction = @FixedxLSplineSim;
 
 %% Select Data
 % patientNums = [5];
-patientNums = 'all';
+patientNums = 'best';
 source = "OGTTLui";
 
 %% Load Data

@@ -173,47 +173,5 @@ if DP.Splines
     legend
 end
 
-%% nL VS Glucose
-if DP.nLGlucose
-    persistent nLGlucosePlot;
-    
-    if isempty(nLGlucosePlot)
-        nLGlucosePlot = MakeDebugPlot("nL and G Correlation", P, DP);
-    else
-        figure(nLGlucosePlot)
-    end
-    
-    
-    [tG, vG] = GetData(P.data.G); % [mmol/L]
-    iiG = GetTimeIndex(tG, P.results.tArray);
-    
-    vGNorm = vG ./ P.data.GFast;
-    
-    nL = P.results.nL(iiG);
-    nLNorm = nL ./ max(nL);
-    
-    % Scatter
-    sct = plot(vGNorm, nLNorm, 'x');
-    sct.DisplayName = "P" + P.patientNum;
-    
-    % Linear Interpolation
-    A(:,1) = vGNorm;
-    A(:,2) = ones(size(vGNorm));
-    b = nLNorm;
-    theta = A\b;
-    m = theta(1);
-    c = theta(2);
-    
-    GArray = 0:3;
-    plt = plot(GArray, m*GArray+c, 'Color', sct.Color);
-    plt.HandleVisibility = 'off';
-    
-    xlabel("Normalised G/Gb")
-    ylabel("Normalised nL/max(nL)")
-    
-    legend
-    
-end
-
 end
 

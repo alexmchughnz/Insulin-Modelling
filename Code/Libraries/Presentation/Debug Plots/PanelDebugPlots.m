@@ -14,6 +14,8 @@ end
 GetFigNum = @(figrow) dot([1000 100 1], figrow);
 
 if ~isempty(figData)
+    figData = sortrows(figData);
+    
     patientCounts = figData(:, 1);
     maxFigs = sum(patientCounts == mode(patientCounts));
     numPatients = length(unique(patientCounts));

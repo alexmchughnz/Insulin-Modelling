@@ -159,13 +159,13 @@ if DP.Splines
     
     % Plot nL.
     plt = plot(P.results.tArray, P.results.nL, 'b');
-    plt.DisplayName = "nL";
-    
+    plt.DisplayName = "nL";    
     
     % Plot fitted splines.
     plot(P.results.tArray, plotvars.basisSplines .* plotvars.nLWeights', '--', ...
         'LineWidth', 1, 'HandleVisibility', 'off');
     
+    ylim([0 0.3])
     
     xlabel("Time [min]")
     ylabel("nL [1/min]")

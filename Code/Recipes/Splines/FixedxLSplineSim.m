@@ -44,6 +44,10 @@ P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSens
 % Fit SI.
 P = FitInsulinSensitivity(P);
 
+% % Find optimal ks3.
+% ks3Range = P.parameters.SC.ks3 * [0.5 : 0.1 : 1.5];
+% P = FindOptimalValue(P, "parameters.SC.ks3", ks3Range, @InsulinError);
+
 % Find optimal JLK.
 [tI, vI] = GetData(P.data.I); % Measured I (for error comparison)
 

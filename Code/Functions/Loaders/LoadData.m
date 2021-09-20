@@ -1,4 +1,4 @@
-function patientSet = LoadData(source, patientNums, showPlots)
+function patientSet = LoadData(source, patientNums)
 
 global CONFIG
 
@@ -20,7 +20,7 @@ elseif isSource("CREBRF")
         216 166 171 220 259 240 253 235 194 263 251];
     bestNums = [12 128 146 160 166 169 171 196 198 216];
 elseif isSource("OGTTLui")
-    MakeDataFunction = @(pSet) MakeOGTTLui(pSet, showPlots);
+    MakeDataFunction = @(pSet) MakeOGTTLui(pSet, CONFIG.ENABLELOADERPLOTS);
     allNums = [1 2 4 5 14 16 22 23 25 30];
     bestNums = [5 22 23 25 30];
 end

@@ -24,8 +24,7 @@ patientNums = 'best';
 source = "OGTTLui";
 
 %% Load Data
-showLoadPlots = false;
-patientSet = LoadData(source, patientNums, showLoadPlots);
+patientSet = LoadData(source, patientNums);
 patientSetOut = {};
 
 %% Run

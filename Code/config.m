@@ -13,6 +13,22 @@ clear MakeDebugPlot  % Needed to reset persistents in this function.
 clear DebugPlots
 
 global CONFIG
+
+CONFIG.ENABLELOADERPLOTS = false;
+CONFIG.SAVERESULTS = true;
+
+CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
+CONFIG.STATUSDEPTH = 2;
+CONFIG.HIGHDETAIL = false;
+
+defaultOptions = odeset('RelTol', 1e-5, ...
+    'AbsTol', 1e-4, ...
+    'MaxStep', 0.5, ...
+    'InitialStep', 0.1);
+
+
+
+CONFIG.DEFAULTODEOPTIONS = defaultOptions;
 CONFIG.FUNCPATH  = fullfile(pwd, 'Functions');
 CONFIG.LIBPATH = fullfile(pwd, 'Libraries');
 CONFIG.MODELPATH = fullfile(pwd, 'Models');
@@ -29,16 +45,6 @@ addpath(genpath(CONFIG.DATAPATH));
 addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.PLOTPATH));
 
-CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
-CONFIG.STATUSDEPTH = 2;
-CONFIG.SAVERESULTS = true;
-CONFIG.HIGHDETAIL = false;
-
-defaultOptions = odeset('RelTol', 1e-5, ...
-    'AbsTol', 1e-4, ...
-    'MaxStep', 0.5, ...
-    'InitialStep', 0.1);
-CONFIG.DEFAULTODEOPTIONS = defaultOptions;
 
 disp('Config updated.')
 clear

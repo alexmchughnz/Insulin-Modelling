@@ -118,7 +118,11 @@ if DP.Glucose
     MakeDebugPlot("Plasma Glucose", P, DP);
     
     [tG, vG] = GetData(P.data.G);
-    plt = plot(tG, vG, 'g*');
+    GError = P.data.GCV .* vG;
+    plt = errorbar(tG, vG, GError, 'k.', ...
+        'MarkerSize', 5, ...
+        'MarkerEdgeColor', 'g', ...
+        'MarkerFaceColor', 'g');
     plt.DisplayName = 'Plasma Sample';
     
     plt = plot(tArray, P.results.G, 'k');

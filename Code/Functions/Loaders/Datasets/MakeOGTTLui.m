@@ -104,6 +104,9 @@ for ii = 1:length(patientSet)
         vGBT = vGBT(isGBTMeasured);  % [mmol/L]
         tGBT = tBT(isGBTMeasured);  % [min]
         
+        assayCV = 3/100; % [percent]
+        fingerCV = 7/100; % [percent]
+        
         if not(all(isGBTMeasured))
             missingtBT = tBT(~isGBTMeasured);
             
@@ -117,6 +120,7 @@ for ii = 1:length(patientSet)
             iiReplace = unique(iiReplace);
             
             tFinal = [tGBT tGPOCV(iiReplace)];
+            
             [tFinal, order] = sort(tFinal);
             
             vFinal = [vGBT vGPOCV(iiReplace)];
@@ -124,9 +128,22 @@ for ii = 1:length(patientSet)
             
             P.data.G.value = vFinal';
             P.data.G.time = tFinal';
+            
+            % Assign correct CVs to different points.
+            isAssay = zeros(numel(tFinal), 1);
+            isAssay(1:length(tGBT)) = true;
+            isAssay = logical(isAssay(order));
+            
+            P.data.GCV = zeros(numel(tFinal), 1);
+            P.data.GCV(isAssay) = assayCV;
+            P.data.GCV(~isAssay) = fingerCV;
+            
         else
             P.data.G.value = vGBT';
             P.data.G.time = tBT';
+            
+            P.data.GCV = assayCV;
+            
         end
         
         P.data.GFast = P.data.G.value(1);  % [mmol/L]

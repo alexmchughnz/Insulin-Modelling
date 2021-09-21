@@ -20,7 +20,6 @@ if DP.nLGlucose
     vGNorm = vG ./ P.data.GFast;
     
     nL = P.results.nL(iiG);
-    nLNorm = nL ./ max(nL);
     
     % Scatter
     sct = plot(vGNorm, nLNorm, 'x');
@@ -29,7 +28,7 @@ if DP.nLGlucose
     % Linear Interpolation
     A(:,1) = vGNorm;
     A(:,2) = ones(size(vGNorm));
-    b = nLNorm;
+    b = nL;
     theta = A\b;
     m = theta(1);
     c = theta(2);
@@ -39,7 +38,7 @@ if DP.nLGlucose
     plt.HandleVisibility = 'off';
     
     xlabel("Normalised G/Gb")
-    ylabel("Normalised nL/max(nL)")
+    ylabel("nL [1/min]")
     
     legend
     

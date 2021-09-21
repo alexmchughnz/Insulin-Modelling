@@ -88,7 +88,7 @@ b = CValues;
 %% Set up Splines
 % Enforce absolute value constraints on variables.
 lbnLW = 0.0;
-ubnLW = 0.3;
+ubnLW = 0.5;
 
 lb(1:numTotalParameters) = lbnLW;
 ub(1:numTotalParameters) = ubnLW;
@@ -165,7 +165,7 @@ if DP.Splines
     plot(P.results.tArray, plotvars.basisSplines .* plotvars.nLWeights', '--', ...
         'LineWidth', 1, 'HandleVisibility', 'off');
     
-    ylim([0 0.3])
+    ylim([0 0.5])
     
     xlabel("Time [min]")
     ylabel("nL [1/min]")

@@ -36,7 +36,8 @@ for ii = 1:length(patientSet)
     
     tables{tt} = AddField(tables{tt}, code, P.results, "d2", @(x) x, "d2 [1/min]");
     tables{tt} = AddField(tables{tt}, code, P.data, "GFast", @(x) x, "Gb [mmol/L]");
-    tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+3, "SI [*1e-3 L/mU/min]");
+    tables{tt} = AddField(tables{tt}, code, P.parameters.SC, "ks3", @(x) x, "ks3 [1/min]");
+    tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+4, "SI [*1e-4 L/mU/min]");
     
     if isfield(P.results, 'fits')
         tables{tt} = AddField(tables{tt}, code, P.results.fits, "insulinMAPE", @(x) 100*x, "insulinMAPE [%]");

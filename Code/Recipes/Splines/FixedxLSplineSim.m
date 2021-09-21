@@ -24,11 +24,13 @@ DebugPlots(plots);
 P = EstimateInsulinSecretion(P);
 
 % Fix xL to hard-code value.
-P.results.xL = 0.7;
+P.results.xL = 0.65;
+
 
 % Fit nL with splines over range.
 numKnots = numel(P.data.I.value) + 1;
 P = FitSplinesnL(P, numKnots);
+
 
 % Find d2.
 lbHalfLife = 5;
@@ -37,16 +39,15 @@ halfLifeRange = 1 ./ linspace(1/ubHalfLife, 1/lbHalfLife, 20);
 d2Range = log(2)./halfLifeRange;
 P = FindOptimalValue(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
 
+
 % Find GFast.
 GFastRange = 1 : 0.25 : 6;
 P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
 
+
 % Fit SI.
 P = FitInsulinSensitivity(P);
 
-% % Find optimal ks3.
-% ks3Range = P.parameters.SC.ks3 * [0.5 : 0.1 : 1.5];
-% P = FindOptimalValue(P, "parameters.SC.ks3", ks3Range, @InsulinError);
 
 % Find optimal JLK.
 [tI, vI] = GetData(P.data.I); % Measured I (for error comparison)
@@ -76,7 +77,17 @@ end
 JLKBest = JLKGrid(iiBest);
 P = ApplyInsulinLossFactor(P, JLKBest);
 
+% Find optimal ks3.
+ks3Range = P.parameters.SC.ks3 * [0.1 : 0.2 : 1.5];
+funcsToApply = {@AddPlasmaInsulinInputArray @FitInsulinSensitivity};
+P = FindOptimalValue(P, "parameters.SC.ks3", ks3Range, @GlucoseError, funcsToApply);
 
+
+% Fit SI.
+P = FitInsulinSensitivity(P);
+
+
+% Solve.
 P = SolveSystem(P, true);
 PlotGlucosenL(P);
 

@@ -7,7 +7,7 @@ function P = AddPlasmaInsulinInputArray(P, forceReSim)
 
 
 if ~exist("forceReSim", "var")
-    forceReSim = false;
+    forceReSim = true;
 end
 
 if P.data.IType == "human"

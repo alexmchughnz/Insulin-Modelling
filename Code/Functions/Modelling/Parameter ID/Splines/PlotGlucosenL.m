@@ -22,7 +22,7 @@ if DP.nLGlucose
     nL = P.results.nL(iiG);
     
     % Scatter
-    sct = plot(vGNorm, nLNorm, 'x');
+    sct = plot(vGNorm, nL, 'x');
     sct.DisplayName = "P" + P.patientNum;
     
     % Linear Interpolation

@@ -22,7 +22,7 @@ Q = GetAnalyticalInterstitialInsulin(I, P);
 Uen = P.results.Uen;
 
 % Exogenous Insulin
-IInput = P.results.IInput;
+Uex = P.results.Uex(P);
 
 %% Get Coefficients
 % Collect basis functions for splines.
@@ -43,7 +43,7 @@ numTotalParameters = numFixedParameters + numTotalSplines;
 cn = I./(1 + GC.alphaI*I);
 cWeights =  basisSplines .* cn;
 
-k = IInput/GC.VI;
+k = Uex/GC.VI;
 kU = (1 - P.results.xL)/GC.VI;
 kI = GC.nK;
 kIQ = GC.nI./GC.VI;

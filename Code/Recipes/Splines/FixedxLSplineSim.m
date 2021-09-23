@@ -31,6 +31,7 @@ P.results.xL = 0.6;
 numKnots = numel(P.data.I.value) + 1;
 P = FitSplinesnL(P, numKnots);
 
+
 % Find optimal JLK.
 [tI, vI] = GetData(P.data.I); % Measured I (for error comparison)
 
@@ -61,11 +62,11 @@ end
 JLKBest = JLKGrid(iiBest);
 P = ApplyInsulinLossFactor(P, JLKBest);
 
+
 % Find GFast.
-% GFastRange = 1 : 0.25 : 6;
-% P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
 [~, vG] = GetData(P.data.G);
 P.data.GFast = min(vG);
+
 
 % Find d2.
 lbHalfLife = 5;
@@ -81,8 +82,7 @@ P = FitInsulinSensitivity(P);
 
 % Find optimal ks3.
 ks3Range = P.parameters.SC.ks3 * [0.1 : 0.2 : 1.5];
-funcsToApply = {@AddPlasmaInsulinInputArray @FitInsulinSensitivity};
-P = FindOptimalValue(P, "parameters.SC.ks3", ks3Range, @GlucoseError, funcsToApply);
+P = FindOptimalValue(P, "parameters.SC.ks3", ks3Range, @GlucoseError, @AddTrialInputs);
 
 
 % Fit SI.

@@ -1,4 +1,4 @@
-function P = AddBolusArrays(P)
+function P = AddTrialInputs(P)
 % Adds bolus arrays to a patient struct.
 % Bolus array gives delivery rate over time.
 
@@ -12,8 +12,11 @@ if isfield(P.data, "vGBolus")
     P.results.GBolus = MakeArray(P, P.data.vGBolus, P.data.tGBolus, P.data.TGBolus);
 end
 
+% Exogenous Insulin Function
+P.results.Uex = @GetExogenousInsulinInput;
+[~, P] = P.results.Uex(P, true);  % To simulate QLocal. Now doesn't need to be done again unless parameters change!
 
-message = "Bolus arrays updated.";
+message = "Trial inputs updated.";
 PrintStatusUpdate(P, message);
 
 end

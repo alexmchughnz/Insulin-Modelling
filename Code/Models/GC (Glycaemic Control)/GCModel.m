@@ -32,7 +32,7 @@ Y0 = [G0;
       I0; 
       Q0;
       GA0;
-      Gb0];  
+      Gb0];
    
 % Forward simulate.
 [~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  

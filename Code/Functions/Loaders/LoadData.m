@@ -55,8 +55,7 @@ for ii = 1:length(patientSet)
     patientSet{ii} = AddParameters(patientSet{ii});
     patientSet{ii} = AddPersistents(patientSet{ii});
     
-    patientSet{ii} = AddBolusArrays(patientSet{ii});
-    patientSet{ii} = AddPlasmaInsulinInputArray(patientSet{ii});
+    patientSet{ii} = AddTrialInputs(patientSet{ii});
 end
 
 end

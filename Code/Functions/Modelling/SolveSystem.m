@@ -200,7 +200,7 @@ if DP.CoefficientShapes
     plt = plot(tArray, P.results.Uen/GC.VI, 'g');
     plt.DisplayName = 'Endogenous';
     
-    plt = plot(tArray, P.results.IInput/GC.VI, 'b');
+    plt = plot(tArray, P.results.Uex(P)/GC.VI, 'b');
     plt.DisplayName = 'Exogenous';
     
     xlabel("Time [min]")

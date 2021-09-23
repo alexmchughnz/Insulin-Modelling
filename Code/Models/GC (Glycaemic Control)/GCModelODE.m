@@ -23,10 +23,11 @@ Q0 = Y0(3); % [mU]
 % Time dependent.
 n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 
-Uen    = P.results.Uen(n);       % [mU/min]
-P2     = P.results.P2(n);        % [mmol]
-GFast  = P.data.GFast;           % Fasting glucose [mmol/L]
-IInput = P.results.IInput(n);
+UexArray  = P.results.Uex(P);       % [mU/min]
+Uex       = UexArray(n);
+Uen       = P.results.Uen(n);       % [mU/min]
+P2        = P.results.P2(n);        % [mmol]
+GFast     = P.data.GFast;           % Fasting glucose [mmol/L]
 
 iinL = min(n, numel(P.results.nL));  % Can be single value or array.
 nL   = P.results.nL(iinL);  % [1/min]
@@ -38,9 +39,9 @@ xL = P.results.xL;        % [1]
 
 % Trial dependent.
 if P.data.GDelivery == "intravenous"
-    GInput = P.results.GBolus(n) + P.data.GInfusion(n);  % [mmol/min]
+    Gex = P.results.GBolus(n) + P.data.GInfusion(n);  % [mmol/min]
 else
-    GInput = P.data.GInfusion(n);  % [mmol/min]
+    Gex = P.data.GInfusion(n);  % [mmol/min]
 end
 
 Qtot = Q;
@@ -55,7 +56,7 @@ end
 %% Computation
 dGA = -(G*Qtot - GFast*Qtot0)/(1 + GC.alphaG*Qtot);   % Insulin-mediated uptake.
 
-dGb = GInput/GC.VG ...        % Exogenous IV glucose input.
+dGb = Gex/GC.VG ...        % Exogenous IV glucose input.
     + d2/GC.VG * P2 ...       % Endogenous input from gut.
     + GC.EGP/GC.VG ...        % Endogenous production.
     - GC.pg * (G-GFast) ...   % Non insulin-mediated uptake.
@@ -63,7 +64,7 @@ dGb = GInput/GC.VG ...        % Exogenous IV glucose input.
 
 dG  = dGb + SI*dGA;
 
-dI  = IInput/GC.VI ...              % Exogenous input (IV or subcut).
+dI  = Uex/GC.VI ...              % Exogenous input (IV or subcut).
     + Uen * (1 - xL)/GC.VI ...      % Endogenous input.
     - GC.nK * I ...                 % Renal clearance.
     - nL * I/(1 + GC.alphaI*I) ...  % Hepatic clearance.

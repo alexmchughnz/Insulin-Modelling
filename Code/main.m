@@ -16,11 +16,11 @@ tStart = tic;
 
 %% Select Recipe
 recipeFunction = @FixedxLSplineSim;
-% resultsTag = "Penalised";
+resultsTag = "NewMethod";
 
 %% Select Data
-% patientNums = [5];
-patientNums = 'best';
+patientNums = [5];
+% patientNums = 'all';
 source = "OGTTLui";
 
 %% Load Data

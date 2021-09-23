@@ -33,6 +33,9 @@ Y0 = [G0;
       Q0;
       GA0;
       Gb0];
+  
+% Pre-generate Uex array to avoid excessive calls.
+P.results.UexArray = P.results.Uex(P);
    
 % Forward simulate.
 [~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  

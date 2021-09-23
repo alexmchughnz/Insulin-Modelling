@@ -23,8 +23,7 @@ Q0 = Y0(3); % [mU]
 % Time dependent.
 n      = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
 
-UexArray  = P.results.Uex(P);       % [mU/min]
-Uex       = UexArray(n);
+Uex       = P.results.UexArray(n);
 Uen       = P.results.Uen(n);       % [mU/min]
 P2        = P.results.P2(n);        % [mmol]
 GFast     = P.data.GFast;           % Fasting glucose [mmol/L]

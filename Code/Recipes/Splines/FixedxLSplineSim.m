@@ -33,7 +33,7 @@ P = FitSplinesnL(P, numKnots);
 
 
 % Find optimal JLK.
-JLKRange = 0.1 : 0.05 : 1.5;
+JLKRange = 0.45 : 0.025 : 1.1;
 
     function P = ClearPForJLK(P) 
     P.results.P2 = zeros(size(P.results.tArray));

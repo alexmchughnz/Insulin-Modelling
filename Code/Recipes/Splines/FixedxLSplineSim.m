@@ -53,7 +53,7 @@ P = LineSearchOptimum(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensit
 
 % Find optimal ks3.
 ks3Range = P.parameters.SC.ks3 * [0.1 : 0.2 : 1.5];
-P = LineSearchOptimum(P, "parameters.SC.ks3", ks3Range, @GlucoseError, @AddTrialInputs);
+P = LineSearchOptimum(P, "parameters.SC.ks3", ks3Range, @InsulinError, @AddTrialInputs);
 
 
 % Fit SI.

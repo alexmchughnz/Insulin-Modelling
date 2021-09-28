@@ -33,9 +33,14 @@ P = FitSplinesnL(P, numKnots);
 
 
 % Find optimal JLK.
-JLKRange = 0.45 : 0.025 : 1.1;
+JLKRange = 0.7 : 0.001 : 1.1;
 P = LineSearchOptimum(P, "results.JLK", JLKRange, @InsulinError, @ApplyInsulinLossFactor);
 P = ApplyInsulinLossFactor(P);  % Update
+
+
+% % Find optimal ks3.
+% ks3Range = P.parameters.SC.ks3 * [0.1 : 0.1 : 1.5];
+% P = LineSearchOptimum(P, "parameters.SC.ks3", ks3Range, @InsulinError, @AddTrialInputs);
 
 
 % Find GFast.
@@ -49,11 +54,6 @@ ubHalfLife = 95;
 halfLifeRange = 1 ./ linspace(1/ubHalfLife, 1/lbHalfLife, 20);
 d2Range = log(2)./halfLifeRange;
 P = LineSearchOptimum(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
-
-
-% Find optimal ks3.
-ks3Range = P.parameters.SC.ks3 * [0.1 : 0.2 : 1.5];
-P = LineSearchOptimum(P, "parameters.SC.ks3", ks3Range, @InsulinError, @AddTrialInputs);
 
 
 % Fit SI.

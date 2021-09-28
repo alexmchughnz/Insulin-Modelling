@@ -50,8 +50,7 @@ for ii = 1:N
             copyP = func(copyP, args(:));
         else
             copyP = func(copyP);
-        end
-        
+        end        
     end
     
     % Run objective function to get error for this test value.
@@ -69,9 +68,30 @@ P = setfield(P, fieldSteps{:}, optValue);
 message = sprintf("Optimal %s = %g (index %d/%d)", fieldSteps{end}, optValue, iiOpt, N);
 PrintStatusUpdate(P, message);
 
+%% Plotting
+plotvars.residualsArray = residualsArray;
+plotvars.searchRange = searchRange;
+plotvars.optValue = optValue;
+MakePlots(P, fieldSteps{end}, plotvars);
 
 end
 
+function MakePlots(P, fieldName, plotvars)
+DP = DebugPlots().LineSearchOptimum;
 
+if DP.ErrorFunction
+   MakeDebugPlot("Line Search "+fieldName, P, DP);
+   
+   plot(plotvars.searchRange, plotvars.residualsArray, 'r');
+   line([plotvars.optValue plotvars.optValue], ylim());
+   
+   legend off
+   
+   xlabel(fieldName)
+   ylabel("Error")
+   
+   legend
+end
 
+end
 

@@ -14,6 +14,8 @@ elseif isempty(DEBUGPLOTS)
     
     DEBUGPLOTS.MakeSplineBasisFunctions.Splines = false;
     
+    DEBUGPLOTS.LineSearchOptimum.ErrorFunction = true;
+    
     DEBUGPLOTS.IntegralFit.GraphicalID = false;
     DEBUGPLOTS.IntegralFit.Convergence = false;
     
@@ -29,6 +31,7 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.SolveSystem.InterstitialInsulin = false;
     DEBUGPLOTS.SolveSystem.GlucoseComponents = true;
     DEBUGPLOTS.SolveSystem.CoefficientShapes = false; 
+    
     
     %% Recipes
     DEBUGPLOTS.IterateParametersSim.SSEHeatmap = true;

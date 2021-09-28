@@ -1,6 +1,7 @@
 function error = GlucoseError(P)
 
 % Simulate G(t).
+P = GIModel(P);
 P = GCModel(P);
 
 % Get RMS error of simulated G to measured data.

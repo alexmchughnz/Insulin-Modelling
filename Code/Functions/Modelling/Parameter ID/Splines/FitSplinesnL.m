@@ -1,4 +1,4 @@
-function [P, A, b, basisSplines] = FitnLSplines(P, numKnots)
+function [P, A, b, basisSplines] = FitSplinesnL(P, numKnots)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
@@ -86,13 +86,6 @@ A(:,1:numTotalParameters) = CWValues;
 b = CValues;
 
 %% Set up Splines
-% Enforce absolute value constraints on variables.
-lbnLW = 0.0;
-ubnLW = 0.5;
-
-lb(1:numTotalParameters) = lbnLW;
-ub(1:numTotalParameters) = ubnLW;
-
 % Enforce constraints on nL spline weights.
 numConstraints = numTotalSplines - 1;
 [~, vG] = GetData(P.data.G);
@@ -137,8 +130,7 @@ bConstraint = [nLDirectionb; nLChangeb];
 
 
 % Solve using linear solver.
-x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb, ub);
-
+x = lsqlin(A, b, AConstraint, bConstraint);
 nLWeights = x;
 P.results.nL = basisSplines * nLWeights;
 

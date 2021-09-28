@@ -1,14 +1,15 @@
-function [P, Y] = GCModel(P, options)
+function [P, Y] = GCModel(P, flags)
 % Function for GC model forward simulation.
 % INPUTS:
 %   P        - patient struct, must have tArray, qGut(t) and QLocal(t)
-%   options  - ode45 options
+%   flags    - string array of flags for optional settings
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
 global CONFIG
-if ~exist('options', 'var')
-    options = CONFIG.DEFAULTODEOPTIONS;
+
+if ~exist("flags", "var")
+    flags = "";
 end
 
 PrintStatusUpdate(P, "Begin solving...")
@@ -38,7 +39,8 @@ Y0 = [G0;
 P.results.UexArray = P.results.Uex(P);
    
 % Forward simulate.
-[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, options, P, Y0);  
+enableG = ~ismember("disableG", flags);
+[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, CONFIG.DEFAULTODEOPTIONS, P, Y0, enableG);  
 
 % Store results.
 P.results.G = Y(:,1);

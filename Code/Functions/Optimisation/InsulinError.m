@@ -1,7 +1,7 @@
 function error = InsulinError(P)
 
 % Simulate I(t).
-P = SolveSystem(P);  
+P = GCModel(P, "disableG");
 
 % Get RMS error of simulated G to measured data.
 [tI, vI] = GetData(P.data.I);

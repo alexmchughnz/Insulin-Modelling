@@ -1,7 +1,7 @@
 function error = GlucoseError(P)
 
 % Simulate G(t).
-P = SolveSystem(P);  % Required for P2 and QDF.
+P = GCModel(P);
 
 % Get RMS error of simulated G to measured data.
 [tG, vG] = GetData(P.data.G);

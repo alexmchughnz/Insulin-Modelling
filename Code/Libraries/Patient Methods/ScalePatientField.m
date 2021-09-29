@@ -10,14 +10,11 @@ function P = ScalePatientField(P, scale, varargin)
     varName = path{end};
     
     if numel(scale) == 1
-        scaleTag = sprintf("%.2g", scale);
+        scaleTag = sprintf("%.4g", scale);
     else
         scaleTag = sprintf("[%.2f to %.2f]", min(scale), max(scale));
     end
-    tag = sprintf("(%s x %s)", varName, scaleTag);
+    tag = sprintf("%s * %s", varName, scaleTag);
     
-    P.patientCode = strjoin([P.patientCode, tag]);
-    
-    message = sprintf("%s scaled by %s", varName, scaleTag);
-    PrintStatusUpdate(P, message);
+    P = TagPatientCode(P, tag);
 end

@@ -1,4 +1,4 @@
-function PrintResults(patientSet, recipeFunction, tag)
+function PrintResults(patientSet, recipeFunction, trialLabel)
 % Prints (and optionally saves) results of simulation.
 % INPUTS:
 %   patientSet - existing table of results
@@ -34,8 +34,11 @@ for tt = 1:length(tables)
         end
         
         try
-        filepath = fullfile(recipedir, tag+recipe+title+".csv");
-        writetable(T, filepath, "WriteRowNames", true);
+            if ~isempty(trialLabel)
+                trialLabel = trialLabel+"_";
+            end
+            filepath = fullfile(recipedir, trialLabel+recipe+title+".csv");
+            writetable(T, filepath, "WriteRowNames", true);
         catch
             disp("Results file open - cannot save!")
         end
@@ -44,7 +47,7 @@ end
 
 %% Plots
 if (CONFIG.SAVERESULTS)
-    SaveOpenFigures(tag, source, recipe);
+    SaveOpenFigures(trialLabel, source, recipe);
 end
 
 monitor = 3;

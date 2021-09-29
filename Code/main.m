@@ -16,11 +16,13 @@ tStart = tic;
 
 %% Select Recipe
 recipeFunction = @FixedxLSplineSim;
-resultsTag = "no ks3 fit";
+
+trialLabel = "";
+% trialLabel = "no ks3 fit";
 
 %% Select Data
-% patientNums = [5];
-patientNums = 'all';
+patientNums = [5];
+% patientNums = 'all';
 source = "OGTTLui";
 
 %% Load Data
@@ -46,10 +48,7 @@ tResults = tic;
 
 PrintTimeTaken("Main", patientSet, tStart);
 
-if ~exist("resultsTag", "var")
-    resultsTag = "";
-end
-PrintResults(patientSetOut, recipeFunction, resultsTag);
+PrintResults(patientSetOut, recipeFunction, trialLabel);
 
 PrintTimeTaken("Results", patientSet, tResults);
 

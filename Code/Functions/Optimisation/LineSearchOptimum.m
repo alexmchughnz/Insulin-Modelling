@@ -30,9 +30,14 @@ end
 
 
 %% Setup
-fieldSteps = split(fieldPath, '.');
 N = numel(searchRange);
+fieldSteps = split(fieldPath, '.');
 residualsArray = nan(size(searchRange));
+
+
+message = sprintf("Line searching %s from %.3g to %.3g (N = %d)...", ...
+                    fieldPath, searchRange(1), searchRange(end), N);
+PrintStatusUpdate(P, message);
 
 %% Search
 for ii = 1:N

@@ -43,7 +43,6 @@ for ii = 1:length(patientNums)
     P.source = source;
     P.patientNum = patientNums(ii);
     P.patientCode = CONFIG.PATIENTFORMAT(P);
-    P.patientSuffix = "";
     patientSet{ii} = P;
 end
 

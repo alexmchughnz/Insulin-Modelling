@@ -1,9 +1,9 @@
-function P = LineSearchOptimum(P, fieldPath, searchRange, errorCriteria, funcsToApply, varargin)
+function P = LineSearchOptimum(P, fieldName, searchRange, errorCriteria, funcsToApply, varargin)
 % Performs a line search to find an optimal value of a parameter.
 % INPUTS:
 %   P             - patient struct
-%   fieldPath     - string path of field to alter, e.g. "P.field.subfield"
-%   searchLine    - array of field values to search over
+%   fieldName     - string name of field to alter, e.g. "P.field.subfield"
+%   searchRange   - array of field values to search over
 %   errorCriteria - function(P) yielding error at each field value
 %   funcsToApply  - cell array of function handles to apply to each struct
 %                   BEFORE running error criteria
@@ -31,12 +31,12 @@ end
 
 %% Setup
 N = numel(searchRange);
-fieldSteps = split(fieldPath, '.');
+path = split(fieldName, '.');
 residualsArray = nan(size(searchRange));
 
 
 message = sprintf("Line searching %s from %.3g to %.3g (N = %d)...", ...
-                    fieldPath, searchRange(1), searchRange(end), N);
+                    fieldName, searchRange(1), searchRange(end), N);
 PrintStatusUpdate(P, message);
 
 %% Search
@@ -44,7 +44,7 @@ for ii = 1:N
     testValue = searchRange(ii);
     
     % Apply test value.
-    copyP = setfield(P, fieldSteps{:}, testValue);
+    copyP = setfield(P, path{:}, testValue);
     
     % Apply designated functions.
     for ff = 1:length(funcsToApply)
@@ -68,16 +68,16 @@ end
 optValue = searchRange(iiOpt);
 
 % Write to struct.
-P = setfield(P, fieldSteps{:}, optValue);
+P = setfield(P, path{:}, optValue);
 
-message = sprintf("Optimal %s = %g (index %d/%d)", fieldSteps{end}, optValue, iiOpt, N);
+message = sprintf("Optimal %s = %g (index %d/%d)", path{end}, optValue, iiOpt, N);
 PrintStatusUpdate(P, message);
 
 %% Plotting
 plotvars.residualsArray = residualsArray;
 plotvars.searchRange = searchRange;
 plotvars.optValue = optValue;
-MakePlots(P, fieldSteps{end}, plotvars);
+MakePlots(P, path{end}, plotvars);
 
 end
 

@@ -33,9 +33,9 @@ P = FitSplinesnL(P, numKnots);
 
 
 % Find optimal JLK.
-JLKRange = 0.7 : 0.001 : 1.1;
+JLKRange = 0.7 : 0.01 : 1.1;
 P = LineSearchOptimum(P, "results.JLK", JLKRange, @InsulinError, @ApplyInsulinLossFactor);
-P = ApplyInsulinLossFactor(P);  % Update
+P = ApplyInsulinLossFactor(P);
 
 
 % % Find optimal ks3.

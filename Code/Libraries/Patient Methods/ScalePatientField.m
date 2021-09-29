@@ -1,5 +1,6 @@
-function P = ScalePatientField(P, scale, varargin)
-    path = varargin;
+function P = ScalePatientField(P, fieldName, scale)
+    
+    path = split(fieldName, '.');
 
     % Edit value of field.
     fieldValue = getfield(P, path{:});

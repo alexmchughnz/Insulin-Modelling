@@ -1,8 +1,8 @@
-function patientSet = LoadData(source, patientNums)
+function T = LoadData(T)
 
 global CONFIG
 
-isSource = @(dataset) contains(source, dataset, 'IgnoreCase', true);
+isSource = @(dataset) contains(T.source, dataset, 'IgnoreCase', true);
 
 %% Select function and numbers.
 
@@ -22,7 +22,7 @@ elseif isSource("CREBRF")
 elseif isSource("OGTTLui")
     MakeDataFunction = @(pSet) MakeOGTTLui(pSet, CONFIG.ENABLELOADERPLOTS);
     allNums = [1 2 4 5 14 16 22 23 25 30];
-    bestNums = [5 22 23 25 30];
+    bestNums = [1 4 5 14 22 23 25 30];
 end
 
 % Replace function if mock.
@@ -31,16 +31,18 @@ if isSource("Mock")
 end
 
 % Replace numbers if selecting all/best.
-if isequal(patientNums, "all")
+if isequal(T.patients, "all")
     patientNums = allNums;
-elseif isequal(patientNums, "best")
+elseif isequal(T.patients, "best")
     patientNums = bestNums;
+else
+    patientNums = T.patients;
 end
 
 
 %% Set up patient set.
 for ii = 1:length(patientNums)
-    P.source = source;
+    P.source = T.source;
     P.patientNum = patientNums(ii);
     P.patientCode = CONFIG.PATIENTFORMAT(P);
     patientSet{ii} = P;
@@ -56,6 +58,10 @@ for ii = 1:length(patientSet)
     
     patientSet{ii} = AddTrialInputs(patientSet{ii});
 end
+
+%% Save and return.
+T.patientSet = patientSet;
+T.numPatients = numel(patientSet);
 
 end
 

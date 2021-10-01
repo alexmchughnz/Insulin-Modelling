@@ -12,43 +12,44 @@ close all
 
 config
 
-tStart = tic;
+T.timepoint = tic;
 
-%% Select Recipe
-recipeFunction = @FixedxLSplineSim;
+%% Set Up Trial
+T.label = "";
 
-trialLabel = "";
-% trialLabel = "no ks3 fit";
+T.recipe = @FixedxLSplineSim;
 
-%% Select Data
-patientNums = [5];
-% patientNums = 'all';
-source = "OGTTLui";
+T.source = "OGTTLui";
+T.patients = "best";
 
 %% Load Data
-patientSet = LoadData(source, patientNums);
-patientSetOut = {};
+T = LoadData(T);
 
 %% Run
 % Execute on each patient.
-numPatients = length(patientSet);
 runtime = tic;
-for ii = 1:numPatients
-    runtime = PrintTimeRemaining("Main", runtime, ii, numPatients, patientSet{ii}, true);
-   
-    patientsOut = recipeFunction(patientSet{ii});    
+
+patientSetIn = T.patientSet;
+patientSetOut = {};
+
+for ii = 1 : numel(patientSetIn)    
+    runtime = PrintTimeRemaining("Main", runtime, ii, T.numPatients, T.patientSet{ii}, true);
     
-    SavePatients(patientsOut);
+    P = patientSetIn{ii};
+  
+    PArray = T.recipe(P);    
     
-    patientSetOut = [patientSetOut; patientsOut(:)];    
+    SavePatients(T, PArray);
+    
+    patientSetOut = [patientSetOut; PArray(:)];    
 end
 
+T.resultSet = patientSetOut;
+
 %% Results
-tResults = tic;
+PrintTimeTaken(T, "Main");
 
-PrintTimeTaken("Main", patientSet, tStart);
-
-PrintResults(patientSetOut, recipeFunction, trialLabel);
-
-PrintTimeTaken("Results", patientSet, tResults);
+T.timepoint = tic;
+PrintResults(T);
+PrintTimeTaken(T, "Results");
 

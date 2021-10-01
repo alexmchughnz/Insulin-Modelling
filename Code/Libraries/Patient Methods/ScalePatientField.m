@@ -6,16 +6,15 @@ function P = ScalePatientField(P, fieldName, scale)
     fieldValue = getfield(P, path{:});
     fieldValue = fieldValue .* scale;
     P = setfield(P, path{:}, fieldValue);
-    
-    % Tag patient code with its modifier.
-    varName = path{end};
-    
+
+    % Print message.
     if numel(scale) == 1
-        scaleTag = sprintf("%.4g", scale);
+        scaleString = sprintf("%.4g", scale);
     else
-        scaleTag = sprintf("[%.2f to %.2f]", min(scale), max(scale));
+        scaleString = sprintf("%.2g to %.2g", min(scale), max(scale));
     end
-    tag = sprintf("%s * %s", varName, scaleTag);
     
-    P = TagPatientCode(P, tag);
+    message = sprintf("%s scaled by %s.", fieldName, scaleString);
+    PrintStatusUpdate(P, message);
+    
 end

@@ -18,18 +18,22 @@ recipeName = string(recipeStruct.function);
 % Save each patient struct in the correct Trial > Recipe > Label directory.
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    code = MakeValidName(P.patientCode);    
+    code = MakeValidName(P.patientCode);
     
-    if isempty(T.label)
-        trialDir = fullfile(location, T.source, recipeName);
-    else        
-        trialDir = fullfile(location, T.source, recipeName, T.label);
-    end    
+    trialPath = fullfile(T.source, recipeName);
     
+    % Append label if present.
+    fileLabel = "";
+    if T.label ~= ""
+        trialPath = fullfile(trialPath, T.label);
+        fileLabel = "-"+T.label;
+    end
+    
+    trialDir = fullfile(location, trialPath);
     if ~isfolder(trialDir)
         mkdir(trialDir);
     end
-    save(fullfile(trialDir, code), '-struct', 'P');
+    save(fullfile(trialDir, code+"_"+recipeName+fileLabel), '-struct', 'P');
     
     message = sprintf("Saved patient %s.", code);
     PrintStatusUpdate(P, message);

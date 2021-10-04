@@ -11,6 +11,7 @@ recipeName = string(recipeStruct.function);
 
 %% Tables
 tables = TabulateResults(T.resultSet);
+
 for tt = 1:length(tables)
     table = tables{tt};
     title = string(table.Properties.Description);
@@ -23,13 +24,15 @@ for tt = 1:length(tables)
         trialPath = fullfile(T.source, recipeName);
         
         % Append label if present.
-        if ~isempty(T.label)
+        fileLabel = "";
+        if T.label ~= ""
             trialPath = fullfile(trialPath, T.label);
+            fileLabel = "-"+T.label;
         end
         
         try
-            filepath = fullfile(CONFIG.RESULTPATH, trialPath, title+".csv");
-            writetable(table, filepath, "WriteRowNames", true);
+            filePath = fullfile(CONFIG.RESULTPATH, trialPath, title+"_"+T.source+recipeName+fileLabel+".csv");
+            writetable(table, filePath, "WriteRowNames", true);
         catch
             disp("Results file open - cannot save!")
         end

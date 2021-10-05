@@ -11,10 +11,12 @@ P = EstimateInsulinSecretion(P);  % Fit Uen.
 
 P = IntegralFitParameters(P, @AssembleIntegralSystemnLxL);  % Fit nL/xL, integral method.
 
-P = FindGutEmptyingRate(P);  % Find d2.
-
-GFastRange = [0.1 : 0.1 : 1] * P.data.GFast;
-P = FindOptimalValue(P, "data.GFast", GFastRange, @GlucoseError, @FitInsulinSensitivity);
+% Find d2.
+lbHalfLife = 5;
+ubHalfLife = 95;
+halfLifeRange = 1 ./ linspace(1/ubHalfLife, 1/lbHalfLife, 20);
+d2Range = log(2)./halfLifeRange;
+P = LineSearchOptimum(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
 
 P = FitInsulinSensitivity(P);
 

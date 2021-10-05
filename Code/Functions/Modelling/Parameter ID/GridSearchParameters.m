@@ -42,7 +42,7 @@ end
 gridData = P.persistents.(gridName){end};
 
 
-%% Find Optimal nL/param2
+%% Find Optimal Parameters
 % Get minimum.
 objectiveValues = gridData.objectiveValues;
 param1Grid = gridData.param1Grid;

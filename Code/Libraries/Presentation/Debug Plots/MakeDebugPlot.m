@@ -42,7 +42,7 @@ end
 fignum = GetFigNum(P.patientNum, set, num);
 F = figure(fignum);
 
-F.Name = sprintf("%d: %s", P.patientNum, figTitle);
+F.Name = sprintf("%s: %s", P.patientCode, figTitle);
 F.NumberTitle = "off";
 
 axes

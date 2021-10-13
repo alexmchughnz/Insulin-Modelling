@@ -1,28 +1,25 @@
 function PArray = IteratexLSplineSim(P)
+% Recipe for fitting parameters to a model with a fixed xL and splines for
+% nL. Values for xL are iterated 
+
 %% Plots
 plots = DebugPlots();
 
+plots.FitSplines.Splines = false; 
+plots.FitSplines.nLGlucose = false;
+    
 DebugPlots(plots);
 
 
 %% Functions
-P = EstimateInsulinSecretion(P);
+xLArray = 0.5 : 0.05 : 0.9;
 
-numSplines = 10;
-xLArray = 0.6 : 0.05: 0.8;
-
-for ii = 1:length(xLArray)
+for ii = 1:numel(xLArray)
     xL = xLArray(ii);
     
-    copyP = P;
-    copyP.patientSuffix = sprintf("xL=%.2f", xL);
-    copyP.results.xL = xL;
+    copyP = TagPatientCode(P, "xL = " +xL);
     
-    copyP = FitSplinesJLKnL(copyP, numSplines);
-    
-    copyP = FindGutEmptyingRate(copyP);
-    copyP = FitInsulinSensitivity(copyP);
-    copyP = SolveSystem(copyP, true);
+    copyP = FixedxLSplineSim(copyP, xL);
     
     PArray{ii} = copyP;
 end

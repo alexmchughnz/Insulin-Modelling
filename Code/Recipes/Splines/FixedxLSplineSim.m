@@ -1,9 +1,13 @@
-function P = FixedxLSplineSim(P)
-% Recipe for
+function P = FixedxLSplineSim(P, xL)
+% Recipe for fitting parameters to a model with a fixed xL and splines for
+% nL.
 % INPUTS:
 %   P  - patient struct
+%   xL - (optional) choose xL to fix
 % OUTPUT:
 %   P  - updated patient struct
+
+defaultxL = 0.6;
 
 %% Plots
 plots = DebugPlots();
@@ -24,7 +28,10 @@ DebugPlots(plots);
 P = EstimateInsulinSecretion(P);
 
 % Fix xL to hard-code value.
-P.results.xL = 0.6;
+if ~exist("xL", "var")
+    xL = defaultxL;
+end
+P.results.xL = xL;
 
 
 % Fit nL with splines over range.

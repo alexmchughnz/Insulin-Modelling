@@ -35,12 +35,12 @@ P.results.xL = xL;
 
 
 % Fit nL with splines over range.
-numKnots = numel(P.data.I.value) + 1;
-P = FitSplinesnL(P, numKnots);
+allowPlots = true;
+P = FitSplinesnL(P, allowPlots);
 
 
 % Find optimal JLK.
-JLKRange = 0.7 : 0.01 : 1.1;
+JLKRange = 0.1 : 0.01 : 1.1;
 P = LineSearchOptimum(P, "results.JLK", JLKRange, @InsulinError, @ApplyInsulinLossFactor);
 P = ApplyInsulinLossFactor(P);
 

@@ -1,4 +1,8 @@
-function [P, A, b, basisSplines] = FitSplinesnL(P, numKnots)
+function [P, A, b, basisSplines] = FitSplinesnL(P, allowPlots)
+
+if ~exist('allowPlots', 'var')
+    allowPlots = false;
+end
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
@@ -136,9 +140,12 @@ P.results.nL = basisSplines * nLWeights;
 
 
 %% Plotting
-plotvars.basisSplines = basisSplines;
-plotvars.nLWeights = nLWeights;
-MakePlots(P, plotvars);
+if allowPlots
+    plotvars.basisSplines = basisSplines;
+    plotvars.nLWeights = nLWeights;
+    MakePlots(P, plotvars);
+end
+
 end
 
 
@@ -151,7 +158,7 @@ if DP.Splines
     
     % Plot nL.
     plt = plot(P.results.tArray, P.results.nL, 'b');
-    plt.DisplayName = "nL";    
+    plt.DisplayName = "nL";
     
     % Plot fitted splines.
     plot(P.results.tArray, plotvars.basisSplines .* plotvars.nLWeights', '--', ...

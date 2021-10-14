@@ -5,6 +5,10 @@ function P = SolveSystem(P, allowPlots)
 % OUTPUT:
 %   P   - modified patient struct with SI
 
+if ~exist('allowPlots', 'var')
+    allowPlots = false;
+end
+
 PrintStatusUpdate(P, "Solving entire system!")
 
 %% Models
@@ -48,10 +52,6 @@ P.results.fits.glucoseMSE = GMSE;
 
 
 %% Plotting
-if ~exist('allowPlots', 'var')
-    allowPlots = false;
-end
-
 if allowPlots
     MakePlots(P);
 end

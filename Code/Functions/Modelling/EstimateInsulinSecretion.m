@@ -46,15 +46,29 @@ dvCPep = [diff(CPepArray)/dt; 0];
 S = (dvCPep + (CP.k1+CP.k3).*CPepArray - CP.k2*Y);  % C-peptide secretion [(pmol/L)/min]
 Uen = CONST.pmol2mU(S) * GC.VI;            % Endogenous insulin secretion [mU/min]
 
+% Apply smoothing.
+k = 2;
+centralWeight = 0.6;
+
+filter = ones(2*k+1, 1) * (1-centralWeight)/(2*k);
+filter(k+1) = centralWeight;
+
+
+smoothUen = conv2(Uen, filter);
+smoothUen = smoothUen(k+1:end-k);
+
 % Write value to patient struct.
-P.results.Uen = Uen;
+P.results.Uen = smoothUen;
 
 %% Plotting
-MakePlots(P);
+plotvars.Uen = Uen;
+plotvars.smoothUen = smoothUen;
+
+MakePlots(P, plotvars);
 
 end
 
-function MakePlots(P)
+function MakePlots(P, plotvars)
 DP = DebugPlots().EstimateInsulinSecretion;
 
 %% CPep
@@ -73,8 +87,12 @@ end
 %% Uen
 if DP.Uen
    MakeDebugPlot("Uen", P, DP);
-   plot(P.results.tArray, P.results.Uen)
-   
+   plt = plot(P.results.tArray, plotvars.Uen, '.');
+   plt.DisplayName = "Raw Uen";
+
+   plt = plot(P.results.tArray, plotvars.smoothUen, '.');
+   plt.DisplayName = "Smooth Uen";
+
    xlabel("Time [min]")
    ylabel("Uen [mU/min]")
 end

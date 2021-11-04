@@ -9,6 +9,9 @@ GC = P.parameters.GC;
 
 numFixedParameters = 0;
 
+nLMin = 0;
+nLMax = 0.5;
+
 %% Setup
 tArray = P.results.tArray;
 tMeas = P.data.I.time;
@@ -134,7 +137,10 @@ bConstraint = [nLDirectionb];
 
 
 % Solve using linear solver.
-x = lsqlin(A, b, AConstraint, bConstraint);
+lb = nLMin * ones(1, numTotalParameters);
+ub = nLMax * ones(1, numTotalParameters);
+
+x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb, ub);
 nLWeights = x;
 P.results.nL = basisSplines * nLWeights;
 

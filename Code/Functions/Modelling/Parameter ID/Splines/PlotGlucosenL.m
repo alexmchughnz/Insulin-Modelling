@@ -17,28 +17,28 @@ if DP.nLGlucose
     [tG, vG] = GetData(P.data.G); % [mmol/L]
     iiG = GetTimeIndex(tG, P.results.tArray);
     
-    vGNorm = vG ./ P.data.GFast;
+    vGPlot = vG;
     
-    nL = P.results.nL(iiG);
+    nLPlot = P.results.nL(iiG);
     
-    % Scatter
-    sct = plot(vGNorm, nL, 'x');
-    sct.DisplayName = "P" + P.patientNum;
+%     % Scatter
+%     sct = plot(vGNorm, nL, 'x');
+%     sct.DisplayName = "P" + P.patientNum;
     
     % Linear Interpolation
-    A(:,1) = vGNorm;
-    A(:,2) = ones(size(vGNorm));
-    b = nL;
+    A(:,1) = vGPlot;
+    A(:,2) = ones(size(vGPlot));
+    b = nLPlot;
     theta = A\b;
     m = theta(1);
     c = theta(2);
     
-    GArray = 0:3;
-    plt = plot(GArray, m*GArray+c, 'Color', sct.Color);
-    plt.HandleVisibility = 'off';
+    GArray = [min(vGPlot) max(vGPlot)];
+    plt = plot(GArray, m*GArray+c);
+    plt.DisplayName = "P" + P.patientNum;
     
-    xlabel("Normalised G/Gb")
-    ylabel("nL [1/min]")
+    xlabel("Measured $G$ [mmol/L]")
+    ylabel("Fit $n_L$ [1/min]")
     
     legend
     

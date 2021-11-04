@@ -127,10 +127,10 @@ nLChangeb = maxnLDeltas;
 % "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
 iiSplines = numFixedParameters + [1:numTotalSplines];
 
-AConstraint = zeros(2*numConstraints, numTotalParameters);
-AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
+AConstraint = zeros(numConstraints, numTotalParameters);
+AConstraint(:, iiSplines) = [nLDirectionA];
 
-bConstraint = [nLDirectionb; nLChangeb];
+bConstraint = [nLDirectionb];
 
 
 % Solve using linear solver.

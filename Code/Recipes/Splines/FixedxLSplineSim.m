@@ -12,8 +12,8 @@ defaultxL = 0.6;
 %% Plots
 plots = DebugPlots();
 
-    plots.EstimateInsulinSecretion.Uen = false;
-    plots.EstimateInsulinSecretion.CPep = false;
+    plots.EstimateInsulinSecretion.Uen = true;
+    plots.EstimateInsulinSecretion.CPep = true;
     
     plots.SolveSystem.CoefficientShapes = false; 
     
@@ -40,9 +40,12 @@ P = FitSplinesnL(P, allowPlots);
 
 
 % Find optimal JLK.
-JLKRange = 0.1 : 0.01 : 1.1;
+JLKRange = 0.7 : 0.01 : 1.00;
 P = LineSearchOptimum(P, "results.JLK", JLKRange, @InsulinError, @ApplyInsulinLossFactor);
 P = ApplyInsulinLossFactor(P);
+
+% JLK = 1.0;
+% P = ApplyInsulinLossFactor(P, JLK);
 
 
 % % Find optimal ks3.

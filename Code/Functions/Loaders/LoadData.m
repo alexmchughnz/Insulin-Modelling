@@ -22,7 +22,7 @@ elseif isSource("CREBRF")
 elseif isSource("OGTTLui")
     MakeDataFunction = @(pSet) MakeOGTTLui(pSet, CONFIG.ENABLELOADERPLOTS);
     allNums = [1 2 4 5 14 16 22 23 25 30];
-    bestNums = [1 4 14 22 23 25 30];
+    bestNums = [1 2 4 14 22 23 25 30];
 end
 
 % Replace function if mock.

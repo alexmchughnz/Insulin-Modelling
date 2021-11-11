@@ -130,17 +130,17 @@ nLChangeb = maxnLDeltas;
 % "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
 iiSplines = numFixedParameters + [1:numTotalSplines];
 
-AConstraint = zeros(numConstraints, numTotalParameters);
-AConstraint(:, iiSplines) = [nLDirectionA];
+AConstraint = zeros(2*numConstraints, numTotalParameters);
+AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
 
-bConstraint = [nLDirectionb];
+bConstraint = [nLDirectionb; nLChangeb];
 
 
 % Solve using linear solver.
-lb = nLMin * ones(1, numTotalParameters);
-ub = nLMax * ones(1, numTotalParameters);
+% lb = nLMin * ones(1, numTotalParameters);
+% ub = nLMax * ones(1, numTotalParameters);
 
-x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb, ub);
+x = lsqlin(A, b, AConstraint, bConstraint, [], []);
 nLWeights = x;
 P.results.nL = basisSplines * nLWeights;
 

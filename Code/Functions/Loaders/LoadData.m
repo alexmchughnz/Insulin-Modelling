@@ -13,6 +13,8 @@ elseif isSource("DISST")
     MakeDataFunction = @MakeDISST;
     allNums = [1:50];
     bestNums = [3 5 7 8 9 13 14 16 24 25];
+elseif isSource("CREBRF2021")
+    MakeDataFunction = @MakeCREBRF2021;
 elseif isSource("CREBRF")
     MakeDataFunction = @MakeCREBRF;
     allNums = [146 95 68 140 12 19 147 154 33 85 126 46 156 104 72 79 ...

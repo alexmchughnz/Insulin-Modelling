@@ -118,11 +118,17 @@ if DP.Glucose
     MakeDebugPlot("Plasma Glucose", P, DP);
     
     [tG, vG] = GetData(P.data.G);
-    GError = P.data.GCV .* vG;
-    plt = errorbar(tG, vG, GError, 'k.', ...
-        'MarkerSize', 5, ...
-        'MarkerEdgeColor', 'g', ...
-        'MarkerFaceColor', 'g');
+    if isfield(P.data, "GCV")
+        GError = P.data.GCV .* vG;
+        plt = errorbar(tG, vG, GError, 'k.', ...
+            'MarkerSize', 5, ...
+            'MarkerEdgeColor', 'g', ...
+            'MarkerFaceColor', 'g');
+    else
+        plt = plot(tG, vG, 'g');
+    end
+    
+    
     plt.DisplayName = 'Plasma Sample';
     
     plt = plot(tArray, P.results.G, 'k');
@@ -179,7 +185,7 @@ if DP.InterstitialInsulin
     MakeDebugPlot("Interstitial Insulin", P, DP);
     
     Q = P.results.Q;  % [mU/L]
-        
+    
     plt = plot(tArray, Q, 'k');
     plt.DisplayName = 'Model Prediction';
     

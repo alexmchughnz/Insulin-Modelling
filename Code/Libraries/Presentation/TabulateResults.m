@@ -32,11 +32,15 @@ for ii = 1:length(patientSet)
     else
         tables{tt} = AddField(tables{tt}, code, P.results, "nL", @(x) mean(x), "mean nL [1/min]");
     end
-    tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");    
+    tables{tt} = AddField(tables{tt}, code, P.results, "xL", @(x) x(1), "xL [1]");
     
     tables{tt} = AddField(tables{tt}, code, P.results, "d2", @(x) x, "d2 [1/min]");
     tables{tt} = AddField(tables{tt}, code, P.data, "GFast", @(x) x, "Gb [mmol/L]");
-    tables{tt} = AddField(tables{tt}, code, P.parameters.SC, "ks3", @(x) x, "ks3 [1/min]");
+    
+    if isfield(P.parameters, "SC")
+        tables{tt} = AddField(tables{tt}, code, P.parameters.SC, "ks3", @(x) x, "ks3 [1/min]");
+    end
+    
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+4, "SI [*1e-4 L/mU/min]");
     
     if isfield(P.results, 'fits')

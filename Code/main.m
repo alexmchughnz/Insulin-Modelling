@@ -17,11 +17,11 @@ T.timepoint = tic;
 %% Set Up Trial
 T.label = "";
 
-T.recipe = @FixedxLSplineSim;
+T.recipe = @SimpleSim;
 
-T.source = "OGTTLui";
-T.patients = 'best';
-% T.patients = 1;
+T.source = "CREBRF2021";
+% T.patients = 'all';
+T.patients = 18;
 
 %% Load Data
 T = LoadData(T);

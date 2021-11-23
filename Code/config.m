@@ -17,7 +17,7 @@ global CONFIG
 CONFIG.ENABLELOADERPLOTS = false;
 CONFIG.SAVERESULTS = true;
 
-CONFIG.PATIENTFORMAT = @(P) sprintf("P%s%d", P.source, P.patientNum);
+CONFIG.PATIENTFORMAT = @(P) sprintf("P%s_%d", P.source, P.patientNum);
 CONFIG.STATUSDEPTH = 2;
 CONFIG.HIGHDETAIL = false;
 

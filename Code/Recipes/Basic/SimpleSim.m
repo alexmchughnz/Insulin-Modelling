@@ -5,7 +5,16 @@ function P = SimpleSim(P)
 % OUTPUT:
 %   P  - updated patient struct
 
-                                                                                                                                             
+
+%% Plots
+plots = DebugPlots();                      
+    plots.EstimateInsulinSecretion.Uen = true;
+    plots.EstimateInsulinSecretion.CPep = true;
+    
+    plots.SolveSystem.Glucose = true;
+    plots.SolveSystem.PlasmaInsulin = true;
+DebugPlots(plots);
+
 %% Functions
 P = EstimateInsulinSecretion(P);  % Fit Uen.
 

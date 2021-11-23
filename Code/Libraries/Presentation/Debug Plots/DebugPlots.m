@@ -10,7 +10,7 @@ elseif isempty(DEBUGPLOTS)
     
     %% Functions    
     DEBUGPLOTS.EstimateInsulinSecretion.Uen = true;
-    DEBUGPLOTS.EstimateInsulinSecretion.CPep = false;
+    DEBUGPLOTS.EstimateInsulinSecretion.CPep = true;
     
     DEBUGPLOTS.MakeSplineBasisFunctions.Splines = false;
     
@@ -29,7 +29,7 @@ elseif isempty(DEBUGPLOTS)
     DEBUGPLOTS.SolveSystem.Glucose = true;
     DEBUGPLOTS.SolveSystem.PlasmaInsulin = true;
     DEBUGPLOTS.SolveSystem.InterstitialInsulin = false;
-    DEBUGPLOTS.SolveSystem.GlucoseComponents = true;
+    DEBUGPLOTS.SolveSystem.GlucoseComponents = false;
     DEBUGPLOTS.SolveSystem.CoefficientShapes = false; 
     
     

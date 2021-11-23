@@ -170,6 +170,7 @@ if DP.PlasmaInsulin
     
     xlabel('Time [min]')
     ylabel('Plasma Insulin, I [mU/l]')
+    ylim([0 +Inf])
     legend()
 end
 

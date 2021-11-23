@@ -15,13 +15,13 @@ config
 T.timepoint = tic;
 
 %% Set Up Trial
-T.label = "NonLRateConstraint";
+T.label = "";
 
 T.recipe = @FixedxLSplineSim;
 
 T.source = "OGTTLui";
-% T.patients = 'best';
-T.patients = 1;
+T.patients = 'best';
+% T.patients = 1;
 
 %% Load Data
 T = LoadData(T);

@@ -12,50 +12,50 @@ close all
 
 config
 
-T.timepoint = tic;
+Trial.timepoint = tic;
 
 %% Set Up Trial
-T.label = "";
+Trial.label = "";
 
-T.recipe = @FixedxLSplineSim;
+Trial.recipe = @FixedxLSplineSim;
 
-T.source = "CREBRF2021";
-T.patients = 'all';
+Trial.source = "CREBRF2021";
+Trial.patients = 'all';
 % T.patients = 24;
 
-%% Load Data
-T = LoadData(T);
 
 %% Run
+Trial = LoadData(Trial);
+
 % Execute on each patient.
 runtime = tic;
 
-patientSetIn = T.patientSet;
+patientSetIn = Trial.patientSet;
 patientSetOut = {};
 
 for ii = 1 : numel(patientSetIn)    
-    runtime = PrintTimeRemaining("Main", runtime, ii, T.numPatients, T.patientSet{ii}, true);
+    runtime = PrintTimeRemaining("Main", runtime, ii, Trial.numPatients, Trial.patientSet{ii}, true);
     
     P = patientSetIn{ii};
   
     try
-    PArray = T.recipe(P);
+    PArray = Trial.recipe(P);
     catch
         PrintStatusUpdate(P, "Error in simulation. Continuing to next subject.", true);
         continue
     end
     
-    SavePatients(T, PArray);
+    SavePatients(Trial, PArray);
     
     patientSetOut = [patientSetOut; PArray(:)];    
 end
 
-T.resultSet = patientSetOut;
+Trial.resultSet = patientSetOut;
 
 %% Results
-PrintTimeTaken(T, "Main");
+PrintTimeTaken(Trial, "Main");
 
-T.timepoint = tic;
-PrintResults(T);
-PrintTimeTaken(T, "Results");
+Trial.timepoint = tic;
+PrintResults(Trial);
+PrintTimeTaken(Trial, "Results");
 

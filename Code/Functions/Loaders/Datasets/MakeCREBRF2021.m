@@ -1,15 +1,14 @@
-function patientSet = MakeCREBRF2021(patientSet)
+function patientSet = MakeCREBRF2021(Trial, patientNums)
 % Function for loading CREBRF2021 data.
 % INPUTS:
-%   patientSet  - cell array of patient structs
+%   T           - trial struct
+%   patientNums - patient numbers to load
 % OUTPUT:
 %   patientSet  - updated cell array of patient structs
 
 
 global CONFIG
 CONST = LoadConstants();
-
-source = "CREBRF2021";
 
 %% Load Data
 opts = spreadsheetImportOptions(...
@@ -18,34 +17,41 @@ opts = spreadsheetImportOptions(...
     'VariableNamesRange', 'B8:U8', ...
     'RowNamesRange', 'A9:A197');
 opts = setvartype(opts, 'double');
-T = readtable(fullfile(CONFIG.DATAPATH, source, "CREBRF2021Import.xlsx"), opts, ...
+T = readtable(fullfile(CONFIG.DATAPATH, Trial.source, "CREBRF2021Import.xlsx"), opts, ...
     'ReadRowNames', true, ...
     'ReadVariableNames', true);
 
-% Generate array of valid patient numbers.
-codes = T.Properties.RowNames;
-nums = zeros(size(codes));
-for pp = 1:length(codes)
-    nums(pp) = str2double(regexp(codes{pp}, "\d*", "match", "once"));
+% Generate array of patient numbers in spreadsheet.
+loadCodes = upper(string(T.Properties.RowNames));
+loadCodes = strrep(loadCodes, "_", "-");
+loadNums = zeros(size(loadCodes));
+for ii = 1:length(loadCodes)
+    loadNums(ii) = str2double(regexp(loadCodes{ii}, "\d*", "match", "once"));
 end
 
 %% Generate Patients
-for ii = 1:length(patientSet)
-    P = patientSet{ii};
-    
-    pp = find(nums == P.patientNum);
-    while numel(pp) > 1         % If number repeated, add 1000.
-        duplicate = pp(end);
-        nums(duplicate) = 1000 + nums(duplicate);
-        P.patientNum = nums(duplicate);
-        pp = find(nums == P.patientNum);
+% Get codes for all numbers and initialise patient set.
+% If number is duplicated, just load both codes.
+patientNums = unique(patientNums);
+patientSet = {};
+for ii = 1:numel(patientNums)
+    num = patientNums(ii);
+    patientIndex = find(loadNums == num);
+    assert(numel(patientIndex) > 0, "Invalid patient number: " + string(num))
+
+    for pp = 1:numel(patientIndex)
+        P = struct();
+        P.patientNum = num + 1000*(pp-1); % Add an offset for duplicate numbers.
+        P.patientCode = loadCodes(patientIndex(pp));
+        patientSet{end+1} = P;
     end
-    
-    assert(numel(pp) == 1, "Invalid patient number.")
-    code = codes{pp};
+end
+
+for ii = 1:numel(patientSet)
+    P = patientSet{ii};
+    code = P.patientCode;
     
     %% Patient Info
-    P.patientCode = string(code);
     P.data.age = T{code, "AGE"};
     P.data.mass = T{code, "WEIGHT"};
     P.data.height = T{code, "HEIGHT"};
@@ -97,6 +103,9 @@ for ii = 1:length(patientSet)
     % Insulin Bolus
     P.data.IType = "none";
     P.data.IDelivery = "none";
+    P.data.vIBolus = 0;
+    P.data.tIBolus = 0;                            % [min]
+    P.data.TIBolus = 0;                            % [min]
     
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
@@ -111,6 +120,5 @@ for ii = 1:length(patientSet)
     
     %% Save
     patientSet{ii} = P;
-    clear P
 end
 end

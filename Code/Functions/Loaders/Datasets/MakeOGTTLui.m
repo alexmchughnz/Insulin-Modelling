@@ -44,7 +44,7 @@ infoTable = readtable(filepath, infoOpts);
 newPatientSet = {};
 for ii = 1:length(patientSet)
     baseP = patientSet{ii};
-    baseP.patientCode = CONFIG.PATIENTCODEFORMAT(baseP);
+    baseP.patientCode = CONFIG.PATIENTCODEFORMAT(source, baseP);
     assert(baseP.patientNum <= 30, "Invalid patient number.")
     
     allCodes = string(infoTable.Properties.RowNames);

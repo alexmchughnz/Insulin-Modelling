@@ -169,7 +169,7 @@ for ii = 1:length(patientSet)
         
         IErrors = P.results.MatchnL.IErrors;
         
-        for rr = 1:length(variableNames)
+        for rr = 1:length(variableNames)  
             tables{tt}{rowNames(rr), :} = IErrors(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;

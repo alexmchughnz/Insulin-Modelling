@@ -18,7 +18,7 @@ recipeName = string(recipeStruct.function);
 % Save each patient struct in the correct Trial > Recipe > Label directory.
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    name = MakeValidName(CONFIG.PATIENTFILEFORMAT(P));
+    name = MakeValidName(CONFIG.PATIENTFILEFORMAT(T, P));
     
     trialPath = fullfile(T.source, recipeName);
     

@@ -1,14 +1,12 @@
-function T = LoadData(T)
-
+function Trial = LoadData(Trial)
 % patientNum: internal identifier
 % patientCode: human-readable identifier
 
 global CONFIG
 
-isSource = @(dataset) contains(T.source, dataset, 'IgnoreCase', true);
+isSource = @(dataset) dataset == Trial.source;
 
 %% Select function and numbers.
-
 if isSource("Detemir")
     MakeDataFunction = @MakeDetemir;
     allNums = [1 3 4];
@@ -33,7 +31,6 @@ elseif isSource("CREBRF2021")
         34  37  47  53  57  85];
     bestNums = [6 8 44 46 47 51 67 69 87 91 92 93 116 155 160 172 ...
                 180 184 189 190 194 231 247 249 251 259];
-
 elseif isSource("CREBRF")
     MakeDataFunction = @MakeCREBRF;
     allNums = [146 95 68 140 12 19 147 154 33 85 126 46 156 104 72 79 ...
@@ -52,36 +49,28 @@ if isSource("Mock")
 end
 
 % Replace numbers if selecting all/best.
-if isequal(T.patients, "all")
+if isequal(Trial.patients, "all")
     patientNums = allNums;
-elseif isequal(T.patients, "best")
+elseif isequal(Trial.patients, "best")
     patientNums = bestNums;
 else
-    patientNums = T.patients;
-end
-
-
-%% Set up patient set.
-for ii = 1:length(patientNums)
-    P.source = T.source;
-    P.patientNum = patientNums(ii);
-    patientSet{ii} = P;
+    patientNums = Trial.patients;
 end
 
 %% Load data.
-patientSet = MakeDataFunction(patientSet);
+patientSet = MakeDataFunction(Trial, patientNums);
 
 %% Add remaining elements to patient structs.
 for ii = 1:length(patientSet)
     patientSet{ii} = AddParameters(patientSet{ii});
-    patientSet{ii} = AddPersistents(patientSet{ii});
+    patientSet{ii} = AddPersistents(Trial, patientSet{ii});
     
     patientSet{ii} = AddTrialInputs(patientSet{ii});
 end
 
 %% Save and return.
-T.patientSet = patientSet;
-T.numPatients = numel(patientSet);
+Trial.patientSet = patientSet;
+Trial.numPatients = numel(patientSet);
 
 end
 

@@ -1,4 +1,4 @@
-function PrintResults(T)
+function PrintResults(Trial)
 % Prints (and optionally saves) results of simulation.
 % INPUTS:
 %   patientSet - existing table of results
@@ -6,11 +6,11 @@ function PrintResults(T)
 global CONFIG
 
 
-recipeStruct = functions(T.recipe);
+recipeStruct = functions(Trial.recipe);
 recipeName = string(recipeStruct.function);
 
 %% Tables
-tables = TabulateResults(T.resultSet);
+tables = TabulateResults(Trial.resultSet);
 
 for tt = 1:length(tables)
     table = tables{tt};
@@ -21,17 +21,17 @@ for tt = 1:length(tables)
     disp(newline);
     
     if (CONFIG.SAVERESULTS)
-        trialPath = fullfile(T.source, recipeName);
+        trialPath = fullfile(Trial.source, recipeName);
         
         % Append label if present.
         fileLabel = "";
-        if T.label ~= ""
-            trialPath = fullfile(trialPath, T.label);
-            fileLabel = "-"+T.label;
+        if Trial.label ~= ""
+            trialPath = fullfile(trialPath, Trial.label);
+            fileLabel = "-"+Trial.label;
         end
         
         try
-            filePath = fullfile(CONFIG.RESULTPATH, trialPath, title+"_"+T.source+recipeName+fileLabel+".csv");
+            filePath = fullfile(CONFIG.RESULTPATH, trialPath, title+"_"+Trial.source+recipeName+fileLabel+".csv");
             writetable(table, filePath, "WriteRowNames", true);
         catch
             disp("Results file open - cannot save!")
@@ -41,7 +41,7 @@ end
 
 %% Plots
 if (CONFIG.SAVERESULTS)
-    SaveOpenFigures(T, trialPath);
+    SaveOpenFigures(Trial, trialPath);
 end
 
 monitor = 3;

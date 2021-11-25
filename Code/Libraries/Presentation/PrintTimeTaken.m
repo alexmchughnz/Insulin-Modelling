@@ -1,11 +1,11 @@
-function PrintTimeTaken(T, label)
+function PrintTimeTaken(Trial, label)
     PrintLine();
 
-    tEnd = toc(T.timepoint);
+    tEnd = toc(Trial.timepoint);
     timeTotal = duration(seconds(tEnd));
     totalString = datestr(timeTotal, 'HH:MM:SS');
     
-    timePerPatient = timeTotal / length(T.patientSet);
+    timePerPatient = timeTotal / length(Trial.patientSet);
     patientString = datestr(timePerPatient, 'HH:MM:SS');
     
     fprintf("Time taken for %s: %s (Mean of %s per patient)\n", ...

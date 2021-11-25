@@ -1,13 +1,13 @@
-function P = AddPersistents(P)
+function P = AddPersistents(Trial, P)
 
 global CONFIG
 
 code = MakeValidName(P.patientCode);
 
-filename = fullfile(CONFIG.RESULTPATH, P.source, code+'.mat');
+filename = fullfile(CONFIG.RESULTPATH, Trial.source, code+'.mat');
 
 if isfile(filename)
-    loadP = load(fullfile(CONFIG.RESULTPATH, P.source, code));
+    loadP = load(fullfile(CONFIG.RESULTPATH, Trial.source, code));
     
     if isfield(loadP, "persistents")
         fields = fieldnames(loadP.persistents);

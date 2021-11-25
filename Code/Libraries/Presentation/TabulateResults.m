@@ -14,7 +14,7 @@ tables = {};
 for ii = 1:length(patientSet)
     tt = 0;
     P = patientSet{ii};
-    code = sprintf("%s", P.patientCode);
+    code = string(P.patientCode);
     
     %% Main Results
     

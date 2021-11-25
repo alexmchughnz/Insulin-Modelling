@@ -35,7 +35,7 @@ if DP.nLGlucose
     
     GArray = [min(vGPlot) max(vGPlot)];
     plt = plot(GArray, m*GArray+c);
-    plt.DisplayName = "P" + P.patientNum;
+    plt.DisplayName = P.patientCode;
     
     xlabel("Measured $G$ [mmol/L]")
     ylabel("Fit $n_L$ [1/min]")

@@ -18,7 +18,7 @@ recipeName = string(recipeStruct.function);
 % Save each patient struct in the correct Trial > Recipe > Label directory.
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    code = MakeValidName(P.patientCode);
+    name = MakeValidName(CONFIG.PATIENTFILEFORMAT(P));
     
     trialPath = fullfile(T.source, recipeName);
     
@@ -33,9 +33,9 @@ for ii = 1:length(patientSet)
     if ~isfolder(trialDir)
         mkdir(trialDir);
     end
-    save(fullfile(trialDir, code+"_"+recipeName+fileLabel), '-struct', 'P');
+    save(fullfile(trialDir, name+"_"+recipeName+fileLabel), '-struct', 'P');
     
-    message = sprintf("Saved patient %s.", code);
+    message = sprintf("Saved patient %s.", name);
     PrintStatusUpdate(P, message);
 end
 

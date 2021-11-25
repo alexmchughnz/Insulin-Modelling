@@ -14,7 +14,7 @@ for iFig = 1:length(FigList)
     AxisHandle = FigHandle.Children(end);    
     
     % Edit    
-    FigName = MakeValidName(T.source + FigHandle.Name);
+    FigName = MakeValidName(FigHandle.Name);
     
     if isfield(AxisHandle, 'Legend') && ~isempty(AxisHandle.Legend)
         legend('Location','southoutside')

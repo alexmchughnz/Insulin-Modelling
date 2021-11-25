@@ -17,11 +17,11 @@ T.timepoint = tic;
 %% Set Up Trial
 T.label = "";
 
-T.recipe = @SimpleSim;
+T.recipe = @FixedxLSplineSim;
 
 T.source = "CREBRF2021";
-% T.patients = 'all';
-T.patients = 18;
+T.patients = 'all';
+% T.patients = 24;
 
 %% Load Data
 T = LoadData(T);
@@ -38,7 +38,12 @@ for ii = 1 : numel(patientSetIn)
     
     P = patientSetIn{ii};
   
-    PArray = T.recipe(P);    
+    try
+    PArray = T.recipe(P);
+    catch
+        PrintStatusUpdate(P, "Error in simulation. Continuing to next subject.", true);
+        continue
+    end
     
     SavePatients(T, PArray);
     

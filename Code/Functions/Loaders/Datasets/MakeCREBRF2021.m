@@ -34,11 +34,18 @@ for ii = 1:length(patientSet)
     P = patientSet{ii};
     
     pp = find(nums == P.patientNum);
-    assert(numel(pp) == 1, "Invalid patient number.")    
-   
+    while numel(pp) > 1         % If number repeated, add 1000.
+        duplicate = pp(end);
+        nums(duplicate) = 1000 + nums(duplicate);
+        P.patientNum = nums(duplicate);
+        pp = find(nums == P.patientNum);
+    end
+    
+    assert(numel(pp) == 1, "Invalid patient number.")
     code = codes{pp};
     
     %% Patient Info
+    P.patientCode = string(code);
     P.data.age = T{code, "AGE"};
     P.data.mass = T{code, "WEIGHT"};
     P.data.height = T{code, "HEIGHT"};
@@ -72,7 +79,7 @@ for ii = 1:length(patientSet)
     measC = measC * 1e+3 / 1e-3;             % [pg/L]
     measC = measC / CONST.MCPeptide;         % [pmol/L]
     P.data.CPep.value = measC([1:end]);
-    P.data.CPep.time = measTimesC;           % [min]   
+    P.data.CPep.time = measTimesC;           % [min]
     
     % Clear NaNs
     GNaN = isnan(P.data.G.value);
@@ -84,12 +91,12 @@ for ii = 1:length(patientSet)
     P.data.CPep.value = P.data.CPep.value(~CNaN);
     P.data.G.time = P.data.G.time(~GNaN);
     P.data.I.time = P.data.I.time(~INaN);
-    P.data.CPep.time = P.data.CPep.time(~CNaN);     
+    P.data.CPep.time = P.data.CPep.time(~CNaN);
     
-    %% Trial Inputs  
+    %% Trial Inputs
     % Insulin Bolus
     P.data.IType = "none";
-    P.data.IDelivery = "none";  
+    P.data.IDelivery = "none";
     
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
@@ -98,7 +105,7 @@ for ii = 1:length(patientSet)
     P.data.vGBolus = vGBolus / CONST.MGlucose * 1e+3;  % [mmol]
     P.data.tGBolus = 0;                            % [min]
     P.data.TGBolus = 1;                            % [min]
-        
+    
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray));
     

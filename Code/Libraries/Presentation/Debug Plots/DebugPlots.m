@@ -14,7 +14,7 @@ elseif isempty(DEBUGPLOTS)
     
     DEBUGPLOTS.MakeSplineBasisFunctions.Splines = false;
     
-    DEBUGPLOTS.LineSearchOptimum.ErrorFunction = true;
+    DEBUGPLOTS.LineSearchOptimum.ErrorFunction = false;
     
     DEBUGPLOTS.IntegralFit.GraphicalID = false;
     DEBUGPLOTS.IntegralFit.Convergence = false;

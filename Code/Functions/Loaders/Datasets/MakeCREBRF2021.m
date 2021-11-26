@@ -22,8 +22,7 @@ T = readtable(fullfile(CONFIG.DATAPATH, Trial.source, "CREBRF2021Import.xlsx"), 
     'ReadVariableNames', true);
 
 % Generate array of patient numbers in spreadsheet.
-loadCodes = upper(string(T.Properties.RowNames));
-loadCodes = strrep(loadCodes, "_", "-");
+loadCodes = string(T.Properties.RowNames);
 loadNums = zeros(size(loadCodes));
 for ii = 1:length(loadCodes)
     loadNums(ii) = str2double(regexp(loadCodes{ii}, "\d*", "match", "once"));
@@ -119,6 +118,7 @@ for ii = 1:numel(patientSet)
     P.data.GInfusion = zeros(size(P.results.tArray));
     
     %% Save
+    P.patientCode = upper(strrep(P.patientCode, "_", "-"));
     patientSet{ii} = P;
 end
 end

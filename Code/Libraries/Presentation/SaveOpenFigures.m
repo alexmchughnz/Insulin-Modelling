@@ -21,13 +21,13 @@ for iFig = 1:length(FigList)
     end
     
     % Save    
-    figDir = fullfile(FolderName, 'fig', trialPath);
+    figDir = fullfile(FolderName, trialPath, "fig");
     if ~isfolder(figDir)
         mkdir(figDir);
     end
     savefig(FigHandle, fullfile(figDir, FigName + ".fig"));
     
-    pngDir = fullfile(FolderName, 'png', trialPath);
+    pngDir = fullfile(FolderName, trialPath, "png");
     if ~isfolder(pngDir)
         mkdir(pngDir);
     end

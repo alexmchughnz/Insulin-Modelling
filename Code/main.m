@@ -17,11 +17,11 @@ Trial.timepoint = tic;
 %% Set Up Trial
 Trial.label = "";
 
-Trial.recipe = @FixedxLSplineSim;
+Trial.recipe = @SplineSim;
 
 Trial.source = "CREBRF2021";
 Trial.patients = 'all';
-% T.patients = 24;
+% Trial.patients = 13;
 
 
 %% Run
@@ -36,21 +36,17 @@ patientSetOut = {};
 for ii = 1 : numel(patientSetIn)    
     runtime = PrintTimeRemaining("Main", runtime, ii, Trial.numPatients, Trial.patientSet{ii}, true);
     
-    P = patientSetIn{ii};
-  
-    try
-    PArray = Trial.recipe(P);
-    catch
-        PrintStatusUpdate(P, "Error in simulation. Continuing to next subject.", true);
-        continue
+    PIn = patientSetIn{ii};
+    
+    POut = RunTrial(Trial, PIn);
+    if ~isempty(POut)
+        SavePatients(Trial, POut);
+        patientSetOut = [patientSetOut; POut(:)];  
     end
-    
-    SavePatients(Trial, PArray);
-    
-    patientSetOut = [patientSetOut; PArray(:)];    
 end
 
 Trial.resultSet = patientSetOut;
+
 
 %% Results
 PrintTimeTaken(Trial, "Main");

@@ -5,8 +5,6 @@ function PrintStatusUpdate(P, message, force)
 %   message - message to print
 %   force   - true if message should always show
 
-global CONFIG
-
 if ~exist("force", "var")
     force = false;
 end
@@ -15,7 +13,7 @@ stack = dbstack(1);
 depth = length(stack) - 2;  % How many levels below main?
 
 
-if force || depth < CONFIG.STATUSDEPTH
+if force || depth < 2
     indent = repmat('   >', 1, depth-1);
     caller = stack(1).name;
     fprintf("[%s]%s %s: %s\n", P.patientCode, indent, caller, message);

@@ -7,7 +7,8 @@ catch err
     if HandleError(err)
         PrintStatusUpdate(PIn, "Computation error. Skipping.");
         POut = [];
-        return
+    else
+        rethrow(err);
     end
 end
 end
@@ -22,10 +23,10 @@ handled = true;
 [~, warnID] = lastwarn;
 
 if warnID == "MATLAB:ode45:IntegrationTolNotMet"
+    lastwarn("");
     return
 else
     handled = false;
-    error(err)
 end
 
 end

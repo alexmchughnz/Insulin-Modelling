@@ -1,4 +1,4 @@
-function [P] = IDModel(P, options)
+function [P] = IDModel(P)
 % Function for ID model forward simulation.
 % INPUTS:
 %   P        - patient struct, must have tArray
@@ -7,11 +7,6 @@ function [P] = IDModel(P, options)
 %   P  - patient struct updated with model results
 
 ID = P.parameters.ID;
-
-global CONFIG
-if ~exist('options', 'var')
-    options = CONFIG.DEFAULTODEOPTIONS;
-end
 
 PrintStatusUpdate(P, "Begin solving...")
 
@@ -26,7 +21,7 @@ Y0 = [ID.ISC0;
       ID.QDB0];
   
 % Forward simulate.
-[~, Y] = ode45(@IDModelODE, P.results.tArray, Y0, options, P);  
+[~, Y] = ode45(@IDModelODE, P.results.tArray, Y0, [], P);  
 
 % Store results.
 P.results.IDH      = Y(:,1);

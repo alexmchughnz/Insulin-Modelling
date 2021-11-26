@@ -2,7 +2,6 @@ function runtime = PrintTimeRemaining(activity, runtime, counter, max, ...
                                       P, showLine, interval)
 
 % Settings
-
 wrapFunc = @() 0;
 if exist("showLine", "var")
     if(showLine)
@@ -23,6 +22,8 @@ message = sprintf('(%d/%d) %s remaining for %s.', ...
 
 % Display
 if mod(counter, interval) == 0
+    disp('')
+    disp('')
     disp('')
     
     wrapFunc();

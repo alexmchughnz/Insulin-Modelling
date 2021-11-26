@@ -6,8 +6,6 @@ function patientSet = MakeCREBRF2021(Trial, patientNums)
 % OUTPUT:
 %   patientSet  - updated cell array of patient structs
 
-
-global CONFIG
 CONST = LoadConstants();
 
 %% Load Data
@@ -17,7 +15,7 @@ opts = spreadsheetImportOptions(...
     'VariableNamesRange', 'B8:U8', ...
     'RowNamesRange', 'A9:A197');
 opts = setvartype(opts, 'double');
-T = readtable(fullfile(CONFIG.DATAPATH, Trial.source, "CREBRF2021Import.xlsx"), opts, ...
+T = readtable(fullfile(Trial.Config.DATAPATH, Trial.source, "CREBRF2021Import.xlsx"), opts, ...
     'ReadRowNames', true, ...
     'ReadVariableNames', true);
 

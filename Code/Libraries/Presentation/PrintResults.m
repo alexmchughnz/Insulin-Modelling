@@ -3,9 +3,6 @@ function PrintResults(Trial)
 % INPUTS:
 %   patientSet - existing table of results
 
-global CONFIG
-
-
 recipeStruct = functions(Trial.recipe);
 recipeName = string(recipeStruct.function);
 
@@ -20,7 +17,7 @@ for tt = 1:length(tables)
     disp(table);
     disp(newline);
     
-    if (CONFIG.SAVERESULTS)
+    if (Trial.Config.SAVERESULTS)
         trialPath = fullfile(Trial.source, recipeName);
         
         % Append label if present.
@@ -31,7 +28,7 @@ for tt = 1:length(tables)
         end
         
         try
-            filePath = fullfile(CONFIG.RESULTPATH, trialPath, title+"_"+Trial.source+recipeName+fileLabel+".csv");
+            filePath = fullfile(Trial.Config.RESULTPATH, trialPath, title+"_"+Trial.source+recipeName+fileLabel+".csv");
             writetable(table, filePath, "WriteRowNames", true);
         catch
             disp("Results file open - cannot save!")
@@ -40,7 +37,7 @@ for tt = 1:length(tables)
 end
 
 %% Plots
-if (CONFIG.SAVERESULTS)
+if (Trial.Config.SAVERESULTS)
     SaveOpenFigures(Trial, trialPath);
 end
 

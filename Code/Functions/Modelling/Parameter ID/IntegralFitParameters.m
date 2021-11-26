@@ -5,8 +5,6 @@ function P = IntegralFitParameters(P, integralSystemFunc)
 % OUTPUT:
 %   P   - modified patient struct with nL and xL
 
-global CONFIG
-
 
 %% Options
 doIterative = false;

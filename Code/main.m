@@ -10,8 +10,7 @@ clear
 clear functions
 close all
 
-config
-
+Trial.Config = config();
 Trial.timepoint = tic;
 
 %% Set Up Trial

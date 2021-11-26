@@ -6,7 +6,6 @@ function [P, Y] = GCModel(P, flags)
 % OUTPUT:
 %   P  - patient struct updated with model results 
 
-global CONFIG
 
 if ~exist("flags", "var")
     flags = "";
@@ -40,7 +39,7 @@ P.results.UexArray = P.results.Uex(P);
    
 % Forward simulate.
 enableG = ~ismember("disableG", flags);
-[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, CONFIG.DEFAULTODEOPTIONS, P, Y0, enableG);  
+[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, [], P, Y0, enableG);  
 
 % Store results.
 P.results.G = Y(:,1);

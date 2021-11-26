@@ -1,9 +1,7 @@
-function SavePatients(T, patientSet, location)
-
-global CONFIG
+function SavePatients(Trial, patientSet, location)
 
 if ~exist("location", "var")
-    location = CONFIG.RESULTPATH;
+    location = Trial.Config.RESULTPATH;
 end
 
 if length(patientSet) == 1
@@ -12,21 +10,21 @@ end
 
 
 % Extract recipe name.
-recipeStruct = functions(T.recipe);
+recipeStruct = functions(Trial.recipe);
 recipeName = string(recipeStruct.function);
 
 % Save each patient struct in the correct Trial > Recipe > Label directory.
 for ii = 1:length(patientSet)
     P = patientSet{ii};
-    name = MakeValidName(CONFIG.PATIENTFILEFORMAT(T, P));
+    name = MakeValidName(Trial.Config.PATIENTFILEFORMAT(Trial, P));
     
-    trialPath = fullfile(T.source, recipeName);
+    trialPath = fullfile(Trial.source, recipeName);
     
     % Append label if present.
     fileLabel = "";
-    if T.label ~= ""
-        trialPath = fullfile(trialPath, T.label);
-        fileLabel = "-"+T.label;
+    if Trial.label ~= ""
+        trialPath = fullfile(trialPath, Trial.label);
+        fileLabel = "-"+Trial.label;
     end
     
     trialDir = fullfile(location, trialPath);

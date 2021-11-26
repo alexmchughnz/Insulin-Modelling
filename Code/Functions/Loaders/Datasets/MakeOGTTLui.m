@@ -5,7 +5,6 @@ function newPatientSet = MakeOGTTLui(patientSet, showPlots)
 % OUTPUT:
 %   newPatientSet - updated cell array of patient structs
 
-global CONFIG
 DEBUGPLOTS = DebugPlots();
 CONST = LoadConstants();
 
@@ -14,7 +13,7 @@ getrow = @(label, n) repmat(string(label), 1, n) + (0:n-1);
 source = "OGTTLui";
 
 %% Load Data
-filepath = fullfile(CONFIG.DATAPATH, source, "OGTTLuiMaster.xls");
+filepath = fullfile(Trial.Config.DATAPATH, source, "OGTTLuiMaster.xls");
 
 btOpts = detectImportOptions(filepath, 'Sheet', 'Blood Test');
 btOpts.DataRange = 'A3:AY15';

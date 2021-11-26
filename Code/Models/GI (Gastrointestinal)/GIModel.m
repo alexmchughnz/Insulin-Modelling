@@ -1,4 +1,4 @@
-function [P] = GIModel(P, options)
+function [P] = GIModel(P)
 % Function for GC model forward simulation.
 % INPUTS:
 %   P        - patient struct, must have tArray
@@ -8,11 +8,6 @@ function [P] = GIModel(P, options)
 
 GI = P.parameters.GI;
 
-global CONFIG
-if ~exist('options', 'var')
-    options = CONFIG.DEFAULTODEOPTIONS;
-end
-
 PrintStatusUpdate(P, "Begin solving...")
 
 % Set up initial conditions.
@@ -20,7 +15,7 @@ Y0 = [GI.P10;
       GI.P20];
   
 % Forward simulate.
-[~, Y] = ode45(@GIModelODE, P.results.tArray, Y0, options, P);  
+[~, Y] = ode45(@GIModelODE, P.results.tArray, Y0, [], P);  
 
 % Store results.
 P.results.P1 = Y(:,1);

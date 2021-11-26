@@ -1,4 +1,4 @@
-function [P] = SCModel(P, options)
+function [P] = SCModel(P)
 % Function for SC model forward simulation.
 % INPUTS:
 %   P        - patient struct, must have tArray
@@ -8,11 +8,6 @@ function [P] = SCModel(P, options)
 
 SC = P.parameters.SC;
 
-global CONFIG
-if ~exist('options', 'var')
-    options = CONFIG.DEFAULTODEOPTIONS;
-end
-
 PrintStatusUpdate(P, "Begin solving...")
 
 
@@ -21,7 +16,7 @@ Y0 = [SC.ISC0;
       SC.QLocal0];
   
 % Forward simulate.
-[~, Y] = ode45(@SCModelODE, P.results.tArray, Y0, options, P);  
+[~, Y] = ode45(@SCModelODE, P.results.tArray, Y0, [], P);  
 
 % Store results.
 P.results.ISC = Y(:,1);

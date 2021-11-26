@@ -1,8 +1,7 @@
-function SaveOpenFigures(T, trialPath)
+function SaveOpenFigures(Trial, trialPath)
 
-global CONFIG
 
-FolderName = CONFIG.PLOTPATH;   % Your destination folder
+FolderName = Trial.Config.PLOTPATH;   % Your destination folder
 FigList = findobj(allchild(0), 'flat', 'Type', 'figure');
 for iFig = 1:length(FigList)
     % Find

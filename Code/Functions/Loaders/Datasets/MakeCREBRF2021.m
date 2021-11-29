@@ -1,4 +1,4 @@
-function patientSet = MakeCREBRF2021(Trial, patientNums)
+function patientSetOut = MakeCREBRF2021(Trial, patientNums)
 % Function for loading CREBRF2021 data.
 % INPUTS:
 %   T           - trial struct
@@ -35,7 +35,7 @@ for ii = 1:numel(patientNums)
     num = patientNums(ii);
     patientIndex = find(loadNums == num);
     assert(numel(patientIndex) > 0, "Invalid patient number: " + string(num))
-
+    
     for pp = 1:numel(patientIndex)
         P = struct();
         P.patientNum = num + 1000*(pp-1); % Add an offset for duplicate numbers.
@@ -44,6 +44,7 @@ for ii = 1:numel(patientNums)
     end
 end
 
+patientSetOut = {};
 for ii = 1:numel(patientSet)
     P = patientSet{ii};
     code = P.patientCode;
@@ -107,16 +108,24 @@ for ii = 1:numel(patientSet)
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
     
-    vGBolus = min(0.3*P.data.mass, 30);     % [g]
+    vGBolus = 0;     % [g]  PLACEHOLDER - will need to add mixed meal
     P.data.vGBolus = vGBolus / CONST.MGlucose * 1e+3;  % [mmol]
     P.data.tGBolus = 0;                            % [min]
-    P.data.TGBolus = 1;                            % [min]
+    P.data.TGBolus = 10;                            % [min]
     
     % Glucose Infusion
     P.data.GInfusion = zeros(size(P.results.tArray));
     
+    %% Validation
+    valid = true;
+    
+    valid = valid && (numel(P.data.CPep.value) >= 4);
+    valid = valid && (numel(P.data.I.value) >= 3);
+    
     %% Save
-    P.patientCode = upper(strrep(P.patientCode, "_", "-"));
-    patientSet{ii} = P;
+    if valid
+        P.patientCode = upper(strrep(P.patientCode, "_", "-"));
+        patientSetOut{end+1} = P;
+    end
 end
 end

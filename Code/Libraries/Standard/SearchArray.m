@@ -1,4 +1,4 @@
-function [n] = GetTimeIndex(tSearch, tArray)
+function [n] = SearchArray(tSearch, tArray)
 % For each t in tSearch, finds the index n of t in tArray.
 % Each n is such that tArray(n) < t < tArray(n+1).
 

@@ -26,7 +26,7 @@ Q0 = Y0(3); % [mU]
 
 %% Variables
 % Time dependent.
-n = GetTimeIndex(t, P.results.tArray);  % Index of current timestep.
+n = SearchArray(t, P.results.tArray);  % Index of current timestep.
 
 Uex  = P.results.UexArray(n);
 Uen  = P.results.Uen(n);       % [mU/min]

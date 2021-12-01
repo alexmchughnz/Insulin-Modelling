@@ -6,7 +6,7 @@ function [time, value] = GetResultsSample(P, time, results)
 %   time  - time points [min]
 %   value - value of results at each time
     
-    iiData = GetTimeIndex(time, P.results.tArray);    
+    iiData = SearchArray(time, P.results.tArray);    
     value = results(iiData);
     
 end

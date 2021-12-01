@@ -1,37 +1,24 @@
-function SavePatients(Trial, patientSet, location)
-
-if ~exist("location", "var")
-    location = Trial.Config.RESULTPATH;
-end
+function SavePatients(Trial, patientSet)
 
 if length(patientSet) == 1
     patientSet = {patientSet};
 end
-
-
-% Extract recipe name.
-recipeStruct = functions(Trial.recipe);
-recipeName = string(recipeStruct.function);
 
 % Save each patient struct in the correct Trial > Recipe > Label directory.
 for ii = 1:length(patientSet)
     P = patientSet{ii};
     name = MakeValidName(Trial.Config.PATIENTFILEFORMAT(Trial, P));
     
-    trialPath = fullfile(Trial.source, recipeName);
-    
-    % Append label if present.
-    fileLabel = "";
-    if Trial.label ~= ""
-        trialPath = fullfile(trialPath, Trial.label);
-        fileLabel = "-"+Trial.label;
+    resultsDir = fullfile(Trial.Config.RESULTPATH, Trial.outputPath);
+    if ~isfolder(resultsDir)
+        mkdir(resultsDir);
     end
-    
-    trialDir = fullfile(location, trialPath);
-    if ~isfolder(trialDir)
-        mkdir(trialDir);
-    end
-    save(fullfile(trialDir, name+"_"+recipeName+fileLabel), '-struct', 'P');
+
+    % Remove big figure handles from saved structs.
+    saveP = P;
+    saveP = rmfield(saveP, "figures");
+
+    save(fullfile(resultsDir, name), '-struct', 'saveP');
     
     message = sprintf("Saved patient %s.", name);
     PrintStatusUpdate(P, message);

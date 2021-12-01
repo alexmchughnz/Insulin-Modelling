@@ -8,13 +8,13 @@ end
 CONST = LoadConstants();
 
 numCols = numel(Trial.patientSet);
-numRows = numel(Trial.patientSet{1}.figures.handles);
+numRows = numel(Trial.patientSet{1}.figures);
 for ii = 1:numCols
     P = Trial.patientSet{ii};
-    handles = P.figures.handles;
+    handles = P.figures;
 
     for hh = 1:numRows
-        F = figure(handles(hh));
+        F = figure(handles{hh});
 
 %         % Grab patient info for figure.
 %         ax = gca();

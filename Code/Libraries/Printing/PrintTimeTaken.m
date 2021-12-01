@@ -1,7 +1,7 @@
 function PrintTimeTaken(Trial, label)
     PrintLine();
 
-    tEnd = toc(Trial.timepoint);
+    tEnd = toc(Trial.startTime);
     timeTotal = duration(seconds(tEnd));
     totalString = datestr(timeTotal, 'HH:MM:SS');
     

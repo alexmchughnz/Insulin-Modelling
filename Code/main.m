@@ -7,50 +7,43 @@ fprintf("Running main - press key to start.\n")
 
 clc
 clear
-clear functions
 close all
 
 Trial.Config = config();
-Trial.timepoint = tic;
+Trial.startTime = tic;
 
 %% Set Up Trial
-Trial.label = "";
+% Trial.label = "";
 
 Trial.recipe = @SplineSim;
 
 Trial.source = "CREBRF2021";
-Trial.patients = 'all';
-% Trial.patients = 13;
+% Trial.patients = "all";
+Trial.patients = [1 2 45];
 
 
 %% Run
 Trial = LoadData(Trial);
 
-% Execute on each patient.
-runtime = tic;
-
 patientSetIn = Trial.patientSet;
 patientSetOut = {};
 
+runtime = tic; 
 for ii = 1 : numel(patientSetIn)    
-    runtime = PrintTimeRemaining("Main", runtime, ii, Trial.numPatients, Trial.patientSet{ii}, true);
-    
-    PIn = patientSetIn{ii};
-    
-    POut = RunTrial(Trial, PIn);
+    POut = RunTrial(Trial, ii);
+
     if ~isempty(POut)
         SavePatients(Trial, POut);
-        patientSetOut = [patientSetOut; POut(:)];  
+        SaveFigures(Trial, POut);
+        patientSetOut = [patientSetOut POut(:)];  % To handle if multiple structs are output.
     end
 end
 
-Trial.resultSet = patientSetOut;
+Trial.patientSet = patientSetOut;
 
 
 %% Results
 PrintTimeTaken(Trial, "Main");
-
-Trial.timepoint = tic;
-PrintResults(Trial);
-PrintTimeTaken(Trial, "Results");
+SaveResults(Trial);
+PanelFigures(Trial);
 

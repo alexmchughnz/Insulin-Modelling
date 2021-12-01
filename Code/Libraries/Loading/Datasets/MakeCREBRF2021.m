@@ -34,11 +34,17 @@ patientSet = {};
 for ii = 1:numel(patientNums)
     num = patientNums(ii);
     patientIndex = find(loadNums == num);
-    assert(numel(patientIndex) > 0, "Invalid patient number: " + string(num))
+    numMatches = numel(patientIndex);
+    assert(numMatches > 0, "Invalid patient number: " + string(num))
     
-    for pp = 1:numel(patientIndex)
+    for pp = 1:numMatches
         P = struct();
-        P.patientNum = num + 1000*(pp-1); % Add an offset for duplicate numbers.
+        if numMatches > 1
+            P.patientNum = double(string(num) + "00" + string(pp)); % Add an offset for duplicate numbers.
+        else
+            P.patientNum = num;
+        end
+
         P.patientCode = loadCodes(patientIndex(pp));
         patientSet{end+1} = P;
     end

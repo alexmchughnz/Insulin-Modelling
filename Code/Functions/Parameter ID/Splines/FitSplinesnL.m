@@ -1,6 +1,6 @@
 function [P, A, b, basisSplines] = FitSplinesnL(P)
 
-CONST = LoadConstants();
+CONST = Constants();
 GC = P.parameters.GC;
 
 numFixedParameters = 0;

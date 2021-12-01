@@ -1,4 +1,4 @@
-function CONST = LoadConstants()
+function CONST = Constants()
 
 CONST.MGlucose = 180.156;  % Glucose molar mass [g/mol]
 CONST.MCPeptide = 3020.29;  % C-peptide molar mass [g/mol]

@@ -5,8 +5,7 @@ function patientSet = MakeDetemir(patientSet)
 % OUTPUT:
 %   patientSet  - updated cell array of patient structs
 
-global CONFIG
-CONST = LoadConstants();
+CONST = Constants();
 
 source = "Detemir";
 

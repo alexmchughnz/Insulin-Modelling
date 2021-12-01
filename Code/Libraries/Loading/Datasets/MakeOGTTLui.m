@@ -5,8 +5,7 @@ function newPatientSet = MakeOGTTLui(patientSet, showPlots)
 % OUTPUT:
 %   newPatientSet - updated cell array of patient structs
 
-DEBUGPLOTS = DebugPlots();
-CONST = LoadConstants();
+CONST = Constants();
 
 getrow = @(label, n) repmat(string(label), 1, n) + (0:n-1);
 

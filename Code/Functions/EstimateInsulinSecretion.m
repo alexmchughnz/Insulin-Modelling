@@ -10,7 +10,7 @@ function P = EstimateInsulinSecretion(P)
 
 CP = P.parameters.CP;
 GC = P.parameters.GC;
-CONST = LoadConstants();
+CONST = Constants();
 
 PrintStatusUpdate(P, "Estimating Uen..."); 
 

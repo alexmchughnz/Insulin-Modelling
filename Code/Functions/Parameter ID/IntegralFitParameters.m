@@ -119,7 +119,7 @@ end
 
 function MakePlots(P, plotvars)
 DP = DebugPlots().IntegralFit;
-CONST = LoadConstants();
+CONST = Constants();
 
 %% Graphical Identifiability Method (Docherty, 2010)
 if DP.GraphicalID

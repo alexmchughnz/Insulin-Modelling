@@ -7,7 +7,7 @@ function patientSet = MakeCREBRF(patientSet)
 
 
 global CONFIG
-CONST = LoadConstants();
+CONST = Constants();
 
 source = "CREBRF";
 

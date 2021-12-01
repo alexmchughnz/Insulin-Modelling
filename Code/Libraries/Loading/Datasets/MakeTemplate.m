@@ -6,7 +6,7 @@ function patientSet = MakeTemplate(patientSet)
 %   patientSet  - updated cell array of patient structs
 
 global CONFIG
-CONST = LoadConstants();
+CONST = Constants();
 
 source = "[template]";
 

@@ -1,6 +1,6 @@
 function [A, b, IFunc, QFunc, paramNames] = AssembleIntegralSystemnLxL(P, I, Q)
 
-CONST = LoadConstants();
+CONST = Constants();
 GC = P.parameters.GC;
 
 paramNames = ["nL", "xL"];

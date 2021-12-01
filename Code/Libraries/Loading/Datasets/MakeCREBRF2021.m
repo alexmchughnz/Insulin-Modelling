@@ -6,7 +6,7 @@ function patientSetOut = MakeCREBRF2021(Trial, patientNums)
 % OUTPUT:
 %   patientSet  - updated cell array of patient structs
 
-CONST = LoadConstants();
+CONST = Constants();
 
 %% Load Data
 opts = spreadsheetImportOptions(...

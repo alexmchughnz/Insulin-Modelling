@@ -101,9 +101,6 @@ for ii = 1:numel(patientSet)
     % Insulin Bolus
     P.data.IType = "none";
     P.data.IDelivery = "none";
-    P.data.vIBolus = 0;
-    P.data.tIBolus = 0;                            % [min]
-    P.data.TIBolus = 0;                            % [min]
     
     % Glucose Bolus
     P.data.GDelivery = "intravenous";
@@ -119,13 +116,47 @@ for ii = 1:numel(patientSet)
     %% Validation
     valid = true;
     
-    valid = valid && (numel(P.data.CPep.value) >= 4);
-    valid = valid && (numel(P.data.I.value) >= 3);
+    valid = valid && (numel(P.data.I.value) >= 4);
+    valid = valid && (numel(P.data.CPep.value) >= 3);
+    
+    if ~valid
+        % Quit patient and continue loop if data is missing.
+        continue
+    end
+    
+    %% Data Modification
+    P.rawdata = P.data;
+
+    % Add CPep point at end. Assume same relative drop between last two points as insulin.
+    N = numel(P.data.I.value);
+    tCPep = P.data.I.time(N);
+    vCPep = P.data.CPep.value(N-1) * P.data.I.value(N)/P.data.I.value(N-1);
+    
+    P = InsertData(P, "CPep", tCPep, vCPep);
+
+    % New Insulin point. Fit exponential to final NI points, then intersect with assumed first-phase measurement at t = 5 min.
+    % I(t) = a*exp(b(t-tFP) + IBasal, where a is peak insulin from first-phase secretion.
+    tFP = 5;  % [min]
+    NI = 3;
+    IBasal = P.data.I.value(1);
+    
+    x = P.data.I.time(end-(NI-1):end) - tFP;
+    y = P.data.I.value(end-(NI-1):end) - IBasal;
+    
+    F0 = fit(x, y, "exp1")
+    IFunc = @(t) F0.a*exp(-F0.b*(t-tFP)) + IBasal;
+    
+    P = InsertData(P, "I", tFP, IFunc(tFP));
+
+    % Add extra CPep point that best explains new insulin point.
+    % Since input is purely endogenous, assume quantity of insulin addition is ~= CPep addition.
+    deltaI = P.data.I.value(2) - P.data.I.value(1);
+    deltaCPep = CONST.mU2pmol(deltaI);
+
+    P = InsertData(P, "CPep", tFP, P.data.CPep.value(1)+deltaCPep);
     
     %% Save
-    if valid
-        P.patientCode = upper(strrep(P.patientCode, "_", "-"));
-        patientSetOut{end+1} = P;
-    end
+    P.patientCode = upper(strrep(P.patientCode, "_", "-"));
+    patientSetOut{end+1} = P;
 end
 end

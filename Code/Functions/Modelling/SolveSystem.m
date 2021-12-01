@@ -125,7 +125,7 @@ if DP.Glucose
             'MarkerEdgeColor', 'g', ...
             'MarkerFaceColor', 'g');
     else
-        plt = plot(tG, vG, 'g');
+        plt = plot(tG, vG, 'g*');
     end
     
     

@@ -174,8 +174,6 @@ if DP.Splines
     
     xlabel("Time [min]")
     ylabel("nL [1/min]")
-    
-    legend
 end
 
 end

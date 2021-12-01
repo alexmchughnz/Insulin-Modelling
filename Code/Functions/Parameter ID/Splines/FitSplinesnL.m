@@ -1,21 +1,15 @@
-function [P, A, b, basisSplines] = FitSplinesnL(P, allowPlots)
-
-if ~exist('allowPlots', 'var')
-    allowPlots = false;
-end
+function [P, A, b, basisSplines] = FitSplinesnL(P)
 
 CONST = LoadConstants();
 GC = P.parameters.GC;
 
 numFixedParameters = 0;
 
-nLMin = 0;
-nLMax = 0.5;
 
 %% Setup
 tArray = P.results.tArray;
 tMeas = P.data.I.time;
-iiMeas = GetTimeIndex(tMeas, tArray);
+iiMeas = SearchArray(tMeas, tArray);
 
 % Plasma Insulin
 [tI, vI] = GetData(P.data.I); % [mU/L]
@@ -36,7 +30,7 @@ Uex = P.results.Uex(P);
 order = 3;
 knotLocations = P.data.I.time;
 
-[basisSplines, allKnots] = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
+[P, basisSplines, allKnots] = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
 numTotalSplines = size(basisSplines, CONST.ROWDIR);
 numTotalParameters = numFixedParameters + numTotalSplines;
 
@@ -139,28 +133,24 @@ bConstraint = [nLDirectionb; nLChangeb];
 % Solve using linear solver.
 % lb = nLMin * ones(1, numTotalParameters);
 % ub = nLMax * ones(1, numTotalParameters);
-
 x = lsqlin(A, b, AConstraint, bConstraint, [], []);
 nLWeights = x;
 P.results.nL = basisSplines * nLWeights;
 
 
 %% Plotting
-if allowPlots
-    plotvars.basisSplines = basisSplines;
-    plotvars.nLWeights = nLWeights;
-    MakePlots(P, plotvars);
-end
+plotvars.basisSplines = basisSplines;
+plotvars.nLWeights = nLWeights;
+
+P = MakePlots(P, plotvars);
 
 end
 
 
-function MakePlots(P, plotvars)
-DP = DebugPlots().FitSplines;
+function P = MakePlots(P, plotvars)
 
 %% Splines
-if DP.Splines
-    MakeDebugPlot("Splines", P, DP);
+    P = AddFigure(P, "Splines");
     
     % Plot nL.
     plt = plot(P.results.tArray, P.results.nL, 'b');
@@ -174,7 +164,5 @@ if DP.Splines
     
     xlabel("Time [min]")
     ylabel("nL [1/min]")
-end
-
 end
 

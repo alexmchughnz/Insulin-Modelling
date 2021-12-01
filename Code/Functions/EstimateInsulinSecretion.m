@@ -64,16 +64,14 @@ P.results.Uen = smoothUen;
 plotvars.Uen = Uen;
 plotvars.smoothUen = smoothUen;
 
-MakePlots(P, plotvars);
+P = MakePlots(P, plotvars);
 
 end
 
-function MakePlots(P, plotvars)
-DP = DebugPlots().EstimateInsulinSecretion;
+function P = MakePlots(P, plotvars)
 
 %% CPep
-if DP.CPep
-   MakeDebugPlot("C-peptide", P, DP);
+   P = AddFigure(P, "CPep");
    
    plt = plot(P.data.CPep.time, P.data.CPep.value, 'b*');
    plt.DisplayName = "Plasma Sample";
@@ -82,11 +80,10 @@ if DP.CPep
    ylabel("Plasma C-Peptide, C [pmol/L]")
    
    legend
-end
 
 %% Uen
-if DP.Uen
-   MakeDebugPlot("Uen", P, DP);
+   P = AddFigure(P, "Uen");
+
    plt = plot(P.results.tArray, plotvars.Uen, '.');
    plt.DisplayName = "Raw Uen";
 
@@ -95,6 +92,5 @@ if DP.Uen
 
    xlabel("Time [min]")
    ylabel("Uen [mU/min]")
-end
 
 end

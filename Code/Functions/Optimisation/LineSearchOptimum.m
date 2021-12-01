@@ -77,15 +77,13 @@ PrintStatusUpdate(P, message);
 plotvars.residualsArray = residualsArray;
 plotvars.searchRange = searchRange;
 plotvars.optValue = optValue;
-MakePlots(P, path{end}, plotvars);
+
+P = MakePlots(P, path{end}, plotvars);
 
 end
 
-function MakePlots(P, fieldName, plotvars)
-DP = DebugPlots().LineSearchOptimum;
-
-if DP.ErrorFunction
-   MakeDebugPlot("Line Search "+fieldName, P, DP);
+function P = MakePlots(P, fieldName, plotvars)
+   P = AddFigure(P, "Line Search "+fieldName);
    
    plot(plotvars.searchRange, plotvars.residualsArray, 'r');
    line([plotvars.optValue plotvars.optValue], ylim());
@@ -96,7 +94,5 @@ if DP.ErrorFunction
    ylabel("Error")
    
    legend
-end
-
 end
 

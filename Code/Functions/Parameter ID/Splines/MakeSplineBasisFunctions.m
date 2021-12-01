@@ -1,4 +1,4 @@
-function [basisSplines, knots] = MakeSplineBasisFunctions(P, order, mode, varargin)
+function [P, basisSplines, knots] = MakeSplineBasisFunctions(P, order, mode, varargin)
 % Creates basis spline functions for a time array.
 % This function enforces 'numKnots' knots within the range of tArray, and
 % generates additional splines for higher orders.
@@ -84,15 +84,14 @@ plotvars.tSpan = tSpan;
 plotvars.phi = phi;
 plotvars.knots = knots;
 plotvars.order = order;
-MakePlots(P, plotvars);
+
+P = MakePlots(P, plotvars);
 end
 
-function MakePlots(P, plotvars)
-DP = DebugPlots().MakeSplineBasisFunctions;
+function P = MakePlots(P, plotvars)
 
 %% Splines
-if DP.Splines
-    MakeDebugPlot("Basis Splines", P, DP);
+    P = AddFigure(P, "BasisSplines");
     
     for k = (0 : plotvars.order) + 1
         subplot(plotvars.order+1, 1, k)
@@ -115,5 +114,4 @@ if DP.Splines
     end
     
     xlabel("Time [min]")
-end
 end

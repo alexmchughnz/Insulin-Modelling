@@ -5,27 +5,48 @@ if ~exist('monitor', 'var')
     monitor = 1;
 end
 
-CONST = LoadConstants();
+CONST = Constants();
 
 numCols = numel(Trial.patientSet);
-numRows = numel(Trial.patientSet{1}.figures);
-for ii = 1:numCols
-    P = Trial.patientSet{ii};
-    handles = P.figures;
 
-    for hh = 1:numRows
-        F = figure(handles{hh});
+for pp = 1:numCols
+    % Iterate to collect the figures we want to show.
+    P = Trial.patientSet{pp};
+    allFigs = P.figures;
+    displayFigs = {};
+    for ii = 1:numel(allFigs)
+        F = allFigs{ii};
+        tag = F.Tag;
+        name = split(F.Name);
+        name = name{end};
 
-%         % Grab patient info for figure.
-%         ax = gca();
-%         lgd = ax.Legend;
-%         if ~isempty(lgd)
-%         lgd.Location = 'best';
-%         end
+        try
+            toShow = (Trial.figureList.(tag).(name) == true);
+        catch err
+            if err.identifier == "MATLAB:nonExistentField"
+                PrintStatusUpdate(P, "Unknown figure name: " + tag+"."+name)
+                toShow = false;
+            else
+                rethrow(err);
+            end
+        end
+
+        if toShow
+            displayFigs{end+1} = F;
+        else
+            close(F);
+        end
+    end
+
+    
+    % Position each figure.
+    numRows = numel(displayFigs);
+    for jj = 1:numRows
+        F = figure(displayFigs{jj});
 
         % Get position indices.
-        colIndex = ii;
-        rowIndex = hh;
+        colIndex = pp;
+        rowIndex = jj;
 
         % Position figure.
         F.Units = 'pixels';
@@ -44,7 +65,7 @@ for ii = 1:numCols
         windowHeight = screenHeight/numRows;
 
         F.Position = [x + windowWidth*(colIndex-1), ...
-            y + h - windowHeight*(rowIndex+1), ...
+            y + h - windowHeight*(rowIndex), ...
             windowWidth, ...
             max(windowHeight-borderHeight, 100)];
     end

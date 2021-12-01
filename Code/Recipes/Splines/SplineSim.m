@@ -9,21 +9,6 @@ function P = SplineSim(P, xL)
 
 defaultxL = 0.6;
 
-%% Plots
-plots = DebugPlots();
-
-    plots.EstimateInsulinSecretion.Uen = true;
-    plots.EstimateInsulinSecretion.CPep = true;
-    
-    plots.SolveSystem.CoefficientShapes = false; 
-    
-    plots.MakeSplineBasisFunctions.Splines = false;
-    
-    plots.FitSplines.nLGlucose = true;
-    
-DebugPlots(plots);
-
-
 %% Functions
 P = EstimateInsulinSecretion(P);
 
@@ -35,8 +20,7 @@ P.results.xL = xL;
 
 
 % Fit nL with splines over range.
-allowPlots = true;
-P = FitSplinesnL(P, allowPlots);
+P = FitSplinesnL(P);
 
 
 % Find GFast.
@@ -58,7 +42,7 @@ P = FitInsulinSensitivity(P);
 
 % Solve.
 P = SolveSystem(P, true);
-PlotGlucosenL(P);
+% PlotGlucosenL(P);
 
 end
 

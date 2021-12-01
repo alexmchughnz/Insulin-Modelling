@@ -4,7 +4,7 @@ function figureList = DefaultFigures()
     figureList.EstimateInsulinSecretion.Uen = true;
     figureList.EstimateInsulinSecretion.CPep = true;
     
-    figureList.MakeSplineBasisFunctions.Splines = false;
+    figureList.MakeSplineBasisFunctions.BasisSplines = false;
     
     figureList.LineSearchOptimum.ErrorFunction = false;
     

@@ -89,9 +89,10 @@ P = MakePlots(P, plotvars);
 end
 
 function P = MakePlots(P, plotvars)
+tag = "MakeSplineBasisFunctions";
 
 %% Splines
-    P = AddFigure(P, "BasisSplines");
+    P = AddFigure(P, tag, "BasisSplines");
     
     for k = (0 : plotvars.order) + 1
         subplot(plotvars.order+1, 1, k)

@@ -83,7 +83,10 @@ P = MakePlots(P, path{end}, plotvars);
 end
 
 function P = MakePlots(P, fieldName, plotvars)
-   P = AddFigure(P, "Line Search "+fieldName);
+   tag = "LineSearchOptimum";
+
+   %% Error Function
+   P = AddFigure(P, tag, "ErrorFunction");
    
    plot(plotvars.searchRange, plotvars.residualsArray, 'r');
    line([plotvars.optValue plotvars.optValue], ylim());

@@ -69,9 +69,10 @@ P = MakePlots(P, plotvars);
 end
 
 function P = MakePlots(P, plotvars)
+tag = "EstimateInsulinSecretion";
 
 %% CPep
-   P = AddFigure(P, "CPep");
+   P = AddFigure(P, tag, "CPep");
    
    plt = plot(P.data.CPep.time, P.data.CPep.value, 'b*');
    plt.DisplayName = "Plasma Sample";
@@ -82,7 +83,7 @@ function P = MakePlots(P, plotvars)
    legend
 
 %% Uen
-   P = AddFigure(P, "Uen");
+   P = AddFigure(P, tag, "Uen");
 
    plt = plot(P.results.tArray, plotvars.Uen, '.');
    plt.DisplayName = "Raw Uen";

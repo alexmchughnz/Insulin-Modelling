@@ -18,7 +18,7 @@ function figureList = DefaultFigures()
     
     figureList.AnalyseInsulinVariance.Error = false;
     
-    figureList.SolveSystem.Glucose = true;
+    figureList.SolveSystem.PlasmaGlucose = true;
     figureList.SolveSystem.PlasmaInsulin = true;
     figureList.SolveSystem.InterstitialInsulin = false;
     figureList.SolveSystem.GlucoseComponents = false;

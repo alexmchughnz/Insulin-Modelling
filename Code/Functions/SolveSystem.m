@@ -60,12 +60,13 @@ end
 
 
 function P = MakePlots(P)
+tag = "SolveSystem";
 
 tArray = P.results.tArray;
 
 %% Glucose Components
 
-P = AddFigure(P, "GlucoseComponents");
+P = AddFigure(P, tag, "GlucoseComponents");
 GC = P.parameters.GC;
 
 % Copied from GCModelODE.
@@ -109,8 +110,8 @@ ylim([-lim lim])
 
 grid on
 
-%% Glucose
-P = AddFigure(P, "PlasmaGlucose");
+%% Plasma Glucose
+P = AddFigure(P, tag, "PlasmaGlucose");
 
 [tG, vG] = GetData(P.data.G);
 if isfield(P.data, "GCV")
@@ -143,7 +144,7 @@ legend()
 ylim([4 15])
 
 %% Plasma Insulin
-P = AddFigure(P, "PlasmaInsulin");
+P = AddFigure(P, tag, "PlasmaInsulin");
 
 [tI, vI] = GetData(P.data.I);  % [mU/L]
 I = P.results.I;  % [mU/L]
@@ -173,7 +174,7 @@ ylim([0 +Inf])
 legend()
 
 %% Interstitial Insulin
-P = AddFigure(P, "InterstitialInsulin");
+P = AddFigure(P, tag, "InterstitialInsulin");
 
 Q = P.results.Q;  % [mU/L]
 
@@ -185,7 +186,7 @@ ylabel('Interstitial Insulin, Q [mU/l]')
 legend()
 
 %% Coefficient Shapes
-P = AddFigure(P, "CoefficientShapes");
+P = AddFigure(P, tag, "CoefficientShapes");
 
 [tI, vI] = GetData(P.data.I);  % [mU/L]
 plt = plot(tI, vI, 'r*');

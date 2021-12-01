@@ -54,7 +54,6 @@ patientSet = MakeDataFunction(Trial, patientNums);
 %% Add remaining elements to patient structs.
 for ii = 1:length(patientSet)
     patientSet{ii}.figures = {};
-
     patientSet{ii} = AddParameters(patientSet{ii});
     patientSet{ii} = AddTrialInputs(patientSet{ii});
 end
@@ -74,6 +73,7 @@ end
 Trial.outputPath = trialPath;
 
 %% Save and return.
+Trial.figureList = DefaultFigures();
 Trial.patientSet = patientSet;
 Trial.timepoint = tic;
 

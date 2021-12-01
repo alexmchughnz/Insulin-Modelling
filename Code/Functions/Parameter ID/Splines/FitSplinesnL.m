@@ -148,9 +148,10 @@ end
 
 
 function P = MakePlots(P, plotvars)
+tag = "FitSplines";
 
 %% Splines
-    P = AddFigure(P, "Splines");
+    P = AddFigure(P, tag, "Splines");
     
     % Plot nL.
     plt = plot(P.results.tArray, P.results.nL, 'b');

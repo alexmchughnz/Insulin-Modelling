@@ -1,4 +1,4 @@
-function [P, F] = AddFigure(P, figTitle)
+function [P, F] = AddFigure(P, tag, name)
 % Adds a figure to patient.
 % INPUTS:
 %   P        - patient struct
@@ -7,18 +7,13 @@ function [P, F] = AddFigure(P, figTitle)
 %   P  - patient struct
 %   F  - figure handle for debug plot
 
-
-stack = dbstack(1);
-originFunction = stack(1).name;
-
-
 % Make figure.
 fignum = double(string(P.patientNum) + "0" + string(numel(P.figures)));
 
 F = figure(fignum);
-F.Name = sprintf("%s: %s", P.patientCode, figTitle);
-F.Tag = originFunction;
-% F.NumberTitle = "off";
+F.Name = sprintf("%s: %s", P.patientCode, name);
+F.Tag = tag;
+F.NumberTitle = "off";
 
 P.figures{end+1} = F;
 

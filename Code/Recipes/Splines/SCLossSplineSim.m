@@ -1,6 +1,6 @@
-function P = FixedxLSplineSim(P, xL)
-% Recipe for fitting parameters to a model with a fixed xL and splines for
-% nL.
+function P = SCLossSplineSim(P, xL)
+% Recipe for fitting parameters to a model with a fixed xL and splines for nL.
+% Identifies Lex, loss from subcutaneous injection.
 % INPUTS:
 %   P  - patient struct
 %   xL - (optional) choose xL to fix

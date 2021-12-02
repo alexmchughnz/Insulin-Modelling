@@ -1,4 +1,4 @@
-function newPatientSet = MakeOGTTLui(patientSet, showPlots)
+function patientSet = MakeOGTTLui(Trial, patientNums)
 % Function for loading OGTTLui data.
 % INPUTS:
 %   patientSet - cell array of patient structs
@@ -9,10 +9,9 @@ CONST = Constants();
 
 getrow = @(label, n) repmat(string(label), 1, n) + (0:n-1);
 
-source = "OGTTLui";
 
 %% Load Data
-filepath = fullfile(Trial.Config.DATAPATH, source, "OGTTLuiMaster.xls");
+filepath = fullfile(Trial.Config.DATAPATH, Trial.source, "OGTTLuiMaster.xls");
 
 btOpts = detectImportOptions(filepath, 'Sheet', 'Blood Test');
 btOpts.DataRange = 'A3:AY15';
@@ -39,10 +38,10 @@ infoTable = readtable(filepath, infoOpts);
 
 
 %% Generate Patients
-newPatientSet = {};
-for ii = 1:length(patientSet)
-    baseP = patientSet{ii};
-    baseP.patientCode = CONFIG.PATIENTCODEFORMAT(source, baseP);
+patientSet = {};
+for ii = 1:length(patientNums)
+    baseP.patientNum = patientNums(ii);
+    baseP.patientCode = "P" + string(baseP.patientNum);
     assert(baseP.patientNum <= 30, "Invalid patient number.")
     
     allCodes = string(infoTable.Properties.RowNames);
@@ -56,9 +55,8 @@ for ii = 1:length(patientSet)
         code = subpatientCodes{ll};
         if hasSubpatients
             P.patientCode = P.patientCode + code(end);
-            P.patientNum = P.patientNum*100 + ll;
+            P.patientNum = CONFIG.PATIENTSUBNUMBER(P.patientNum, ll);
         end
-        
         
         %% Patient Info
         P.data.age = infoTable{code, "Age"};  % [years]
@@ -188,11 +186,10 @@ for ii = 1:length(patientSet)
         P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]
         
         
-        %% Debug Plots
-        if showPlots
-            DEBUGPLOTS.MakeOGTTLui = struct();
-            DP = DEBUGPLOTS.MakeOGTTLui;
-            MakeDebugPlot("OGTTLui Input", P, DP);
+        %% Plots
+        if Trial.Config.ENABLELOADERPLOTS
+            tag = "MakeOGTTLui";
+            P = AddFigure(P, tag, "Input");
             
             % All Glucose Data
             subplot(2, 1, 1)
@@ -239,8 +236,7 @@ for ii = 1:length(patientSet)
         end
         
         %% Save
-        newPatientSet{end+1} = P;
-        clear P
+        patientSet{end+1} = P;
         
     end
 end

@@ -22,7 +22,9 @@ function figureList = DefaultFigures()
     figureList.SolveSystem.PlasmaInsulin = true;
     figureList.SolveSystem.InterstitialInsulin = false;
     figureList.SolveSystem.GlucoseComponents = false;
-    figureList.SolveSystem.CoefficientShapes = false; 
+    figureList.SolveSystem.CoefficientShapes = false;
+    
+    figureList.MakeOGTTLui.Input = false;
     
     
     %% Recipes

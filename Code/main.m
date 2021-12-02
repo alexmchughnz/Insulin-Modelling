@@ -17,9 +17,9 @@ Trial.startTime = tic;
 
 Trial.recipe = @SplineSim;
 
-Trial.source = "CREBRF2021";
+Trial.source = "OGTTLui";
 % Trial.patients = "all";
-Trial.patients = [1 2 45];
+Trial.patients = [25];
 
 
 %% Run

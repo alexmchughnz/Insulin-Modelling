@@ -21,8 +21,7 @@ CONFIG.ENABLELOADERPLOTS = false;
 CONFIG.SAVERESULTS = true;
 
 CONFIG.MAXTIME = 120;
-
-CONFIG.PATIENTCODEFORMAT = @(source, P) sprintf("P%d", source, P.patientNum);
+CONFIG.PATIENTSUBNUMBER = @(base, sub) double(string(base) + "00" + string(sub));
 CONFIG.PATIENTFILEFORMAT = @(T, P) sprintf("%s_%s", T.source, P.patientCode);
 CONFIG.STATUSDEPTH = 2;
 CONFIG.HIGHDETAIL = false;

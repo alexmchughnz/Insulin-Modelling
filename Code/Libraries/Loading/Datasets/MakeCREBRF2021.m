@@ -40,7 +40,7 @@ for ii = 1:numel(patientNums)
     for pp = 1:numMatches
         P = struct();
         if numMatches > 1
-            P.patientNum = double(string(num) + "00" + string(pp)); % Add an offset for duplicate numbers.
+            P.patientNum = CONFIG.PATIENTSUBNUMBER(num, pp); % Add an offset for duplicate numbers.
         else
             P.patientNum = num;
         end

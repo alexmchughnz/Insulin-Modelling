@@ -15,7 +15,7 @@ QLocal = Y(2);
 
 %% Variables
 % Patient dependent.
-n = GetTimeIndex(t, P.results.tArray);
+n = SearchArray(t, P.results.tArray);
 IBolus = P.results.IBolus(n); % [mU/min]
 
 %% Computation

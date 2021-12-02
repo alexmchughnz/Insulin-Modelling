@@ -21,7 +21,8 @@ for tt = 1:length(tables)
         try
             filePath = fullfile(Trial.Config.RESULTPATH, Trial.outputPath, title+"_"+Trial.source+recipeName+fileLabel+".csv");
             writetable(table, filePath, "WriteRowNames", true);
-        catch
+        catch err
+            
             disp("Results file open - cannot save!")
         end
     end

@@ -2,9 +2,6 @@
 % Author : Alex McHugh
 % Created: 26/01/21
 
-fprintf("Running main - press key to start.\n")
-% pause
-
 clc
 clear
 close all
@@ -13,13 +10,10 @@ Trial.Config = config();
 Trial.startTime = tic;
 
 %% Set Up Trial
-% Trial.label = "";
-
 Trial.recipe = @SplineSim;
 
 Trial.source = "OGTTLui";
-% Trial.patients = "all";
-Trial.patients = [25];
+Trial.patients = "all";
 
 
 %% Run

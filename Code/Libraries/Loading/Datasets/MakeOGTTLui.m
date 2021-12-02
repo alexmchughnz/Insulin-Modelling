@@ -55,7 +55,7 @@ for ii = 1:length(patientNums)
         code = subpatientCodes{ll};
         if hasSubpatients
             P.patientCode = P.patientCode + code(end);
-            P.patientNum = CONFIG.PATIENTSUBNUMBER(P.patientNum, ll);
+            P.patientNum = Trial.Config.PATIENTSUBNUMBER(P.patientNum, ll);
         end
         
         %% Patient Info

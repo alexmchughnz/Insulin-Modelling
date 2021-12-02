@@ -17,15 +17,18 @@ for tt = 1:length(tables)
     disp(table);
     disp(newline);
     
-    if (Trial.Config.SAVERESULTS)        
+    if (Trial.Config.SAVERESULTS)
         try
-            filePath = fullfile(Trial.Config.RESULTPATH, Trial.outputPath, title+"_"+Trial.source+recipeName+fileLabel+".csv");
+            filePath = fullfile(Trial.Config.RESULTPATH, Trial.outputPath, title+"_"+Trial.source+recipeName+Trial.label+".csv");
             writetable(table, filePath, "WriteRowNames", true);
+            disp("Results file saved.")
         catch err
-            
-            disp("Results file open - cannot save!")
+            if err.identifier == "MATLAB:table:write:FileOpenError"
+                disp("Results file open - cannot save!")
+            else
+                rethrow(err)
+            end
         end
     end
-end
-
+    
 end

@@ -2,7 +2,7 @@ function PanelFigures(Trial, monitor)
 % Iterate through all patients' plots and displays them in a grid.
 
 if ~exist('monitor', 'var')
-    monitor = 1;
+    monitor = 3;
 end
 
 CONST = Constants();
@@ -15,7 +15,7 @@ for pp = 1:numCols
     allFigs = P.figures;
     displayFigs = {};
     for ii = 1:numel(allFigs)
-        F = allFigs{ii};
+        F = allFigs(ii);
         tag = F.Tag;
         name = split(F.Name);
         name = name{end};
@@ -33,8 +33,6 @@ for pp = 1:numCols
 
         if toShow
             displayFigs{end+1} = F;
-        else
-            close(F);
         end
     end
 

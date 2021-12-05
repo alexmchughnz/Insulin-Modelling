@@ -15,7 +15,7 @@ F.Name = sprintf("%s: %s", P.patientCode, name);
 F.Tag = tag;
 F.NumberTitle = "off";
 
-P.figures{end+1} = F;
+P.figures(end+1) = F;
 
 axes
 hold on

@@ -2,11 +2,9 @@ function SaveFigures(Trial, P)
 % Saves all figures belonging to a patient.
 
 
-figureFolder = Trial.Config.PLOTPATH;
-
 for ii = 1:length(P.figures)
     % Find
-    F = P.figures{ii};
+    F = P.figures(ii);
     figure(F)
 
     F.Units = 'pixels';
@@ -22,13 +20,13 @@ for ii = 1:length(P.figures)
     end
     
     % Save    
-    figDir = fullfile(figureFolder, Trial.outputPath, "fig");
+    figDir = fullfile(Trial.Config.PLOTPATH, Trial.outputPath, "fig");
     if ~isfolder(figDir)
         mkdir(figDir);
     end
     savefig(F, fullfile(figDir, figName + ".fig"));
     
-    pngDir = fullfile(figureFolder, Trial.outputPath, "png");
+    pngDir = fullfile(Trial.Config.PLOTPATH, Trial.outputPath, "png");
     if ~isfolder(pngDir)
         mkdir(pngDir);
     end

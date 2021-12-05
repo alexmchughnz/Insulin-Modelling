@@ -53,7 +53,7 @@ patientSet = MakeDataFunction(Trial, patientNums);
 
 %% Add remaining elements to patient structs.
 for ii = 1:length(patientSet)
-    patientSet{ii}.figures = {};
+    patientSet{ii}.figures = gobjects(0);
     patientSet{ii} = AddParameters(patientSet{ii});
     patientSet{ii} = AddTrialInputs(patientSet{ii});
 end

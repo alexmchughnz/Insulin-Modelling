@@ -34,6 +34,7 @@ CONFIG.RECIPEPATH = fullfile(pwd, 'Recipes');
 CONFIG.DATAPATH  = fullfile(pwd, '..', 'Data');
 CONFIG.RESULTPATH = fullfile(pwd, '..', 'Results');
 CONFIG.PLOTPATH = fullfile(pwd, '..', 'Plots');
+CONFIG.MODULEPATH  = fullfile(pwd, '..', '..', 'Modules');
 
 addpath(genpath(CONFIG.FUNCPATH));
 addpath(genpath(CONFIG.LIBPATH));
@@ -42,6 +43,7 @@ addpath(genpath(CONFIG.RECIPEPATH));
 addpath(genpath(CONFIG.DATAPATH));
 addpath(genpath(CONFIG.RESULTPATH));
 addpath(genpath(CONFIG.PLOTPATH));
+addpath(genpath(CONFIG.MODULEPATH));
 
 
 disp('Config updated.')

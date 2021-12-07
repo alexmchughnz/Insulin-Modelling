@@ -3,6 +3,11 @@ function [P, A, b, basisSplines] = FitSplinesnL(P)
 CONST = Constants();
 GC = P.parameters.GC;
 
+
+minnL = 0;
+maxnLRateOfChange = 0.001;  % [min^-2]
+
+
 numFixedParameters = 0;
 
 
@@ -109,7 +114,6 @@ nLDirectionb = zeros(numConstraints, 1);
 
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
-maxnLRateOfChange = 0.001;  % [min^-2]
 dataKnots = allKnots(order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
 tDeltas = diff(dataKnots);
 maxnLDeltas = maxnLRateOfChange * tDeltas;
@@ -131,9 +135,8 @@ bConstraint = [nLDirectionb; nLChangeb];
 
 
 % Solve using linear solver.
-% lb = nLMin * ones(1, numTotalParameters);
-% ub = nLMax * ones(1, numTotalParameters);
-x = lsqlin(A, b, AConstraint, bConstraint, [], []);
+lb = minnL * ones(1, numTotalParameters);
+x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb);
 nLWeights = x;
 P.results.nL = basisSplines * nLWeights;
 

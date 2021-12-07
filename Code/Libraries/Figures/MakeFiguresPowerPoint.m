@@ -1,14 +1,12 @@
-function MakeFiguresPowerPoint(Trial)
+function MakeFiguresPowerPoint(Trial, P)
 % Save all patient plots in a powerpoint.
 
+figsPerSlide = 4;
 
 if ~ispc
     disp("Can only make PowerPoint on PC.")
     return
 end
-
-
-numPatients = numel(Trial.patientSet);
 
 figDir = fullfile(Trial.Config.PLOTPATH, Trial.outputPath);
 if ~isfolder(figDir)
@@ -18,25 +16,20 @@ end
 recipeName = split(Trial.outputPath, "\");
 recipeName = recipeName{end};
 
-pptDir = fullfile(figDir, Trial.source+"_"+recipeName);
+pptDir = fullfile(figDir, Trial.source+"_"+recipeName+".ppt");
 
+allFigs = P.figures;
 
-for pp = 1:numPatients
-    figsPerSlide = 4;
+numSlides = ceil(numel(allFigs)/figsPerSlide);
+
+for nn = 1:numSlides
+    range = [1:figsPerSlide] + (nn-1)*figsPerSlide;
+    range = range(range<=numel(allFigs));
     
-    P = Trial.patientSet{pp};
-    allFigs = P.figures;
+    title = sprintf("%s (%d/%d)", P.patientCode, nn, numSlides);
     
-    numSlides = ceil(numel(allFigs)/figsPerSlide);
-    
-%     saveppt2(pptDir, 'figure', 0, )
-    for nn = 1:numSlides
-        range = [1:figsPerSlide] + (nn-1)*figsPerSlide;
-        range = range(range<=numel(allFigs));
-    
-        saveppt2(pptDir, 'figure', allFigs(range), 't', P.patientCode, 'scale', true, 'stretch', false)
-    end
-    
+    saveppt2(pptDir, 'figure', allFigs(range), 't', title, 'scale', true, 'stretch', false)
 end
+
 end
 

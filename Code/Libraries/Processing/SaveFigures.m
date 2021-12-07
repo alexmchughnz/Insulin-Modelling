@@ -31,5 +31,10 @@ for ii = 1:length(P.figures)
         mkdir(pngDir);
     end
     saveas(F, fullfile(pngDir, figName + ".png"));
+    
+    % Close
+    if Trial.Config.CLOSEALLFIGURES
+        close(F)
+    end
 end
 end

@@ -1,12 +1,17 @@
 function PanelFigures(Trial, monitor)
 % Iterate through all patients' plots and displays them in a grid.
 
+if Trial.Config.CLOSEALLFIGURES
+    % No figures shown, skip this call.
+    return
+end
+
+
 if ~exist('monitor', 'var')
     monitor = 3;
 end
 
 CONST = Constants();
-
 numCols = numel(Trial.patientSet);
 
 for pp = 1:numCols

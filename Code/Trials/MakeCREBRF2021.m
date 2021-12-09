@@ -140,10 +140,10 @@ for ii = 1:numel(patientSet)
     
     P = InsertData(P, "CPep", tCPep, vCPep);
 
-    % New Insulin point. Fit exponential to final NI points, then intersect with assumed first-phase measurement at t = 5 min.
-    % I(t) = a*exp(b(t-tFP) + IBasal, where a is peak insulin from first-phase secretion.
+    % New Insulin point. Fit exponential to final NI points, then intersect with assumed first-phase measurement at t = tFP.
+    % I(t) = a*exp(b(t-tFP)) + IBasal, where a is peak insulin from first-phase secretion.
     tFP = 10;  % [min]
-    NI = 3;
+    NI = 2;
     IBasal = P.data.I.value(1);
     
     x = P.data.I.time(end-(NI-1):end) - tFP;
@@ -154,28 +154,28 @@ for ii = 1:numel(patientSet)
     
     P = InsertData(P, "I", tFP, IFunc(tFP));
 
-    % Add extra CPep point that best explains new insulin point I2.
+    % Add extra CPep point that best explains new insulin point I1.
     % Since input is purely endogenous, solve van Cauter equations to estimate C2.
-    % Desired Uen = deltaI / deltat.
-    % Integrating C equation between t1 and t2:
-    % dC = int{Uen} + k2*int{Y} - (k1+k3)*int{C}
-    % Uen is input rate, so int{Uen} = dI.
-    % In one step, integrating Y equation yields int{Y} = k1*C1*deltat.
-    % By trapezoidal integration, int{C} = deltat/2 * (C1+C2).
+    %
+    % Integrating C equation between t0 and t1:
+    % C(t1) - C(t0) = int{Uen} + k2*int{Y} - k13*int{C}
+    %
+    % Uen is desired input rate, so int{Uen} = desired amount = deltaI
+    % Assuming Y(t1) - Y(t0) = 0, int{Y} = k1/k2 * int{C}
+    % By trapezoidal integration, int{C} = deltat*(C0+C1)/2
+    % 
     % Solving and rearranging yields below equation.
     
     deltaI = CONST.mU2pmol(P.data.I.value(2) - P.data.I.value(1));
     deltat = P.data.I.time(2) - P.data.I.time(1);
-    C1 = P.data.CPep.value(1);
+    C0 = P.data.CPep.value(1);
     
     CP = CPParameters(P);
-    k1 = CP.k1;
-    k2 = CP.k2;
     k3 = CP.k3;
     
-    C2 = [(k1*k2*deltat - (k1+k3)*deltat/2 + 1)*C1 + deltaI] / [1 + deltat*(k1+k3)/2];
+    C1 = [deltaI + (1 + k3/2*deltat)*C0] / [(1 - k3/2*deltat)];
 
-    P = InsertData(P, "CPep", tFP, C2);
+    P = InsertData(P, "CPep", tFP, C1);
     
     %% Save
     P.patientCode = upper(strrep(P.patientCode, "_", "-"));

@@ -13,13 +13,12 @@ Trial.Config = config();
 Trial.startTime = tic;
 
 %% Set Up Trial
-% Trial.label = "";
+% Trial.label = "Sample";
 
 Trial.recipe = @SplineSim;
 Trial.source = "CREBRF2021";
-% Trial.patients = "all";
+Trial.patients = "sample";
 % Trial.patients = [43 45 18  24  26  39  33];
-Trial.patients = 45;
 
 
 %% Run

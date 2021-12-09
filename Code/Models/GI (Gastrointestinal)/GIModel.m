@@ -15,7 +15,7 @@ Y0 = [GI.P10;
       GI.P20];
   
 % Forward simulate.
-[~, Y] = ode45(@GIModelODE, P.results.tArray, Y0, [], P);  
+[~, Y] = ode45(@GIModelODE, P.results.tArray, Y0, P.options.ODE, P);  
 
 % Store results.
 P.results.P1 = Y(:,1);

@@ -42,7 +42,6 @@ P = FitInsulinSensitivity(P);
 
 % Solve.
 P = SolveSystem(P, true);
-% PlotGlucosenL(P);
 
 end
 

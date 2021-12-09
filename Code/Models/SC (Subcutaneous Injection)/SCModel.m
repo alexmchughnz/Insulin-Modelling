@@ -16,7 +16,7 @@ Y0 = [SC.ISC0;
       SC.QLocal0];
   
 % Forward simulate.
-[~, Y] = ode45(@SCModelODE, P.results.tArray, Y0, [], P);  
+[~, Y] = ode45(@SCModelODE, P.results.tArray, Y0, P.options.ODE, P);  
 
 % Store results.
 P.results.ISC = Y(:,1);

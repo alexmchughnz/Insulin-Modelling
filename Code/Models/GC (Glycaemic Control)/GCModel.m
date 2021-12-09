@@ -39,7 +39,7 @@ P.results.UexArray = P.results.Uex(P);
    
 % Forward simulate.
 enableG = ~ismember("disableG", flags);
-[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, [], P, Y0, enableG);  
+[~, Y] = ode45(@GCModelODE, P.results.tArray, Y0, P.options.ODE, P, Y0, enableG);  
 
 % Store results.
 P.results.G = Y(:,1);

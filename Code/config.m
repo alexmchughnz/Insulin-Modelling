@@ -27,6 +27,9 @@ CONFIG.PATIENTFILEFORMAT = @(T, P) sprintf("%s_%s", T.source, P.patientCode);
 CONFIG.STATUSDEPTH = 2;
 CONFIG.HIGHDETAIL = false;
 
+CONFIG.DEFAULTODEOPTIONS = odeset('RelTol', 1e-5, ...
+    'MaxStep', 1, ...
+    'InitialStep', 0.5);
 
 CONFIG.FUNCPATH  = fullfile(pwd, 'Functions');
 CONFIG.LIBPATH = fullfile(pwd, 'Libraries');

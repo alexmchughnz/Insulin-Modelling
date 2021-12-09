@@ -9,21 +9,6 @@ function P = SCLossSplineSim(P, xL)
 
 defaultxL = 0.6;
 
-%% Plots
-plots = DebugPlots();
-
-    plots.EstimateInsulinSecretion.Uen = true;
-    plots.EstimateInsulinSecretion.CPep = true;
-    
-    plots.SolveSystem.CoefficientShapes = false; 
-    
-    plots.MakeSplineBasisFunctions.Splines = false;
-    
-    plots.FitSplines.nLGlucose = true;
-    
-DebugPlots(plots);
-
-
 %% Functions
 P = EstimateInsulinSecretion(P);
 % 
@@ -38,6 +23,7 @@ P = EstimateInsulinSecretion(P);
 % 
 % P.results.Uen(firstPhase) = P.results.Uen(firstPhase) * 1.15;
 
+
 % Fix xL to hard-code value.
 if ~exist("xL", "var")
     xL = defaultxL;
@@ -46,8 +32,7 @@ P.results.xL = xL;
 
 
 % Fit nL with splines over range.
-allowPlots = true;
-P = FitSplinesnL(P, allowPlots);
+P = FitSplinesnL(P);
 
 
 % Find optimal JLK.
@@ -80,7 +65,5 @@ P = FitInsulinSensitivity(P);
 
 % Solve.
 P = SolveSystem(P, true);
-PlotGlucosenL(P);
-
 end
 

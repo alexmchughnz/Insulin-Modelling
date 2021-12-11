@@ -1,9 +1,10 @@
 function patientSet = MakeOGTTLui(Trial, patientNums)
 % Function for loading OGTTLui data.
 % INPUTS:
-%   patientSet - cell array of patient structs
+%   Trial       - trial struct
+%   patientNums - array of patient nums
 % OUTPUT:
-%   newPatientSet - updated cell array of patient structs
+%   patientSet - updated cell array of patient structs
 
 CONST = Constants();
 
@@ -55,7 +56,7 @@ for ii = 1:length(patientNums)
         code = subpatientCodes{ll};
         if hasSubpatients
             P.patientCode = P.patientCode + code(end);
-            P.patientNum = CONFIG.PATIENTSUBNUMBER(P.patientNum, ll);
+            P.patientNum = Trial.Config.PATIENTSUBNUMBER(P.patientNum, ll);
         end
         
         %% Patient Info

@@ -11,17 +11,17 @@ defaultxL = 0.6;
 
 %% Functions
 P = EstimateInsulinSecretion(P);
-% 
-% % Scale Uen.
-% [~, nMaxI] = max(P.data.I.value);
-% tMaxI = P.data.I.time(nMaxI);
-% 
-% iiZero = GetTimeIndex(0, P.results.tArray);
-% iiMaxI = GetTimeIndex(tMaxI, P.results.tArray);
-% 
-% firstPhase = iiZero:iiMaxI;
-% 
-% P.results.Uen(firstPhase) = P.results.Uen(firstPhase) * 1.15;
+
+% Scale Uen.
+[~, nMaxI] = max(P.data.I.value);
+tMaxI = P.data.I.time(nMaxI);
+
+iiZero = SearchArray(0, P.results.tArray);
+iiMaxI = SearchArray(tMaxI, P.results.tArray);
+
+firstPhase = iiZero:iiMaxI;
+
+P.results.Uen(firstPhase) = P.results.Uen(firstPhase) * 1.15;
 
 
 % Fix xL to hard-code value.
@@ -38,6 +38,7 @@ P = FitSplinesnL(P);
 % Find optimal JLK.
 JLKRange = 0.2 : 0.01 : 1.00;
 P = LineSearchOptimum(P, "results.JLK", JLKRange, @InsulinError, @ApplyInsulinLossFactor);
+% P.results.JLK = 1;
 P = ApplyInsulinLossFactor(P);
 
 

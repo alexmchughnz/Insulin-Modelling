@@ -12,4 +12,5 @@
 .MATLABDriveTag
 
 *.mat
+*.DS_STORE
 

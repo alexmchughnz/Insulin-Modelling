@@ -1,4 +1,4 @@
-function [P, A, b, basisSplines] = FitSplinesnL(P)
+function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
 
 CONST = Constants();
 GC = P.parameters.GC;
@@ -32,10 +32,7 @@ Uex = P.results.Uex(P);
 
 %% Get Coefficients
 % Collect basis functions for splines.
-order = 3;
-knotLocations = P.data.I.time;
-
-[P, basisSplines, allKnots] = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
+[P, basisSplines, allKnots] = MakeSplineBasisFunctions(P, splineOptions);
 numTotalSplines = size(basisSplines, CONST.ROWDIR);
 numTotalParameters = numFixedParameters + numTotalSplines;
 
@@ -114,7 +111,7 @@ nLDirectionb = zeros(numConstraints, 1);
 
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
-dataKnots = allKnots(order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
+dataKnots = allKnots(splineOptions.order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
 tDeltas = diff(dataKnots);
 maxnLDeltas = maxnLRateOfChange * tDeltas;
 % Absolute change in nL must be less than max change, thus

@@ -20,7 +20,11 @@ P.results.xL = xL;
 
 
 % Fit nL with splines over range.
-P = FitSplinesnL(P);
+splineOptions.knotType = "location";
+splineOptions.knots = P.data.I.time;
+splineOptions.order = 3;
+
+P = FitSplinesnL(P, splineOptions);
 
 
 % Find GFast.

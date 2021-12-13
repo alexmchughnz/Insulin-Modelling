@@ -1,4 +1,4 @@
-function [P, basisSplines, knots] = MakeSplineBasisFunctions(P, order, mode, varargin)
+function [P, basisSplines, knots] = MakeSplineBasisFunctions(P, splineOptions)
 % Creates basis spline functions for a time array.
 % This function enforces 'numKnots' knots within the range of tArray, and
 % generates additional splines for higher orders.
@@ -11,11 +11,12 @@ tStart = P.results.tArray(1);
 tEnd = P.results.tArray(end);
 
 % Knots
+order = splineOptions.order;
 numExtraKnots = order;  % k-th order splines requires k extra knots / 1 spline at each end to fully define all in range.
 
-if mode == "numKnots"
-    % Fixed Number of Knots
-    numKnots = varargin{1};
+switch splineOptions.knotType
+    case "amount"  % Fixed Number of Knots
+    numKnots = splineOptions.knots;
     
     knotSpacing = RoundToMultiple((tEnd-tStart)/(numKnots-1), tDelta, -1);  % Time width of knots.
     
@@ -23,10 +24,12 @@ if mode == "numKnots"
     knotEnd = tStart + (numKnots+numExtraKnots)*knotSpacing;
     knots = knotStart : knotSpacing : knotEnd;
     
-elseif mode == "knotLocations"
-    % Specified Knot Locations
-    knots = varargin{1}';    
-    extraKnotSpacing = floor(mean(diff(knots)));
+    case "location" % Specified Knot Locations
+    numKnots = numel(splineOptions.knots);
+    knots = zeros(1, numKnots);
+    knots(:) = splineOptions.knots;
+
+    extraKnotSpacing = floor(mean(diff(knots)));  % Default width of additional knots.
     
     % Add knots to cover time range if required.
     if tStart < knots(1)

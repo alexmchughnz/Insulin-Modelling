@@ -15,9 +15,9 @@ Trial.startTime = tic;
 %% Set Up Trial
 % Trial.label = "Lex1";
 
-Trial.recipe = @SCLossSplineSim;
+Trial.recipe = @InvestigateSplinesSim;
 Trial.source = "OGTTLui";
-Trial.patients = 1;
+Trial.patients = 25;
 % Trial.patients = [43 45 18  24  26  39  33];
 
 
@@ -29,7 +29,7 @@ patientSetOut = {};
 
 runtime = tic; 
 for ii = 1 : numel(patientSetIn)    
-    POut = RunTrial(Trial, ii);
+    POut = RunTrial(Trial, ii);  % Can be cell array.
 
     if ~isempty(POut)
         SavePatients(Trial, POut);

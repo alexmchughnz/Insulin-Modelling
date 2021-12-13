@@ -43,6 +43,9 @@ switch splineOptions.knotType
     extraRightKnots = knots(end) + extraKnotSpacing * [1:+1:numExtraKnots];
     
     knots = [extraLeftKnots knots extraRightKnots];
+
+    otherwise
+        error("Must have valid knotType setting for splines.")
     
 end
 

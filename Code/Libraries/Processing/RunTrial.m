@@ -3,16 +3,17 @@ function POut = RunTrial(Trial, PIndex)
 
 PIn = Trial.patientSet{PIndex};
 
-try
+% try
     POut = Trial.recipe(PIn);
-catch err
-    if HandleError(err)
-        PrintStatusUpdate(PIn, "Computation error. Skipping.");
-        POut = [];
-    else
-        rethrow(err);
-    end
-end
+% catch err
+%    
+%     if HandleError(err)
+%         PrintStatusUpdate(PIn, "Computation error. Skipping.");
+%         POut = [];
+%     else
+%         rethrow(err);
+%     end
+% end
 
 Trial.timepoint = PrintTimeRemaining("Trial", Trial.timepoint, PIndex, numel(Trial.patientSet), Trial.patientSet{PIndex}, true);
     

@@ -7,6 +7,11 @@ for pp = 1:numel(patientSet)
     for ii = 1:numel(P.figures)
         % Find
         F = P.figures(ii);
+        
+        if ~isgraphics(F)
+            return
+        end
+        
         figure(F)
 
         F.Units = 'pixels';

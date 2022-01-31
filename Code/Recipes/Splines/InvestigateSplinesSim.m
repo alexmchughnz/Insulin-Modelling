@@ -41,10 +41,10 @@ end
 % Iterate number and order of fixed splines.
 splineOptions.knotType = "amount";
 
-numberArray = [2, 5, 10, 20, 50];
+numberArray = [2, 5, 10, 20];
 orderArray = 1:4;
 for nn = 1:numel(numberArray)
-    splineOptions.knots = numberArray(ii);
+    splineOptions.knots = numberArray(nn);
 
     for kk = 1:numel(orderArray)
         splineOptions.order = orderArray(kk);

@@ -91,8 +91,8 @@ b = CValues;
 %% Set up Splines
 % Enforce constraints on nL spline weights.
 numConstraints = numTotalSplines - 1;
-[~, vG] = GetData(P.data.G);
-GDiffs = vG(2:end) - vG(1:end-1);
+[tG, vG] = GetData(P.data.G);
+ppG = griddedInterpolant(tG, vG);
 
 for ii = 1:numConstraints
     % Set up difference matrix.
@@ -102,23 +102,23 @@ end
 
 % Directional constraint - delta(nL) should always be opposite to delta(G).
 % Expand delta(G) pattern by at edges to constrain "extra" splines.
-diffPattern = [GDiffs(1); GDiffs];                                 % One extra left-hand spline.
-diffPattern(numel(diffPattern)+1 : numConstraints) = GDiffs(end);  % Any number of extra right-hand splines.
+dataKnots = allKnots(splineOptions.order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
+GDiffPattern = diff(ppG(dataKnots));
+
 % nL should decrease if G is increasing, thus
 % sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < 0
-nLDirectionA = sign(diffPattern) .* nLDiffMatrix;
+nLDirectionA = sign(GDiffPattern) .* nLDiffMatrix;
 nLDirectionb = zeros(numConstraints, 1);
 
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
-dataKnots = allKnots(splineOptions.order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
 tDeltas = diff(dataKnots);
 maxnLDeltas = maxnLRateOfChange * tDeltas;
 % Absolute change in nL must be less than max change, thus
 % abs(nL(ii+1) - nL(ii))  < maxnLDeltas(ii)
 % sign(nL(ii+1) - nL(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
 % -sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
-nLChangeA = -sign(diffPattern) .* nLDiffMatrix ;
+nLChangeA = -sign(GDiffPattern) .* nLDiffMatrix ;
 nLChangeb = maxnLDeltas;
 
 % Place constraints on splines.

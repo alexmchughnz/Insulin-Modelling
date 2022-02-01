@@ -17,7 +17,7 @@ Trial.startTime = tic;
 
 Trial.recipe = @InvestigateSplinesSim;
 Trial.source = "OGTTLui";
-Trial.patients = 25;
+Trial.patients = 'best';
 % Trial.patients = [43 45 18  24  26  39  33];
 
 
@@ -33,10 +33,13 @@ for ii = 1 : numel(patientSetIn)
 
     if ~isempty(POut)
         SavePatients(Trial, POut);
-        MakeFiguresPowerPoint(Trial, POut);
+%         MakeFiguresPowerPoint(Trial, POut);
         SaveFigures(Trial, POut);
         patientSetOut = [patientSetOut POut(:)];  % To handle if multiple structs are output.
     end
+    
+    close all
+    
 end
 
 Trial.patientSet = patientSetOut;

@@ -40,7 +40,7 @@ infoTable = readtable(filepath, infoOpts);
 
 %% Generate Patients
 patientSet = {};
-for ii = 1:length(patientNums)
+for ii = 1:numel(patientNums)
     baseP.patientNum = patientNums(ii);
     baseP.patientCode = "P" + string(baseP.patientNum);
     assert(baseP.patientNum <= 30, "Invalid patient number.")
@@ -48,9 +48,9 @@ for ii = 1:length(patientNums)
     allCodes = string(infoTable.Properties.RowNames);
     allNums = arrayfun(@(s) sscanf(s, "%d"), allCodes);
     subpatientCodes = allCodes(allNums == baseP.patientNum);
-    hasSubpatients = length(subpatientCodes) > 1;
+    hasSubpatients = numel(subpatientCodes) > 1;
     
-    for ll = 1:length(subpatientCodes)
+    for ll = 1:numel(subpatientCodes)
         P = baseP;
         
         code = subpatientCodes{ll};
@@ -129,7 +129,7 @@ for ii = 1:length(patientNums)
             
             % Assign correct CVs to different points.
             isAssay = zeros(numel(tFinal), 1);
-            isAssay(1:length(tGBT)) = true;
+            isAssay(1:numel(tGBT)) = true;
             isAssay = logical(isAssay(order));
             
             P.data.GCV = zeros(numel(tFinal), 1);

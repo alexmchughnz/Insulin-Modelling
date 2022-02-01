@@ -21,7 +21,7 @@ fieldPath = ["results", "Uen"];
 % Time = Time points to apply pattern at. Intervals of <1 will add
 % interpolated points.
 % Scale = Pattern of scales to apply to points. Will be continued over
-% length of data array.
+% all of data array.
 MakePattern = @(time, scale) struct('time', time, 'scale', scale);
 
 patterns{1} = MakePattern([1 2], ...
@@ -37,7 +37,7 @@ patterns{5} = MakePattern([1 1.5 ], ...
                            1 + [+0.15 -0.15]);
 
 %% Functions
-for pp = 1:length(patterns)
+for pp = 1:numel(patterns)
     pattern = patterns{pp};
     
     % Adjust patient metadata.

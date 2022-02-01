@@ -9,7 +9,7 @@ global CONFIG
 
 
 %% Generate Patients
-for ii = 1:length(patientSet)
+for ii = 1:numel(patientSet)
     P = patientSet{ii};
     
     %% Load Data

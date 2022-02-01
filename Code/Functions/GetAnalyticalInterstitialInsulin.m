@@ -10,7 +10,7 @@ GC = P.parameters.GC;
 
 % Setup.
 tArray = P.results.tArray;
-Q = zeros(length(tArray), 1); % Analytical solution for Q
+Q = zeros(numel(tArray), 1); % Analytical solution for Q
 
 % Consider form of dQ/dt = -cQ*Q + cI*I.
 cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q
@@ -22,7 +22,7 @@ I0 = I(1);   % [mU/L]
 Q0 = I0/2;      % [mU/L]
 Q(1) = Q0;
 
-for ii = 2:length(Q)
+for ii = 2:numel(Q)
     t = tArray(ii);         % Current time value.
     tSpan = tArray(1:ii);   % Array of time values from t0 to t.
     ISpan = I(1:ii);     % Array of I values from t0 to t.

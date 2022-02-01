@@ -22,7 +22,7 @@ T = readtable(fullfile(Trial.Config.DATAPATH, Trial.source, "CREBRF2021Import.xl
 % Generate array of patient numbers in spreadsheet.
 loadCodes = string(T.Properties.RowNames);
 loadNums = zeros(size(loadCodes));
-for ii = 1:length(loadCodes)
+for ii = 1:numel(loadCodes)
     loadNums(ii) = str2double(regexp(loadCodes{ii}, "\d*", "match", "once"));
 end
 
@@ -64,7 +64,7 @@ for ii = 1:numel(patientSet)
     
     %% Trial Times
     measTimes = [0 30 60 150]';  % [min]
-    nMeas = length(measTimes);
+    nMeas = numel(measTimes);
     
     P.data.simTime = [floor(min(measTimes)), ceil(max(measTimes))];
     P.data.simDuration =  floor(diff(P.data.simTime));
@@ -84,7 +84,7 @@ for ii = 1:numel(patientSet)
     
     % C-peptide Assay
     measTimesC = measTimes(1:end-1);  % one fewer CPep measurement
-    nMeasC = length(measTimesC);
+    nMeasC = numel(measTimesC);
     measC = T{code, repmat("C", 1, nMeasC) + measTimesC'}';  % [ng/mL]
     measC = measC * 1e+3 / 1e-3;             % [pg/L]
     measC = measC / CONST.MCPeptide;         % [pmol/L]

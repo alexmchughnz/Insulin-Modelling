@@ -18,7 +18,7 @@ function P = LineSearchOptimum(P, fieldName, searchRange, errorCriteria, funcsTo
 % Pre-formatting
 if ~exist("funcsToApply", "var")
     funcsToApply = {};
-elseif length(funcsToApply) == 1
+elseif numel(funcsToApply) == 1
     funcsToApply = {funcsToApply};
 end
 
@@ -47,7 +47,7 @@ for ii = 1:N
     copyP = setfield(P, path{:}, testValue);
     
     % Apply designated functions.
-    for ff = 1:length(funcsToApply)
+    for ff = 1:numel(funcsToApply)
         func = funcsToApply{ff};
         args = argumentsToApply{ff};
         

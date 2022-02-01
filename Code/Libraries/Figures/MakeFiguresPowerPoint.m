@@ -31,7 +31,7 @@ for pp = 1:numel(patientSet)
         range = [1:figsPerSlide] + (nn-1)*figsPerSlide;
         range = range(range<=numel(allFigs));
 
-        title = sprintf("%s (%d/%d)", patientSet.patientCode, nn, numSlides);
+        title = sprintf("%s (%d/%d)", P.patientCode, nn, numSlides);
 
         saveppt2(pptDir, 'figure', allFigs(range), 't', title, 'scale', true, 'stretch', false)
     end

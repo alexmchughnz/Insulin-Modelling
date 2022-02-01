@@ -8,7 +8,7 @@ t0 = tArray(1);
 tf = tArray(end);
 
 dt = tArray(2) - t0;
-for ii = 1:length(tSearch)
+for ii = 1:numel(tSearch)
     t = tSearch(ii);    
     n(ii) = round((t-t0)/dt) + 1;    
     

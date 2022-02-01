@@ -34,7 +34,7 @@ Y0 = CP.k1/CP.k2*CPepArray(1);
 Y(1:2) = Y0;
 
 % Calculate Y over time. Assumes dY/dt == 0(?)
-for ii = 3:length(tArray)
+for ii = 3:numel(tArray)
     tSeg = tArray(1:ii-1);
     CPepSeg = CPepArray(1:ii-1);
     YSeg = Y(1:ii-1);

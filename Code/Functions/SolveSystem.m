@@ -163,7 +163,7 @@ if isfield(P.data, 'tIBolus')
         'Color', 'r', ...
         'LineStyle', '--');
     plt(1).DisplayName = 'Bolus Input';
-    for pp = 2:length(plt)
+    for pp = 2:numel(plt)
         plt(pp).HandleVisibility = 'off';
     end
 end

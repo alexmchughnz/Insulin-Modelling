@@ -10,10 +10,10 @@ function [P, F] = AddFigure(P, tag, name)
 % Make figure.
 fignum = double(string(P.patientNum) + "0" + string(numel(P.figures)));
 
-F = figure(fignum);
+F = figure();
 F.Name = sprintf("%s: %s", P.patientCode, name);
 F.Tag = tag;
-F.NumberTitle = "off";
+F.NumberTitle = "on";
 
 P.figures(end+1) = F;
 

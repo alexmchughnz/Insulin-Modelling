@@ -40,8 +40,8 @@ newDataPoints = ppData(newTime);
 
 % Now, apply pattern to new data points.
 expandedPattern = repmat(patternScale(:), ...
-    ceil(length(newDataPoints)/length(patternScale)), 1);
-expandedPattern = expandedPattern(1:length(newDataPoints));
+    ceil(numel(newDataPoints)/numel(patternScale)), 1);
+expandedPattern = expandedPattern(1:numel(newDataPoints));
 
 adjustedData = newDataPoints .* expandedPattern;
 

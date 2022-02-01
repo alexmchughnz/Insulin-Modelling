@@ -9,7 +9,7 @@ recipeName = string(recipeStruct.function);
 %% Tables
 tables = TabulateResults(Trial.patientSet);
 
-for tt = 1:length(tables)
+for tt = 1:numel(tables)
     table = tables{tt};
     title = string(table.Properties.Description);
     

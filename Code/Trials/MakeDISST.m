@@ -32,7 +32,7 @@ dataTable = readtable(fullfile(CONFIG.DATAPATH, source, "DIST recent.xls"), opts
 nMeas = 5;  % Number of measurements.
     
 %% Generate Patients
-for ii = 1:length(patientSet)
+for ii = 1:numel(patientSet)
     P = patientSet{ii};
     assert(P.patientNum <= 50, "Invalid patient number.")
     code = dataTable.Properties.RowNames{P.patientNum};

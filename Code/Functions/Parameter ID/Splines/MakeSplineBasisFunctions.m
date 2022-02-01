@@ -51,13 +51,13 @@ end
 
 % Splines
 tSpan = (knots(1) : tDelta : knots(end))';        % Extended time range covering all splines.
-numSplines = length(knots) - 1;                   % One spline in between each adjacent pair of knots.
-phi = zeros(length(tSpan), numSplines, order+1);  % 3D array of spline functions. Dimensions are [time, spline, order].
+numSplines = numel(knots) - 1;                   % One spline in between each adjacent pair of knots.
+phi = zeros(numel(tSpan), numSplines, order+1);  % 3D array of spline functions. Dimensions are [time, spline, order].
 
 %% Spline Creation
 % Set up zeroth-order splines.
 k = 0;
-for ii = 1 : length(knots)-1
+for ii = 1 : numel(knots)-1
     isKnotActive = (knots(ii) <= tSpan) & (tSpan < knots(ii+1));
     iiActive = find(isKnotActive);
     

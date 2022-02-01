@@ -22,7 +22,7 @@ if P.source == "DISST"
     tIBolus = tMinutes(iiBolus);
     
     [tI, order] = sort([tI; tIBolus]);
-    iiBeforeFakePoint = find(order == length(order)) - 1;
+    iiBeforeFakePoint = find(order == numel(order)) - 1;
     
     fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
     
@@ -93,12 +93,12 @@ CParam1 = A(:, 1);
 CParam2 = A(:, 2);
 CParam1Norm = MeanNormalise(CParam1);
 CParam2Norm = MeanNormalise(CParam2);
-delta2Norm = norm(CParam1Norm - CParam2Norm) / length(CParam1);
+delta2Norm = norm(CParam1Norm - CParam2Norm) / numel(CParam1);
 P.results.delta2Norm = delta2Norm;
 
 bNorm = MeanNormalise(b);
-P.results.("delta2Norm" + paramNames(1)) = norm(CParam1Norm - bNorm) / length(CParam1);
-P.results.("delta2Norm" + paramNames(2)) = norm(CParam2Norm - bNorm) / length(CParam1);
+P.results.("delta2Norm" + paramNames(1)) = norm(CParam1Norm - bNorm) / numel(CParam1);
+P.results.("delta2Norm" + paramNames(2)) = norm(CParam2Norm - bNorm) / numel(CParam1);
 
 
 %% Plotting
@@ -137,7 +137,7 @@ if DP.GraphicalID
     plt = plot(tIntegrals, plotvars.bNorm);
     plt.DisplayName = "$b$";
     
-    for ii = 1:length(tIntegrals)
+    for ii = 1:numel(tIntegrals)
         t = tIntegrals(ii);
         
         plt = plot([t t], [plotvars.CParam1Norm(ii) plotvars.CParam2Norm(ii)], 'k');

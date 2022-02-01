@@ -10,7 +10,7 @@ if ~exist("force", "var")
 end
 
 stack = dbstack(1);
-depth = length(stack) - 2;  % How many levels below main?
+depth = numel(stack) - 2;  % How many levels below main?
 
 
 if force || depth < 2

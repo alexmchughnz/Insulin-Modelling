@@ -82,8 +82,8 @@ Gb = Y(:, ccGb);         % Added terms in equation.
 
 G  = ppG(P.results.tArray);  % Change in G over interval.
 
-first = 1:length(P.results.tArray)-1;
-second = 2:length(P.results.tArray);
+first = 1:numel(P.results.tArray)-1;
+second = 2:numel(P.results.tArray);
 
 A = GA(second) - GA(first);
 b = (G(second) - G(first)) - (Gb(second) - Gb(first));

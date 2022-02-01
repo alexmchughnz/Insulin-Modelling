@@ -5,7 +5,7 @@ function PrintTimeTaken(Trial, label)
     timeTotal = duration(seconds(tEnd));
     totalString = datestr(timeTotal, 'HH:MM:SS');
     
-    timePerPatient = timeTotal / length(Trial.patientSet);
+    timePerPatient = timeTotal / numel(Trial.patientSet);
     patientString = datestr(timePerPatient, 'HH:MM:SS');
     
     fprintf("Time taken for %s: %s (Mean of %s per patient)\n", ...

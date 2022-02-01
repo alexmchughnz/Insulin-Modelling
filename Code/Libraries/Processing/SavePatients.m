@@ -1,11 +1,11 @@
 function SavePatients(Trial, patientSet)
 
-if length(patientSet) == 1
+if numel(patientSet) == 1
     patientSet = {patientSet};
 end
 
 % Save each patient struct in the correct Trial > Recipe > Label directory.
-for ii = 1:length(patientSet)
+for ii = 1:numel(patientSet)
     P = patientSet{ii};
     name = MakeValidName(Trial.Config.PATIENTFILEFORMAT(Trial, P));
     

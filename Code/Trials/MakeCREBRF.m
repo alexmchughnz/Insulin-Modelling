@@ -25,13 +25,13 @@ T = readtable(fullfile(CONFIG.DATAPATH, source, "CREBRFImport.xlsx"), opts, ...
 % Generate array of valid patient numbers.
 codes = T.Properties.RowNames;
 nums = zeros(size(codes));
-for pp = 1:length(codes)
+for pp = 1:numel(codes)
     parts = sscanf(codes{pp}, "%c%d_");
     nums(pp) = parts(2);
 end
 
 %% Generate Patients
-for ii = 1:length(patientSet)
+for ii = 1:numel(patientSet)
     P = patientSet{ii};
     
     pp = find(nums == P.patientNum);
@@ -47,7 +47,7 @@ for ii = 1:length(patientSet)
     
     %% Trial Times
     measTimes = [0 2 4 6 8 10 30]';  % [min]
-    nMeas = length(measTimes);
+    nMeas = numel(measTimes);
     
     P.data.simTime = [floor(min(measTimes)), ceil(max(measTimes))];
     P.data.simDuration =  floor(diff(P.data.simTime));

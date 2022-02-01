@@ -11,7 +11,7 @@ DIM3 = 3;
 tables = {};
 
 %% With All Patients
-for ii = 1:length(patientSet)
+for ii = 1:numel(patientSet)
     tt = 0;
     P = patientSet{ii};
     code = string(P.patientCode);
@@ -20,7 +20,7 @@ for ii = 1:length(patientSet)
     
     name = "MainResults";
     tt = tt + 1;
-    if tt > length(tables)
+    if tt > numel(tables)
         tables{tt} = table;
     end
     tables{tt}.Properties.Description = name;
@@ -63,7 +63,7 @@ for ii = 1:length(patientSet)
     name = "GridSearch";
     if isfield(P.results, name)
         tt = tt + 1;
-        if tt > length(tables)
+        if tt > numel(tables)
             tables{tt} = table;
         end
         tables{tt}.Properties.Description = name;
@@ -87,8 +87,8 @@ for ii = 1:length(patientSet)
 end
 
 %% Per Each Patient
-tt = length(tables);
-for ii = 1:length(patientSet)
+tt = numel(tables);
+for ii = 1:numel(patientSet)
     P = patientSet{ii};
     
     %% Match I Input - Individual
@@ -113,7 +113,7 @@ for ii = 1:length(patientSet)
         IScales = P.results.MatchIInput.IScales;
         allIScales = cat(DIM3, allIScales, IScales);
         
-        for rr = 1:length(rowNames)
+        for rr = 1:numel(rowNames)
             tables{tt}{rowNames(rr), :} = IScales(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
@@ -126,7 +126,7 @@ for ii = 1:length(patientSet)
         
         IErrors = P.results.MatchIInput.IErrors;
         
-        for rr = 1:length(rowNames)
+        for rr = 1:numel(rowNames)
             tables{tt}{rowNames(rr), :} = IErrors(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
@@ -156,7 +156,7 @@ for ii = 1:length(patientSet)
         IScales = P.results.MatchnL.IScales;
         allIScales = cat(DIM3, allIScales, IScales);
         
-        for rr = 1:length(variableNames)
+        for rr = 1:numel(variableNames)
             tables{tt}{rowNames(rr), :} = IScales(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
@@ -169,7 +169,7 @@ for ii = 1:length(patientSet)
         
         IErrors = P.results.MatchnL.IErrors;
         
-        for rr = 1:length(variableNames)  
+        for rr = 1:numel(variableNames)  
             tables{tt}{rowNames(rr), :} = IErrors(rr, :);
         end
         tables{tt}.Properties.VariableNames = variableNames;
@@ -184,7 +184,7 @@ if isfield(P.results, name)
     tables{tt}.Properties.Description = name + " - Averaged";
     
     meanIScales = mean(allIScales, DIM3);
-    for rr = 1:length(rowNames)
+    for rr = 1:numel(rowNames)
         tables{tt}{rowNames(rr), :} = meanIScales(rr, :);
     end
     tables{tt}.Properties.VariableNames = variableNames;
@@ -200,7 +200,7 @@ if isfield(P.results, name)
     tables{tt}.Properties.Description = name + " - Averaged";
     
     meanIScales = mean(allIScales, DIM3);
-    for rr = 1:length(variableNames)
+    for rr = 1:numel(variableNames)
         tables{tt}{rowNames(rr), :} = meanIScales(rr, :);
     end
     tables{tt}.Properties.VariableNames = variableNames;

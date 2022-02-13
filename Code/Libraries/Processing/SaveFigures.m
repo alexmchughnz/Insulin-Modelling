@@ -1,6 +1,10 @@
 function SaveFigures(Trial, patientSet)
 % Saves all figures belonging to a patient or set of patients.
 
+if numel(patientSet) == 1
+    patientSet = {patientSet};
+end
+
 for pp = 1:numel(patientSet)
     P = patientSet{pp};
 

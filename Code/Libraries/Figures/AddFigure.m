@@ -13,7 +13,7 @@ fignum = double(string(P.patientNum) + "0" + string(numel(P.figures)));
 F = figure();
 F.Name = sprintf("%s: %s", P.patientCode, name);
 F.Tag = tag;
-F.NumberTitle = "on";
+F.NumberTitle = "off";
 
 P.figures(end+1) = F;
 

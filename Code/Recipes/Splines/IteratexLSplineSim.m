@@ -1,14 +1,6 @@
 function PArray = IteratexLSplineSim(P)
 % Recipe for fitting parameters to a model with a fixed xL and splines for
-% nL. Values for xL are iterated 
-
-%% Plots
-plots = DebugPlots();
-
-plots.FitSplines.Splines = false; 
-plots.FitSplines.nLGlucose = false;
-    
-DebugPlots(plots);
+% nL. Values for xL are iterated.
 
 
 %% Functions
@@ -19,7 +11,7 @@ for ii = 1:numel(xLArray)
     
     copyP = TagPatientCode(P, "xL = " +xL);
     
-    copyP = FixedxLSplineSim(copyP, xL);
+    copyP = SCLossSplineSim(copyP, {}, xL);
     
     PArray{ii} = copyP;
 end

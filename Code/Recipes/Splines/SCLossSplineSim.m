@@ -1,4 +1,4 @@
-function P = SCLossSplineSim(P, xL)
+function P = SCLossSplineSim(P, splineOptions, xL)
 % Recipe for fitting parameters to a model with a fixed xL and splines for nL.
 % Identifies Lex, loss from subcutaneous injection.
 % INPUTS:
@@ -7,7 +7,26 @@ function P = SCLossSplineSim(P, xL)
 % OUTPUT:
 %   P  - updated patient struct
 
-defaultxL = 0.6;
+%% Setup
+
+% Default splineOptions.
+if ~exist("splineOptions", "var") || isempty(splineOptions)
+    defaultSplineOptions.knotType = "location";
+    defaultSplineOptions.knots = P.data.I.time;
+    defaultSplineOptions.order = 3;
+    
+    splineOptions = defaultSplineOptions;
+end
+P.results.splineOptions = splineOptions;
+
+% Default xL.
+if ~exist("xL", "var")
+    defaultxL = 0.6;
+    
+    xL = defaultxL;
+end
+P.results.xL = xL;
+
 
 %% Functions
 P = EstimateInsulinSecretion(P);
@@ -29,12 +48,6 @@ if ~exist("xL", "var")
     xL = defaultxL;
 end
 P.results.xL = xL;
-
-
-% Fit nL with splines over range.
-splineOptions.knotType = "location";
-splineOptions.knots = P.data.I.time;
-splineOptions.order = 3;
 
 P = FitSplinesnL(P, splineOptions);
 

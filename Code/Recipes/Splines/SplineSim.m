@@ -1,4 +1,4 @@
-function P = SplineSim(P, xL)
+function P = SplineSim(P, splineOptions, xL)
 % Recipe for fitting parameters to a model with a fixed xL and splines for
 % nL.
 % INPUTS:
@@ -7,23 +7,31 @@ function P = SplineSim(P, xL)
 % OUTPUT:
 %   P  - updated patient struct
 
-defaultxL = 0.6;
+%% Setup
 
-%% Functions
-P = EstimateInsulinSecretion(P);
+% Default splineOptions.
+if ~exist("defaultSplineOptions", "var")
+    defaultSplineOptions.knotType = "location";
+    defaultSplineOptions.knots = P.data.I.time;
+    defaultSplineOptions.order = 3;
+    
+    splineOptions = defaultSplineOptions;
+end
+P.results.splineOptions = splineOptions;
 
-% Fix xL to hard-code value.
+% Default xL.
 if ~exist("xL", "var")
+    defaultxL = 0.6;
+    
     xL = defaultxL;
 end
 P.results.xL = xL;
 
 
-% Fit nL with splines over range.
-splineOptions.knotType = "location";
-splineOptions.knots = P.data.I.time;
-splineOptions.order = 3;
+%% Functions
+P = EstimateInsulinSecretion(P);
 
+% Fit nL with splines over range.
 P = FitSplinesnL(P, splineOptions);
 
 

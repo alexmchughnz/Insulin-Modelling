@@ -7,22 +7,7 @@ function PArray = InvestigateSplinesSim(P, xL)
 % OUTPUT:
 %   P  - updated patient struct
 
-defaultxL = 0.6;
 PArray = {};
-
-%% Setup
-P = EstimateInsulinSecretion(P);
-
-% Fix xL to hard-code value.
-if ~exist("xL", "var")
-    xL = defaultxL;
-end
-P.results.xL = xL;
-
-% Find GFast.
-[~, vG] = GetData(P.data.G);
-P.data.GFast = min(vG);
-
 
 %% Functions
 % Iterate order with knots at data.
@@ -33,8 +18,8 @@ orderArray = 1:4;
 for ii = 1:numel(orderArray)
     splineOptions.order = orderArray(ii);
     newP = TagPatientCode(P, "data | order = "+splineOptions.order);
-    newP = FinishSimulation(newP, splineOptions);
-    PArray = [PArray newP];
+    newP = SCLossSplineSim(newP, splineOptions);
+    PArray{end+1} = newP;
 end
 
 
@@ -49,7 +34,7 @@ for nn = 1:numel(numberArray)
     for kk = 1:numel(orderArray)
         splineOptions.order = orderArray(kk);
         newP = TagPatientCode(P, "number = " + splineOptions.knots + " | order = " + splineOptions.order);
-        newP = FinishSimulation(newP, splineOptions);
+        newP = SCLossSplineSim(newP, splineOptions);
         PArray = [PArray newP];
     end
 end
@@ -57,26 +42,3 @@ end
 end
 
 
-
-
-function P = FinishSimulation(P, splineOptions)
-
-% Fit nL with splines over range.
-P = FitSplinesnL(P, splineOptions);
-
-
-% Find d2.
-lbHalfLife = 5;
-ubHalfLife = 95;
-halfLifeRange = 1 ./ linspace(1/ubHalfLife, 1/lbHalfLife, 20);
-d2Range = log(2)./halfLifeRange;
-P = LineSearchOptimum(P, "results.d2", d2Range, @GlucoseError, @FitInsulinSensitivity);
-
-
-% Fit SI.
-P = FitInsulinSensitivity(P);
-
-% Solve.
-P = SolveSystem(P, true);
-
-end

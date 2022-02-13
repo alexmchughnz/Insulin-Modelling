@@ -39,7 +39,7 @@ elseif issource("CREBRF")
 elseif issource("OGTTLui")
     MakeDataFunction = @MakeOGTTLui;
     nums("all") = [1 2 4 5 14 16 22 23 25 30];
-    nums("best") = [1 2 4 14 22 23 25 30];
+    nums("best") = [1 4 14 22 23 25 30];
 end
 
 % Replace numbers if selecting all/best.

@@ -19,7 +19,7 @@ clear DebugPlots
 
 CONFIG.ENABLELOADERPLOTS = false;
 CONFIG.SAVERESULTS = true;
-CONFIG.CLOSEALLFIGURES = true;
+CONFIG.CLOSEALLFIGURES = false;
 
 CONFIG.MAXTIME = 120;
 CONFIG.PATIENTSUBNUMBER = @(base, sub) double(string(base) + "00" + string(sub));

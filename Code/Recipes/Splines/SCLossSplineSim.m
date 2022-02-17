@@ -8,16 +8,9 @@ function P = SCLossSplineSim(P, splineOptions, xL)
 %   P  - updated patient struct
 
 %% Setup
-
-% Default splineOptions.
-if ~exist("splineOptions", "var") || isempty(splineOptions)
-    defaultSplineOptions.knotType = "location";
-    defaultSplineOptions.knots = P.data.I.time;
-    defaultSplineOptions.order = 3;
-    
-    splineOptions = defaultSplineOptions;
+if ~exist("splineOptions", "var")
+    splineOptions = {}; 
 end
-P.results.splineOptions = splineOptions;
 
 % Default xL.
 if ~exist("xL", "var")
@@ -55,13 +48,7 @@ P = FitSplinesnL(P, splineOptions);
 % Find optimal JLK.
 JLKRange = 0.2 : 0.01 : 1.00;
 P = LineSearchOptimum(P, "results.JLK", JLKRange, @InsulinError, @ApplyInsulinLossFactor);
-% P.results.JLK = 1;
 P = ApplyInsulinLossFactor(P);
-
-
-% % Find optimal ks3.
-% ks3Range = P.parameters.SC.ks3 * [0.1 : 0.1 : 1.5];
-% P = LineSearchOptimum(P, "parameters.SC.ks3", ks3Range, @InsulinError, @AddTrialInputs);
 
 
 % Find GFast.

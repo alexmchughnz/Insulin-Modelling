@@ -2,13 +2,25 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
 
 CONST = Constants();
 GC = P.parameters.GC;
-
-
 minnL = 0;
-maxnLRateOfChange = 0.001;  % [min^-2]
-
-
 numFixedParameters = 0;
+
+
+% Default splineOptions.
+defaultSplineOptions.knotType = "location";
+defaultSplineOptions.knots = P.data.I.time;
+defaultSplineOptions.order = 3;
+defaultSplineOptions.maxRate = 0.001;
+
+fields = fieldnames(defaultSplineOptions);
+for ii = 1:numel(fields)
+    field = fields{ii};
+    if ~isfield(splineOptions, field)
+        splineOptions.(field) = defaultSplineOptions.(field);
+    end
+end
+P.results.splineOptions = splineOptions;
+
 
 
 %% Setup
@@ -112,8 +124,9 @@ nLDirectionb = zeros(numConstraints, 1);
 
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
+maxnLRate = splineOptions.maxRate;
 tDeltas = diff(dataKnots);
-maxnLDeltas = maxnLRateOfChange * tDeltas;
+maxnLDeltas = maxnLRate * tDeltas;
 % Absolute change in nL must be less than max change, thus
 % abs(nL(ii+1) - nL(ii))  < maxnLDeltas(ii)
 % sign(nL(ii+1) - nL(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)

@@ -7,8 +7,6 @@ function [P, F] = AddFigure(P, tag, name)
 %   P  - patient struct
 %   F  - figure handle for debug plot
 
-% Make figure.
-fignum = double(string(P.patientNum) + "0" + string(numel(P.figures)));
 
 F = figure();
 F.Name = sprintf("%s: %s", P.patientCode, name);

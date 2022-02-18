@@ -12,7 +12,7 @@ function figureList = DefaultFigures()
     figureList.IntegralFit.Convergence = false;
     
     figureList.FitSplines.Splines = true; 
-    figureList.FitSplines.nLGlucose = false; 
+    figureList.AnalysenLGlucose.nLGlucose = true; 
     
     figureList.GridSearchParameters.ErrorSurface = false;
     

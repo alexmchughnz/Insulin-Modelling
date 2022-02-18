@@ -41,6 +41,11 @@ for ii = 1:numel(patientSet)
         tables{tt} = AddField(tables{tt}, code, P.parameters.SC, "ks3", @(x) x, "ks3 [1/min]");
     end
     
+    if isfield(P.results, "nLGlucose")
+        tables{tt} = AddField(tables{tt}, code, P.results.nLGlucose, "coeffs", @(x) x(1), "nL/G slope");
+        tables{tt} = AddField(tables{tt}, code, P.results.nLGlucose, "Rsq", @(x) x, "nL/G fit R^2");
+    end
+    
     tables{tt} = AddField(tables{tt}, code, P.results, "SI", @(x) x*1e+4, "SI [*1e-4 L/mU/min]");
     
     if isfield(P.results, 'fits')

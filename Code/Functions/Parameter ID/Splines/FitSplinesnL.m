@@ -114,7 +114,8 @@ end
 
 % Directional constraint - delta(nL) should always be opposite to delta(G).
 % Expand delta(G) pattern by at edges to constrain "extra" splines.
-dataKnots = allKnots(splineOptions.order + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
+dataSplineIndex = max([1 splineOptions.order]);
+dataKnots = allKnots(dataSplineIndex + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
 GDiffPattern = diff(ppG(dataKnots));
 
 % nL should decrease if G is increasing, thus

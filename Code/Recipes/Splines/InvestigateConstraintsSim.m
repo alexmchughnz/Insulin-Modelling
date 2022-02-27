@@ -10,9 +10,23 @@ function PArray = InvestigateConstraintsSim(P, xL)
 PArray = {};
 
 %% Functions
-% Iterate order with knots at data.
+
+% Analyse constant nL.
+splineOptions = {};
+splineOptions.knotType = "amount";
+splineOptions.knots = 2;
+splineOptions.maxRate = 0;
+splineOptions.order = 1;
+
+newP = TagPatientCode(P, "max rate = 0");
+newP = SCLossSplineSim(newP, splineOptions);
+PArray{end+1} = newP;
+
+
+% Iterate max rate.
+splineOptions = {};
 maxRateArray = 0.001 * 10.^[0:2];
-maxRateArray = [0 maxRateArray];
+
 for ii = 1:numel(maxRateArray)
     splineOptions.maxRate = maxRateArray(ii);
     newP = TagPatientCode(P, "max rate = " + splineOptions.maxRate);

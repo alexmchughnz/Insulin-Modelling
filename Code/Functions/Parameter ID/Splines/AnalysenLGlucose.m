@@ -58,6 +58,8 @@ function AddToPlot(P, plotvars)
     
     legend()
     
+    ylim([0 0.5])
+    
     xlabel("Plasma Glucose [mol/L]")
     ylabel("nL [1/min]")
 end

@@ -20,6 +20,7 @@ function figureList = DefaultFigures()
     
     figureList.SolveSystem.PlasmaGlucose = true;
     figureList.SolveSystem.PlasmaInsulin = true;
+    figureList.SolveSystem.QLocal = false;
     figureList.SolveSystem.InterstitialInsulin = false;
     figureList.SolveSystem.GlucoseComponents = false;
     figureList.SolveSystem.CoefficientShapes = false;

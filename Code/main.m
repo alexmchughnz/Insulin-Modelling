@@ -13,16 +13,26 @@ Trial.Config = config();
 Trial.startTime = tic;
 
 %% Set Up Trial
-% Trial.label = "Lex1";
+Trial.label = "Tony";
 
-Trial.recipe = @InvestigateConstraintsSim;
+Trial.recipe = @SimpleSim;
 Trial.source = "OGTTLui";
 Trial.patients = 'best';
+
+extraFigures = "SolveSystem.QLocal";
+
 % Trial.patients = [43 45 18  24  26  39  33];
 
 
 %% Run
 Trial = LoadData(Trial);
+
+for ii = 1:numel(extraFigures)
+    figname = extraFigures(ii);
+    figpath = split(figname, ".");
+    Trial.figureList = setfield(Trial.figureList, figpath{:}, true);
+end
+
 
 patientSetIn = Trial.patientSet;
 patientSetOut = {};

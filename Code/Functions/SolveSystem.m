@@ -185,6 +185,22 @@ xlabel('Time [min]')
 ylabel('Interstitial Insulin, Q [mU/l]')
 legend()
 
+%% Subcut Amounts
+P = AddFigure(P, tag, "QLocal");
+
+ISC = P.results.ISC;  % [mU/L]
+plt = plot(tArray, ISC);
+plt.DisplayName = 'Subcutaneous space (ISC)';
+
+QLocal = P.results.QLocal;  % [mU/L]
+plt = plot(tArray, QLocal);
+plt.DisplayName = 'Local interstitium (QLocal)';
+
+
+xlabel('Time [min]')
+ylabel('Insulin amount [mU]')
+legend()
+
 %% Coefficient Shapes
 P = AddFigure(P, tag, "CoefficientShapes");
 

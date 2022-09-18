@@ -80,10 +80,10 @@ Y    = [Y1(1, :); Y2];
 GA = Y(:, ccGA);         % Coefficient of SI in equation.
 Gb = Y(:, ccGb);         % Added terms in equation.
 
-G  = ppG(P.results.tArray);  % Change in G over interval.
+G  = ppG(t);  % Change in G over interval.
 
-first = 1:numel(P.results.tArray)-1;
-second = 2:numel(P.results.tArray);
+first = 1:numel(t)-1;
+second = 2:numel(t);
 
 A = GA(second) - GA(first);
 b = (G(second) - G(first)) - (Gb(second) - Gb(first));

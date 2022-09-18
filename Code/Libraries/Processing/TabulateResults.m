@@ -25,6 +25,8 @@ for ii = 1:numel(patientSet)
     end
     tables{tt}.Properties.Description = name;
     
+    tables{tt} = AddField(tables{tt}, code, P.results, "runtime", @(x) x, "Runtime [s]");
+    
     tables{tt} = AddField(tables{tt}, code, P.results, "JLK", @(x) x, "JLK [/1]");
     
     if all(P.results.nL == P.results.nL(1))

@@ -58,8 +58,12 @@ end
 
 
 function newP = RunSim(P, splineOptions, tag)
+    start = tic();
+    
     newP = TagPatientCode(P, tag);
     newP = SCLossSplineSim(newP, splineOptions);
+    
+    newP.results.runtime = toc(start);
 end
 
 

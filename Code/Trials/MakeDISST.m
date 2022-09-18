@@ -1,13 +1,12 @@
-function patientSet = MakeDISST(patientSet)
+function patientSet = MakeDISST(Trial, patientNums)
 % Function for loading DISST data.
 % INPUTS:
-%   patientSet  - cell array of patient structs
+%   Trial       - trial struct
+%   patientNums - array of patient nums
 % OUTPUT:
-%   patientSet  - updated cell array of patient structs
+%   patientSet - updated cell array of patient structs
 
 CONST = Constants();
-
-source = "DISST";
 
 %% Load Data
 opts = spreadsheetImportOptions(...
@@ -16,7 +15,7 @@ opts = spreadsheetImportOptions(...
     'VariableNamesRange', 'C2:K2', ...
     'RowNamesRange', 'B3:B53');
 opts = setvartype(opts, 'double');
-infoTable = readtable(fullfile(CONFIG.DATAPATH, source, "database recent.xls"), opts, ...
+infoTable = readtable(fullfile(Trial.Config.DATAPATH, Trial.source, "database recent.xls"), opts, ...
     'ReadRowNames', true, ...
     'ReadVariableNames', true);
 
@@ -25,17 +24,19 @@ opts = spreadsheetImportOptions(...
     'DataRange', 'A3:Y52', ...
     'VariableNamesRange', '2:2');
 opts = setvartype(opts, 'double');
-dataTable = readtable(fullfile(CONFIG.DATAPATH, source, "DIST recent.xls"), opts, ...
+dataTable = readtable(fullfile(Trial.Config.DATAPATH, Trial.source, "DIST recent.xls"), opts, ...
     'ReadRowNames', true, ...
     'ReadVariableNames', true);
 
 nMeas = 5;  % Number of measurements.
     
 %% Generate Patients
-for ii = 1:numel(patientSet)
-    P = patientSet{ii};
+patientSet = {};
+for ii = 1:numel(patientNums)
+    P.patientNum = patientNums(ii);
     assert(P.patientNum <= 50, "Invalid patient number.")
     code = dataTable.Properties.RowNames{P.patientNum};
+    P.patientCode = code;
     
     %% Patient Info
     P.data.age = infoTable{code, "age_years_"};  % [years]
@@ -83,7 +84,7 @@ for ii = 1:numel(patientSet)
     P.data.GInfusion = zeros(size(P.results.tArray)); % [mmol/min]    
     
     %% Save
-    patientSet{ii} = P;
+    patientSet{end+1} = P;
     clear P
 end
 end

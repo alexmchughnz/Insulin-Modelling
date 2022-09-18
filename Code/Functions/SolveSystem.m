@@ -158,7 +158,7 @@ plt.DisplayName = 'Model Prediction';
 if isfield(P.data, 'tIBolus')
     x = [P.data.tIBolus'; P.data.tIBolus'];
     y = repmat(ylim', numel(P.data.tIBolus), 1);
-
+    
     plt = line(x, y, ...
         'Color', 'r', ...
         'LineStyle', '--');
@@ -186,20 +186,24 @@ ylabel('Interstitial Insulin, Q [mU/l]')
 legend()
 
 %% Subcut Amounts
-P = AddFigure(P, tag, "QLocal");
-
-ISC = P.results.ISC;  % [mU/L]
-plt = plot(tArray, ISC);
-plt.DisplayName = 'Subcutaneous space (ISC)';
-
-QLocal = P.results.QLocal;  % [mU/L]
-plt = plot(tArray, QLocal);
-plt.DisplayName = 'Local interstitium (QLocal)';
-
-
-xlabel('Time [min]')
-ylabel('Insulin amount [mU]')
-legend()
+if P.data.IDelivery == "subcutaneous"
+    
+    P = AddFigure(P, tag, "QLocal");
+    
+    ISC = P.results.ISC;  % [mU/L]
+    plt = plot(tArray, ISC);
+    plt.DisplayName = 'Subcutaneous space (ISC)';
+    
+    QLocal = P.results.QLocal;  % [mU/L]
+    plt = plot(tArray, QLocal);
+    plt.DisplayName = 'Local interstitium (QLocal)';
+    
+    
+    xlabel('Time [min]')
+    ylabel('Insulin amount [mU]')
+    legend()
+    
+end
 
 %% Coefficient Shapes
 P = AddFigure(P, tag, "CoefficientShapes");

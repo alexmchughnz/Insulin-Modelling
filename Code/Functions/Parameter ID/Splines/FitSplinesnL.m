@@ -102,11 +102,11 @@ b = CValues;
 
 %% Set up Splines
 % Enforce constraints on nL spline weights.
-numConstraints = numTotalSplines - 1;
+numKnotPairs = splineOptions.knots - 1;
 [tG, vG] = GetData(P.data.G);
 ppG = griddedInterpolant(tG, vG);
 
-for ii = 1:numConstraints
+for ii = 1:numKnotPairs
     % Set up difference matrix.
     nLDiffMatrix(ii, ii) = -1;
     nLDiffMatrix(ii, ii+1) = 1;
@@ -115,13 +115,15 @@ end
 % Directional constraint - delta(nL) should always be opposite to delta(G).
 % Expand delta(G) pattern by at edges to constrain "extra" splines.
 dataSplineIndex = max([1 splineOptions.order]);
-dataKnots = allKnots(dataSplineIndex + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
+dataKnots = allKnots(dataSplineIndex + (0:numKnotPairs))'; % Take off extra knots, keep those that define data range.
 GDiffPattern = diff(ppG(dataKnots));
 
-% nL should decrease if G is increasing, thus
-% sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < 0
+% nL should decrease if G is increasing, thus for all pairs of knots:
+%   delta(G) * delta(nL) < 0.
+% At any knot, nL = sum(nLWeight_i)
+
 nLDirectionA = sign(GDiffPattern) .* nLDiffMatrix;
-nLDirectionb = zeros(numConstraints, 1);
+nLDirectionb = zeros(numKnotPairs, 1);
 
 % Change over time constraint - delta(nL) should be less than
 % 0.001 min^-2 (Caumo, 2007).
@@ -139,7 +141,7 @@ nLChangeb = maxnLDeltas;
 % "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
 iiSplines = numFixedParameters + [1:numTotalSplines];
 
-AConstraint = zeros(2*numConstraints, numTotalParameters);
+AConstraint = zeros(2*numKnotPairs, numTotalParameters);
 AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
 
 bConstraint = [nLDirectionb; nLChangeb];

@@ -13,13 +13,13 @@ Trial.Config = config();
 Trial.startTime = tic;
 
 %% Set Up Trial
-Trial.label = "Tony";
+Trial.label = "FixedConstraints";
 
-Trial.recipe = @SimpleSim;
+Trial.recipe = @InvestigateSplinesSim;
 Trial.source = "OGTTLui";
 Trial.patients = 'best';
 
-extraFigures = "SolveSystem.QLocal";
+extraFigures = [];
 
 % Trial.patients = [43 45 18  24  26  39  33];
 
@@ -40,16 +40,26 @@ patientSetOut = {};
 runtime = tic; 
 for ii = 1 : numel(patientSetIn)    
     POut = RunTrial(Trial, ii);  % Can be cell array.
+  
+    for pp = 1:numel(POut)
+        if numel(POut) == 1
+            P = POut;
+        else
+            P = POut{pp};
+        end
+        if ~isfield(P.results, 'runtime')
+            P.results.runtime = duration(seconds(toc(runtime)));
+        end
+    end
 
     if ~isempty(POut)
         SavePatients(Trial, POut);
-%         MakeFiguresPowerPoint(Trial, POut);
         SaveFigures(Trial, POut);
         patientSetOut = [patientSetOut POut(:)];  % To handle if multiple structs are output.
     end
     
-    close all
-    
+    % Graphics can get overloaded if we show all plots from every patient.
+    close all  
 end
 
 Trial.patientSet = patientSetOut;
@@ -58,5 +68,5 @@ Trial.patientSet = patientSetOut;
 %% Results
 PrintTimeTaken(Trial, "Main");
 SaveResults(Trial);
-PanelFigures(Trial);
+% PanelFigures(Trial);
 

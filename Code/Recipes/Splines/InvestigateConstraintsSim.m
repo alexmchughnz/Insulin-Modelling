@@ -9,14 +9,15 @@ function PArray = InvestigateConstraintsSim(P, xL)
 
 PArray = {};
 
+defaultSplineOptions.knotType = "location";
+defaultSplineOptions.knots = P.data.I.time;
+defaultSplineOptions.order = 2;
+
 %% Functions
 
 % Analyse constant nL.
-splineOptions = {};
-splineOptions.knotType = "amount";
-splineOptions.knots = 2;
+splineOptions = defaultSplineOptions;
 splineOptions.maxRate = 0;
-splineOptions.order = 1;
 
 newP = TagPatientCode(P, "max rate = 0");
 newP = SCLossSplineSim(newP, splineOptions);
@@ -24,8 +25,8 @@ PArray{end+1} = newP;
 
 
 % Iterate max rate.
-splineOptions = {};
-maxRateArray = 0.001 * 10.^[0:2];
+splineOptions = defaultSplineOptions;
+maxRateArray = 0.001 * 10.^[-1:2];
 
 for ii = 1:numel(maxRateArray)
     splineOptions.maxRate = maxRateArray(ii);

@@ -45,7 +45,7 @@ Uex = P.results.Uex(P);
 %% Get Coefficients
 % Collect basis functions for splines.
 [P, basisSplines, allKnots] = MakeSplineBasisFunctions(P, splineOptions);
-numTotalSplines = size(basisSplines, CONST.ROWDIR);
+numTotalSplines = size(basisSplines, CONST.COLUMNDIM);
 numTotalParameters = numFixedParameters + numTotalSplines;
 
 % Consider:
@@ -76,7 +76,7 @@ intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
 RHS = [I -I0 -intUTerm intITerm intIQTerm -intkTerm];
-C = sum(RHS, CONST.ROWDIR);
+C = sum(RHS, CONST.COLUMNDIM);
 
 %% Assemble MLR System
 % Extract values at measurement points.

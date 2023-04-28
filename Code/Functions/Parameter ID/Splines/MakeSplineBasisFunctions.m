@@ -89,7 +89,7 @@ basisSplines = phi(:, :, end);  % Of higher order only.
 isInTimeRange = (tStart <= tSpan) & (tSpan <= tEnd);  % Crop entries outside data range.
 basisSplines = basisSplines(isInTimeRange, :);
 
-isZeroColumn = all(basisSplines == 0, CONST.COLUMNDIR);  % Delete any columns for support splines not in data range.
+isZeroColumn = all(basisSplines == 0, CONST.ROWDIM);  % Delete any columns for support splines not in data range.
 basisSplines(:, isZeroColumn) = [];   
 
 

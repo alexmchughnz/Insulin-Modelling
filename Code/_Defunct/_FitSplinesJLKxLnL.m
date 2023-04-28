@@ -30,7 +30,7 @@ order = 3;
 knotLocations = P.data.I.time;
 
 [basisSplines, allKnots] = MakeSplineBasisFunctions(P, order, "knotLocations", knotLocations);
-numTotalSplines = size(basisSplines, CONST.ROWDIR);
+numTotalSplines = size(basisSplines, CONST.COLUMNDIM);
 numTotalParameters = numFixedParameters + numTotalSplines;
 
 % Consider:
@@ -61,7 +61,7 @@ intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
 RHS = [I -I0 intITerm intIQTerm CX];
-C = sum(RHS, CONST.ROWDIR);
+C = sum(RHS, CONST.COLUMNDIM);
 
 %% Assemble MLR System
 % Extract values at measurement points.

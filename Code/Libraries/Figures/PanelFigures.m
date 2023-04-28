@@ -55,7 +55,7 @@ for pp = 1:numCols
         F.Units = 'pixels';
         screensize = num2cell(get(groot, 'MonitorPositions'));
 
-        if monitor > size(screensize, CONST.COLUMNDIR)
+        if monitor > size(screensize, CONST.ROWDIM)
             monitor = 1;
         end
         [x, y, w, h] = screensize{monitor, :};

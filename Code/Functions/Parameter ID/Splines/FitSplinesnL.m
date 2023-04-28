@@ -5,7 +5,6 @@ GC = P.parameters.GC;
 minnL = 0;
 numFixedParameters = 0;
 
-
 % Default splineOptions.
 defaultSplineOptions.knotType = "location";
 defaultSplineOptions.knots = P.data.I.time;
@@ -100,46 +99,54 @@ CValues = (vC(second) - vC(first)) ./ dt;
 A(:,1:numTotalParameters) = CWValues;
 b = CValues;
 
-%% Set up Splines
-% Enforce constraints on nL spline weights.
-numConstraints = numTotalSplines - 1;
+%% Directional constraint - delta(nL) should always be opposite to delta(G).
+% nL should decrease if G is increasing, thus for all pairs of knots:
+%   delta(G) * delta(nL) < 0.
+
+% Select knots in data range.
+dataKnots = allKnots(splineOptions.order+1 : end-splineOptions.order)';
+numDataKnotPairs = numel(dataKnots) - 1;
+
+% Get G differences.
 [tG, vG] = GetData(P.data.G);
 ppG = griddedInterpolant(tG, vG);
+GDifferences = diff(ppG(dataKnots));  % [1 x N-1]
 
-for ii = 1:numConstraints
-    % Set up difference matrix.
-    nLDiffMatrix(ii, ii) = -1;
-    nLDiffMatrix(ii, ii+1) = 1;
+
+% At any time t, nL = sum{n_i * bs_i(t)} for all S splines, where bs_i is the i-th basis spline function and n_i that spline's weighting.
+% Thus, between knot times t1 and t2, delta(nL) = sum{n_i * (bs_i(t2) - bs_i(t1))} for all splines i
+%                                               = [bs_1(t2)-bs_1(t1), bs_2(t2)-bs_2(t1), ..., bs_S(t2)-bs_S(t1)] * (n_1; n_2; ...; n_S)
+for rr = 1:numel(dataKnots)-1   % Each row is a difference between a pair of knots.
+    for cc = 1:numTotalSplines  % Each column is an indivdual spline.
+        t1 = dataKnots(rr);
+        t2 = dataKnots(rr+1);
+        bs_i = basisSplines(:, cc);
+
+        n1 = SearchArray(t1, tArray);  % Index of knot 1's location in time.
+        n2 = SearchArray(t2, tArray);  % Index of knot 1's location in time.
+
+        nLDiffMatrix(rr, cc) = bs_i(n2) - bs_i(n1);  % [N-1 x S]
+    end
 end
 
-% Directional constraint - delta(nL) should always be opposite to delta(G).
-% Expand delta(G) pattern by at edges to constrain "extra" splines.
-dataSplineIndex = max([1 splineOptions.order]);
-dataKnots = allKnots(dataSplineIndex + (0:numConstraints))'; % Take off extra knots, keep those that define data range.
-GDiffPattern = diff(ppG(dataKnots));
+nLDirectionA = GDifferences .* nLDiffMatrix;
+nLDirectionb = zeros(numTotalSplines, 1);
 
-% nL should decrease if G is increasing, thus
-% sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < 0
-nLDirectionA = sign(GDiffPattern) .* nLDiffMatrix;
-nLDirectionb = zeros(numConstraints, 1);
-
-% Change over time constraint - delta(nL) should be less than
-% 0.001 min^-2 (Caumo, 2007).
-maxnLRate = splineOptions.maxRate;
+%% 2) Change over time constraint - delta(nL) should be less than 0.001 min^-2 (Caumo, 2007).
 tDeltas = diff(dataKnots);
-maxnLDeltas = maxnLRate * tDeltas;
+maxnLDeltas = splineOptions.maxRate * tDeltas;
 % Absolute change in nL must be less than max change, thus
 % abs(nL(ii+1) - nL(ii))  < maxnLDeltas(ii)
 % sign(nL(ii+1) - nL(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
 % -sign(G(ii+1) - G(ii)) * (nL(ii+1) - nL(ii)) < maxnLDeltas(ii)
-nLChangeA = -sign(GDiffPattern) .* nLDiffMatrix ;
+nLChangeA = -sign(GDifferences) .* nLDiffMatrix;  % [N-1 x S]
 nLChangeb = maxnLDeltas;
 
 % Place constraints on splines.
 % "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
 iiSplines = numFixedParameters + [1:numTotalSplines];
 
-AConstraint = zeros(2*numConstraints, numTotalParameters);
+AConstraint = zeros(2*numDataKnotPairs, numTotalParameters);
 AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
 
 bConstraint = [nLDirectionb; nLChangeb];

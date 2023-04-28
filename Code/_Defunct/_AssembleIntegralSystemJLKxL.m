@@ -54,7 +54,7 @@ intIQTerm = kIQ*cumtrapz(tArray, I-Q);
 
 I0 = I(1) * ones(size(I));
 RHS = [I -I0 intIaITerm intITerm intIQTerm CX];
-C = sum(RHS, CONST.ROWDIR);
+C = sum(RHS, CONST.COLUMNDIM);
 
 %% Make Minute-Wise Q and I Functions
 % I(t) = I(t0) + CJ*JLK + CX*xL - kIaI*int{I/(1+aI*I)} - kI*int{I} - kIQ*int{I-Q} - CX

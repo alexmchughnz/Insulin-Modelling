@@ -118,50 +118,50 @@ end
 
 
 function MakePlots(P, plotvars)
-DP = DebugPlots().IntegralFit;
-CONST = Constants();
-
-%% Graphical Identifiability Method (Docherty, 2010)
-if DP.GraphicalID
-    MakeDebugPlot("Graphical Identifiability", P, DP);
-    
-    [tI, ~] = GetData(P.data.I); % [mU/L]
-    tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.ROWDIR);
-    
-    plt = plot(tIntegrals, plotvars.CParam1Norm);
-    plt.DisplayName = plotvars.paramNames(1) + " coeff.";
-    
-    plt = plot(tIntegrals, plotvars.CParam2Norm);
-    plt.DisplayName = plotvars.paramNames(2) + " coeff.";
-    
-    plt = plot(tIntegrals, plotvars.bNorm);
-    plt.DisplayName = "$b$";
-    
-    for ii = 1:numel(tIntegrals)
-        t = tIntegrals(ii);
-        
-        plt = plot([t t], [plotvars.CParam1Norm(ii) plotvars.CParam2Norm(ii)], 'k');
-        plt.Marker = 'o';
-        plt.MarkerFaceColor = 'auto';
-        plt.HandleVisibility = 'off';
-    end
-    plt.HandleVisibility = 'on';
-    plt.DisplayName = "Samples";
-    
-    xlabel("Time [min]")
-    ylabel("Mean-normalised integral value")
-    legend()
-end
-
-%% Convergence
-if isfield(plotvars, "param1Array")
-    if DP.Convergence
-        MakeDebugPlot("Convergence Plot", P, DP);
-        plot(plotvars.param1Array, 'b')
-        plot(plotvars.param2Array, 'r')
-        
-        legend(plotvars.paramNames(1), plotvars.paramNames(2))
-    end
-end
+% DP = DebugPlots().IntegralFit;
+% CONST = Constants();
+% 
+% %% Graphical Identifiability Method (Docherty, 2010)
+% if DP.GraphicalID
+%     MakeDebugPlot("Graphical Identifiability", P, DP);
+%     
+%     [tI, ~] = GetData(P.data.I); % [mU/L]
+%     tIntegrals = mean([tI(1:end-1), tI(2:end)], CONST.COLUMNDIM);
+%     
+%     plt = plot(tIntegrals, plotvars.CParam1Norm);
+%     plt.DisplayName = plotvars.paramNames(1) + " coeff.";
+%     
+%     plt = plot(tIntegrals, plotvars.CParam2Norm);
+%     plt.DisplayName = plotvars.paramNames(2) + " coeff.";
+%     
+%     plt = plot(tIntegrals, plotvars.bNorm);
+%     plt.DisplayName = "$b$";
+%     
+%     for ii = 1:numel(tIntegrals)
+%         t = tIntegrals(ii);
+%         
+%         plt = plot([t t], [plotvars.CParam1Norm(ii) plotvars.CParam2Norm(ii)], 'k');
+%         plt.Marker = 'o';
+%         plt.MarkerFaceColor = 'auto';
+%         plt.HandleVisibility = 'off';
+%     end
+%     plt.HandleVisibility = 'on';
+%     plt.DisplayName = "Samples";
+%     
+%     xlabel("Time [min]")
+%     ylabel("Mean-normalised integral value")
+%     legend()
+% end
+% 
+% %% Convergence
+% if isfield(plotvars, "param1Array")
+%     if DP.Convergence
+%         MakeDebugPlot("Convergence Plot", P, DP);
+%         plot(plotvars.param1Array, 'b')
+%         plot(plotvars.param2Array, 'r')
+%         
+%         legend(plotvars.paramNames(1), plotvars.paramNames(2))
+%     end
+% end
 
 end

@@ -6,8 +6,8 @@ CONST.mU2pmol = @(mU) mU * 6.0;    % Insulin [mU]  -> Insulin [pmol]
 CONST.pmol2mU = @(pmol) pmol / 6.0;  % Insulin [pmol] -> Insulin [mU]
 CONST.IU18Factor = 18;  % TODO: Not sure what this yet! Something involving dL?
 
-CONST.COLUMNDIR= 1;
-CONST.ROWDIR = 2;
-CONST.PAGEDIR = 3;
+CONST.ROWDIM = 1;     % Dimension of incrementing rows within same column/page.
+CONST.COLUMNDIM = 2;  % Dimension of incrementing columns within same row/page.
+CONST.PAGEDIM = 3;    % Dimension of incrementing pages within same row/column.
 
 end

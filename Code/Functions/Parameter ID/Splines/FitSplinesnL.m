@@ -105,6 +105,7 @@ b = CValues;
 
 % Select knots in data range.
 dataKnots = allKnots(splineOptions.order+1 : end-splineOptions.order)';
+dataKnots = dataKnots(ismember(dataKnots, tArray));
 numDataKnotPairs = numel(dataKnots) - 1;
 
 % At any time t, nL = sum{n_i * bs_i(t)} for all S splines, where bs_i is the i-th basis spline function and n_i that spline's weighting.

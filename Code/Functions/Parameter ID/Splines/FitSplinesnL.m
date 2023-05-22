@@ -135,26 +135,23 @@ end
 ppG = griddedInterpolant(tG, vG);
 GDeltas = diff(ppG(dataKnots));  % [1 x N-1]
 
-nLDirectionA = GDeltas .* nLDiffMatrix;
+nLDirectionA = sign(GDeltas) .* nLDiffMatrix;
 nLDirectionb = zeros(numDataKnotPairs, 1);
 
 % Constraint 2): delta(nL)/delta(t) should be less than max rate R_max, thus for all pairs of knots:
-%   abs(delta(nL)) / delta(t)          <  R_max
-%   abs( nLDiffMatrix * (nLWeights) )  <  R_max * (delta(t))
+%   abs(delta(nL)) / delta(t)   <   R_max
+%   abs(delta(nL))              <   R_max * (delta(t))
 % Simultaneously, we are constraining delta(nL) to opposite direction of delta(G).
-% Thus, to ensure each change in xL in (nLDiffMatrix * (nLWeights)) is a positive value, we can rewrite:
-%   (sgn(delta(G))) .* nLDiffMatrix * (nLWeights)  < R_max * (delta(t))
+% Thus, to ensure each change in xL in delta(nL) is a positive listed value, we can rewrite:
+%   (sgn(delta(nL)) .* delta(nL)) * (nLWeights)   <   R_max * (delta(t))
+%   (-sgn(delta(G)) .* delta(nL)) * (nLWeights)   <   R_max * (delta(t))
 tDeltas = diff(dataKnots);
 nLChangeA = -sign(GDeltas) .* nLDiffMatrix;  % [N-1 x S]
 nLChangeb = splineOptions.maxRate .* tDeltas;
 
 %% Place constraints.
-% "A" structure is [fixedParams, extraSplines, dataSplines, extraSplines].
-iiSplines = numFixedParameters + [1:numTotalSplines];
-
-AConstraint = zeros(2*numDataKnotPairs, numTotalParameters);
-AConstraint(:, iiSplines) = [nLDirectionA; nLChangeA];
-
+% "A" horiz. structure is [fixedParams, extraSplines, dataSplines, extraSplines].
+AConstraint= [nLDirectionA; nLChangeA];
 bConstraint = [nLDirectionb; nLChangeb];
 
 

@@ -10,9 +10,23 @@ function PArray = InvestigateSplinesSim(P, xL)
 PArray = {};
 
 %% Functions
+
+
+% Analyse constant nL.
+splineOptions = {};
+splineOptions.knotType = "amount";
+splineOptions.knots = 2;
+splineOptions.maxRate = 0;
+splineOptions.order = 1;
+
+tag = "max rate = 0";
+PArray{end+1} = RunSim(P, splineOptions, tag);
+
+
 % Iterate order with knots at data.
 measTimes = P.data.I.time;
 
+splineOptions = {};
 splineOptions.knotType = "location";
 splineOptions.knots = measTimes;
 
@@ -25,10 +39,12 @@ for ii = 1:numel(orderArray)
 end
 
 % Data, double density.
-splineOptions.knotType = "location";
-
 midpoints = measTimes(1:end-1) + diff(measTimes)/2;
+
+splineOptions = {};
+splineOptions.knotType = "location";
 splineOptions.knots = sort([measTimes(:); midpoints(:)]);
+
 for ii = 1:numel(orderArray)
     splineOptions.order = orderArray(ii);
     tag = "data (x2) | order = "+splineOptions.order;
@@ -38,6 +54,7 @@ end
 
 
 % Iterate number and order of fixed splines.
+splineOptions = {};
 splineOptions.knotType = "amount";
 
 numberArray = [2, 5, 10, 20, 50];

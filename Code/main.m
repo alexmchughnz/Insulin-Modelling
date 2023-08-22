@@ -13,9 +13,9 @@ Trial.Config = config();
 Trial.startTime = tic;
 
 %% Set Up Trial
-% Trial.label = "Lex1";
+Trial.label = "OriginalCode";
 
-Trial.recipe = @InvestigateConstraintsSim;
+Trial.recipe = @InvestigateSplinesSim;
 Trial.source = "OGTTLui";
 Trial.patients = 'best';
 % Trial.patients = [43 45 18  24  26  39  33];

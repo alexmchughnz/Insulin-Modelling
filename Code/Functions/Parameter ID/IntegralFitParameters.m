@@ -16,19 +16,19 @@ PrintStatusUpdate(P, "Fitting parameters...")
 tArray = P.results.tArray;
 [tI, vI] = GetData(P.data.I); % [mU/L]
 
-if P.source == "DISST"
-    % Need to add 'false' point for improved fitting.
-    [vIBolus, iiBolus] = max(P.results.IBolus);
-    tIBolus = tMinutes(iiBolus);
-    
-    [tI, order] = sort([tI; tIBolus]);
-    iiBeforeFakePoint = find(order == numel(order)) - 1;
-    
-    fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
-    
-    fakeData = [vI; fakeI];
-    vI = fakeData(order);
-end
+% if P.source == "DISST"
+%     % Need to add 'false' point for improved fitting.
+%     [vIBolus, iiBolus] = max(P.results.IBolus);
+%     tIBolus = tMinutes(iiBolus);
+% 
+%     [tI, order] = sort([tI; tIBolus]);
+%     iiBeforeFakePoint = find(order == numel(order)) - 1;
+% 
+%     fakeI = vIBolus/GC.VI + vI(iiBeforeFakePoint); % [mU/L]
+% 
+%     fakeData = [vI; fakeI];
+%     vI = fakeData(order);
+% end
 
 ppI = griddedInterpolant(tI, vI);  % [mU/L]
 I = ppI(tArray);

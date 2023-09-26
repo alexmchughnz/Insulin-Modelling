@@ -8,7 +8,7 @@ paramNames = ["nL", "xL"];
 %% Setup
 tArray = P.results.tArray;
 tMeas = P.data.I.time;
-iiMeas = GetTimeIndex(tMeas, tArray);
+iiMeas = SearchArray(tMeas, tArray);
 
 % Plasma Insulin
 if ~exist("I", "var")

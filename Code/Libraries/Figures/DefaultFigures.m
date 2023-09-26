@@ -8,7 +8,7 @@ function figureList = DefaultFigures()
     
     figureList.LineSearchOptimum.ErrorFunction = false;
     
-    figureList.IntegralFit.GraphicalID = false;
+    figureList.IntegralFit.GraphicalID = true;
     figureList.IntegralFit.Convergence = false;
     
     figureList.FitSplines.Splines = true; 
@@ -23,6 +23,7 @@ function figureList = DefaultFigures()
     figureList.SolveSystem.InterstitialInsulin = false;
     figureList.SolveSystem.GlucoseComponents = false;
     figureList.SolveSystem.CoefficientShapes = false;
+    figureList.SolveSystem.Clearance = false;
     
     figureList.MakeOGTTLui.Input = false;
     

@@ -202,4 +202,28 @@ xlabel("Time [min]")
 ylabel("Insulin [mU/L]")
 legend()
 
+%% nLxL Shapes
+P = AddFigure(P, tag, "Clearance");
+
+subplot(2,1,1)
+plt = plot(tArray, P.results.xL*ones(size(tArray)), 'r');
+plt.DisplayName = "xL";
+ylim([0 1])
+ylabel("$x_L$")
+
+
+subplot(2,1,2)
+
+nL = P.results.nL;
+if numel(nL) == 1
+    nL = nL * ones(size(tArray));
+end
+
+plt = plot(tArray, nL, 'b');
+plt.DisplayName = "nL";
+ylim([0 1])
+ylabel("$$n_L$$")
+
+xlabel("Time [min]")
+
 end

@@ -3,7 +3,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
 CONST = Constants();
 GC = P.parameters.GC;
 minnL = 0;
-numFixedParameters = 0;
+numFixedParameters = 1; % For xL????
 
 
 % Default splineOptions.
@@ -49,25 +49,27 @@ numTotalSplines = size(basisSplines, CONST.COLUMNDIM);
 numTotalParameters = numFixedParameters + numTotalSplines;
 
 % Consider:
-% dI/dt = k - cn*nL + kU*Uen - kI*I - kIQ*(I-Q)
+% dI/dt = k - cn*nL + cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
 %   with nL = sum(nLWeight_i * shape_i).
 
 % Let cWeight_i = shape_i * cn.
 % We can express equation as:
-% dI/dt = k - sum(cWeight_i * nLWeight_i) + kU*Uen - kI*I - kIQ*(I-Q)
+% dI/dt = k - sum(cWeight_i * nLWeight_i) + cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
 cn = I./(1 + GC.alphaI*I);
 cWeights =  basisSplines .* cn;
+cx = -Uen/GC.VI;
 
 k = Uex/GC.VI;
-kU = (1 - P.results.xL)/GC.VI;
+kU = 1/GC.VI;
 kI = GC.nK;
 kIQ = GC.nI./GC.VI;
 
 %% Integrate I Equation
-% I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+% I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + xL*int{cx} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
 % Defining CWeights = -int{cWeights}
-% CWeights.*nLWeights = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
+% CWeights.*nLWeights + xL*int{cx} = I(t) - I(t0) - xL*int{cx} - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
 CWeights = -cumtrapz(tArray, cWeights);
+CX = cumtrapz(tArray, cx);
 
 intkTerm = cumtrapz(tArray, k);
 intUTerm = kU*cumtrapz(tArray, Uen);
@@ -81,6 +83,7 @@ C = sum(RHS, CONST.COLUMNDIM);
 %% Assemble MLR System
 % Extract values at measurement points.
 vCWeights = CWeights(iiMeas, :);
+vCX = CX(iiMeas, :);
 vC = C(iiMeas);
 
 % Find time width of each integral wedge.
@@ -95,9 +98,11 @@ dt = t2 - t1;
 % sample points, and normalising by integral width (dt):
 % [CW_1(t) CW_2(t) ... CW_M(t)] * (nLW1; nLW2; ... nLWM) = [C(t)] @ measurement times only
 CWValues = (vCWeights(second,:) - vCWeights(first,:)) ./ dt;
+CXValues = (vCX(second,:) - vCX(first,:)) ./ dt;
 CValues = (vC(second) - vC(first)) ./ dt;
 
-A(:,1:numTotalParameters) = CWValues;
+A(:,1) = CXValues;
+A(:,2:numTotalParameters) = CWValues;
 b = CValues;
 
 %% Set up Splines
@@ -106,7 +111,8 @@ numConstraints = numTotalSplines - 1;
 [tG, vG] = GetData(P.data.G);
 ppG = griddedInterpolant(tG, vG);
 
-for ii = 1:numConstraints
+nLDiffMatrix = zeros(numConstraints, numConstraints+1);
+for ii = 2:numConstraints
     % Set up difference matrix.
     nLDiffMatrix(ii, ii) = -1;
     nLDiffMatrix(ii, ii+1) = 1;
@@ -148,7 +154,9 @@ bConstraint = [nLDirectionb; nLChangeb];
 % Solve using linear solver.
 lb = minnL * ones(1, numTotalParameters);
 x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb);
-nLWeights = x;
+
+P.results.xL = x(1);
+nLWeights = x(2:end);
 P.results.nL = basisSplines * nLWeights;
 
 

@@ -13,4 +13,6 @@
 
 *.mat
 *.DS_STORE
+*.db
+
 

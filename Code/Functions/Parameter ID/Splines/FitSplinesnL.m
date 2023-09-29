@@ -176,7 +176,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
         plot(P.results.tArray, plotvars.basisSplines .* plotvars.nLWeights', '--', ...
             'LineWidth', 1, 'HandleVisibility', 'off');
         
-        ylim([0 0.5])
+        ylim([0 Inf])
         
         xlabel("Time [min]")
         ylabel("nL [1/min]")

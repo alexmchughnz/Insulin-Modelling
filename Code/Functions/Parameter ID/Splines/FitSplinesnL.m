@@ -6,7 +6,21 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     numFixedParameters = 1; % For xL????
     
     
-    %% Splines
+    %% Splines    
+    defaultSplineOptions.constrain = true;
+    defaultSplineOptions.knotType = "location";
+    defaultSplineOptions.knots = P.data.I.time';
+    defaultSplineOptions.order = 3;
+    defaultSplineOptions.maxRate = 0.001;
+
+    fields = fieldnames(defaultSplineOptions);
+    for ii = 1:numel(fields)
+        field = fields{ii};
+        if ~isfield(splineOptions, field)
+            splineOptions.(field) = defaultSplineOptions.(field);
+        end
+    end
+    P.results.splineOptions = splineOptions;
     
     % Collect basis functions for splines.
     [P, basisSplines, tExtended, allKnots, dataKnots] = MakeSplineBasisFunctions(P, splineOptions);

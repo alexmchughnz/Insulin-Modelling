@@ -1,4 +1,4 @@
-function [P, A, b, basisSplines] = FitSplinesLexnL(P, splineOptions)
+function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
 
     CONST = Constants();
     GC = P.parameters.GC;
@@ -6,30 +6,17 @@ function [P, A, b, basisSplines] = FitSplinesLexnL(P, splineOptions)
     numFixedParameters = 1; % For xL????
     
     
-    %% Splines.
-    defaultSplineOptions.knotType = "location";
-    defaultSplineOptions.knots = P.data.I.time;
-    defaultSplineOptions.order = 3;
-    defaultSplineOptions.maxRate = 0.001;
-    
-    fields = fieldnames(defaultSplineOptions);
-    for ii = 1:numel(fields)
-        field = fields{ii};
-        if ~isfield(splineOptions, field)
-            splineOptions.(field) = defaultSplineOptions.(field);
-        end
-    end
-    P.results.splineOptions = splineOptions;
+    %% Splines
     
     % Collect basis functions for splines.
-    [P, basisSplines, allKnots] = MakeSplineBasisFunctions(P, splineOptions);
+    [P, basisSplines, tExtended, allKnots, dataKnots] = MakeSplineBasisFunctions(P, splineOptions);
     numTotalSplines = size(basisSplines, CONST.COLUMNDIM);
     numTotalParameters = numFixedParameters + numTotalSplines;
     
     
     %% Setup
     tArray = P.results.tArray;
-    tInts = allKnots;
+    tInts = dataKnots';
     iiInts = SearchArray(tInts, tArray);
     
     % Plasma Insulin
@@ -155,7 +142,11 @@ function [P, A, b, basisSplines] = FitSplinesLexnL(P, splineOptions)
     
     % Solve using linear solver.
     lb = minnL * ones(1, numTotalParameters);
-    x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb);
+    if splineOptions.constrain
+        x = lsqlin(A, b, AConstraint, bConstraint, [], [], lb);
+    else
+        x = lsqlin(A, b, [], [], [], [], lb);
+    end
     
     P.results.xL = x(1);
     nLWeights = x(2:end);

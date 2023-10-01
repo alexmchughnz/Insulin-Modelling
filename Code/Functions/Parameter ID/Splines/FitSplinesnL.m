@@ -68,8 +68,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     
     %% Integrate I Equation
     % I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
-    % Defining CWeights = -int{cWeights}
-    % CWeights.*nLWeights = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
+    % -int{cWeights}.*nLWeights = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
     CWeights = -cumtrapz(tArray, cWeights);
     
     intkTerm = cumtrapz(tArray, k);

@@ -1,9 +1,10 @@
-function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
+function [P, A, b, basisSplines] = FitSplinesLexnLxL(P, splineOptions)
 
     CONST = Constants();
     GC = P.parameters.GC;
+    SC = P.parameters.SC;
     minnL = 0;
-    numFixedParameters = 1; % For xL????
+    numFixedParameters = 2; % For xL and Lex
     
     
     %% Splines    
@@ -46,46 +47,50 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     
     % Exogenous Insulin
     Uex = P.results.Uex(P);
-    
 
-    
+
     %% Get Coefficients
-    
+    % Analytical solutions for ISC/Lex and Q_Local/Lex.
+    % Assuming ISC(0) and QLocal(0) = 0.
+    cISC = exp(-SC.ks2*tArray) .* cumtrapz(tArray, exp(SC.ks2*tArray).*Uex); % factor of Lex to be IDed; not included
+    cQLocal = SC.ks2*exp(-(SC.ks3+SC.kdi)*tArray) .* cumtrapz(tArray, exp((SC.ks3+SC.kdi)*tArray).*cISC);
+        
     % Consider:
-    % dI/dt = k - cn*nL - cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
+    % dI/dt = cL*Lex - cn*nL - cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
     %   with nL = sum(nLWeight_i * shape_i).
     
     % Let cWeight_i = shape_i * cn.
     % We can express equation as:
-    % dI/dt = k - sum(cWeight_i * nLWeight_i) - cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
+    % dI/dt = cL*Lex - sum(cWeight_i * nLWeight_i) - cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
     cn = I./(1 + GC.alphaI*I);
     cWeights =  basisSplines .* cn;
     cx = Uen/GC.VI;
-    
-    k = Uex/GC.VI;
+    cL = SC.ks3/GC.VI * cQLocal;
+
     kU = 1/GC.VI;
     kI = GC.nK;
     kIQ = GC.nI./GC.VI;
     
     %% Integrate I Equation
-    % I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + xL*int{cx} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
-    % -int{cWeights}.*nLWeights - xL*int{cx} = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
+    % I(t) - I(t0) = Lex*int{cL} - int{sum(cWeight_i * nLWeight_i)} - xL*int{cx} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+    % -int{cWeights}.*nLWeights - xL*int{cx} + Lex*int{cL} = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} := C
     CWeights = -cumtrapz(tArray, cWeights);
     CX = -cumtrapz(tArray, cx);
+    CL = cumtrapz(tArray, cL);
     
-    intkTerm = cumtrapz(tArray, k);
     intUTerm = kU*cumtrapz(tArray, Uen);
     intITerm = kI*cumtrapz(tArray, I);
     intIQTerm = kIQ*cumtrapz(tArray, I-Q);
     
     I0 = I(1) * ones(size(I));
-    RHS = [I -I0 -intUTerm intITerm intIQTerm -intkTerm];
+    RHS = [I -I0 -intUTerm intITerm intIQTerm];
     C = sum(RHS, CONST.COLUMNDIM);
     
     %% Assemble MLR System
     % Extract values at measurement points.
     vCWeights = CWeights(iiInts, :);
     vCX = CX(iiInts, :);
+    vCL = CL(iiInts, :);
     vC = C(iiInts);
     
     % Find time width of each integral wedge.
@@ -101,10 +106,12 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     % [CW_1(t) CW_2(t) ... CW_M(t)] * (nLW1; nLW2; ... nLWM) = [C(t)] @ measurement times only
     CWValues = (vCWeights(iiSecond,:) - vCWeights(iiFirst,:)) ./ dt;
     CXValues = (vCX(iiSecond,:) - vCX(iiFirst,:)) ./ dt;
+    CLValues = (vCL(iiSecond,:) - vCL(iiFirst,:)) ./ dt;
     CValues = (vC(iiSecond) - vC(iiFirst)) ./ dt;
     
-    A(:,1) = CXValues;
-    A(:,2:numTotalParameters) = CWValues;
+    A(:,1) = CLValues;
+    A(:,2) = CXValues;
+    A(:,3:numTotalParameters) = CWValues;
     b = CValues;
     
     %% Set up Splines
@@ -161,8 +168,9 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
         x = lsqlin(A, b, [], [], [], [], lb);
     end
     
-    P.results.xL = x(1);
-    nLWeights = x(2:end);
+    P.results.JLK = x(1);
+    P.results.xL = x(2);
+    nLWeights = x(3:end);
     P.results.nL = basisSplines * nLWeights;
     
     

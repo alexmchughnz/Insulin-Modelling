@@ -14,12 +14,12 @@ tEnd = P.results.tArray(end);
 % Knots
 switch splineOptions.knotType
     case "amount"  % Fixed Number of Knots
-    numDataKnots = splineOptions.knots;  
-        knots = linspace(tStart, tEnd, numDataKnots);
+        numDataKnots = splineOptions.knots;  
+        knots = linspace(tStart, tEnd, numDataKnots)';
         knots = RoundToMultiple(knots, tDelta);
     
     case "location" % Specified Knot Locations
-        knots = splineOptions.knots;
+        knots = splineOptions.knots';
 
     otherwise
         error("Must have valid knotType setting for splines.")
@@ -27,7 +27,7 @@ end
 
 % Append extra knots for consistent fitting.
 numExtraKnots = splineOptions.order;  % k-th order splines requires k extra knots / 1 spline at each end to fully define all in range.
-extraKnotSpacing = max(diff(knots));  % Default width of additional knots.
+extraKnotSpacing = round(max(diff(knots)));  % Default width of additional knots.
 
 extraLeftKnots = knots(1) - extraKnotSpacing * [numExtraKnots:-1:1];
 extraRightKnots = knots(end) + extraKnotSpacing * [1:+1:numExtraKnots];
@@ -35,7 +35,7 @@ extraRightKnots = knots(end) + extraKnotSpacing * [1:+1:numExtraKnots];
 allKnots = [extraLeftKnots knots extraRightKnots];
 
 % Splines
-tExtended = (allKnots(1) : tDelta : allKnots(end))';        % Extended time range covering all splines.
+tExtended = (allKnots(1) : tDelta : ceil(allKnots(end)))';        % Extended time range covering all splines.
 
 % We require maxSplines of the lowest order splines to interpolate to get numDataKnots fully covered
 % by maxOrder splines.

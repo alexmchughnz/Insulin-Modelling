@@ -1,9 +1,9 @@
-function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
+function [P, A, b, basisSplines] = FitSplinesnLxL(P, splineOptions)
 
     CONST = Constants();
     GC = P.parameters.GC;
     minnL = 0;
-    numFixedParameters = 0;
+    numFixedParameters = 1; % For xL????
     
     
     %% Splines    
@@ -12,7 +12,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     defaultSplineOptions.knots = P.data.I.time;
     defaultSplineOptions.order = 3;
     defaultSplineOptions.maxRate = 0.001;
-    
+
     fields = fieldnames(defaultSplineOptions);
     for ii = 1:numel(fields)
         field = fields{ii};
@@ -22,7 +22,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     end
     P.results.splineOptions = splineOptions;
     
-% Collect basis functions for splines.
+    % Collect basis functions for splines.
     [P, basisSplines, tExtended, allKnots, dataKnots] = MakeSplineBasisFunctions(P, splineOptions);
     numTotalSplines = size(basisSplines, CONST.COLUMNDIM);
     numTotalParameters = numFixedParameters + numTotalSplines;
@@ -46,31 +46,33 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     
     % Exogenous Insulin
     Uex = P.results.Uex(P);
-
+    
 
     
     %% Get Coefficients
-        
+    
     % Consider:
-    % dI/dt = k - cn*nL + kU*Uen - kI*I - kIQ*(I-Q)
+    % dI/dt = k - cn*nL + cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
     %   with nL = sum(nLWeight_i * shape_i).
     
     % Let cWeight_i = shape_i * cn.
     % We can express equation as:
-    % dI/dt = k - sum(cWeight_i * nLWeight_i) + kU*Uen - kI*I - kIQ*(I-Q)
+    % dI/dt = k - sum(cWeight_i * nLWeight_i) + cx*xL + kU*Uen - kI*I - kIQ*(I-Q)
     cn = I./(1 + GC.alphaI*I);
     cWeights =  basisSplines .* cn;
+    cx = -Uen/GC.VI;
     
     k = Uex/GC.VI;
-    kU = (1 - P.results.xL)/GC.VI;
+    kU = 1/GC.VI;
     kI = GC.nK;
     kIQ = GC.nI./GC.VI;
     
     %% Integrate I Equation
-    % I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+    % I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + xL*int{cx} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
     % Defining CWeights = -int{cWeights}
-    % CWeights.*nLWeights = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
+    % CWeights.*nLWeights + xL*int{cx} = I(t) - I(t0) - xL*int{cx} - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
     CWeights = -cumtrapz(tArray, cWeights);
+    CX = cumtrapz(tArray, cx);
     
     intkTerm = cumtrapz(tArray, k);
     intUTerm = kU*cumtrapz(tArray, Uen);
@@ -84,6 +86,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     %% Assemble MLR System
     % Extract values at measurement points.
     vCWeights = CWeights(iiInts, :);
+    vCX = CX(iiInts, :);
     vC = C(iiInts);
     
     % Find time width of each integral wedge.
@@ -98,9 +101,11 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     % sample points, and normalising by integral width (dt):
     % [CW_1(t) CW_2(t) ... CW_M(t)] * (nLW1; nLW2; ... nLWM) = [C(t)] @ measurement times only
     CWValues = (vCWeights(iiSecond,:) - vCWeights(iiFirst,:)) ./ dt;
+    CXValues = (vCX(iiSecond,:) - vCX(iiFirst,:)) ./ dt;
     CValues = (vC(iiSecond) - vC(iiFirst)) ./ dt;
     
-    A(:,1:numTotalParameters) = CWValues;
+    A(:,1) = CXValues;
+    A(:,2:numTotalParameters) = CWValues;
     b = CValues;
     
     %% Set up Splines
@@ -157,7 +162,8 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
         x = lsqlin(A, b, [], [], [], [], lb);
     end
     
-    nLWeights = x;
+    P.results.xL = x(1);
+    nLWeights = x(2:end);
     P.results.nL = basisSplines * nLWeights;
     
     
@@ -184,10 +190,9 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
         plot(P.results.tArray, plotvars.basisSplines .* plotvars.nLWeights', '--', ...
             'LineWidth', 1, 'HandleVisibility', 'off');
         
-        ylim([0 0.5])
+        ylim([0 Inf])
         
         xlabel("Time [min]")
         ylabel("nL [1/min]")
-    end
-    
-    
+    end    
+

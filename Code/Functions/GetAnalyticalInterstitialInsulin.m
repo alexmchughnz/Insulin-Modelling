@@ -12,8 +12,8 @@ GC = P.parameters.GC;
 tArray = P.results.tArray;
 Q = zeros(numel(tArray), 1); % Analytical solution for Q
 
-% Consider form of dQ/dt = -cQ*Q + cI*I.
-cQ = GC.nC + GC.nI/GC.VQ; % Constant term coefficent of Q
+% Consider form of dQ/dt = cQ*Q + cI*I.
+cQ = -GC.nC - GC.nI/GC.VQ; % Constant term coefficent of Q
 cI = GC.nI/GC.VQ;         % Constant term coefficent of I
 
 % Initial values.
@@ -29,8 +29,8 @@ for ii = 2:numel(Q)
     
     % Analytical solution for the Q equation at time==t.
     % Standard soln. for non-homogenous 1st order ODE (page 17).
-    Q(ii) = Q0*exp(-cQ*(t-t0)) ...
-        + trapz(tSpan, cI*ISpan.*exp(-cQ*(t - tSpan)));
+    Q(ii) = Q0*exp(cQ*(t-t0)) ...
+        + trapz(tSpan, cI*ISpan.*exp(cQ*(t - tSpan)));
 end
 
 end

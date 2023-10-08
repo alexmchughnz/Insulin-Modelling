@@ -11,8 +11,8 @@ function P = SplineSim(P, splineOptions, xL)
 
 % Default splineOptions.
 if ~exist("defaultSplineOptions", "var")
-    defaultSplineOptions.knotType = "amount";
-    defaultSplineOptions.knots = 20;
+    defaultSplineOptions.knotType = "location";
+    defaultSplineOptions.knots = P.data.I.time;
     defaultSplineOptions.order = 3;
     defaultSplineOptions.maxRate = 0.001;
     defaultSplineOptions.constrain = true;
@@ -24,7 +24,7 @@ P.results.splineOptions = splineOptions;
 % Default xL.
 if ~exist("xL", "var")
     defaultxL = 0.6;
-    
+
     xL = defaultxL;
 end
 P.results.xL = xL;

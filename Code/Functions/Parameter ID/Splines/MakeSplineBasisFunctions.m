@@ -15,7 +15,7 @@ tEnd = P.results.tArray(end);
 switch splineOptions.knotType
     case "amount"  % Fixed Number of Knots
         numDataKnots = splineOptions.knots;  
-        knots = linspace(tStart, tEnd, numDataKnots)';
+        knots = linspace(tStart, tEnd, numDataKnots);
         knots = RoundToMultiple(knots, tDelta);
     
     case "location" % Specified Knot Locations

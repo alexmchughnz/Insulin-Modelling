@@ -1,4 +1,4 @@
-function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
+function [P, A, b, basisSplines] = FitSplinesnLxL(P, splineOptions)
 
     CONST = Constants();
     GC = P.parameters.GC;
@@ -68,7 +68,7 @@ function [P, A, b, basisSplines] = FitSplinesnL(P, splineOptions)
     kIQ = GC.nI./GC.VI;
     
     %% Integrate I Equation
-    % I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} + xL*int{cx} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
+    % I(t) - I(t0) = int{k} - int{sum(cWeight_i * nLWeight_i)} - xL*int{cx} + kU*int{Uen} - kI*int{I} - kIQ*int{I-Q}
     % -int{cWeights}.*nLWeights - xL*int{cx} = I(t) - I(t0) - kU*int{Uen} + kI*int{I} + kIQ*int{I-Q} - int{k} := C
     CWeights = -cumtrapz(tArray, cWeights);
     CX = -cumtrapz(tArray, cx);
